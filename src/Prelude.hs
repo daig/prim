@@ -9,7 +9,6 @@ type I16 = Int#
 type I32 = Int#
 type I64 = Int#
 
-type Word = Word#
 type U8 = Word#
 type U16 = Word#
 type U32 = Word#

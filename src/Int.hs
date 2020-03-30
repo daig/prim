@@ -59,10 +59,10 @@ le y x = B# do x <=# y
 eq x y = B# do x ==# y
 ne x y = B# do x /=# y
 
-toWord :: Int -> Word
-toWord = int2Word#
-fromWord :: Word -> Int
-fromWord = word2Int#
+toU64 :: Int -> U64
+toU64 = int2Word#
+fromU64 :: U64 -> Int
+fromU64 = word2Int#
 
 toF32 :: Int -> F32
 toF32 = int2Float#

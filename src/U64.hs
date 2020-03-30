@@ -1,7 +1,7 @@
-module Word where
+module U64 where
 import qualified GHC.Types as GHC
 
-add,sub,mul, quot, rem :: Word -> Word -> Word
+add,sub,mul, quot, rem :: U64 -> U64 -> U64
 add y x = plusWord# x y
 sub y x = minusWord# x y
 mul y x = timesWord# x y
@@ -9,7 +9,7 @@ mul y x = timesWord# x y
 -- |Add unsigned integers, with the high part (carry) in the first
 --           component of the returned pair and the low part in the second
 --           component of the pair. See also @addC@.
-add2 :: Word -> Word -> (# Word, Word #)
+add2 :: U64 -> U64 -> (# U64, U64 #)
 add2 y x = plusWord2# x y
 
 -- | Rounds towards zero. The behavior is undefined if the first argument is zero.
@@ -20,20 +20,20 @@ quot y x = quotWord# x y
 rem y x = remWord# x y
 
 -- | Rounds towards zero
-quotRem :: Word -> Word -> (# Word, Word #)
+quotRem :: U64 -> U64 -> (# U64, U64 #)
 quotRem y x = quotRemWord# x y
 -- |Add signed integers reporting overflow.
---           First member of result is the sum truncated to an @Word@;
---           second member is zero if the true sum fits in an @Word@,
+--           First member of result is the sum truncated to an @U64@;
+--           second member is zero if the true sum fits in an @U64@,
 --           nonzero if overflow occurred (the sum is either too large
---           or too small to fit in an @Word@).
-addC, subC :: Word -> Word -> (# Word, B #)
+--           or too small to fit in an @U64@).
+addC, subC :: U64 -> U64 -> (# U64, B #)
 addC y x = case addWordC# x y of (# z, o #) -> (# z, B# o #)
 -- |Subtract signed integers reporting overflow.
---           First member of result is the difference truncated to an @Word@;
---           second member is zero if the true difference fits in an @Word@,
+--           First member of result is the difference truncated to an @U64@;
+--           second member is zero if the true difference fits in an @U64@,
 --           nonzero if overflow occurred (the difference is either too large
---           or too small to fit in an @Word@).
+--           or too small to fit in an @U64@).
 subC y x = case subWordC# x y of (# z, o #) -> (# z, B# o #)
 
 gt y x = B# do gtWord# x y
@@ -43,33 +43,40 @@ le y x = B# do leWord# x y
 eq x y = B# do eqWord# x y
 ne x y = B# do neWord# x y
 
-fromInt :: Int -> Word
+fromInt :: Int -> U64
 fromInt = int2Word#
-toInt :: Word -> Int
+toInt :: U64 -> Int
 toInt = word2Int#
 
-toF32 :: Word -> F32
+toF32 :: U64 -> F32
 toF32 = word2Float#
-toF64 :: Word -> F64
+toF64 :: U64 -> F64
 toF64 = word2Double#
 
-toU8 :: Word -> U8
+toU8 :: U64 -> U8
 toU8 = narrow8Word#
-toU16 :: Word -> U16
+toU16 :: U64 -> U16
 toU16 = narrow16Word#
-toU32 :: Word -> U32
+toU32 :: U64 -> U32
 toU32 = narrow32Word#
 
-toB8 :: Word -> B8
+toB8 :: U64 -> B8
 toB8 = narrow8Word#
-toB16 :: Word -> B16
+toB16 :: U64 -> B16
 toB16 = narrow16Word#
-toB32 :: Word -> B32
+toB32 :: U64 -> B32
 toB32 = narrow32Word#
+
+and,or,xor :: U64 -> U64 -> U64
+and = and#
+or = or#
+xor = xor#
+not :: U64 -> U64
+not = not#
 
 -- | Shift left.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
-shiftL#, shiftRL# :: Int -> Word -> Word
+shiftL#, shiftRL# :: Int -> U64 -> U64
 shiftL# i w = uncheckedShiftL# w i
 
 -- |Shift right logical.  Result undefined if shift amount is not
@@ -77,11 +84,11 @@ shiftL# i w = uncheckedShiftL# w i
 shiftRL# i w = uncheckedShiftRL# w i
 
 -- | Count the number of set bits
-popCnt,clz,ctz :: Word -> U8
+popCnt,clz,ctz :: U64 -> U8
 popCnt = popCnt#; clz = clz#; ctz = ctz#
 
-byteSwap :: Word -> Word
+byteSwap :: U64 -> U64
 byteSwap = byteSwap#
-pdep, pext :: Word -> Word -> Word
+pdep, pext :: U64 -> U64 -> U64
 pdep y x = pdep# x y; pext y x = pext# x y
 

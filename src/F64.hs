@@ -18,7 +18,7 @@ sinh = sinhDouble#; cosh = coshDouble#; tanh = tanhDouble#
 pow :: F64 -> F64 -> F64
 pow y x = x **## y
 
-decode2Int :: F64 -> (# Int, Word, Word, Int #)
+decode2Int :: F64 -> (# Int, U64, U64, Int #)
 decode2Int = decodeDouble_2Int#  
 decodeI64 :: F64 -> (# Int, Int #)
 decodeI64 = decodeDouble_Int64#
@@ -35,8 +35,8 @@ fromInt :: Int -> F64
 fromInt = int2Double#
 toInt :: F64 -> Int
 toInt = double2Int#
-fromWord :: Word -> F64
-fromWord = word2Double#
+fromU64 :: U64 -> F64
+fromU64 = word2Double#
 toF32 :: F64 -> F32
 toF32 = double2Float#
 fromF32 :: F32 -> F64
