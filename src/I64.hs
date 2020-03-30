@@ -69,10 +69,6 @@ toF32 = int2Float#
 toF64 :: I64 -> F64
 toF64 = int2Double#
 
--- | Shift left.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftL# :: I64 -> I64 -> I64
-shiftL# = uncheckedIShiftL# 
 
 
 -- |Shift right arithmetic.  Result undefined if shift amount is not
@@ -81,13 +77,21 @@ shiftL# = uncheckedIShiftL#
 shiftRA# :: I64 -> I64 -> I64
 shiftRA# = uncheckedIShiftRA#
 
+
+-- * Bitwise operations included for completeness, but signed bit operations should never be used.
+
+{-# DEPRECATED shiftL#, shiftRL#, and, or, xor "Don't use signed bitwise operations, prefer U64 instead" #-}
+
+-- | Shift left.  Result undefined if shift amount is not
+--           in the range 0 to word size - 1 inclusive.
+shiftL# :: I64 -> I64 -> I64
+shiftL# = uncheckedIShiftL# 
+
 -- |Shift right logical.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 
 shiftRL# :: I64 -> I64 -> I64
 shiftRL# = uncheckedIShiftRL#
-
--- | Included for completeness, but signed bit operations should never be used.
 and, or, xor :: I64 -> I64 -> I64
 and = andI#
 or = orI#
