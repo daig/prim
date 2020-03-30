@@ -69,6 +69,13 @@ toF32 = int2Float#
 toF64 :: I64 -> F64
 toF64 = int2Double#
 
+toI8 :: I64 -> I8
+toI8 = narrow8Int#
+toI16 :: I64 -> I16
+toI16 = narrow16Int#
+toI32 :: I64 -> I32
+toI32 = narrow32Int#
+
 
 
 -- |Shift right arithmetic.  Result undefined if shift amount is not
