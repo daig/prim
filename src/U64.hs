@@ -66,29 +66,3 @@ toB16 :: U64 -> B16
 toB16 = narrow16Word#
 toB32 :: U64 -> B32
 toB32 = narrow32Word#
-
-and,or,xor :: U64 -> U64 -> U64
-and = and#
-or = or#
-xor = xor#
-not :: U64 -> U64
-not = not#
-
--- | Shift left.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftL#, shiftRL# :: Int -> U64 -> U64
-shiftL# i w = uncheckedShiftL# w i
-
--- |Shift right logical.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftRL# i w = uncheckedShiftRL# w i
-
--- | Count the number of set bits
-popCnt,clz,ctz :: U64 -> U8
-popCnt = popCnt#; clz = clz#; ctz = ctz#
-
-byteSwap :: U64 -> U64
-byteSwap = byteSwap#
-pdep, pext :: U64 -> U64 -> U64
-pdep y x = pdep# x y; pext y x = pext# x y
-
