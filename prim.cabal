@@ -26,7 +26,8 @@ library
   default-extensions: MagicHash, UnboxedTuples, UnliftedNewtypes, PatternSynonyms
                     , BlockArguments
   hs-source-dirs: src
-  exposed-modules: Prelude, Bool, Char, Int
+  exposed-modules: Prelude, Bool, Char
+                 , I64
                  , U64
                  , B8, B16, B32, B64
                  , F64

@@ -1,7 +1,7 @@
-module Int where
+module I64 where
 import qualified GHC.Types 
 
-add,sub,mul, quot, rem :: Int -> Int -> Int
+add,sub,mul, quot, rem :: I64 -> I64 -> I64
 add y x = x +# y
 sub y x = x -# y
 -- | Low word of signed integer multiply
@@ -24,32 +24,32 @@ mul y x = x *# y
 --
 --     If in doubt, return non-zero, but do make an effort to create the
 --     correct answer for small args, since otherwise the performance of
---     @(*) :: Integer -> Integer -> Integer@ will be poor.
-mulMayOflo :: Int -> Int -> B
+--     @(*) :: I64eger -> I64eger -> I64eger@ will be poor.
+mulMayOflo :: I64 -> I64 -> B
 mulMayOflo x y = B# do mulIntMayOflo# x y
-negate :: Int -> Int
+negate :: I64 -> I64
 negate = negateInt#
 -- | Rounds towards zero. The behavior is undefined if the first argument is zero.
 quot y x = quotInt# x y
 -- |Satisfies @(add (rem y x) (mul y (quot y x)) == x@. The
 --     behavior is undefined if the first argument is zero.
 rem y x = remInt# x y
-quotRem :: Int -> Int -> (# Int, Int #)
+quotRem :: I64 -> I64 -> (# I64, I64 #)
 -- | Rounds towards zero
 quotRem y x = quotRemInt# x y
 
-addC, subC :: Int -> Int -> (# Int, B #)
+addC, subC :: I64 -> I64 -> (# I64, B #)
 -- |Add signed integers reporting overflow.
---           First member of result is the sum truncated to an @Int@;
---           second member is zero if the true sum fits in an @Int@,
+--           First member of result is the sum truncated to an @I64@;
+--           second member is zero if the true sum fits in an @I64@,
 --           nonzero if overflow occurred (the sum is either too large
---           or too small to fit in an @Int@).
+--           or too small to fit in an @I64@).
 addC y x = case addIntC# x y of (# z, o #) -> (# z, B# o #)
 -- |Subtract signed integers reporting overflow.
---           First member of result is the difference truncated to an @Int@;
---           second member is zero if the true difference fits in an @Int@,
+--           First member of result is the difference truncated to an @I64@;
+--           second member is zero if the true difference fits in an @I64@,
 --           nonzero if overflow occurred (the difference is either too large
---           or too small to fit in an @Int@).
+--           or too small to fit in an @I64@).
 subC y x = case subIntC# x y of (# z, o #) -> (# z, B# o #)
 
 gt y x = B# do x ># y
@@ -59,39 +59,39 @@ le y x = B# do x <=# y
 eq x y = B# do x ==# y
 ne x y = B# do x /=# y
 
-toU64 :: Int -> U64
+toU64 :: I64 -> U64
 toU64 = int2Word#
-fromU64 :: U64 -> Int
+fromU64 :: U64 -> I64
 fromU64 = word2Int#
 
-toF32 :: Int -> F32
+toF32 :: I64 -> F32
 toF32 = int2Float#
-toF64 :: Int -> F64
+toF64 :: I64 -> F64
 toF64 = int2Double#
 
 -- | Shift left.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
-shiftL# :: Int -> Int -> Int
+shiftL# :: I64 -> I64 -> I64
 shiftL# = uncheckedIShiftL# 
 
 
 -- |Shift right arithmetic.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 
-shiftRA# :: Int -> Int -> Int
+shiftRA# :: I64 -> I64 -> I64
 shiftRA# = uncheckedIShiftRA#
 
 -- |Shift right logical.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 
-shiftRL# :: Int -> Int -> Int
+shiftRL# :: I64 -> I64 -> I64
 shiftRL# = uncheckedIShiftRL#
 
 -- | Included for completeness, but signed bit operations should never be used.
-and, or, xor :: Int -> Int -> Int
+and, or, xor :: I64 -> I64 -> I64
 and = andI#
 or = orI#
 xor = xorI#
 
-not :: Int -> Int
+not :: I64 -> I64
 not = notI#
