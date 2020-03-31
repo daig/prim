@@ -1,6 +1,7 @@
 {-# language TypeOperators #-}
 module Prelude (module Prelude, module X) where
 import GHC.Prim as X
+import qualified GHC.Types as GHC
 
 type Char = Char#
 
@@ -44,3 +45,4 @@ type Bytes = ByteArray#
 type Array = Array#
 
 type CostCentreStack# = Addr
+
