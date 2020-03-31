@@ -33,4 +33,5 @@ library
                  , B8, B16, B32, B64
                  , F64
                  , Weak, Stable, Stable.Name
+                 , Spark
   build-depends: ghc-prim == 0.6.1
