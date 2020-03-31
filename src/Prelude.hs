@@ -46,3 +46,4 @@ type Array = Array#
 
 type CostCentreStack# = Addr
 
+type Proxy = Proxy#
