@@ -34,4 +34,5 @@ library
                  , F64
                  , Weak, Stable, Stable.Name
                  , Spark
+                 , Enum
   build-depends: ghc-prim == 0.6.1
