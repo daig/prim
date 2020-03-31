@@ -52,3 +52,7 @@ byteSwap :: B64 -> B64
 byteSwap = byteSwap#
 pdep, pext :: B64 -> B64 -> B64
 pdep y x = pdep# x y; pext y x = pext# x y
+
+-- | Reverse the order of the bits.
+reverse :: B64 -> B64
+reverse = bitReverse#

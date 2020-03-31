@@ -13,3 +13,7 @@ pext :: B16 -> U64 -> B16
 pext y x = pext16# x y
 pdep :: B16 -> U64 -> U64
 pdep y x = pdep16# x y
+
+-- | Reverse the order of the bits.
+reverse :: B16 -> B16
+reverse = bitReverse16#

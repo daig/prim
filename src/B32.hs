@@ -14,3 +14,7 @@ pext :: B32 -> U64 -> B32
 pext y x = pext32# x y
 pdep :: B32 -> U64 -> U64
 pdep y x = pdep32# x y
+
+-- | Reverse the order of the bits.
+reverse :: B32 -> B32
+reverse = bitReverse32#
