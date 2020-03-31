@@ -39,4 +39,5 @@ library
                  , Any, BCO
                  , SPEC
                  , RTS.Rep
+                 , Array
   build-depends: ghc-prim == 0.6.1
