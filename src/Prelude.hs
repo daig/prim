@@ -35,3 +35,5 @@ type Thread = ThreadId#
 type Addr = Addr#
 
 type Maybe# (a :: TYPE r) = (# B, a #)
+
+type Compact = Compact#
