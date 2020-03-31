@@ -42,3 +42,5 @@ type BCO = BCO#
 
 type Bytes = ByteArray#
 type Array = Array#
+
+type CostCentreStack# = Addr
