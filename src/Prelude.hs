@@ -1,7 +1,9 @@
 {-# language TypeOperators #-}
 module Prelude (module Prelude, module X) where
 import GHC.Prim as X
+import           GHC.Types as X (Any,Symbol,Nat,TYPE)
 import qualified GHC.Types as GHC
+import RTS.Rep as X
 
 type Char = Char#
 
@@ -47,3 +49,6 @@ type Array = Array#
 type CostCentreStack# = Addr
 
 type Proxy = Proxy#
+
+type T = GHC.Type
+type C = GHC.Constraint

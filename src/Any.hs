@@ -1,4 +1,4 @@
-module Any where
+module Any (module Any, seq) where
 
 fromAddr :: Addr -> (# a #)
 fromAddr = addrToAny#

@@ -38,4 +38,5 @@ library
                  , Enum
                  , Any, BCO
                  , SPEC
+                 , RTS.Rep
   build-depends: ghc-prim == 0.6.1
