@@ -2,6 +2,7 @@ module Spark where
 
 par :: a -> I64
 par = par#
+{-# DEPRECATED par "Use 'spark#' instead" #-}
 spark, seq :: a -> ST s a
 spark = spark#
 seq = seq#
