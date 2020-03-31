@@ -24,6 +24,7 @@ source-repository head
 library 
   default-language: Haskell2010
   default-extensions: MagicHash, UnboxedTuples, UnliftedNewtypes, PatternSynonyms
+                    , KindSignatures, PolyKinds
                     , BlockArguments
   hs-source-dirs: src
   exposed-modules: Prelude, Bool, Char
