@@ -1,7 +1,9 @@
 {-# language ScopedTypeVariables, RankNTypes, TypeApplications #-}
 module Enum
-  (dataToTag# -- ^ Must be evaluated, not a thunk
-  ,tagToEnum# -- ^ @a@ must be an enum type
+  (-- | Must be evaluated, not a thunk
+   dataToTag# 
+  -- | @a@ must be an enum type
+  ,tagToEnum#
   ) where
 
 -- Note we can't fiddle with tagToEnum# eg to rename
