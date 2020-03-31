@@ -14,7 +14,7 @@ type U16 = Word#
 type U32 = Word#
 type U64 = Word#
 
-newtype B = B# Int#
+type  B = Int#
 type B8 = Word#
 type B16 = Word#
 type B32 = Word#

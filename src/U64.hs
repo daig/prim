@@ -28,20 +28,20 @@ quotRem y x = quotRemWord# x y
 --           nonzero if overflow occurred (the sum is either too large
 --           or too small to fit in an @U64@).
 addC, subC :: U64 -> U64 -> (# U64, B #)
-addC y x = case addWordC# x y of (# z, o #) -> (# z, B# o #)
+addC y x = addWordC# x y
 -- |Subtract signed integers reporting overflow.
 --           First member of result is the difference truncated to an @U64@;
 --           second member is zero if the true difference fits in an @U64@,
 --           nonzero if overflow occurred (the difference is either too large
 --           or too small to fit in an @U64@).
-subC y x = case subWordC# x y of (# z, o #) -> (# z, B# o #)
+subC y x = subWordC# x y
 
-gt y x = B# do gtWord# x y
-ge y x = B# do geWord# x y
-lt y x = B# do ltWord# x y
-le y x = B# do leWord# x y
-eq x y = B# do eqWord# x y
-ne x y = B# do neWord# x y
+gt y x = gtWord# x y
+ge y x = geWord# x y
+lt y x = ltWord# x y
+le y x = leWord# x y
+eq x y = eqWord# x y
+ne x y = neWord# x y
 
 fromInt :: Int -> U64
 fromInt = int2Word#

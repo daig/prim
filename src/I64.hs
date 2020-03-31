@@ -26,7 +26,7 @@ mul y x = x *# y
 --     correct answer for small args, since otherwise the performance of
 --     @(*) :: I64eger -> I64eger -> I64eger@ will be poor.
 mulMayOflo :: I64 -> I64 -> B
-mulMayOflo x y = B# do mulIntMayOflo# x y
+mulMayOflo x y = mulIntMayOflo# x y
 negate :: I64 -> I64
 negate = negateInt#
 -- | Rounds towards zero. The behavior is undefined if the first argument is zero.
@@ -44,20 +44,20 @@ addC, subC :: I64 -> I64 -> (# I64, B #)
 --           second member is zero if the true sum fits in an @I64@,
 --           nonzero if overflow occurred (the sum is either too large
 --           or too small to fit in an @I64@).
-addC y x = case addIntC# x y of (# z, o #) -> (# z, B# o #)
+addC y x = addIntC# x y
 -- |Subtract signed integers reporting overflow.
 --           First member of result is the difference truncated to an @I64@;
 --           second member is zero if the true difference fits in an @I64@,
 --           nonzero if overflow occurred (the difference is either too large
 --           or too small to fit in an @I64@).
-subC y x = case subIntC# x y of (# z, o #) -> (# z, B# o #)
+subC y x = subIntC# x y
 
-gt y x = B# do x ># y
-ge y x = B# do x >=# y
-lt y x = B# do x <# y
-le y x = B# do x <=# y
-eq x y = B# do x ==# y
-ne x y = B# do x /=# y
+gt y x = x ># y
+ge y x = x >=# y
+lt y x = x <# y
+le y x = x <=# y
+eq x y = x ==# y
+ne x y = x /=# y
 
 toU64 :: I64 -> U64
 toU64 = int2Word#

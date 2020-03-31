@@ -1,8 +1,8 @@
 module B64 where
 import qualified GHC.Types as GHC
 
-eq x y = B# do eqWord# x y
-ne x y = B# do neWord# x y
+eq x y = eqWord# x y
+ne x y = neWord# x y
 
 fromInt :: Int -> B64
 fromInt = int2Word#

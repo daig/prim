@@ -24,12 +24,12 @@ decodeI64 :: F64 -> (# Int, Int #)
 decodeI64 = decodeDouble_Int64#
 
 
-gt y x = B# do x >## y
-ge y x = B# do x >=## y
-lt y x = B# do x <## y
-le y x = B# do x <=## y
-eq x y = B# do x ==## y
-ne x y = B# do x /=## y
+gt y x = x >## y
+ge y x = x >=## y
+lt y x = x <## y
+le y x = x <=## y
+eq x y = x ==## y
+ne x y = x /=## y
 
 fromInt :: Int -> F64
 fromInt = int2Double#
