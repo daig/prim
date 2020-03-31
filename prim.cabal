@@ -27,7 +27,7 @@ library
                     , KindSignatures, PolyKinds, ConstraintKinds, TypeOperators, RankNTypes
                     , BlockArguments
   hs-source-dirs: src
-  exposed-modules: Prelude, Bool, Char
+  exposed-modules: Prelude, Char
                  , I64
                  , U64
                  , B8, B16, B32, B64
