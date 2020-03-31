@@ -37,3 +37,8 @@ type Addr = Addr#
 type Maybe# (a :: TYPE r) = (# B, a #)
 
 type Compact = Compact#
+
+type BCO = BCO#
+
+type Bytes = ByteArray#
+type Array = Array#
