@@ -1,5 +1,6 @@
 module Array where
 
+type Array = Array#
 type Mutable = MutableArray#
 
 new :: I64 -> a -> ST s (Mutable s a)

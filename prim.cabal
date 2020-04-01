@@ -40,4 +40,10 @@ library
                  , SPEC
                  , RTS.Rep
                  , Array, Array.Small
-  build-depends: ghc-prim == 0.6.1
+                 , Array.Byte, Array.Byte.Pinned, Array.Byte.Unpinned
+                 , Array.Char, Array.Char8
+                 , Array.F32, Array.F64
+                 , Array.I64, Array.I32, Array.I16, Array.I8
+                 , Array.U64, Array.U32, Array.U16, Array.U8
+                 , Array.Ptr.Stable
+  build-depends: ghc-prim == 0.6.1, microbase

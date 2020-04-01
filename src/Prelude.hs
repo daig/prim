@@ -6,6 +6,7 @@ import qualified GHC.Types as GHC
 import RTS.Rep as X
 
 type Char = Char#
+type Char8# = Char#
 
 type Int = Int#
 type I8 = Int#
@@ -42,9 +43,6 @@ type Maybe# (a :: TYPE r) = (# B, a #)
 type Compact = Compact#
 
 type BCO = BCO#
-
-type Bytes = ByteArray#
-type Array = Array#
 
 type CostCentreStack# = Addr
 
