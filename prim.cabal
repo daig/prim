@@ -33,7 +33,7 @@ library
                  , U64
                  , B8, B16, B32, B64
                  , F64
-                 , Weak, Stable, Stable.Name
+                 , Ref.Weak, Ref.Stable, Ref.Stable.Name
                  , Spark
                  , Enum
                  , Any, BCO
@@ -45,7 +45,6 @@ library
                  , Array.F32, Array.F64
                  , Array.I64, Array.I32, Array.I16, Array.I8
                  , Array.U64, Array.U32, Array.U16, Array.U8
-                 , Array.Ptr.Stable
-                 , Array.Array
+                 , Array.Ref.Stable
                  , MachDeps
   build-depends: ghc-prim == 0.6.1, microbase

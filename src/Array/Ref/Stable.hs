@@ -1,19 +1,19 @@
-module Array.Ptr.Stable where
+module Array.Ref.Stable where
 import Array.Byte
-import Stable (Ptr)
+import qualified Ref
 
 index# :: A
        -> I64 -- Offset in elments
-       -> Ptr a
+       -> Ref.Stable a
 index# = indexStablePtrArray#
 
 index## :: A
         -> I64 -- Offset in bytes
-        -> Ptr a
+        -> Ref.Stable a
 index## = indexWord8ArrayAsStablePtr#
 
-read# :: M s -> I64 -> ST s (Ptr a)
+read# :: M s -> I64 -> ST s (Ref.Stable a)
 read# = readStablePtrArray#
 
-write# :: M s -> I64 -> Ptr a -> ST_ s
+write# :: M s -> I64 -> Ref.Stable a -> ST_ s
 write# = writeStablePtrArray#
