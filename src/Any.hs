@@ -1,6 +1,5 @@
 module Any (module Any, seq) where
-import qualified Array.Byte as Byte
-import Array (Array)
+import qualified Array
 
 fromAddr :: Addr -> (# a #)
 fromAddr = addrToAny#
@@ -9,7 +8,7 @@ fromAddr = addrToAny#
 toAddr# :: a -> IO Addr
 toAddr# = anyToAddr#
 
-unpackClosure :: a -> (# Addr, Byte.Array, Array b #)
+unpackClosure :: a -> (# Addr, Array.Byte, Array.Boxed b #)
 unpackClosure = unpackClosure# 
 
 getApStackVal :: a -> I64 -> (# I64, b #)

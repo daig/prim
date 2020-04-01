@@ -1,31 +1,25 @@
-module Array.Small where
-import Prelude hiding (Array)
+module Array.Boxed where
+import qualified Array
 
-type A = SmallArray#
-type M = SmallMutableArray#
+type A = Array#
+type M = MutableArray#
+
 
 new :: I64 -> a -> ST s (M s a)
-new = newSmallArray#
+new = newArray#
 
 eq :: M s a -> M s a -> B
-eq = sameSmallMutableArray#
-
-shrink :: M s a -> I64 -> ST_ s
-shrink = shrinkSmallMutableArray#
+eq = sameMutableArray#
 
 read :: M s a -> I64 -> ST s a
-read = readSmallArray#
+read = readArray#
 
 write :: M s a -> I64 -> a -> ST_ s
-write = writeSmallArray#
+write = writeArray#
 
 -- | Number of elements
 size :: A a -> I64
-size = sizeofSmallArray#
-
--- | Number of elements. Must be in @ST@ because of possible resizes.
-sizeM# :: M s a -> ST s I64
-sizeM# = getSizeofSmallMutableArray#
+size = sizeofArray#
 
 -- | Read from the specified index of an immutable array.
 -- The result is packaged into an unboxed unary tuple; the result itself is not yet evaluated.
@@ -35,15 +29,15 @@ sizeM# = getSizeofSmallMutableArray#
 -- reduces references to the argument array, allowing it to be garbage collected more promptly.
 -- Warning: this can fail with an unchecked exception.
 index# :: A a -> I64 -> (# a #)
-index# = indexSmallArray#
+index# = indexArray#
 
 -- | Make a mutable array immutable, without copying.
 freeze## :: M s a -> ST s (A a)
-freeze## = unsafeFreezeSmallArray#
+freeze## = unsafeFreezeArray#
 
 -- | Make an immutable array mutable, without copying.
 thaw## :: A a -> ST s (M s a)
-thaw## = unsafeThawSmallArray#
+thaw## = unsafeThawArray#
 
 -- | Copy the elements from the source array to the destination array.
 -- Both arrays must fully contain the specified ranges, but this is not checked.
@@ -56,7 +50,7 @@ copy# :: A a -- ^ source
       -> I64 -- ^ destination offset
       -> I64 -- ^ number of elements to copy
       -> ST_ s
-copy# = copySmallArray#
+copy# = copyArray#
 
 -- | Copy the elements from the source array to the destination array.
 -- Both arrays must fully contain the specified ranges, but this is not checked.
@@ -69,7 +63,7 @@ copyM# :: M s a -- ^ source
        -> I64 -- ^ destination offset
        -> I64 -- ^ number of elements to copy
        -> ST_ s
-copyM# = copySmallMutableArray#
+copyM# = copyMutableArray#
 
 -- | Create a new array with the elements from the source array.
 -- The provided array must fully contain the specified range, but this is not checked.
@@ -79,7 +73,7 @@ clone# :: A a
        -> I64 -- ^ Source offset
        -> I64 -- ^ number of elements to copy
        -> A a
-clone# = cloneSmallArray#
+clone# = cloneArray#
 
 -- | Create a new array with the elements from the source array.
 -- The provided array must fully contain the specified range, but this is not checked.
@@ -89,24 +83,24 @@ cloneM# :: M s a
         -> I64 -- ^ Source offset
         -> I64 -- ^ number of elements to copy
         -> ST s (M s a)
-cloneM# = cloneSmallMutableArray#
+cloneM# = cloneMutableArray#
 
 freeze# :: M s a
         -> I64 -- ^ Source offset
         -> I64 -- ^ number of elements to copy
         -> ST s (A a)
-freeze# = freezeSmallArray#
+freeze# = freezeArray#
 
 thaw# ::  A a
         -> I64 -- ^ Source offset
         -> I64 -- ^ number of elements to copy
         -> ST s (M s a)
-thaw# = thawSmallArray#
+thaw# = thawArray#
 
-cas :: M s a
+cas# :: M s a
     -> I64 -- ^ Source offset
     -> a -- ^ Expected old value
     -> a -- ^ New value
     -> ST s (# B, a #) -- ^ Whether the swap failed, and the actual new value
-cas as o a0 a1 s0 = case casSmallArray# as o a0 a1 s0 of
+cas# as o a0 a1 s0 = case casArray# as o a0 a1 s0 of
   (# s1, failed', a #) -> (# s1, (# failed', a #) #)

@@ -5,6 +5,10 @@ import           GHC.Types as X (Any,Symbol,Nat,TYPE)
 import qualified GHC.Types as GHC
 import RTS.Rep as X
 
+-- TODO: use hsboot instead of this file
+-- TODO: add safe versions of the sized numbers
+--
+
 type Char = Char#
 type Char8# = Char#
 
