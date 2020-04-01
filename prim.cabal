@@ -46,5 +46,6 @@ library
                  , Array.I64, Array.I32, Array.I16, Array.I8
                  , Array.U64, Array.U32, Array.U16, Array.U8
                  , Array.Ref.Stable
+                 , Array.Array, Array.Array.Byte, Array.Array.Array
                  , MachDeps
   build-depends: ghc-prim == 0.6.1, microbase
