@@ -1,4 +1,4 @@
-module B64 where
+module B64 (B64, module B64) where
 import qualified GHC.Types as GHC
 
 eq, ne :: B64 -> B64 -> B

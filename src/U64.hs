@@ -1,4 +1,4 @@
-module U64 where
+module U64 (U64, module U64) where
 import qualified GHC.Types as GHC
 
 add,sub,mul, quot, rem :: U64 -> U64 -> U64

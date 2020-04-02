@@ -1,4 +1,4 @@
-module B32 where
+module B32 (B32, module B32) where
 
 fromU64 :: U64 -> B32
 fromU64 = narrow32Word#

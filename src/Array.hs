@@ -1,4 +1,4 @@
--- | Types for arrays, meant to be imported qualified
+-- | Types for arrays
 {-# language NoImplicitPrelude #-}
 module Array where
 import GHC.Prim

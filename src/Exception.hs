@@ -1,7 +1,12 @@
-module Exception (module Exception, raise#) where
+module Exception where
 
-catch :: IO a -> (b -> IO a) -> IO a
-catch = catch#
+-- | Can only catch values with an @Exception@ instance.
+catch# :: IO a -> (e -> IO a) -> IO a
+catch# = Prelude.catch#
 
-raiseIO :: a -> IO b
-raiseIO = raiseIO#
+-- | Raising values other than type @SomeException@ leads to segfault
+raise# :: e -> a
+raise# = Prelude.raise#
+-- | Raising values other than type @SomeException@ leads to segfault
+raiseIO# :: e -> IO a
+raiseIO# = Prelude.raiseIO#

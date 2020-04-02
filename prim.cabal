@@ -30,10 +30,10 @@ library
   other-modules: Prelude
   reexported-modules: GHC.Tuple as Tuple
   exposed-modules: Char
-                 , I64
-                 , U64
+                 , I64, I32, I16, I8
+                 , U64, U32, U16, U8
                  , B8, B16, B32, B64
-                 , F64
+                 , F64, F32
                  , Ref.Weak, Ref.Stable, Ref.Stable.Name, Ref.Byte
                  , Ref.Char8, Ref.Char
                  , Ref.I64, Ref.I32, Ref.I16, Ref.I8
@@ -49,7 +49,6 @@ library
                  , Array.U64, Array.U32, Array.U16, Array.U8
                  , Array.Ref.Stable
                  , Array.Array, Array.Array.Byte, Array.Array.Array
-
                  , Thread
                  , Compact
                  , Proxy
@@ -58,7 +57,7 @@ library
                  , Spark
                  , Enum
                  , Any, BCO
-                 , RTS.Rep, RTS.Block, Optimizer
+                 , RTS.Block, Optimizer
                  , RTS.Prefetch.Any, RTS.Prefetch.Ref, RTS.Prefetch.Array, RTS.Prefetch.Array.M
-                 , String, String.C, String.C.Latin, String.C.UTF8, String.Linked
+                 , String, String.C, String.C.Latin, String.C.UTF8, String.List
   build-depends: ghc-prim == 0.6.1, microbase

@@ -1,5 +1,5 @@
 {-# language UnliftedFFITypes #-}
-module String.Linked where
+module String.List where
 import qualified GHC.Types
 
 type S = [GHC.Types.Char]

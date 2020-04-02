@@ -1,6 +1,7 @@
-module Any (module Any, seq) where
+module Any (module Any, Any, seq) where
 import qualified Ref
 import qualified Array
+import GHC.Types as X (Any)
 
 eq# :: a -> a -> B
 eq# = reallyUnsafePtrEquality#

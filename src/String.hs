@@ -5,4 +5,4 @@ import qualified GHC.Types
 type C# = Addr#
 
 -- | Boxed Linked list of @Char@
-type Linked = [GHC.Types.Char]
+type List = [GHC.Types.Char]

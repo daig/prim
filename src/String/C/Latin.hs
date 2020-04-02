@@ -53,7 +53,7 @@ All of this goes for unpackUtf8# too.
 -}
 
 
-unpack# :: S -> String.Linked
+unpack# :: S -> String.List
 {-# NOINLINE CONLIKE unpack# #-}
 unpack# addr
   = unpack 0#
@@ -64,7 +64,7 @@ unpack# addr
       where
         !ch = indexCharOffAddr# addr nh
 
-unpackAppend# :: S -> String.Linked -> String.Linked
+unpackAppend# :: S -> String.List -> String.List
 {-# NOINLINE unpackAppend# #-}
      -- See the NOINLINE note on unpack#
 unpackAppend# addr rest
@@ -103,7 +103,7 @@ foldr# addr f z
 
 -- There's really no point in inlining this for the same reasons as
 -- unpack. See Note [Inlining unpack#] above for details.
-unpackN# :: S -> Int# -> String.Linked
+unpackN# :: S -> Int# -> String.List
 {-# NOINLINE unpackN# #-}
 unpackN# _addr 0#   = []
 unpackN#  addr len# = unpack [] (len# -# 1#)

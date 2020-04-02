@@ -16,7 +16,7 @@ kill# :: Id -> a -> IO_
 kill# = killThread#
 yield :: IO_
 yield = yield#
-here :: IO Thread
+here :: IO Id
 here = myThreadId#
 -- | Label a thread with the given cstring pointer
 label# :: Id -> Ref.Byte -> IO_

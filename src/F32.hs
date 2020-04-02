@@ -1,4 +1,4 @@
-module F32 where
+module F32 (F32, module F32) where
 
 add,sub,mul,div :: F32 -> F32 -> F32
 add y x = plusFloat# x y
@@ -18,27 +18,22 @@ sinh = sinhFloat#; cosh = coshFloat#; tanh = tanhFloat#
 pow :: F32 -> F32 -> F32
 pow y x = powerFloat# x y
 
---decode2Int :: F32 -> (# Int, Word, Word, Int #)
---decode2Int = decodeDouble_2Int#  
---decodeI64 = F32 -> (# Int, Int #)
---decodeI64 = decodeDouble_I64#
+gt,ge,lt,le,eq,ne :: F32 -> F32 -> B
+gt y x = gtFloat# x y
+ge y x = geFloat# x y
+lt y x = ltFloat# x y
+le y x = leFloat# x y
+eq x y = eqFloat# x y
+ne x y = neFloat# x y
 
-
-gt y x = B# do gtFloat# x y
-ge y x = B# do geFloat# x y
-lt y x = B# do ltFloat# x y
-le y x = B# do leFloat# x y
-eq x y = B# do eqFloat# x y
-ne x y = B# do neFloat# x y
-
-toInt :: F32 -> Int
+toInt :: F32 -> I64
 toInt = float2Int#
-fromInt:: Int -> F32
+fromInt:: I64 -> F32
 fromInt = int2Float#
 toF64 :: F32 -> F64
 toF64 = float2Double#
 fromF64 :: F64 -> F32
 fromF64 = double2Float#
 
-decodeInt :: F32 -> (# Int, Int #)
-decodeInt = decodeFloat_Int#
+decodeI64 :: F32 -> (# I64, I64 #)
+decodeI64 = decodeFloat_Int#
