@@ -51,6 +51,7 @@ library
 
                  , Thread
                  , Compact
+                 , Proxy
                  , SPEC
                  , Exception, Exception.Mask
                  , Spark

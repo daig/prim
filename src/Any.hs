@@ -2,6 +2,9 @@ module Any (module Any, seq) where
 import qualified Ref
 import qualified Array
 
+eq# :: a -> a -> B
+eq# = reallyUnsafePtrEquality#
+
 fromRef :: Ref.Byte -> (# a #)
 fromRef = addrToAny#
 

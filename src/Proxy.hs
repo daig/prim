@@ -1,4 +1,6 @@
+{-# language PatternSynonyms #-}
 module Proxy where
 
-proxy :: Proxy a
-proxy = proxy#
+-- | Hack to expose 'proxy#'
+pattern Proxy :: Proxy a
+pattern Proxy <- proxy# where Proxy = proxy#
