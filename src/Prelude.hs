@@ -1,7 +1,7 @@
 {-# language TypeOperators #-}
 module Prelude (module Prelude, module X) where
 import GHC.Prim as X
-import           GHC.Types as X (Any,Symbol,Nat,TYPE)
+import           GHC.Types as X (TYPE)
 import qualified GHC.Types as GHC
 
 -- TODO: use hsboot instead of this file

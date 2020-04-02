@@ -1,8 +1,8 @@
-cabal-version: 3.0
+cabal-version: 2.4
 name: prim
 homepage: https://github.com/daig/prim#readme
 version: 0.1.0.0
-category: 
+category: Prelude, Exordium
 synopsis: 
 description: 
 stability: cursed
@@ -14,7 +14,6 @@ license: MIT
 
 extra-source-files:
   README.md
-  CHANGELOG.md
 
 source-repository head
   type: git
@@ -34,6 +33,7 @@ library
                  , U64, U32, U16, U8
                  , B8, B16, B32, B64
                  , F64, F32
+                 , Ref
                  , Ref.Weak, Ref.Stable, Ref.Stable.Name, Ref.Byte
                  , Ref.Char8, Ref.Char
                  , Ref.I64, Ref.I32, Ref.I16, Ref.I8
@@ -60,4 +60,7 @@ library
                  , RTS.Block, Optimizer
                  , RTS.Prefetch.Any, RTS.Prefetch.Ref, RTS.Prefetch.Array, RTS.Prefetch.Array.M
                  , String, String.C, String.C.Latin, String.C.UTF8, String.List
-  build-depends: ghc-prim == 0.6.1, microbase
+                 , Nat
+                 , Stock
+                 , Syntax.ImplicitParam
+  build-depends: ghc-prim == 0.6.1
