@@ -37,6 +37,8 @@ type ST_ s = State# s -> State# s
 type ST s (a :: TYPE r) = State# s -> (# State# s, a #)
 type IO (a :: TYPE r) = ST (☸) a
 type IO_ = ST_ (☸)
+type STM (a :: TYPE r) = ST (☸) a
+type STM_ = IO_
 
 type Thread = ThreadId#
 
