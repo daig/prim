@@ -4,7 +4,7 @@ homepage: https://github.com/daig/prim#readme
 version: 0.1.0.0
 category: Prelude, Exordium
 synopsis: 
-description: 
+description: ghc-prim but good
 stability: cursed
 bug-reports: https://github.com/daig/prim/issues
 author: Dai
@@ -33,6 +33,7 @@ library
                  , U64, U32, U16, U8
                  , B8, B16, B32, B64
                  , F64, F32
+                 , ST,ST.IO, ST.IO.STM
                  , Ref
                  , Ref.Weak, Ref.Stable, Ref.Stable.Name, Ref.Byte
                  , Ref.Char8, Ref.Char
@@ -63,4 +64,4 @@ library
                  , Nat
                  , Stock
                  , Syntax.ImplicitParam
-  build-depends: ghc-prim == 0.6.1
+  build-depends: ghc-prim == 0.6.1, microbase
