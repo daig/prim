@@ -1,6 +1,7 @@
 module Compact where
 import qualified Ref
 
+type Compact = Compact#
 type Block# = (# Ref.Byte, U64 #)
 
 new :: U64 -> IO Compact

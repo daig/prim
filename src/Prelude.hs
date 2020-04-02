@@ -40,17 +40,7 @@ type IO_ = ST_ (☸)
 type STM (a :: TYPE r) = ST (☸) a
 type STM_ = IO_
 
-type Thread = ThreadId#
-
 type Maybe# (a :: TYPE r) = (# B, a #)
-
-type Compact = Compact#
-
-type BCO = BCO#
-
-type CostCentreStack# = Addr#
-
-type Proxy = Proxy#
 
 type T = GHC.Type
 type C = GHC.Constraint

@@ -1,6 +1,8 @@
 module BCO where
 import qualified Array
 
+type BCO = BCO#
+
 mkApUpd0 :: BCO -> (# a #)
 mkApUpd0 = mkApUpd0#
 

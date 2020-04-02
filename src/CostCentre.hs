@@ -1,5 +1,7 @@
 module CostCentre where
 
+type Stack = Addr#
+
 -- | Get the 'CostCentreStack associated with a given value
 get :: a -> ST s CostCentreStack
 get = getCCSOf#
