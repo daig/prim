@@ -39,6 +39,7 @@ library
                  , Ref.U64, Ref.U32, Ref.U16, Ref.U8
                  , Ref.F32, Ref.F64
                  , Ref.Ref.Byte, Ref.Ref.Stable
+                 , Ref.Boxed
                  , Spark
                  , Enum
                  , Any, BCO
