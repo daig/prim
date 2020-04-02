@@ -1,7 +1,7 @@
 cabal-version: 2.4
 name: prim
 homepage: https://github.com/daig/prim#readme
-version: 0.1.0.0
+version: 0.1.0.1
 category: Prelude
 synopsis: An ergonomic but conservative interface to ghc-prim
 description: 
@@ -70,4 +70,4 @@ library
                  , Nat
                  , Stock
                  , Syntax.ImplicitParam
-  build-depends: ghc-prim ^>= 0.6.1, microbase
+  build-depends: ghc-prim ^>= 0.6.1
