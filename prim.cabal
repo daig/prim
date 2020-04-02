@@ -28,6 +28,7 @@ library
                     , BlockArguments
   hs-source-dirs: src
   other-modules: Prelude
+  reexported-modules: GHC.Tuple as Tuple
   exposed-modules: Char
                  , I64
                  , U64
