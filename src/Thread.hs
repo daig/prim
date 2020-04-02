@@ -21,6 +21,7 @@ label# :: Thread -> Ref.Byte -> IO_
 label# = labelThread#
 bound' :: IO B
 bound' = isCurrentThreadBound#
+-- TODO: put this somewhere else
 noDuplicate :: ST_ s
 noDuplicate = noDuplicate#
 status :: Thread -> IO (# Status, Cap, B #)

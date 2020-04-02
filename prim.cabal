@@ -50,6 +50,7 @@ library
                  , Array.Array, Array.Array.Byte, Array.Array.Array
 
                  , Thread
+                 , Compact
                  , SPEC
                  , Exception, Exception.Mask
                  , Spark

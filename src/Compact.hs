@@ -1,6 +1,7 @@
 module Compact where
+import qualified Ref
 
-type Block# = (# Addr, U64 #)
+type Block# = (# Ref.Byte, U64 #)
 
 new :: U64 -> IO Compact
 new = compactNew#
@@ -17,14 +18,14 @@ head :: Compact -> IO Block#
 head c s0 = case compactGetFirstBlock# c s0 of
   (# s1, a, n #) -> (# s1, (# a, n #) #)
 
-next :: Compact -> Addr -> IO Block#
+next :: Compact -> Ref.Byte -> IO Block#
 next c a0 s0 = case compactGetNextBlock# c a0 s0 of
   (# s1, a1, n #) -> (# s1, (# a1, n #) #)
 
-allocate :: Block# -> IO Addr
+allocate :: Block# -> IO Ref.Byte
 allocate (# a, n #) = compactAllocateBlock# n a
 
-fixup :: Addr -> Addr -> IO (# Compact, Addr #)
+fixup :: Ref.Byte -> Ref.Byte -> IO (# Compact, Ref.Byte #)
 fixup b0 root s0 = case compactFixupPointers# b0 root s0 of
   (# s1, c, b1 #) -> (# s1, (# c, b1 #) #)
 
