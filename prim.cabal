@@ -55,6 +55,6 @@ library
                  , Spark
                  , Enum
                  , Any, BCO
-                 , RTS.Rep
+                 , RTS.Rep, RTS.Block
                  , MachDeps
   build-depends: ghc-prim == 0.6.1, microbase
