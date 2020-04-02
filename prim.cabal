@@ -60,4 +60,5 @@ library
                  , Any, BCO
                  , RTS.Rep, RTS.Block, Optimizer
                  , RTS.Prefetch.Any, RTS.Prefetch.Ref, RTS.Prefetch.Array, RTS.Prefetch.Array.M
+                 , String, String.C, String.C.Latin, String.C.UTF8, String.Linked
   build-depends: ghc-prim == 0.6.1, microbase
