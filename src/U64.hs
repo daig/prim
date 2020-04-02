@@ -36,6 +36,7 @@ addC y x = addWordC# x y
 --           or too small to fit in an @U64@).
 subC y x = subWordC# x y
 
+gt,ge,lt,le,eq,ne :: U64 -> U64 -> B
 gt y x = gtWord# x y
 ge y x = geWord# x y
 lt y x = ltWord# x y

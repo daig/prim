@@ -1,6 +1,7 @@
 module B64 where
 import qualified GHC.Types as GHC
 
+eq, ne :: B64 -> B64 -> B
 eq x y = eqWord# x y
 ne x y = neWord# x y
 
