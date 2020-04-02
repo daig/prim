@@ -1,4 +1,6 @@
+{-# language PatternSynonyms #-}
 module Thread where
+import qualified Ref
 
 -- | The physical capability (Hardware thread) a 'Thread' is running on
 type Cap = I64
@@ -15,7 +17,7 @@ yield = yield#
 here :: IO Thread
 here = myThreadId#
 -- | Label a thread with the given cstring pointer
-label# :: Thread -> Addr -> IO_
+label# :: Thread -> Ref.Byte -> IO_
 label# = labelThread#
 bound' :: IO B
 bound' = isCurrentThreadBound#
