@@ -33,7 +33,12 @@ library
                  , U64
                  , B8, B16, B32, B64
                  , F64
-                 , Ref.Weak, Ref.Stable, Ref.Stable.Name
+                 , Ref.Weak, Ref.Stable, Ref.Stable.Name, Ref.Byte
+                 , Ref.Char8, Ref.Char
+                 , Ref.I64, Ref.I32, Ref.I16, Ref.I8
+                 , Ref.U64, Ref.U32, Ref.U16, Ref.U8
+                 , Ref.F32, Ref.F64
+                 , Ref.Ref.Byte, Ref.Ref.Stable
                  , Spark
                  , Enum
                  , Any, BCO

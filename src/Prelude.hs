@@ -40,15 +40,13 @@ type IO_ = ST_ (☸)
 
 type Thread = ThreadId#
 
-type Addr = Addr#
-
 type Maybe# (a :: TYPE r) = (# B, a #)
 
 type Compact = Compact#
 
 type BCO = BCO#
 
-type CostCentreStack# = Addr
+type CostCentreStack# = Addr#
 
 type Proxy = Proxy#
 

@@ -1,4 +1,5 @@
 module Ref.Weak where
+import qualified Ref
 
 type Ref = Weak#
 
@@ -8,7 +9,7 @@ new = mkWeak#
 newNoFinalizer :: k -> v -> IO (Ref v)
 newNoFinalizer = mkWeakNoFinalizer#
 
-addFinalizer :: Addr -> Addr -> B -> Addr -> Ref v -> IO B
+addFinalizer :: Ref.Byte -> Ref.Byte -> B -> Ref.Byte -> Ref v -> IO B
 addFinalizer = addCFinalizerToWeak#
 
 deref :: Ref v -> IO (Maybe# v)
