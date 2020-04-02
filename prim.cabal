@@ -59,5 +59,6 @@ library
                  , Enum
                  , Any, BCO
                  , RTS.Rep, RTS.Block
+                 , RTS.Prefetch.Any, RTS.Prefetch.Ref, RTS.Prefetch.Array, RTS.Prefetch.Array.M
                  , MachDeps
   build-depends: ghc-prim == 0.6.1, microbase
