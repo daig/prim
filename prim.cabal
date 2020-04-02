@@ -54,11 +54,10 @@ library
                  , Compact
                  , Proxy
                  , Coerce
-                 , SPEC
                  , Exception, Exception.Mask
                  , Spark
                  , Enum
                  , Any, BCO
-                 , RTS.Rep, RTS.Block
+                 , RTS.Rep, RTS.Block, Optimizer
                  , RTS.Prefetch.Any, RTS.Prefetch.Ref, RTS.Prefetch.Array, RTS.Prefetch.Array.M
   build-depends: ghc-prim == 0.6.1, microbase
