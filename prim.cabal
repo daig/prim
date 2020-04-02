@@ -3,8 +3,13 @@ name: prim
 homepage: https://github.com/daig/prim#readme
 version: 0.1.0.0
 category: Prelude, Exordium
-synopsis: 
-description: ghc-prim but good
+synopsis: An ergonomic but conservative interface to ghc-prim
+description: 
+      This library reorganizes @ghc-prim@ in a sane but conservative way 
+  , without adding any fancy tricks like overloading or extra functions.
+  It's meant as a foundation for low-level programming in haskell, as well as (eventually),
+  a comprehensive home for documentation on ghc magic.
+
 stability: cursed
 bug-reports: https://github.com/daig/prim/issues
 author: Dai
@@ -14,6 +19,7 @@ license: MIT
 
 extra-source-files:
   README.md
+  CHANGELOG.md
 
 source-repository head
   type: git
