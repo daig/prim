@@ -70,4 +70,4 @@ library
                  , Nat
                  , Stock
                  , Syntax.ImplicitParam
-  build-depends: ghc-prim == 0.6.1, microbase
+  build-depends: ghc-prim ^>= 0.6.1, microbase
