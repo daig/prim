@@ -1,7 +1,7 @@
 cabal-version: 2.4
 name: prim
 homepage: https://github.com/daig/prim#readme
-version: 0.1.0.1
+version: 0.1.0.2
 category: Prelude
 synopsis: An ergonomic but conservative interface to ghc-prim
 description: 
@@ -37,7 +37,7 @@ library
   exposed-modules: Char
                  , I64, I32, I16, I8
                  , U64, U32, U16, U8
-                 , B8, B16, B32, B64
+                 , B, B8, B16, B32, B64
                  , F64, F32
                  , ST,ST.IO, ST.IO.STM
                  , Ref

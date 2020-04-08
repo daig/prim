@@ -93,13 +93,13 @@ shiftRA# = uncheckedIShiftRA#
 -- | Shift left.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 shiftL# :: I64 -> I64 -> I64
-shiftL# = uncheckedIShiftL# 
+shiftL# i x = uncheckedIShiftL# x i
 
 -- |Shift right logical.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 
 shiftRL# :: I64 -> I64 -> I64
-shiftRL# = uncheckedIShiftRL#
+shiftRL# i x = uncheckedIShiftRL# x i
 and, or, xor :: I64 -> I64 -> I64
 and = andI#
 or = orI#
