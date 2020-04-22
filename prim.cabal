@@ -1,7 +1,7 @@
 cabal-version: 2.4
 name: prim
 homepage: https://github.com/daig/prim#readme
-version: 0.1.0.5
+version: 0.1.0.6
 category: Prelude
 synopsis: An ergonomic but conservative interface to ghc-prim
 description: 
@@ -32,7 +32,7 @@ library
                     , KindSignatures, PolyKinds, ConstraintKinds, TypeOperators, RankNTypes
                     , BlockArguments
   hs-source-dirs: src
-  reexported-modules: GHC.Tuple as Tuple
+  other-modules: Prelude
   exposed-modules: Char
                  , I64, I32, I16, I8
                  , U64, U32, U16, U8
@@ -48,6 +48,7 @@ library
                  , Ref.Ref.Byte, Ref.Ref.Stable
                  , Ref.Boxed, Ref.STM, Ref.Lock
                  , Rep.RTS, Rep.Kind
+                 , Tuple
                  , Array, Array.Small, Array.Boxed
                  , Array.Byte, Array.Byte.Pinned, Array.Byte.Unpinned
                  , Array.Char, Array.Char8
@@ -70,5 +71,5 @@ library
                  , Nat
                  , Stock
                  , Syntax.ImplicitParam
-                 , Prelude
+                 , Prim
   build-depends: ghc-prim ^>= 0.6.1
