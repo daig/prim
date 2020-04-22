@@ -1,7 +1,7 @@
 cabal-version: 2.4
 name: prim
 homepage: https://github.com/daig/prim#readme
-version: 0.1.0.4
+version: 0.1.0.5
 category: Prelude
 synopsis: An ergonomic but conservative interface to ghc-prim
 description: 
@@ -47,6 +47,7 @@ library
                  , Ref.F32, Ref.F64
                  , Ref.Ref.Byte, Ref.Ref.Stable
                  , Ref.Boxed, Ref.STM, Ref.Lock
+                 , Rep.RTS, Rep.Kind
                  , Array, Array.Small, Array.Boxed
                  , Array.Byte, Array.Byte.Pinned, Array.Byte.Unpinned
                  , Array.Char, Array.Char8
