@@ -13,6 +13,8 @@ pattern I = True
 pattern B# :: Prim.B -> B
 pattern B# i <- (Prim.dataToTag# -> i) where B# i = isTrue# i
 
+infixr 3 `and`
+infixr 2 `or`
 and, or :: B -> B -> B
 and = (&&); {-# inline and #-}
 or = (||); {-# inline or #-}

@@ -1,7 +1,7 @@
 cabal-version: 2.4
 name: prim
 homepage: https://github.com/daig/prim#readme
-version: 0.1.0.8
+version: 0.1.0.9
 category: Prelude
 synopsis: An ergonomic but conservative interface to ghc-prim
 description: 
