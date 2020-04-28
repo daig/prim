@@ -1,5 +1,7 @@
+{-# language BangPatterns #-}
 module I64 (I64, module I64) where
-import qualified GHC.Types 
+import Stock.B (pattern B#)
+import qualified GHC.Classes as GHC (divInt#,modInt#)
 
 add,sub,mul, quot, rem :: I64 -> I64 -> I64
 add y x = x +# y
@@ -37,6 +39,12 @@ rem y x = remInt# x y
 quotRem :: I64 -> I64 -> (# I64, I64 #)
 -- | Rounds towards zero
 quotRem y x = quotRemInt# x y
+
+-- These functions have built-in rules.
+div,mod :: I64 {- ^ divisor -} -> I64 {- ^ dividend -} -> I64 {- ^ modulus -}
+div y x = GHC.divInt# x y; {-# inline div #-}
+mod y x = GHC.modInt# x y; {-# inline mod #-}
+
 
 addC, subC :: I64 -> I64 -> (# I64, B #)
 -- |Add signed integers reporting overflow.
@@ -76,8 +84,6 @@ toI16 :: I64 -> I16
 toI16 = narrow16Int#
 toI32 :: I64 -> I32
 toI32 = narrow32Int#
-
-
 
 -- |Shift right arithmetic.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
