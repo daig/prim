@@ -1,4 +1,5 @@
-module F64 (F64, module F64) where
+module F64 (F64, (+##), (-##), (*##), (/##), (>##), (>=##), (<#), (<=#), (==##)
+  ,module F64) where
 
 add,sub,mul,div :: F64 -> F64 -> F64
 add y x = x +## y

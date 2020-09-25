@@ -1,5 +1,5 @@
 {-# language BangPatterns #-}
-module I64 (I64, module I64) where
+module I64 (I64, (+#), (-#), (*#), module I64) where
 import Stock.B (pattern B#,(&&), pattern I)
 import qualified GHC.Classes as GHC (divInt#,modInt#)
 
