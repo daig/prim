@@ -7,3 +7,7 @@ add, sub, mul ∷ U8 → U8 → U8
 add y x = narrow8Word# (plusWord# x y)
 sub y x = narrow8Word# (minusWord# x y)
 mul y x = narrow8Word# (timesWord# x y)
+
+pattern Max, Min ∷ U8
+pattern Max = 0xFF##
+pattern Min = 0##

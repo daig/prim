@@ -16,3 +16,7 @@ quotRem y x = case quotRemInt# x y of
 
 shiftL# ∷ I64 → I16 → I16
 shiftL# i x = narrow16Int# (uncheckedIShiftL# x i)
+
+pattern Max, Min ∷ I16
+pattern Max =  0x7FFF#
+pattern Min = -0x800#

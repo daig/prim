@@ -120,3 +120,7 @@ xor = xorI#
 
 not ∷ I64 → I64
 not = notI#
+
+pattern Max, Min ∷ I64
+pattern Max =  0x7FFFFFFFFFFFFFFF#
+pattern Min = -0x8000000000000000#

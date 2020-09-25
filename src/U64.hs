@@ -67,3 +67,7 @@ toB16 ∷ U64 → B16
 toB16 = narrow16Word#
 toB32 ∷ U64 → B32
 toB32 = narrow32Word#
+
+pattern Max, Min ∷ U64
+pattern Max = 0xFFFFFFFFFFFFFFFF##
+pattern Min = 0##
