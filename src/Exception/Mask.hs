@@ -2,20 +2,20 @@
 module Exception.Mask where
 import Prelude hiding (State#)
 
-async :: IO a -> IO a
+async ∷ IO a → IO a
 async = maskAsyncExceptions#
 
-uninterruptible :: IO a -> IO a
+uninterruptible ∷ IO a → IO a
 uninterruptible = maskUninterruptible#
 
-state :: IO State#
+state ∷ IO State#
 state = getMaskingState#
 
 type State# = I64
 
-pattern Unmasked :: State#
+pattern Unmasked ∷ State#
 pattern Unmasked = 0#
-pattern Uninterruptible :: State#
+pattern Uninterruptible ∷ State#
 pattern Uninterruptible = 1#
-pattern Interruptible :: State#
+pattern Interruptible ∷ State#
 pattern Interruptible = 2#

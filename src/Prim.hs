@@ -32,15 +32,15 @@ type B64 = Word#
 type F32 = Float#
 type F64 = Double#
 
-type Maybe# (a :: TYPE r) = (# B, a #)
+type Maybe# (a ∷ TYPE r) = (# B, a #)
 
 type T = GHC.Type
 type C = GHC.Constraint
 
 type Token = State#
-type ST_ s = Token s -> Token s
-type ST s (a :: TYPE r) = Token s -> (# Token s, a #)
+type ST_ s = Token s → Token s
+type ST s (a ∷ TYPE r) = Token s → (# Token s, a #)
 
 type (☸) = RealWorld
-type IO (a :: TYPE r) = ST (☸) a
+type IO (a ∷ TYPE r) = ST (☸) a
 type IO_ = ST_ (☸)

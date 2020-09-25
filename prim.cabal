@@ -30,7 +30,7 @@ library
   default-language: Haskell2010
   default-extensions: MagicHash, UnboxedTuples
                     , KindSignatures, PolyKinds, ConstraintKinds, TypeOperators, RankNTypes
-                    , BlockArguments
+                    , BlockArguments, UnicodeSyntax
                     , PatternSynonyms, ViewPatterns
   hs-source-dirs: src
   other-modules: Prelude

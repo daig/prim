@@ -7,23 +7,23 @@ module Array.Array where
 type A = ArrayArray#
 type M = MutableArrayArray#
 
-new :: I64 -> ST s (M s)
+new ∷ I64 → ST s (M s)
 new = newArrayArray#
 
-eq :: M s -> M s -> B
+eq ∷ M s → M s → B
 eq = sameMutableArrayArray#
 
-freeze## :: M s -> ST s A
+freeze## ∷ M s → ST s A
 freeze## = unsafeFreezeArrayArray#
 
-size :: A -> I64
+size ∷ A → I64
 size = sizeofArrayArray#
 
-sizeM :: M s -> I64
+sizeM ∷ M s → I64
 sizeM = sizeofMutableArrayArray#
 
-copy# :: A -> I64 -> M s -> I64 -> I64 -> ST_ s
+copy# ∷ A → I64 → M s → I64 → I64 → ST_ s
 copy# = copyArrayArray#
 
-copyM# :: M s -> I64 -> M s -> I64 -> I64 -> ST_ s
+copyM# ∷ M s → I64 → M s → I64 → I64 → ST_ s
 copyM# = copyMutableArrayArray#

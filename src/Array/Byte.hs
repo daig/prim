@@ -7,25 +7,25 @@ type M = MutableByteArray#
 
 -- | Create a new uninitialized mutable byte array of specified size (in bytes),
 -- in the specified state thread.
-new :: I64 -> ST s (M s)
+new ∷ I64 → ST s (M s)
 new = newByteArray#
 
-eq :: M s -> M s -> B
+eq ∷ M s → M s → B
 eq = sameMutableByteArray#
 
-shrink :: M s -> I64 -> ST_ s
+shrink ∷ M s → I64 → ST_ s
 shrink = shrinkMutableByteArray#
 
 -- | Number of elements
-size :: A -> I64
+size ∷ A → I64
 size = sizeofByteArray#
 
 -- | Number of elements. Must be in @ST@ because of possible resizes.
-sizeM :: M s -> ST s I64
+sizeM ∷ M s → ST s I64
 sizeM = getSizeofMutableByteArray#
 
 -- | Make a mutable array immutable, without copying.
-freeze## :: M s -> ST s (A)
+freeze## ∷ M s → ST s (A)
 freeze## = unsafeFreezeByteArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -33,12 +33,12 @@ freeze## = unsafeFreezeByteArray#
 -- The two arrays must not be the same array in different states, but this is not checked either.
 --
 -- Warning: this can fail with an unchecked exception.
-copy# :: A -- ^ source
-      -> I64 -- ^ source offset
-      -> M s -- ^ destination
-      -> I64 -- ^ destination offset
-      -> I64 -- ^ number of elements to copy
-      -> ST_ s
+copy# ∷ A -- ^ source
+      → I64 -- ^ source offset
+      → M s -- ^ destination
+      → I64 -- ^ destination offset
+      → I64 -- ^ number of elements to copy
+      → ST_ s
 copy# = copyByteArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -46,12 +46,12 @@ copy# = copyByteArray#
 -- The two arrays must not be the same array in different states, but this is not checked either.
 --
 -- Warning: this can fail with an unchecked exception.
-copyM# :: M s -- ^ source
-       -> I64 -- ^ source offset
-       -> M s -- ^ destination
-       -> I64 -- ^ destination offset
-       -> I64 -- ^ number of elements to copy
-       -> ST_ s
+copyM# ∷ M s -- ^ source
+       → I64 -- ^ source offset
+       → M s -- ^ destination
+       → I64 -- ^ destination offset
+       → I64 -- ^ number of elements to copy
+       → ST_ s
 copyM# = copyMutableByteArray#
 
 -- | Copy a range of the @A@ to the memory range starting at the @Ref.Byte@.
@@ -59,11 +59,11 @@ copyM# = copyMutableByteArray#
 -- The @Ref.Byte@ must not point into the @A@ (e.g. if the @A@ were pinned), but this is not checked either. 
 --
 -- Warning: this can fail with an unchecked exception.
-copyToRef# :: A -- ^ source
-            -> I64 -- ^ source offset
-            -> Ref.Byte -- ^ destination
-            -> I64 -- ^ number of elements to copy
-            -> ST_ s
+copyToRef# ∷ A -- ^ source
+            → I64 -- ^ source offset
+            → Ref.Byte -- ^ destination
+            → I64 -- ^ number of elements to copy
+            → ST_ s
 copyToRef# = copyByteArrayToAddr#
 
 -- | Copy a range of the @A@ to the memory range starting at the @Ref.Byte@.
@@ -71,11 +71,11 @@ copyToRef# = copyByteArrayToAddr#
 -- The @Ref.Byte@ must not point into the @A@ (e.g. if the @A@ were pinned), but this is not checked either. 
 --
 -- Warning: this can fail with an unchecked exception.
-copyToRefM# :: M s -- ^ source
-             -> I64 -- ^ source offset
-             -> Ref.Byte -- ^ destination
-             -> I64 -- ^ number of elements to copy
-             -> ST_ s
+copyToRefM# ∷ M s -- ^ source
+             → I64 -- ^ source offset
+             → Ref.Byte -- ^ destination
+             → I64 -- ^ number of elements to copy
+             → ST_ s
 copyToRefM# = copyMutableByteArrayToAddr#
 
 -- |Copy a memory range starting at the @Ref.Byte@ to the specified range in the
@@ -85,29 +85,29 @@ copyToRefM# = copyMutableByteArrayToAddr#
 --    but this is not checked either.
 --
 --    Warning: This can fail with an unchecked exception.
-copyFromRef# :: Ref.Byte -- ^ source
-              -> M s -- ^ destination
-              -> I64 -- ^ destination offset
-              -> I64 -- ^ number of elements to copy
-              -> ST_ s
+copyFromRef# ∷ Ref.Byte -- ^ source
+              → M s -- ^ destination
+              → I64 -- ^ destination offset
+              → I64 -- ^ number of elements to copy
+              → ST_ s
 copyFromRef# = copyAddrToByteArray#
 
 -- | Set a slice to the specified byte.
-set :: M s
-    -> I64 -- ^ slice start offset
-    -> I64 -- ^ slice length in bytes
-    -> I64 -- ^ the byte to set them to
-    -> ST_ s
+set ∷ M s
+    → I64 -- ^ slice start offset
+    → I64 -- ^ slice length in bytes
+    → I64 -- ^ the byte to set them to
+    → ST_ s
 set = setByteArray#
 
 
 
 -- | Lexicographic comparison.
 -- Warning: Both arrays mus fully contain the specified ranges, but this is not checked.
-compare# :: A -- ^ source1
-         -> I64 -- ^ source1 offset
-         -> A -- ^ source2
-         -> I64 -- ^ source2 offset
-         -> I64 -- ^ number of bytes to compare
-         -> I64 -- ^ a number less-than, equal-to, or greater-than @0#@
+compare# ∷ A -- ^ source1
+         → I64 -- ^ source1 offset
+         → A -- ^ source2
+         → I64 -- ^ source2 offset
+         → I64 -- ^ number of bytes to compare
+         → I64 -- ^ a number less-than, equal-to, or greater-than @0#@
 compare# = compareByteArrays#

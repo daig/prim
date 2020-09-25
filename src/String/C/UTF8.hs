@@ -7,7 +7,7 @@ import GHC.Types (Char(..),isTrue#,Bool(..))
 
 -- There's really no point in inlining this for the same reasons as
 -- unpack. See Note [Inlining unpack#] above for details.
-unpack# :: S -> String.List
+unpack# ∷ S → String.List
 {-# NOINLINE CONLIKE unpack# #-}
 unpack# addr
   = unpack 0#
