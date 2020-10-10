@@ -67,6 +67,9 @@ addC y x = addIntC# x y
 --           or too small to fit in an @I64@).
 subC y x = subIntC# x y
 
+(>),(≥),(<),(≤),(==),(≠) ∷ I64 → I64 → B
+(>) = (>#); (≥) = (>=#); (<) = (<#); (≤) = (<=#)
+(==) = (==#); (≠) = (/=#)
 gt,ge,lt,le,eq,ne ∷ I64 → I64 → B
 gt y x = x ># y
 ge y x = x >=# y
