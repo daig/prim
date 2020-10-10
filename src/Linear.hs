@@ -1,0 +1,3 @@
+module Linear where
+
+type (⊸) = (->)
