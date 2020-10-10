@@ -1,11 +1,14 @@
 {-# language BangPatterns #-}
-module I64 (I64, (+#), (-#), (*#), module I64) where
+module I64 (I64, module I64) where
 import Stock.B (pattern B#,(&&), pattern I)
 import qualified GHC.Classes as GHC (divInt#,modInt#)
 
+(+), (-), (*) ∷ I64 → I64 → I64
+(+) = (+#); (-) = (-#)
+-- | Low word of signed integer multiply
+(*) = (*#)
 add,sub,mul, quot, rem ∷ I64 → I64 → I64
-add y x = x +# y
-sub y x = x -# y
+add y x = x +# y; sub y x = x -# y
 -- | Low word of signed integer multiply
 mul y x = x *# y
 -- |Return non-zero if there is any possibility that the upper word of a
@@ -67,16 +70,16 @@ addC y x = addIntC# x y
 --           or too small to fit in an @I64@).
 subC y x = subIntC# x y
 
-(>),(≥),(<),(≤),(==),(≠) ∷ I64 → I64 → B
+(>),(≥),(<),(≤),(≡),(≠) ∷ I64 → I64 → B
 (>) = (>#); (≥) = (>=#); (<) = (<#); (≤) = (<=#)
-(==) = (==#); (≠) = (/=#)
+(≡) = (==#); (≠) = (/=#)
 gt,ge,lt,le,eq,ne ∷ I64 → I64 → B
-gt y x = x ># y
-ge y x = x >=# y
-lt y x = x <# y
-le y x = x <=# y
-eq x y = x ==# y
-ne x y = x /=# y
+gt = (<#)
+ge = (<=#)
+lt = (>#)
+le = (>=#)
+eq = (==#)
+ne = (/=#)
 
 toU64 ∷ I64 → U64
 toU64 = int2Word#

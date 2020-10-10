@@ -3,6 +3,10 @@ module I8 (I8, module I8) where
 fromI64 ∷ I64 → I8
 fromI64 = narrow8Int#
 
+(+), (-), (*) ∷ I8 → I8 → I8
+x + y = narrow8Int# (x +# y)
+x - y = narrow8Int# (x -# y)
+x * y = narrow8Int# (x *# y)
 add, sub, mul, quot, rem ∷ I8 → I8 → I8
 add y x = narrow8Int# (x +# y)
 sub y x = narrow8Int# (x -# y)

@@ -1,10 +1,10 @@
 module U64 (U64, module U64) where
 import qualified GHC.Types as GHC
 
+(+),(-),(*) ∷ U64 → U64 → U64
+(+) = plusWord#; (-) = minusWord#; (*) = timesWord#
 add,sub,mul, quot, rem ∷ U64 → U64 → U64
-add y x = plusWord# x y
-sub y x = minusWord# x y
-mul y x = timesWord# x y
+add y x = plusWord# x y; sub y x = minusWord# x y; mul y x = timesWord# x y
 
 -- |Add unsigned integers, with the high part (carry) in the first
 --           component of the returned pair and the low part in the second
@@ -36,13 +36,12 @@ addC y x = addWordC# x y
 --           or too small to fit in an @U64@).
 subC y x = subWordC# x y
 
+(>),(≥),(<),(≤),(≡),(≠) ∷ U64 → U64 → B
+(>) = gtWord#; (≥) = geWord#; (<) = ltWord#; (≤) = leWord#
+(≡) = eqWord#; (≠) = neWord#
 gt,ge,lt,le,eq,ne ∷ U64 → U64 → B
-gt y x = gtWord# x y
-ge y x = geWord# x y
-lt y x = ltWord# x y
-le y x = leWord# x y
-eq x y = eqWord# x y
-ne x y = neWord# x y
+gt = ltWord#; ge = leWord#; lt = gtWord#; le = geWord#
+eq = eqWord#; ne = neWord#
 
 fromInt ∷ Int → U64
 fromInt = int2Word#
@@ -71,3 +70,37 @@ toB32 = narrow32Word#
 pattern Max, Min ∷ U64
 pattern Max = 0xFFFFFFFFFFFFFFFF##
 pattern Min = 0##
+
+-- * Bitwise operations
+infixl 7 &&
+infixl 6 ⊕
+infixl 5 ||
+(&&),(||),(⊕) ∷ U64 → U64 → U64
+(&&) = and#; (||) = or#; (⊕) = xor#
+and,or,xor ∷ U64 → U64 → U64
+and = and#; or = or#; xor = xor#
+(¬), not ∷ U64 → U64
+(¬) = not#
+not = not#
+
+-- | Shift left.  Result undefined if shift amount is not
+--           in the range 0 to word size - 1 inclusive.
+shiftL#, shiftRL# ∷ Int → U64 → U64
+shiftL# i w = uncheckedShiftL# w i
+
+-- |Shift right logical.  Result undefined if shift amount is not
+--           in the range 0 to word size - 1 inclusive.
+shiftRL# i w = uncheckedShiftRL# w i
+
+-- | Count the number of set bits
+popCnt,clz,ctz ∷ U64 → U8
+popCnt = popCnt#; clz = clz#; ctz = ctz#
+
+byteSwap ∷ B64 → B64
+byteSwap = byteSwap#
+pdep, pext ∷ B64 → B64 → B64
+pdep y x = pdep# x y; pext y x = pext# x y
+
+-- | Reverse the order of the bits.
+reverse ∷ B64 → B64
+reverse = bitReverse#
