@@ -19,16 +19,16 @@ pattern Min = 0##
 -- * Bitwise operations
 
 -- | Count the number of set bits
-popCnt,clz,ctz ∷ B16 → B16
+popCnt,clz,ctz ∷ U16 → U16
 popCnt = popCnt16#; clz = clz16#; ctz = ctz16#
 
-byteSwap ∷ B16 → B16
+byteSwap ∷ U16 → U16
 byteSwap = byteSwap16#
-pext ∷ B16 → U64 → B16
+pext ∷ U16 → U64 → U16
 pext y x = pext16# x y
-pdep ∷ B16 → U64 → U64
+pdep ∷ U16 → U64 → U64
 pdep y x = pdep16# x y
 
 -- | Reverse the order of the bits.
-reverse ∷ B16 → B16
+reverse ∷ U16 → U16
 reverse = bitReverse16#

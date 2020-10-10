@@ -24,10 +24,6 @@ type U32 = Word#
 type U64 = Word#
 
 type B = Int#
-type B8 = Word#
-type B16 = Word#
-type B32 = Word#
-type B64 = Word#
 
 type F32 = Float#
 type F64 = Double#

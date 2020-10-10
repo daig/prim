@@ -18,14 +18,14 @@ pattern Min = 0##
 
 -- * Bitwise operations
 -- | Count the number of set bits
-popCnt,clz,ctz ∷ B8 → B8
+popCnt,clz,ctz ∷ U8 → U8
 popCnt = popCnt8#; clz = clz8#; ctz = ctz8#
 
-pext ∷ B8 → U64 → B8
+pext ∷ U8 → U64 → U8
 pext y x = pext8# x y
-pdep ∷ B8 → U64 → U64
+pdep ∷ U8 → U64 → U64
 pdep y x = pdep8# x y
 
 -- | Reverse the order of the bits.
-reverse ∷ B8 → B8
+reverse ∷ U8 → U8
 reverse = bitReverse8#

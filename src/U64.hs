@@ -60,13 +60,6 @@ toU16 = narrow16Word#
 toU32 ∷ U64 → U32
 toU32 = narrow32Word#
 
-toB8 ∷ U64 → B8
-toB8 = narrow8Word#
-toB16 ∷ U64 → B16
-toB16 = narrow16Word#
-toB32 ∷ U64 → B32
-toB32 = narrow32Word#
-
 pattern Max, Min ∷ U64
 pattern Max = 0xFFFFFFFFFFFFFFFF##
 pattern Min = 0##
@@ -95,11 +88,11 @@ shiftRL# i w = uncheckedShiftRL# w i
 popCnt,clz,ctz ∷ U64 → U8
 popCnt = popCnt#; clz = clz#; ctz = ctz#
 
-byteSwap ∷ B64 → B64
+byteSwap ∷ U64 → U64
 byteSwap = byteSwap#
-pdep, pext ∷ B64 → B64 → B64
+pdep, pext ∷ U64 → U64 → U64
 pdep y x = pdep# x y; pext y x = pext# x y
 
 -- | Reverse the order of the bits.
-reverse ∷ B64 → B64
+reverse ∷ U64 → U64
 reverse = bitReverse#
