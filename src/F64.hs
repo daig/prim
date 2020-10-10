@@ -1,6 +1,11 @@
 module F64 (F64, (+##), (-##), (*##), (/##), (>##), (>=##), (<#), (<=#), (==##)
   ,module F64) where
 
+
+(+),(-),(×),(÷) ∷ F64 → F64 → F64
+(+) = (+##); (-) = (-##); (×) = (*##); (÷) = (/##)
+infixl 7 ×, ÷
+infixl 6 +, -
 add,sub,mul,div ∷ F64 → F64 → F64
 add y x = x +## y
 sub y x = x -## y
@@ -25,12 +30,16 @@ decodeI64 ∷ F64 → (# Int, Int #)
 decodeI64 = decodeDouble_Int64#
 
 
+(>),(≥),(<),(≤),(≡),(≠) ∷ F64 → F64 → B
+(>) = (>##); (≥) = (>=##); (<) = (<##); (≤) = (<=##)
+(≡) = (==##); (≠) = (/=##)
+gt, ge, lt, le, eq, ne ∷ F64 → F64 → B
 gt y x = x >## y
 ge y x = x >=## y
 lt y x = x <## y
 le y x = x <=## y
-eq x y = x ==## y
-ne x y = x /=## y
+eq = (==##)
+ne = (/=##)
 
 fromInt ∷ Int → F64
 fromInt = int2Double#

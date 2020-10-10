@@ -72,15 +72,14 @@ pattern Max = 0xFFFFFFFFFFFFFFFF##
 pattern Min = 0##
 
 -- * Bitwise operations
-infixl 7 &&
+infixl 7 ∧
 infixl 6 ⊕
-infixl 5 ||
-(&&),(||),(⊕) ∷ U64 → U64 → U64
-(&&) = and#; (||) = or#; (⊕) = xor#
+infixl 5 ∨ 
+(∧),(∨),(⊕) ∷ U64 → U64 → U64
+(∧) = and#; (∨) = or#; (⊕) = xor#
 and,or,xor ∷ U64 → U64 → U64
 and = and#; or = or#; xor = xor#
-(¬), not ∷ U64 → U64
-(¬) = not#
+not ∷ U64 → U64
 not = not#
 
 -- | Shift left.  Result undefined if shift amount is not
