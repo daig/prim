@@ -1,8 +1,8 @@
 module F32 (F32, module F32) where
 
-(+),(-),(×),(÷) ∷ F32 → F32 → F32
-(+) = plusFloat#; (-) = minusFloat#; (×) = timesFloat#; (÷) = divideFloat#
-infixl 7 ×, ÷
+(+),(-),(*),(/) ∷ F32 → F32 → F32
+(+) = plusFloat#; (-) = minusFloat#; (*) = timesFloat#; (/) = divideFloat#
+infixl 7 *, /
 infixl 6 +, -
 add,sub,mul,div ∷ F32 → F32 → F32
 add y x = plusFloat# x y
