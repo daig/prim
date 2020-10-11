@@ -1,6 +1,6 @@
 {-# language BangPatterns #-}
 module I64 (I64, module I64) where
-import Stock.B (pattern B#,(&&), pattern I)
+import Stock.B (pattern B#,(∧), pattern T)
 import qualified GHC.Classes as GHC (divInt#,modInt#)
 
 (+), (-), (*) ∷ I64 → I64 → I64
@@ -49,11 +49,11 @@ div y x = GHC.divInt# x y; {-# inline div #-}
 mod y x = GHC.modInt# x y; {-# inline mod #-}
 -- | Rounds towards negative infinity. The behavior is undefined if the first argument is zero.
 divMod ∷ I64 {- ^ divisor -} → I64 {- ^ dividend -} → (# I64, I64 #) {- ^ (div, mod) -}
-divMod y x | B# (gt 0# x) && B# (lt 0# y) = case quotRem y (x -# 1# ) of
+divMod y x | B# (gt 0# x) ∧ B# (lt 0# y) = case quotRem y (x -# 1# ) of
                                     (# q, r #) → (# q -# 1#, r +# y +# 1# #)
-           | B# (lt 0# x) && B# (gt 0# y) = case quotRem y (x +# 1# ) of
+           | B# (lt 0# x) ∧ B# (gt 0# y) = case quotRem y (x +# 1# ) of
                                     (# q, r #) → (# q -# 1#, r +# y +# 1# #)
-           | I = quotRem y x
+           | T = quotRem y x
 
 
 addC, subC ∷ I64 → I64 → (# I64, B #)
