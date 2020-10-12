@@ -1,26 +1,23 @@
-module I16 (I16, module I16) where
+module I16 where
 
-fromI64 ∷ I64 → I16
-fromI64 = narrow16Int#
+fromI ∷ I → I16
+fromI = narrowInt16#
 
-(+), (-), (*) ∷ I16 → I16 → I16
-x + y = narrow16Int# (x +# y)
-x - y = narrow16Int# (x -# y)
-x * y = narrow16Int# (x *# y)
-add, sub, mul, quot, rem ∷ I16 → I16 → I16
-add y x = narrow16Int# (x +# y)
-sub y x = narrow16Int# (x -# y)
-mul y x = narrow16Int# (x *# y)
-quot y x = narrow16Int# (quotInt# x y)
-rem y x = narrow16Int# (remInt# x y)
+(>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ I16 → I16 → B#
+(>) = gtInt16#; gt = ltInt16#
+(≥) = geInt16#; ge = leInt16#
+(<) = ltInt16#; lt = gtInt16#
+(≤) = leInt16#; le = geInt16#
+(≡) = eqInt16#; eq = eqInt16#
+(≠) = neInt16#; ne = neInt16#
+
+(+), (-), (*), add, sub, mul ∷ I16 → I16 → I16
+(+) = plusInt16#; add = plusInt16#
+(-) = subInt16#; sub y x = x - y
+(*) = timesInt16#; mul = timesInt16#
+(//), (%%), quot, rem ∷ I16 → I16 → I16
+(//) = quotInt16#; quot y x = x // y
+(%%) = remInt16#; rem y x = x %% y
 
 quotRem ∷ I16 → I16 → (# I16, I16 #)
-quotRem y x = case quotRemInt# x y of
-  (# q, r #) → (# narrow16Int# q, narrow16Int# r #)
-
-shiftL# ∷ I64 → I16 → I16
-shiftL# i x = narrow16Int# (uncheckedIShiftL# x i)
-
-pattern Max, Min ∷ I16
-pattern Max =  0x7FFF#
-pattern Min = -0x800#
+quotRem y x = quotRemInt16# x y

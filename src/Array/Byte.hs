@@ -7,21 +7,21 @@ type M = MutableByteArray#
 
 -- | Create a new uninitialized mutable byte array of specified size (in bytes),
 -- in the specified state thread.
-new ∷ I64 → ST s (M s)
+new ∷ I → ST s (M s)
 new = newByteArray#
 
-eq ∷ M s → M s → I1
+eq ∷ M s → M s → B#
 eq = sameMutableByteArray#
 
-shrink ∷ M s → I64 → ST_ s
+shrink ∷ M s → I → ST_ s
 shrink = shrinkMutableByteArray#
 
 -- | Number of elements
-size ∷ A → I64
+size ∷ A → I
 size = sizeofByteArray#
 
 -- | Number of elements. Must be in @ST@ because of possible resizes.
-sizeM ∷ M s → ST s I64
+sizeM ∷ M s → ST s I
 sizeM = getSizeofMutableByteArray#
 
 -- | Make a mutable array immutable, without copying.
@@ -34,10 +34,10 @@ freeze## = unsafeFreezeByteArray#
 --
 -- Warning: this can fail with an unchecked exception.
 copy# ∷ A -- ^ source
-      → I64 -- ^ source offset
+      → I -- ^ source offset
       → M s -- ^ destination
-      → I64 -- ^ destination offset
-      → I64 -- ^ number of elements to copy
+      → I -- ^ destination offset
+      → I -- ^ number of elements to copy
       → ST_ s
 copy# = copyByteArray#
 
@@ -47,10 +47,10 @@ copy# = copyByteArray#
 --
 -- Warning: this can fail with an unchecked exception.
 copyM# ∷ M s -- ^ source
-       → I64 -- ^ source offset
+       → I -- ^ source offset
        → M s -- ^ destination
-       → I64 -- ^ destination offset
-       → I64 -- ^ number of elements to copy
+       → I -- ^ destination offset
+       → I -- ^ number of elements to copy
        → ST_ s
 copyM# = copyMutableByteArray#
 
@@ -60,9 +60,9 @@ copyM# = copyMutableByteArray#
 --
 -- Warning: this can fail with an unchecked exception.
 copyToRef# ∷ A -- ^ source
-            → I64 -- ^ source offset
+            → I -- ^ source offset
             → Ref.Byte -- ^ destination
-            → I64 -- ^ number of elements to copy
+            → I -- ^ number of elements to copy
             → ST_ s
 copyToRef# = copyByteArrayToAddr#
 
@@ -72,9 +72,9 @@ copyToRef# = copyByteArrayToAddr#
 --
 -- Warning: this can fail with an unchecked exception.
 copyToRefM# ∷ M s -- ^ source
-             → I64 -- ^ source offset
+             → I -- ^ source offset
              → Ref.Byte -- ^ destination
-             → I64 -- ^ number of elements to copy
+             → I -- ^ number of elements to copy
              → ST_ s
 copyToRefM# = copyMutableByteArrayToAddr#
 
@@ -87,16 +87,16 @@ copyToRefM# = copyMutableByteArrayToAddr#
 --    Warning: This can fail with an unchecked exception.
 copyFromRef# ∷ Ref.Byte -- ^ source
               → M s -- ^ destination
-              → I64 -- ^ destination offset
-              → I64 -- ^ number of elements to copy
+              → I -- ^ destination offset
+              → I -- ^ number of elements to copy
               → ST_ s
 copyFromRef# = copyAddrToByteArray#
 
 -- | Set a slice to the specified byte.
 set ∷ M s
-    → I64 -- ^ slice start offset
-    → I64 -- ^ slice length in bytes
-    → I64 -- ^ the byte to set them to
+    → I -- ^ slice start offset
+    → I -- ^ slice length in bytes
+    → I -- ^ the byte to set them to
     → ST_ s
 set = setByteArray#
 
@@ -105,9 +105,9 @@ set = setByteArray#
 -- | Lexicographic comparison.
 -- Warning: Both arrays mus fully contain the specified ranges, but this is not checked.
 compare# ∷ A -- ^ source1
-         → I64 -- ^ source1 offset
+         → I -- ^ source1 offset
          → A -- ^ source2
-         → I64 -- ^ source2 offset
-         → I64 -- ^ number of bytes to compare
-         → I64 -- ^ a number less-than, equal-to, or greater-than @0#@
+         → I -- ^ source2 offset
+         → I -- ^ number of bytes to compare
+         → I -- ^ a number less-than, equal-to, or greater-than @0#@
 compare# = compareByteArrays#

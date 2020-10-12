@@ -2,7 +2,7 @@ module Ref.STM where
 
 type Ref = TVar#
 
-eq ∷ Ref s a → Ref s a → I1
+eq ∷ Ref s a → Ref s a → B#
 eq = sameTVar#
 
 new ∷ a → ST s (Ref s a)

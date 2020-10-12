@@ -34,9 +34,9 @@ library
                     , PatternSynonyms, ViewPatterns
   hs-source-dirs: src
   other-modules: Prelude
-  exposed-modules: Char
-                 , I, I64, I32, I16, I8, I1
-                 , U, U64, U32, U16, U8
+  exposed-modules: Char , B
+                 , I, I.I64, I.I32, I.I16, I.I8, I16, I8
+                 , U, U.U64, U.U32, U.U16, U.U8, U16, U8
                  , F64, F32
                  , IO, IO.STM
                  , Ref
@@ -70,7 +70,7 @@ library
                  , String, String.C, String.C.Latin, String.C.UTF8, String.List
                  , Nat
                  , Stock.Eq, Stock.Ord, Stock.Ord.Ordering
-                 , Stock.B, Stock.Char, Stock.Double, Stock.Float, Stock.Int, Stock.Word, Stock.IO
+                 , Stock.Char, Stock.Double, Stock.Float, Stock.Int, Stock.Word, Stock.IO
                  , Linear
                  , Syntax.ImplicitParam
                  , Prim

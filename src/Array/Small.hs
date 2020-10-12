@@ -4,27 +4,27 @@ import Prelude hiding (Array)
 type A = SmallArray#
 type M = SmallMutableArray#
 
-new ∷ I64 → a → ST s (M s a)
+new ∷ I → a → ST s (M s a)
 new = newSmallArray#
 
-eq ∷ M s a → M s a → I1
+eq ∷ M s a → M s a → B#
 eq = sameSmallMutableArray#
 
-shrink ∷ M s a → I64 → ST_ s
+shrink ∷ M s a → I → ST_ s
 shrink = shrinkSmallMutableArray#
 
-read ∷ M s a → I64 → ST s a
+read ∷ M s a → I → ST s a
 read = readSmallArray#
 
-write ∷ M s a → I64 → a → ST_ s
+write ∷ M s a → I → a → ST_ s
 write = writeSmallArray#
 
 -- | Number of elements
-size ∷ A a → I64
+size ∷ A a → I
 size = sizeofSmallArray#
 
 -- | Number of elements. Must be in @ST@ because of possible resizes.
-sizeM# ∷ M s a → ST s I64
+sizeM# ∷ M s a → ST s I
 sizeM# = getSizeofSmallMutableArray#
 
 -- | Read from the specified index of an immutable array.
@@ -34,7 +34,7 @@ sizeM# = getSizeofSmallMutableArray#
 -- additional thunks from building up on the heap. Avoiding these thunks, in turn,
 -- reduces references to the argument array, allowing it to be garbage collected more promptly.
 -- Warning: this can fail with an unchecked exception.
-index# ∷ A a → I64 → (# a #)
+index# ∷ A a → I → (# a #)
 index# = indexSmallArray#
 
 -- | Make a mutable array immutable, without copying.
@@ -51,10 +51,10 @@ thaw## = unsafeThawSmallArray#
 --
 -- Warning: this can fail with an unchecked exception.
 copy# ∷ A a -- ^ source
-      → I64 -- ^ source offset
+      → I -- ^ source offset
       → M s a -- ^ destination
-      → I64 -- ^ destination offset
-      → I64 -- ^ number of elements to copy
+      → I -- ^ destination offset
+      → I -- ^ number of elements to copy
       → ST_ s
 copy# = copySmallArray#
 
@@ -64,10 +64,10 @@ copy# = copySmallArray#
 --
 -- Warning: this can fail with an unchecked exception.
 copyM# ∷ M s a -- ^ source
-       → I64 -- ^ source offset
+       → I -- ^ source offset
        → M s a -- ^ destination
-       → I64 -- ^ destination offset
-       → I64 -- ^ number of elements to copy
+       → I -- ^ destination offset
+       → I -- ^ number of elements to copy
        → ST_ s
 copyM# = copySmallMutableArray#
 
@@ -76,8 +76,8 @@ copyM# = copySmallMutableArray#
 --
 -- Warning: this can fail with an unchecked exception.
 clone# ∷ A a
-       → I64 -- ^ Source offset
-       → I64 -- ^ number of elements to copy
+       → I -- ^ Source offset
+       → I -- ^ number of elements to copy
        → A a
 clone# = cloneSmallArray#
 
@@ -86,27 +86,27 @@ clone# = cloneSmallArray#
 --
 -- Warning: this can fail with an unchecked exception.
 cloneM# ∷ M s a
-        → I64 -- ^ Source offset
-        → I64 -- ^ number of elements to copy
+        → I -- ^ Source offset
+        → I -- ^ number of elements to copy
         → ST s (M s a)
 cloneM# = cloneSmallMutableArray#
 
 freeze# ∷ M s a
-        → I64 -- ^ Source offset
-        → I64 -- ^ number of elements to copy
+        → I -- ^ Source offset
+        → I -- ^ number of elements to copy
         → ST s (A a)
 freeze# = freezeSmallArray#
 
 thaw# ∷  A a
-        → I64 -- ^ Source offset
-        → I64 -- ^ number of elements to copy
+        → I -- ^ Source offset
+        → I -- ^ number of elements to copy
         → ST s (M s a)
 thaw# = thawSmallArray#
 
 cas ∷ M s a
-    → I64 -- ^ Source offset
+    → I -- ^ Source offset
     → a -- ^ Expected old value
     → a -- ^ New value
-    → ST s (# I1, a #) -- ^ Whether the swap failed, and the actual new value
+    → ST s (# B#, a #) -- ^ Whether the swap failed, and the actual new value
 cas as o a0 a1 s0 = case casSmallArray# as o a0 a1 s0 of
   (# s1, failed', a #) → (# s1, (# failed', a #) #)

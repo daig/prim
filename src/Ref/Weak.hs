@@ -9,7 +9,7 @@ new = mkWeak#
 newNoFinalizer ∷ k → v → IO (Ref v)
 newNoFinalizer = mkWeakNoFinalizer#
 
-addFinalizer ∷ Ref.Byte → Ref.Byte → I1 → Ref.Byte → Ref v → IO I1
+addFinalizer ∷ Ref.Byte → Ref.Byte → B# → Ref.Byte → Ref v → IO B#
 addFinalizer = addCFinalizerToWeak#
 
 deref ∷ Ref v → IO (Maybe# v)

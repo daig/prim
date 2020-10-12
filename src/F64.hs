@@ -24,16 +24,16 @@ sinh = sinhDouble#; cosh = coshDouble#; tanh = tanhDouble#
 pow ∷ F64 → F64 → F64
 pow y x = x **## y
 
-decode2I ∷ F64 → (# I, U64, U64, I #)
+decode2I ∷ F64 → (# I8#, U32#, U32#, I16# #) -- ^ (sign {1,-1}, high, low, exp)
 decode2I = decodeDouble_2Int#  
-decodeI64 ∷ F64 → (# I, I #)
+decodeI64 ∷ F64 → (# I64, I16# #) -- ^ (mantissa , base-2 exponent)
 decodeI64 = decodeDouble_Int64#
 
 
-(>),(≥),(<),(≤),(≡),(≠) ∷ F64 → F64 → I1
+(>),(≥),(<),(≤),(≡),(≠) ∷ F64 → F64 → B#
 (>) = (>##); (≥) = (>=##); (<) = (<##); (≤) = (<=##)
 (≡) = (==##); (≠) = (/=##)
-gt, ge, lt, le, eq, ne ∷ F64 → F64 → I1
+gt, ge, lt, le, eq, ne ∷ F64 → F64 → B#
 gt y x = x >## y
 ge y x = x >=## y
 lt y x = x <## y

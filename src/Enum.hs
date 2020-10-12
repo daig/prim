@@ -4,7 +4,7 @@ module Enum
    dataToTag# 
   -- | @a@ must be an enum type
   ,tagToEnum#
-  ,toI64
+  ,toI
   ) where
 
 -- Note we can't fiddle with tagToEnum# eg to rename
@@ -23,5 +23,5 @@ dataToTag# can be an inline primop if it doesn't need to do any
 evaluation, and (b) we want to expose the evaluation to the
 simplifier, because it might be possible to eliminate the evaluation
 in the case when the argument is already known to be evaluated. -}
-toI64 ∷ a → I64; {-# inline toI64 #-}
-toI64 !x = dataToTag# x
+toI ∷ a → I; {-# inline toI #-}
+toI !x = dataToTag# x

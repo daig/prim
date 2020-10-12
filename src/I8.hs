@@ -1,27 +1,24 @@
-module I8 (I8, module I8) where
+module I8 where
 
-fromI64 ∷ I64 → I8
-fromI64 = narrow8Int#
+fromI ∷ I → I8
+fromI = narrowInt8#
 
-(+), (-), (*) ∷ I8 → I8 → I8
-x + y = narrow8Int# (x +# y)
-x - y = narrow8Int# (x -# y)
-x * y = narrow8Int# (x *# y)
-add, sub, mul, quot, rem ∷ I8 → I8 → I8
-add y x = narrow8Int# (x +# y)
-sub y x = narrow8Int# (x -# y)
-mul y x = narrow8Int# (x *# y)
-quot y x = narrow8Int# (quotInt# x y)
-rem y x = narrow8Int# (remInt# x y)
+
+(>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ I8 → I8 → B#
+(>) = gtInt8#; gt = ltInt8#
+(≥) = geInt8#; ge = leInt8#
+(<) = ltInt8#; lt = gtInt8#
+(≤) = leInt8#; le = geInt8#
+(≡) = eqInt8#; eq = eqInt8#
+(≠) = neInt8#; ne = neInt8#
+
+(+), (-), (*), add, sub, mul ∷ I8 → I8 → I8
+(+) = plusInt8#; add = plusInt8#
+(-) = subInt8#; sub y x = x - y
+(*) = timesInt8#; mul = timesInt8#
+(//), (%%), quot, rem ∷ I8 → I8 → I8
+(//) = quotInt8#; quot y x = x // y
+(%%) = remInt8#; rem y x = x %% y
 
 quotRem ∷ I8 → I8 → (# I8, I8 #)
-quotRem y x = case quotRemInt# x y of
-  (# q, r #) → (# narrow8Int# q, narrow8Int# r #)
-
-shiftL# ∷ I64 → I8 → I8
-shiftL# i x = narrow8Int# (uncheckedIShiftL# x i)
-
-
-pattern Max, Min ∷ I8
-pattern Max =  0x7F#
-pattern Min = -0x80#
+quotRem y x = quotRemInt8# x y

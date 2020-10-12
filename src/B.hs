@@ -1,4 +1,4 @@
-module Stock.B (module Stock.B, not) where
+module B (module B, not) where
 import GHC.Types (Bool(..),isTrue#)
 import GHC.Classes ((&&),(||),not)
 
@@ -9,7 +9,7 @@ pattern T ∷ B
 pattern T = True
 {-# complete F,T #-}
 
-pattern B# ∷ I1 → B
+pattern B# ∷ B# → B
 pattern B# i ← (dataToTag# → i) where B# i = isTrue# i
 
 infixr 3 ∧

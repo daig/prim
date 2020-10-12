@@ -5,20 +5,20 @@ type A = Array#
 type M = MutableArray#
 
 
-new ∷ I64 → a → ST s (M s a)
+new ∷ I → a → ST s (M s a)
 new = newArray#
 
-eq ∷ M s a → M s a → I1
+eq ∷ M s a → M s a → B#
 eq = sameMutableArray#
 
-read ∷ M s a → I64 → ST s a
+read ∷ M s a → I → ST s a
 read = readArray#
 
-write ∷ M s a → I64 → a → ST_ s
+write ∷ M s a → I → a → ST_ s
 write = writeArray#
 
 -- | Number of elements
-size ∷ A a → I64
+size ∷ A a → I
 size = sizeofArray#
 
 -- | Read from the specified index of an immutable array.
@@ -28,7 +28,7 @@ size = sizeofArray#
 -- additional thunks from building up on the heap. Avoiding these thunks, in turn,
 -- reduces references to the argument array, allowing it to be garbage collected more promptly.
 -- Warning: this can fail with an unchecked exception.
-index# ∷ A a → I64 → (# a #)
+index# ∷ A a → I → (# a #)
 index# = indexArray#
 
 -- | Make a mutable array immutable, without copying.
@@ -45,10 +45,10 @@ thaw## = unsafeThawArray#
 --
 -- Warning: this can fail with an unchecked exception.
 copy# ∷ A a -- ^ source
-      → I64 -- ^ source offset
+      → I -- ^ source offset
       → M s a -- ^ destination
-      → I64 -- ^ destination offset
-      → I64 -- ^ number of elements to copy
+      → I -- ^ destination offset
+      → I -- ^ number of elements to copy
       → ST_ s
 copy# = copyArray#
 
@@ -58,10 +58,10 @@ copy# = copyArray#
 --
 -- Warning: this can fail with an unchecked exception.
 copyM# ∷ M s a -- ^ source
-       → I64 -- ^ source offset
+       → I -- ^ source offset
        → M s a -- ^ destination
-       → I64 -- ^ destination offset
-       → I64 -- ^ number of elements to copy
+       → I -- ^ destination offset
+       → I -- ^ number of elements to copy
        → ST_ s
 copyM# = copyMutableArray#
 
@@ -70,8 +70,8 @@ copyM# = copyMutableArray#
 --
 -- Warning: this can fail with an unchecked exception.
 clone# ∷ A a
-       → I64 -- ^ Source offset
-       → I64 -- ^ number of elements to copy
+       → I -- ^ Source offset
+       → I -- ^ number of elements to copy
        → A a
 clone# = cloneArray#
 
@@ -80,27 +80,27 @@ clone# = cloneArray#
 --
 -- Warning: this can fail with an unchecked exception.
 cloneM# ∷ M s a
-        → I64 -- ^ Source offset
-        → I64 -- ^ number of elements to copy
+        → I -- ^ Source offset
+        → I -- ^ number of elements to copy
         → ST s (M s a)
 cloneM# = cloneMutableArray#
 
 freeze# ∷ M s a
-        → I64 -- ^ Source offset
-        → I64 -- ^ number of elements to copy
+        → I -- ^ Source offset
+        → I -- ^ number of elements to copy
         → ST s (A a)
 freeze# = freezeArray#
 
 thaw# ∷  A a
-        → I64 -- ^ Source offset
-        → I64 -- ^ number of elements to copy
+        → I -- ^ Source offset
+        → I -- ^ number of elements to copy
         → ST s (M s a)
 thaw# = thawArray#
 
 cas# ∷ M s a
-    → I64 -- ^ Source offset
+    → I -- ^ Source offset
     → a -- ^ Expected old value
     → a -- ^ New value
-    → ST s (# I1, a #) -- ^ Whether the swap failed, and the actual new value
+    → ST s (# B#, a #) -- ^ Whether the swap failed, and the actual new value
 cas# as o a0 a1 s0 = case casArray# as o a0 a1 s0 of
   (# s1, failed', a #) → (# s1, (# failed', a #) #)

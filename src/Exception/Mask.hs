@@ -11,7 +11,7 @@ uninterruptible = maskUninterruptible#
 state ∷ IO State#
 state = getMaskingState#
 
-type State# = I64
+type State# = I
 
 pattern Unmasked ∷ State#
 pattern Unmasked = 0#

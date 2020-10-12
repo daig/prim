@@ -1,31 +1,23 @@
-module U8 (U8, module U8) where
+module U8 where
 
-fromU64 ∷ U64 → U8
-fromU64 = narrow8Word#
+fromU ∷ U → U8
+fromU = narrowWord8#
 
-(+),(-),(*) ∷ U8 → U8 → U8
-x + y = narrow8Word# (plusWord# x y)
-x - y = narrow8Word# (minusWord# x y)
-x * y = narrow8Word# (timesWord# x y)
-add, sub, mul ∷ U8 → U8 → U8
-add y x = narrow8Word# (plusWord# x y)
-sub y x = narrow8Word# (minusWord# x y)
-mul y x = narrow8Word# (timesWord# x y)
+(>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ U8 → U8 → B#
+(>) = gtWord8#; gt = ltWord8#
+(≥) = geWord8#; ge = leWord8#
+(<) = ltWord8#; lt = gtWord8#
+(≤) = leWord8#; le = geWord8#
+(≡) = eqWord8#; eq = eqWord8#
+(≠) = neWord8#; ne = neWord8#
 
-pattern Max, Min ∷ U8
-pattern Max = 0xFF##
-pattern Min = 0##
+(+), (-), (*), add, sub, mul ∷ U8 → U8 → U8
+(+) = plusWord8#; add = plusWord8#
+(-) = subWord8#; sub y x = x - y
+(*) = timesWord8#; mul = timesWord8#
+(//), (%%), quot, rem ∷ U8 → U8 → U8
+(//) = quotWord8#; quot y x = x // y
+(%%) = remWord8#; rem y x = x %% y
 
--- * Bitwise operations
--- | Count the number of set bits
-popCnt,clz,ctz ∷ U8 → U8
-popCnt = popCnt8#; clz = clz8#; ctz = ctz8#
-
-pext ∷ U8 → U64 → U8
-pext y x = pext8# x y
-pdep ∷ U8 → U64 → U64
-pdep y x = pdep8# x y
-
--- | Reverse the order of the bits.
-reverse ∷ U8 → U8
-reverse = bitReverse8#
+quotRem ∷ U8 → U8 → (# U8, U8 #)
+quotRem y x = quotRemWord8# x y
