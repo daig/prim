@@ -18,3 +18,6 @@ unpackClosure = unpackClosure#
 
 getApStackVal ∷ a → I64 → (# I64, b #)
 getApStackVal = getApStackVal#
+
+size# ∷ a → I {- ^ # machine words -}
+size# = closureSize
