@@ -8,7 +8,7 @@ type M = MutableArray#
 new ∷ I64 → a → ST s (M s a)
 new = newArray#
 
-eq ∷ M s a → M s a → B
+eq ∷ M s a → M s a → I1
 eq = sameMutableArray#
 
 read ∷ M s a → I64 → ST s a
@@ -101,6 +101,6 @@ cas# ∷ M s a
     → I64 -- ^ Source offset
     → a -- ^ Expected old value
     → a -- ^ New value
-    → ST s (# B, a #) -- ^ Whether the swap failed, and the actual new value
+    → ST s (# I1, a #) -- ^ Whether the swap failed, and the actual new value
 cas# as o a0 a1 s0 = case casArray# as o a0 a1 s0 of
   (# s1, failed', a #) → (# s1, (# failed', a #) #)

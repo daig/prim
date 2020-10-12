@@ -3,7 +3,7 @@ import qualified Ref
 import qualified Array
 import GHC.Types as X (Any)
 
-eq# ∷ a → a → B
+eq# ∷ a → a → I1
 eq# = reallyUnsafePtrEquality#
 
 fromRef ∷ Ref.Byte → (# a #)

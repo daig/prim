@@ -27,7 +27,7 @@ quotRem y x = quotRemWord# x y
 --           second member is zero if the true sum fits in an @U64@,
 --           nonzero if overflow occurred (the sum is either too large
 --           or too small to fit in an @U64@).
-addC, subC ∷ U64 → U64 → (# U64, B #)
+addC, subC ∷ U64 → U64 → (# U64, I1 #)
 addC y x = addWordC# x y
 -- |Subtract signed integers reporting overflow.
 --           First member of result is the difference truncated to an @U64@;
@@ -36,16 +36,16 @@ addC y x = addWordC# x y
 --           or too small to fit in an @U64@).
 subC y x = subWordC# x y
 
-(>),(≥),(<),(≤),(≡),(≠) ∷ U64 → U64 → B
+(>),(≥),(<),(≤),(≡),(≠) ∷ U64 → U64 → I1
 (>) = gtWord#; (≥) = geWord#; (<) = ltWord#; (≤) = leWord#
 (≡) = eqWord#; (≠) = neWord#
-gt,ge,lt,le,eq,ne ∷ U64 → U64 → B
+gt,ge,lt,le,eq,ne ∷ U64 → U64 → I1
 gt = ltWord#; ge = leWord#; lt = gtWord#; le = geWord#
 eq = eqWord#; ne = neWord#
 
-fromInt ∷ Int → U64
+fromInt ∷ I → U64
 fromInt = int2Word#
-toInt ∷ U64 → Int
+toInt ∷ U64 → I
 toInt = word2Int#
 
 toF32 ∷ U64 → F32
@@ -77,7 +77,7 @@ not = not#
 
 -- | Shift left.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
-shiftL#, shiftRL# ∷ Int → U64 → U64
+shiftL#, shiftRL# ∷ I → U64 → U64
 shiftL# i w = uncheckedShiftL# w i
 
 -- |Shift right logical.  Result undefined if shift amount is not

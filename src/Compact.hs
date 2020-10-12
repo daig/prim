@@ -8,10 +8,10 @@ new ∷ U64 → IO Compact
 new = compactNew#
 resize ∷ Compact → U64 → IO_
 resize = compactResize#
-elem' ∷ a → Compact → IO B
+elem' ∷ a → Compact → IO I1
 elem' a c = compactContains# c a
 
-elemOfAny' ∷ a → IO B
+elemOfAny' ∷ a → IO I1
 elemOfAny' = compactContainsAny#
 
 -- | The address and size (in bytes) of the first block of a @Compact@

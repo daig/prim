@@ -2,10 +2,10 @@ module Ref.Lock where
 
 type Ref = MVar#
 
-eq ∷ Ref s a → Ref s a → B
+eq ∷ Ref s a → Ref s a → I1
 eq = sameMVar#
 
-empty' ∷ Ref s a → ST s B
+empty' ∷ Ref s a → ST s I1
 empty' = isEmptyMVar#
 
 -- | A new empty @Ref@
@@ -33,5 +33,5 @@ read' r s0 = case tryReadMVar# r s0 of
 write ∷ Ref s a → a → ST_ s
 write = putMVar#
 
-write' ∷ Ref s a → a → ST s B {- ^ whether the write succeeded -}
+write' ∷ Ref s a → a → ST s I1 {- ^ whether the write succeeded -}
 write' = tryPutMVar#

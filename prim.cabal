@@ -35,9 +35,8 @@ library
   hs-source-dirs: src
   other-modules: Prelude
   exposed-modules: Char
-                 , I64, I32, I16, I8
+                 , I64, I32, I16, I8, I1
                  , U64, U32, U16, U8
-                 , B
                  , F64, F32
                  , IO, IO.STM
                  , Ref

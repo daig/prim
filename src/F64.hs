@@ -24,16 +24,16 @@ sinh = sinhDouble#; cosh = coshDouble#; tanh = tanhDouble#
 pow ∷ F64 → F64 → F64
 pow y x = x **## y
 
-decode2Int ∷ F64 → (# Int, U64, U64, Int #)
-decode2Int = decodeDouble_2Int#  
-decodeI64 ∷ F64 → (# Int, Int #)
+decode2I ∷ F64 → (# I, U64, U64, I #)
+decode2I = decodeDouble_2Int#  
+decodeI64 ∷ F64 → (# I, I #)
 decodeI64 = decodeDouble_Int64#
 
 
-(>),(≥),(<),(≤),(≡),(≠) ∷ F64 → F64 → B
+(>),(≥),(<),(≤),(≡),(≠) ∷ F64 → F64 → I1
 (>) = (>##); (≥) = (>=##); (<) = (<##); (≤) = (<=##)
 (≡) = (==##); (≠) = (/=##)
-gt, ge, lt, le, eq, ne ∷ F64 → F64 → B
+gt, ge, lt, le, eq, ne ∷ F64 → F64 → I1
 gt y x = x >## y
 ge y x = x >=## y
 lt y x = x <## y
@@ -41,10 +41,10 @@ le y x = x <=## y
 eq = (==##)
 ne = (/=##)
 
-fromInt ∷ Int → F64
-fromInt = int2Double#
-toInt ∷ F64 → Int
-toInt = double2Int#
+fromI ∷ I → F64
+fromI = int2Double#
+toI ∷ F64 → I
+toI = double2Int#
 fromU64 ∷ U64 → F64
 fromU64 = word2Double#
 toF32 ∷ F64 → F32

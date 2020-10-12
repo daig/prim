@@ -22,7 +22,7 @@ fromI64 ∷ I64 → Ref
 fromI64 = int2Addr#
 {-# DEPRECATED toI64, fromI64 "This operation is strongly deprecated" #-}
 
-gt,ge,lt,le,eq,ne ∷ Ref → Ref → B
+gt,ge,lt,le,eq,ne ∷ Ref → Ref → I1
 gt y x = gtAddr# x y
 ge y x = geAddr# x y
 lt y x = ltAddr# x y

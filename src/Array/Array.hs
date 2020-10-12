@@ -10,7 +10,7 @@ type M = MutableArrayArray#
 new ∷ I64 → ST s (M s)
 new = newArrayArray#
 
-eq ∷ M s → M s → B
+eq ∷ M s → M s → I1
 eq = sameMutableArrayArray#
 
 freeze## ∷ M s → ST s A

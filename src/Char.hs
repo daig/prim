@@ -7,7 +7,7 @@ le y x = leChar# x y
 eq x y = eqChar# x y
 ne x y = neChar# x y
 
-fromInt ∷ Int → Char
+fromInt ∷ I → Char
 fromInt = chr#
-toInt ∷ Char → Int
+toInt ∷ Char → I
 toInt = ord#

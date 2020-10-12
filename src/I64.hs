@@ -30,7 +30,7 @@ mul y x = x *# y
 --     If in doubt, return non-zero, but do make an effort to create the
 --     correct answer for small args, since otherwise the performance of
 --     @(*) ∷ I64eger → I64eger → I64eger@ will be poor.
-mulMayOflo ∷ I64 → I64 → B
+mulMayOflo ∷ I64 → I64 → I1
 mulMayOflo x y = mulIntMayOflo# x y
 negate ∷ I64 → I64
 negate = negateInt#
@@ -56,7 +56,7 @@ divMod y x | B# (gt 0# x) ∧ B# (lt 0# y) = case quotRem y (x -# 1# ) of
            | T = quotRem y x
 
 
-addC, subC ∷ I64 → I64 → (# I64, B #)
+addC, subC ∷ I64 → I64 → (# I64, I1 #)
 -- |Add signed integers reporting overflow.
 --           First member of result is the sum truncated to an @I64@;
 --           second member is zero if the true sum fits in an @I64@,
@@ -70,10 +70,10 @@ addC y x = addIntC# x y
 --           or too small to fit in an @I64@).
 subC y x = subIntC# x y
 
-(>),(≥),(<),(≤),(≡),(≠) ∷ I64 → I64 → B
+(>),(≥),(<),(≤),(≡),(≠) ∷ I64 → I64 → I1
 (>) = (>#); (≥) = (>=#); (<) = (<#); (≤) = (<=#)
 (≡) = (==#); (≠) = (/=#)
-gt,ge,lt,le,eq,ne ∷ I64 → I64 → B
+gt,ge,lt,le,eq,ne ∷ I64 → I64 → I1
 gt = (<#)
 ge = (<=#)
 lt = (>#)

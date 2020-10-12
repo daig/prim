@@ -9,10 +9,10 @@ new = newPinnedByteArray#
 newAligned ∷ I64 → I64 → ST s (M s)
 newAligned = newAlignedPinnedByteArray#
 
-pinned' ∷ A → B
+pinned' ∷ A → I1
 pinned' = isByteArrayPinned#
 
-pinnedM' ∷ M s → B
+pinnedM' ∷ M s → I1
 pinnedM' = isMutableByteArrayPinned#
 
 contents ∷ A → Ref.Byte

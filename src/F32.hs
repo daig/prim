@@ -22,7 +22,7 @@ sinh = sinhFloat#; cosh = coshFloat#; tanh = tanhFloat#
 pow ∷ F32 → F32 → F32
 pow y x = powerFloat# x y
 
-gt,ge,lt,le,eq,ne ∷ F32 → F32 → B
+gt,ge,lt,le,eq,ne ∷ F32 → F32 → I1
 gt y x = gtFloat# x y
 ge y x = geFloat# x y
 lt y x = ltFloat# x y

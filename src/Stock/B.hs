@@ -1,5 +1,4 @@
 module Stock.B (module Stock.B, not) where
-import qualified Prelude as Prim
 import GHC.Types (Bool(..),isTrue#)
 import GHC.Classes ((&&),(||),not)
 
@@ -10,8 +9,8 @@ pattern T ∷ B
 pattern T = True
 {-# complete F,T #-}
 
-pattern B# ∷ Prim.B → B
-pattern B# i ← (Prim.dataToTag# → i) where B# i = isTrue# i
+pattern B# ∷ I1 → B
+pattern B# i ← (dataToTag# → i) where B# i = isTrue# i
 
 infixr 3 ∧
 infixr 2 ∨
