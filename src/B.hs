@@ -2,7 +2,6 @@ module B (module B, not) where
 import GHC.Types (Bool(..),isTrue#)
 import GHC.Classes ((&&),(||),not)
 
-type B = Bool
 pattern F ∷ B
 pattern F = False
 pattern T ∷ B

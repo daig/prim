@@ -17,6 +17,8 @@ type I64 = I
 type I32# = I
 type I16# = I
 type I8# = I
+
+type B = GHC.Bool
 type B# = I
 type I16 = Int16#
 type I8 = Int8#
