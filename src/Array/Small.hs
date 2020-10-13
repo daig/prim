@@ -7,8 +7,8 @@ type M = SmallMutableArray#
 new ∷ I → a → ST s (M s a)
 new = newSmallArray#
 
-eq ∷ M s a → M s a → B#
-eq = sameSmallMutableArray#
+(≡), eq ∷ M s a → M s a → B#
+(≡) = sameSmallMutableArray#; eq = sameSmallMutableArray#
 
 shrink ∷ M s a → I → ST_ s
 shrink = shrinkSmallMutableArray#

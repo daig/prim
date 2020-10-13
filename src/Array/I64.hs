@@ -1,5 +1,7 @@
+-- | Description : Packed 'Array.Byte' Arrays of 'I64'
 module Array.I64 where
 import Array.Byte
+
 
 index# ∷ A → I {- ^ Offset in elments -} → I64
 index# = indexInt64Array#

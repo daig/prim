@@ -8,5 +8,5 @@ new = makeStablePtr#
 deref ∷ Ref a → IO a
 deref = deRefStablePtr#
 
-eq ∷ Ref a → Ref a → B#
-eq = eqStablePtr#
+(≡), eq ∷ Ref a → Ref a → B#
+(≡) = eqStablePtr#; eq = eqStablePtr#

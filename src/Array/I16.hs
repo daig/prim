@@ -1,3 +1,4 @@
+-- | Description : Packed 'Array.Byte' Arrays of 'I16#'
 module Array.I16 where
 import Array.Byte
 

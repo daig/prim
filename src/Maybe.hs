@@ -1,2 +1,1 @@
-module Maybe where
-
+module Maybe (Maybe#) where

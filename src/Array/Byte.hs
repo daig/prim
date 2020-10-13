@@ -10,7 +10,9 @@ type M = MutableByteArray#
 new ∷ I → ST s (M s)
 new = newByteArray#
 
-eq ∷ M s → M s → B#
+infix 4 ≡
+(≡), eq ∷ M s → M s → B#
+(≡) = sameMutableByteArray#
 eq = sameMutableByteArray#
 
 shrink ∷ M s → I → ST_ s

@@ -3,6 +3,10 @@ module I (I, module I) where
 import B (pattern B#,(∧), pattern T)
 import qualified GHC.Classes as GHC (divInt#,modInt#)
 
+pattern Max, Min ∷ I
+pattern Max =  0x7FFFFFFFFFFFFFFF#
+pattern Min = -0x8000000000000000#
+
 (+), (-), (*) ∷ I → I → I
 (+) = (+#); (-) = (-#)
 -- | Low word of signed integer multiply
@@ -29,7 +33,7 @@ mul y x = x *# y
 --
 --     If in doubt, return non-zero, but do make an effort to create the
 --     correct answer for small args, since otherwise the performance of
---     @(*) ∷ Ieger → Ieger → Ieger@ will be poor.
+--     @(*) ∷ I → I → I@ will be poor.
 mulMayOflo ∷ I → I → B#
 mulMayOflo x y = mulIntMayOflo# x y
 negate ∷ I → I
@@ -81,6 +85,8 @@ le = (>=#)
 eq = (==#)
 ne = (/=#)
 
+-- * Conversions
+
 toU64 ∷ I → U64
 toU64 = int2Word#
 fromU64 ∷ U64 → I
@@ -105,21 +111,22 @@ toI16 = narrowInt16#
 
 -- |Shift right arithmetic.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
+shiftR# ∷ I → I → I
+shiftR# = uncheckedIShiftRA#
 
-shiftRA# ∷ I → I → I
-shiftRA# = uncheckedIShiftRA#
+-- | Bitwise negation. @not n = -n - 1@
+not ∷ I → I
+not = notI#
 
-
--- * Bitwise operations included for completeness, but signed bit operations should never be used.
-
-{-# DEPRECATED shiftL#, shiftRL#, and, or, xor "Don't use signed bitwise operations, prefer U64 instead" #-}
+{-# DEPRECATED shiftL#, shiftRL#, and, or, xor "Signed logical bitwise operations are rarely sensible, prefer U instead" #-}
 
 -- | Shift left.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 shiftL# ∷ I → I → I
 shiftL# i x = uncheckedIShiftL# x i
 
--- |Shift right logical.  Result undefined if shift amount is not
+
+-- | Shift right logical.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 
 shiftRL# ∷ I → I → I
@@ -128,10 +135,3 @@ and, or, xor ∷ I → I → I
 and = andI#
 or = orI#
 xor = xorI#
-
-not ∷ I → I
-not = notI#
-
-pattern Max, Min ∷ I
-pattern Max =  0x7FFFFFFFFFFFFFFF#
-pattern Min = -0x8000000000000000#

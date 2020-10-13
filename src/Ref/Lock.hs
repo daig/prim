@@ -2,8 +2,8 @@ module Ref.Lock where
 
 type Ref = MVar#
 
-eq ∷ Ref s a → Ref s a → B#
-eq = sameMVar#
+(≡), eq ∷ Ref s a → Ref s a → B#
+(≡) = sameMVar#; eq = sameMVar#
 
 empty' ∷ Ref s a → ST s B#
 empty' = isEmptyMVar#

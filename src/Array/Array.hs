@@ -1,6 +1,6 @@
--- | /Unlifted/ arrays, containing strictly evaluated pointers.
+-- | Description : /Unlifted/ arrays. Containing strictly evaluated pointers.
 -- Unlike "Array.Byte", these store pointers, but like it, they're guarenteed not to be bottom.
--- Eg. We cannot store an 'Addr', because it might be null, but we can store "Array.Byte.Array",
+-- Eg. We cannot store an 'Addr', because it might be null, but we can store "Array.Byte",
 -- and more "Array.Array"
 module Array.Array where
 
@@ -10,8 +10,8 @@ type M = MutableArrayArray#
 new ∷ I → ST s (M s)
 new = newArrayArray#
 
-eq ∷ M s → M s → B#
-eq = sameMutableArrayArray#
+(≡), eq ∷ M s → M s → B#
+(≡) = sameMutableArrayArray#; eq = sameMutableArrayArray#
 
 freeze## ∷ M s → ST s A
 freeze## = unsafeFreezeArrayArray#

@@ -3,7 +3,11 @@ module String.C.Latin where
 import qualified String
 import String.C
 import Prelude hiding (Char)
-import GHC.Types (Char(..),isTrue#,Bool(..))
+import Stock.Char (Char(C#))
+import I hiding ((≡))
+import Char ((≡))
+import Ref.Char8
+import B
 
 --------------------------------------------------------------------------
 -- Unpacking C strings
@@ -55,28 +59,22 @@ All of this goes for unpackUtf8# too.
 
 unpack# ∷ S → String.List
 {-# NOINLINE CONLIKE unpack# #-}
-unpack# addr
-  = unpack 0#
-  where
+unpack# ref = unpack 0# where
     unpack nh
-      | isTrue# (ch `eqChar#` '\0'#) = []
-      | True                         = C# ch : unpack (nh +# 1#)
-      where
-        !ch = indexCharOffAddr# addr nh
+      | B# (ch ≡ '\0'#) = []
+      | T               = C# ch : unpack (nh + 1#)
+      where !ch = ref !# nh
 
 unpackAppend# ∷ S → String.List → String.List
 {-# NOINLINE unpackAppend# #-}
      -- See the NOINLINE note on unpack#
-unpackAppend# addr rest
-  = unpack 0#
-  where
+unpackAppend# ref rest = unpack 0# where
     unpack nh
-      | isTrue# (ch `eqChar#` '\0'#) = rest
-      | True                         = C# ch : unpack (nh +# 1#)
-      where
-        !ch = indexCharOffAddr# addr nh
+      | B# (ch ≡ '\0'#) = rest
+      | T                         = C# ch : unpack (nh + 1#)
+      where !ch = ref !# nh
 
-foldr# ∷ S → (Char  → a → a) → a → a
+foldr# ∷ S → (Char → a → a) → a → a
 
 -- Usually the unpack-list rule turns foldr# into unpack#
 
@@ -92,24 +90,20 @@ foldr# ∷ S → (Char  → a → a) → a → a
 -- literal strings, and making a separate 'unpack' loop for
 -- each is highly gratuitous.  See nofib/real/anna/PrettyPrint.
 
-foldr# addr f z
-  = unpack 0#
-  where
+foldr# ref f z = unpack 0# where
     unpack nh
-      | isTrue# (ch `eqChar#` '\0'#) = z
-      | True                         = C# ch `f` unpack (nh +# 1#)
-      where
-        !ch = indexCharOffAddr# addr nh
+      | B# (ch ≡ '\0'#) = z
+      | T               = C# ch `f` unpack (nh + 1#)
+      where !ch = ref !# nh
 
 -- There's really no point in inlining this for the same reasons as
 -- unpack. See Note [Inlining unpack#] above for details.
-unpackN# ∷ S → Int# → String.List
+unpackN# ∷ S → I → String.List
 {-# NOINLINE unpackN# #-}
-unpackN# _addr 0#   = []
-unpackN#  addr len# = unpack [] (len# -# 1#)
-    where
-     unpack acc i#
-      | isTrue# (i# <# 0#)  = acc
-      | True                =
-         case indexCharOffAddr# addr i# of
-            ch → unpack (C# ch : acc) (i# -# 1#)
+unpackN# _ref 0#   = []
+unpackN#  ref len = unpack [] (len - 1#) where
+     unpack acc i
+      | B# (i < 0#) = acc
+      | T           =
+         case ref !# i of
+            ch → unpack (C# ch : acc) (i - 1#)

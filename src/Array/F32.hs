@@ -1,3 +1,4 @@
+-- | Description : Packed 'Array.Byte' Arrays of 'F64'
 module Array.F32 where
 import Array.Byte
 

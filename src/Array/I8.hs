@@ -1,3 +1,4 @@
+-- | Description : Packed 'Array.Byte' Arrays of 'I8#'
 module Array.I8 where
 import Array.Byte
 

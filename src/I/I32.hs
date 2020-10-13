@@ -1,4 +1,4 @@
-module I.I32 where
+module I.I32 (I32#, module I.I32) where
 
 type I32 = I
 

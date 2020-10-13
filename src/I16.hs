@@ -1,4 +1,4 @@
-module I16 where
+module I16 (I16, module I16) where
 
 fromI ∷ I → I16
 fromI = narrowInt16#

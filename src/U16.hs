@@ -1,4 +1,4 @@
-module U16 where
+module U16 (U16, module U16) where
 
 fromU ∷ U → U16
 fromU = narrowWord16#

@@ -1,6 +1,5 @@
-module IO where
---import GHC.Types (TYPE)
+module IO (type (☸),IO,IO_,run) where
 import GHC.Magic
 
-run ∷ forall (r ∷ RuntimeRep) (o ∷ TYPE r). (Token (☸) → o) → o
+run ∷ ∀ (r ∷ RuntimeRep) (o ∷ TYPE r). (Token (☸) → o) → o
 run = runRW#

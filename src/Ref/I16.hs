@@ -1,11 +1,17 @@
 module Ref.I16 where
 import Ref.Byte
 
-index# ∷ Ref → I {- ^ Offset in elments -} → I16#
-index# = indexInt16OffAddr#
+(!#) ∷ Ref → I {- ^ Offset in elments -} → I16#
+(!#) = indexInt16OffAddr#
+index# ∷ I {- ^ Offset in elments -} → Ref → I16#
+index# i r = r !# i
 
-read# ∷ Ref → I {- ^ Offset in elements -} → ST s I16#
-read# = readInt16OffAddr#
+(!!#) ∷ Ref → I {- ^ Offset in elements -} → ST s I16#
+(!!#) = readInt16OffAddr#
+read# ∷ I {- ^ Offset in elments -} → Ref → ST s I16#
+read# i r = r !!# i
 
-write# ∷ Ref → I {- ^ Offset in elements -} → I16# → ST_ s
-write# = writeInt16OffAddr#
+(¡#) ∷ Ref → I {- ^ Offset in elements -} → I16# → ST_ s
+(¡#) = writeInt16OffAddr#
+write# ∷ I {- ^ Offset in elements -} → I16# → Ref → ST_ s
+write# i x r = (r ¡# i) x

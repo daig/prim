@@ -1,4 +1,4 @@
-module I.I8 where
+module I.I8 (I8#, module I.I8) where
 
 fromI ∷ I → I8#
 fromI = narrow8Int#

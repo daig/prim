@@ -1,6 +1,6 @@
-module B (module B, not) where
+module B (B, B#, module B) where
 import GHC.Types (Bool(..),isTrue#)
-import GHC.Classes ((&&),(||),not)
+import GHC.Classes as GHC ((&&),(||),not)
 
 pattern F ∷ B
 pattern F = False
@@ -11,10 +11,11 @@ pattern T = True
 pattern B# ∷ B# → B
 pattern B# i ← (dataToTag# → i) where B# i = isTrue# i
 
-infixr 3 ∧
-infixr 2 ∨
 (∧), (∨), and, or ∷ B → B → B
-and = (&&); {-# inline and #-}
-(∧) = (&&); {-# inline (∧) #-}
-or = (||); {-# inline or #-}
-(∨) = (||); {-# inline (∨) #-}
+infixr 3 ∧ ; infixr 2 ∨
+(∧) = (&&); (∨) = (||)
+and = (&&); or  = (||) 
+{-# inline (∧) #-}; {-# inline (∨) #-}
+{-# inline and #-}; {-# inline or #-}
+not ∷ B → B
+not = GHC.not

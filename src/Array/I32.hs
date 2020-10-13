@@ -1,3 +1,4 @@
+-- | Description : Packed 'Array.Byte' Arrays of 'I32#'
 module Array.I32 where
 import Array.Byte
 

@@ -34,11 +34,11 @@ library
                     , PatternSynonyms, ViewPatterns
   hs-source-dirs: src
   other-modules: Prelude
-  exposed-modules: Char , B
+  exposed-modules: Char , B, Type
                  , I, I.I64, I.I32, I.I16, I.I8, I16, I8
                  , U, U.U64, U.U32, U.U16, U.U8, U16, U8
                  , F64, F32
-                 , IO, IO.STM
+                 , ST, IO, IO.STM
                  , Ref
                  , Ref.Weak, Ref.Stable, Ref.Stable.Name, Ref.Byte
                  , Ref.Char8, Ref.Char
@@ -73,5 +73,5 @@ library
                  , Stock.Char, Stock.Double, Stock.Float, Stock.Int, Stock.Word, Stock.IO
                  , Linear
                  , Syntax.ImplicitParam
-                 , Prim
+                 , Maybe
   build-depends: ghc-prim ^>= 0.6.1

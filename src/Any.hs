@@ -1,3 +1,4 @@
+-- | Description : Operations on arbitrary lifted types
 module Any (module Any, Any, seq) where
 import qualified Ref
 import qualified Array
