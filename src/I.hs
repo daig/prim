@@ -7,11 +7,10 @@ pattern Max, Min ∷ I
 pattern Max =  0x7FFFFFFFFFFFFFFF#
 pattern Min = -0x8000000000000000#
 
-(+), (-), (*) ∷ I → I → I
+(+), (-), (*), add, sub, mul ∷ I → I → I
 (+) = (+#); (-) = (-#)
 -- | Low word of signed integer multiply
 (*) = (*#)
-add,sub,mul, quot, rem ∷ I → I → I
 add y x = x +# y; sub y x = x -# y
 -- | Low word of signed integer multiply
 mul y x = x *# y
@@ -38,20 +37,28 @@ mulMayOflo ∷ I → I → B#
 mulMayOflo x y = mulIntMayOflo# x y
 negate ∷ I → I
 negate = negateInt#
--- | Rounds towards zero. The behavior is undefined if the first argument is zero.
+-- | Rounds towards 0. The behavior is undefined if the first argument is zero.
+quot, rem ∷ I {- ^ divisor -}  → I {- ^ dividend -} → I
+(%%), (//) ∷ I {- ^ dividend -}  → I {- ^ divisor -} → I
 quot y x = quotInt# x y
+(//) = quotInt#
 -- |Satisfies @(add (rem y x) (mul y (quot y x)) == x@. The
 --     behavior is undefined if the first argument is zero.
 rem y x = remInt# x y
+(%%) = remInt#
+-- | Rounds towards 0. The behavior is undefined if the first argument is zero.
 quotRem ∷ I → I → (# I, I #)
--- | Rounds towards zero
 quotRem y x = quotRemInt# x y
 
 -- These functions have built-in rules.
-div,mod ∷ I {- ^ divisor -} → I {- ^ dividend -} → I {- ^ modulus -}
+-- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
+div,mod ∷ I {- ^ divisor -} → I {- ^ dividend -} → I
+(%), (/) ∷ I {- ^ dividend -}  → I {- ^ divisor -} → I
 div y x = GHC.divInt# x y; {-# inline div #-}
 mod y x = GHC.modInt# x y; {-# inline mod #-}
--- | Rounds towards negative infinity. The behavior is undefined if the first argument is zero.
+(%) = GHC.modInt#; {-# inline (%) #-}
+(/) = GHC.divInt#; {-# inline (/) #-}
+-- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
 divMod ∷ I {- ^ divisor -} → I {- ^ dividend -} → (# I, I #) {- ^ (div, mod) -}
 divMod y x | B# (gt 0# x) ∧ B# (lt 0# y) = case quotRem y (x -# 1# ) of
                                     (# q, r #) → (# q -# 1#, r +# y +# 1# #)
@@ -74,23 +81,18 @@ addC y x = addIntC# x y
 --           or too small to fit in an @I@).
 subC y x = subIntC# x y
 
-(>),(≥),(<),(≤),(≡),(≠) ∷ I → I → B#
+(>),(≥),(<),(≤),(≡),(≠),
+  gt,ge,lt,le,eq,ne ∷ I → I → B#
 (>) = (>#); (≥) = (>=#); (<) = (<#); (≤) = (<=#)
 (≡) = (==#); (≠) = (/=#)
-gt,ge,lt,le,eq,ne ∷ I → I → B#
-gt = (<#)
-ge = (<=#)
-lt = (>#)
-le = (>=#)
-eq = (==#)
-ne = (/=#)
+gt = (<#); ge = (<=#); lt = (>#); le = (>=#); eq = (==#); ne = (/=#)
 
 -- * Conversions
 
-toU64 ∷ I → U64
-toU64 = int2Word#
-fromU64 ∷ U64 → I
-fromU64 = word2Int#
+toU ∷ I → U
+toU = int2Word#
+fromU ∷ U → I
+fromU = word2Int#
 
 toF32 ∷ I → F32
 toF32 = int2Float#
