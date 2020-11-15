@@ -3,7 +3,7 @@ import qualified GHC.Types as GHC
 
 (+),(-),(*) ∷ U → U → U
 (+) = plusWord#; (-) = minusWord#; (*) = timesWord#
-add,sub,mul, quot, rem ∷ U → U → U
+add,sub,mul, quot, rem, div, mod ∷ U → U → U
 add y x = plusWord# x y; sub y x = minusWord# x y; mul y x = timesWord# x y
 
 -- |Add unsigned integers, with the high part (carry) in the first
@@ -14,14 +14,21 @@ add2 y x = plusWord2# x y
 
 -- | Rounds towards zero. The behavior is undefined if the first argument is zero.
 quot y x = quotWord# x y
+div y x = quotWord# x y
+(//) = quotWord#
+(/) = quotWord#
 
 -- |Satisfies @(add (rem y x) (mul y (quot y x)) == x@. The
 --     behavior is undefined if the first argument is zero.
 rem y x = remWord# x y
+mod y x = remWord# x y
+(%%) = remWord#
+(%) = remWord#
 
 -- | Rounds towards zero
-quotRem ∷ U → U → (# U, U #)
+quotRem, divMod ∷ U → U → (# U, U #)
 quotRem y x = quotRemWord# x y
+divMod y x = quotRemWord# x y
 -- |Add signed integers reporting overflow.
 --           First member of result is the sum truncated to an @U@;
 --           second member is zero if the true sum fits in an @U@,
@@ -43,10 +50,10 @@ gt,ge,lt,le,eq,ne ∷ U → U → B#
 gt = ltWord#; ge = leWord#; lt = gtWord#; le = geWord#
 eq = eqWord#; ne = neWord#
 
-fromInt ∷ I → U
-fromInt = int2Word#
-toInt ∷ U → I
-toInt = word2Int#
+fromI ∷ I → U
+fromI = int2Word#
+toI ∷ U → I
+toI = word2Int#
 
 toF32 ∷ U → F32
 toF32 = word2Float#

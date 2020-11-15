@@ -30,16 +30,11 @@ decodeI64 ∷ F64 → (# I64, I16# #) -- ^ (mantissa , base-2 exponent)
 decodeI64 = decodeDouble_Int64#
 
 
-(>),(≥),(<),(≤),(≡),(≠) ∷ F64 → F64 → B#
+(>),(≥),(<),(≤),(≡),(≠)
+  ,gt, ge, lt, le, eq, ne ∷ F64 → F64 → B#
 (>) = (>##); (≥) = (>=##); (<) = (<##); (≤) = (<=##)
 (≡) = (==##); (≠) = (/=##)
-gt, ge, lt, le, eq, ne ∷ F64 → F64 → B#
-gt y x = x >## y
-ge y x = x >=## y
-lt y x = x <## y
-le y x = x <=## y
-eq = (==##)
-ne = (/=##)
+gt = (<##); ge = (<=##); lt = (>##); le = (>=##); eq = (==##); ne = (/=##)
 
 fromI ∷ I → F64
 fromI = int2Double#

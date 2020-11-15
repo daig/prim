@@ -22,13 +22,12 @@ sinh = sinhFloat#; cosh = coshFloat#; tanh = tanhFloat#
 pow ∷ F32 → F32 → F32
 pow y x = powerFloat# x y
 
-gt,ge,lt,le,eq,ne ∷ F32 → F32 → B#
-gt y x = gtFloat# x y
-ge y x = geFloat# x y
-lt y x = ltFloat# x y
-le y x = leFloat# x y
-eq x y = eqFloat# x y
-ne x y = neFloat# x y
+(>),(≥),(<),(≤),(≡),(≠),
+  gt,ge,lt,le,eq,ne ∷ F32 → F32 → B#
+(>) = gtFloat#; (≥) = geFloat#; (<) = ltFloat#; (≤) = leFloat#
+(≡) = eqFloat#; (≠) = neFloat#
+gt = ltFloat#; ge = leFloat#; lt = gtFloat#; le = geFloat#
+eq = eqFloat#; ne = neFloat#
 
 toI ∷ F32 → I
 toI = float2Int#
