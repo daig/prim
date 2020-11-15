@@ -8,6 +8,12 @@ pattern T ∷ B
 pattern T = True
 {-# complete F,T #-}
 
+infixl 7 ∧#
+infixl 5 ∨#
+(∧#), (∨#) ∷ B# → B# → B#
+(∧#) = andI#; (∨#) = orI#;
+
+
 pattern B# ∷ B# → B
 pattern B# i ← (dataToTag# → i) where B# i = isTrue# i
 

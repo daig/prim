@@ -8,7 +8,7 @@ module Enum
   ) where
 
 -- Note we can't fiddle with tagToEnum# eg to rename
--- because of ghc magic prefenting it used at higher order
+-- because of ghc magic preventing it used at higher order
 
 
 {- |

@@ -81,6 +81,7 @@ addC y x = addIntC# x y
 --           or too small to fit in an @I@).
 subC y x = subIntC# x y
 
+infix 4 >, ≥, <, ≤, ≡, ≠
 (>),(≥),(<),(≤),(≡),(≠),
   gt,ge,lt,le,eq,ne ∷ I → I → B#
 (>) = (>#); (≥) = (>=#); (<) = (<#); (≤) = (<=#)

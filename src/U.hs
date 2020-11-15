@@ -43,6 +43,7 @@ addC y x = addWordC# x y
 --           or too small to fit in an @U@).
 subC y x = subWordC# x y
 
+infix 4 >, ≥, <, ≤, ≡, ≠
 (>),(≥),(<),(≤),(≡),(≠) ∷ U → U → B#
 (>) = gtWord#; (≥) = geWord#; (<) = ltWord#; (≤) = leWord#
 (≡) = eqWord#; (≠) = neWord#

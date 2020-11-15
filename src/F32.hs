@@ -22,6 +22,7 @@ sinh = sinhFloat#; cosh = coshFloat#; tanh = tanhFloat#
 pow ∷ F32 → F32 → F32
 pow y x = powerFloat# x y
 
+infix 4 >, ≥, <, ≤, ≡, ≠
 (>),(≥),(<),(≤),(≡),(≠),
   gt,ge,lt,le,eq,ne ∷ F32 → F32 → B#
 (>) = gtFloat#; (≥) = geFloat#; (<) = ltFloat#; (≤) = leFloat#
