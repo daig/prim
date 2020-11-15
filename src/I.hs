@@ -1,7 +1,9 @@
+{-# language CPP #-}
 {-# language BangPatterns #-}
 module I (I, module I) where
 import B (pattern B#,(∧), pattern T)
 import qualified GHC.Classes as GHC (divInt#,modInt#)
+#include "MachDeps.h"
 
 pattern Max, Min ∷ I
 pattern Max =  0x7FFFFFFFFFFFFFFF#
@@ -117,23 +119,36 @@ toI16 = narrowInt16#
 shiftR# ∷ I → I → I
 shiftR# = uncheckedIShiftRA#
 
+-- |Shift right arithmetic.  Result 0 or -1 (depending on sign)
+-- if shift amount is not in the range 0 to word size - 1 inclusive.
+shiftR ∷ I → I → I
+shiftR i x | B# (i ≥ WORD_SIZE_IN_BITS#) = if B# (x < 0#) then (-1#) else 0#
+           | T = uncheckedIShiftRA# x i
+
 -- | Bitwise negation. @not n = -n - 1@
 not ∷ I → I
 not = notI#
 
 {-# DEPRECATED shiftL#, shiftRL#, and, or, xor "Signed logical bitwise operations are rarely sensible, prefer U instead" #-}
 
+shiftL#, shiftL, shiftRL#, shiftRL ∷ I → I → I
 -- | Shift left.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
-shiftL# ∷ I → I → I
 shiftL# i x = uncheckedIShiftL# x i
+
+-- | Shift left.  Result 0 if shift amount is not
+--           in the range 0 to word size - 1 inclusive.
+shiftL i x | B# (i ≥ WORD_SIZE_IN_BITS#) = 0#
+           | T = uncheckedIShiftL# x i
 
 
 -- | Shift right logical.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
-
-shiftRL# ∷ I → I → I
 shiftRL# i x = uncheckedIShiftRL# x i
+-- | Shift right logical.  Result 0 if shift amount is not
+--           in the range 0 to word size - 1 inclusive.
+shiftRL i x | B# (i ≥ WORD_SIZE_IN_BITS#) = 0#
+            | T = uncheckedIShiftRL# x i
 and, or, xor ∷ I → I → I
 and = andI#
 or = orI#

@@ -8,8 +8,8 @@ pattern T ∷ B
 pattern T = True
 {-# complete F,T #-}
 
-infixl 7 ∧#
-infixl 5 ∨#
+infixl 3 ∧#
+infixl 2 ∨#
 (∧#), (∨#) ∷ B# → B# → B#
 (∧#) = andI#; (∨#) = orI#;
 

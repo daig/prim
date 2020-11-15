@@ -1,5 +1,8 @@
+{-# language CPP #-}
 module U (U, module U) where
 import qualified GHC.Types as GHC
+import B
+#include "MachDeps.h"
 
 (+),(-),(*) ∷ U → U → U
 (+) = plusWord#; (-) = minusWord#; (*) = timesWord#
@@ -89,12 +92,17 @@ not = not#
 
 -- | Shift left.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
-shiftL#, shiftRL# ∷ I → U → U
+shiftL#, shiftRL#, shiftL ∷ I → U → U
 shiftL# i w = uncheckedShiftL# w i
+shiftL i w | B# (i >=# WORD_SIZE_IN_BITS#) = 0##
+           | T = uncheckedShiftL# w i
+
 
 -- |Shift right logical.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 shiftRL# i w = uncheckedShiftRL# w i
+shiftRL i w | B# (i >=# WORD_SIZE_IN_BITS#) = 0##
+            | T = uncheckedShiftRL# w i
 
 -- | Count the number of set bits
 popCnt,clz,ctz ∷ U → U8#
