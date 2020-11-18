@@ -1,4 +1,4 @@
-{-# OP IO#NS_GHC -Wno-deprecations #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
 {-# language BangPatterns #-}
 module String.C.UTF8 where
 import qualified String

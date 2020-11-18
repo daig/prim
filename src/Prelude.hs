@@ -1,4 +1,4 @@
-{-# OP IO#NS_HADDOCK not-home  #-}
+{-# OPTIONS_HADDOCK not-home  #-}
 {-# language NoImplicitPrelude,TypeOperators #-}
 module Prelude (module Prelude, module X, type TYPE) where
 import GHC.Prim  as X
