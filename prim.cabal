@@ -47,7 +47,6 @@ library
                  , Ref.F32, Ref.F64
                  , Ref.Ref.Byte, Ref.Ref.Stable
                  , Ref.Boxed, Ref.STM, Ref.Lock
-                 , Rep.RTS, Rep.Kind
                  , Tuple
                  , Array, Array.Small, Array.Boxed
                  , Array.Byte, Array.Byte.Pinned, Array.Byte.Unpinned
@@ -65,6 +64,7 @@ library
                  , Spark
                  , Enum
                  , Any, BCO
+                 , RTS.Rep
                  , RTS.Block, Optimizer
                  , RTS.Prefetch.Any, RTS.Prefetch.Ref, RTS.Prefetch.Array, RTS.Prefetch.Array.M
                  , String, String.C, String.C.Latin, String.C.UTF8, String.List
@@ -75,5 +75,5 @@ library
                  , Syntax.ImplicitParam
                  , Maybe
                  , Magic
-                 , Classy
+                 , Typeable
   build-depends: ghc-prim ^>= 0.6.1
