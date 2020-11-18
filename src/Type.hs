@@ -1,1 +1,1 @@
-module Type (TYPE,T,C) where
+module Type (TYPE,RuntimeRep,T,C) where
