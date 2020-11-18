@@ -19,6 +19,7 @@ yield = yield#
 here ∷ IO# Id
 here = myThreadId#
 -- | Label a thread with the given cstring pointer
+-- Used in debugging output if the RTS was compiled to support it.
 label# ∷ Id → Ref.Byte → IO_#
 label# = labelThread#
 bound' ∷ IO# B#
@@ -32,13 +33,15 @@ status n s = case threadStatus# n s of
 
 -- * Constants for why_blocked field of a TSO from rts/Constants.h
 type Status = Int#
+pattern Running, BlockedOnMVar, BlockedOnBlackHole, BlockedOnRead, BlockedOnWrite, BlockedOnDelay, BlockedOnSTM, BlockedOnDoProc, BlockedOnCCall, BlockedOnCCall_Interruptible
+  ,BlockedOnMsgThrowTo, ThreadMigrating, BlockedOnMVar, ThreadFinished, ThreadDied ∷ Status
 pattern Running = 0#
 pattern BlockedOnMVar = 1#
 pattern BlockedOnBlackHole = 2#
 pattern BlockedOnRead = 3#
 pattern BlockedOnWrite = 4#
 pattern BlockedOnDelay = 5#
-pattern BlockedOnSTM# = 6#
+pattern BlockedOnSTM = 6#
 -- | Win32 only
 pattern BlockedOnDoProc = 7#
 
@@ -54,4 +57,13 @@ pattern BlockedOnMsgThrowTo = 12#
 -- | The thread is not on any run queues, but can be woken up by @tryWakeupThread()@
 pattern ThreadMigrating = 13#
 
--- TODO: There should be more here, like ThreadFinished. Figure out the numbering
+pattern BlockedOnMVarRead = 14#
+
+-- | Lightweight non-deadlock checked version of MVar.  Used for the why_blocked
+-- field of a TSO. Threads blocked for this reason are not forcibly release by
+-- the GC, as we expect them to be unblocked in the future based on outstanding IO events.
+BlockedOnIOCompletion = 15#
+-- TODO: There should be more here. Figure out the numbering
+
+pattern ThreadFinished = 16#
+pattern ThreadDied = 17#
