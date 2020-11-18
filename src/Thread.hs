@@ -55,5 +55,3 @@ pattern BlockedOnMsgThrowTo = 12#
 pattern ThreadMigrating = 13#
 
 -- TODO: There should be more here, like ThreadFinished. Figure out the numbering
-
-
