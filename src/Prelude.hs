@@ -1,4 +1,4 @@
-{-# OPTIONS_HADDOCK not-home  #-}
+{-# OP IO#NS_HADDOCK not-home  #-}
 {-# language NoImplicitPrelude,TypeOperators #-}
 module Prelude (module Prelude, module X, type TYPE) where
 import GHC.Prim  as X
@@ -57,16 +57,16 @@ type C = GHC.Constraint
 -- It is represented by nothing at all. 
 type Token = State#
 -- | A stateful computation returning an @a@, threaded by the @Token s@
-type ST s (a ∷ TYPE r) = Token s → (# Token s, a #)
+type ST# s (a ∷ TYPE r) = Token s → (# Token s, a #)
 -- | A stateful value action by the @Token s@
-type ST_ s = Token s → Token s
+type ST_# s = Token s → Token s
 
 -- | @☸@ is deeply magical.  It is /primitive/, but it is not
 --         /unlifted/ (hence @ptrArg@).  We never manipulate values of type
---         @☸@; it\'s only used in the type system, to parameterise 'ST'.
+--         @☸@; it\'s only used in the type system, to parameterise 'ST#'.
 type (☸) = RealWorld
 
 -- | A computation performing some I\/O before returning a value of type @a@.
-type IO (a ∷ TYPE r) = ST (☸) a
+type IO# (a ∷ TYPE r) = ST# (☸) a
 -- | A computation performing some I\/O
-type IO_ = ST_ (☸)
+type IO_# = ST_# (☸)

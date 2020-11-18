@@ -1,1 +1,1 @@
-module ST (Token,ST,ST_) where
+module ST (Token,ST#,ST_#) where

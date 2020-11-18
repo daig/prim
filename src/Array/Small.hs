@@ -4,27 +4,27 @@ import Prelude hiding (Array)
 type A = SmallArray#
 type M = SmallMutableArray#
 
-new ∷ I → a → ST s (M s a)
+new ∷ I → a → ST# s (M s a)
 new = newSmallArray#
 
 (≡), eq ∷ M s a → M s a → B#
 (≡) = sameSmallMutableArray#; eq = sameSmallMutableArray#
 
-shrink ∷ M s a → I → ST_ s
+shrink ∷ M s a → I → ST_# s
 shrink = shrinkSmallMutableArray#
 
-read ∷ M s a → I → ST s a
+read ∷ M s a → I → ST# s a
 read = readSmallArray#
 
-write ∷ M s a → I → a → ST_ s
+write ∷ M s a → I → a → ST_# s
 write = writeSmallArray#
 
 -- | Number of elements
 size ∷ A a → I
 size = sizeofSmallArray#
 
--- | Number of elements. Must be in @ST@ because of possible resizes.
-sizeM# ∷ M s a → ST s I
+-- | Number of elements. Must be in @ST#@ because of possible resizes.
+sizeM# ∷ M s a → ST# s I
 sizeM# = getSizeofSmallMutableArray#
 
 -- | Read from the specified index of an immutable array.
@@ -38,11 +38,11 @@ index# ∷ A a → I → (# a #)
 index# = indexSmallArray#
 
 -- | Make a mutable array immutable, without copying.
-freeze## ∷ M s a → ST s (A a)
+freeze## ∷ M s a → ST# s (A a)
 freeze## = unsafeFreezeSmallArray#
 
 -- | Make an immutable array mutable, without copying.
-thaw## ∷ A a → ST s (M s a)
+thaw## ∷ A a → ST# s (M s a)
 thaw## = unsafeThawSmallArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -55,7 +55,7 @@ copy# ∷ A a -- ^ source
       → M s a -- ^ destination
       → I -- ^ destination offset
       → I -- ^ number of elements to copy
-      → ST_ s
+      → ST_# s
 copy# = copySmallArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -68,7 +68,7 @@ copyM# ∷ M s a -- ^ source
        → M s a -- ^ destination
        → I -- ^ destination offset
        → I -- ^ number of elements to copy
-       → ST_ s
+       → ST_# s
 copyM# = copySmallMutableArray#
 
 -- | Create a new array with the elements from the source array.
@@ -88,25 +88,25 @@ clone# = cloneSmallArray#
 cloneM# ∷ M s a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST s (M s a)
+        → ST# s (M s a)
 cloneM# = cloneSmallMutableArray#
 
 freeze# ∷ M s a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST s (A a)
+        → ST# s (A a)
 freeze# = freezeSmallArray#
 
 thaw# ∷  A a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST s (M s a)
+        → ST# s (M s a)
 thaw# = thawSmallArray#
 
 cas ∷ M s a
     → I -- ^ Source offset
     → a -- ^ Expected old value
     → a -- ^ New value
-    → ST s (# B#, a #) -- ^ Whether the swap failed, and the actual new value
+    → ST# s (# B#, a #) -- ^ Whether the swap failed, and the actual new value
 cas as o a0 a1 s0 = case casSmallArray# as o a0 a1 s0 of
   (# s1, failed', a #) → (# s1, (# failed', a #) #)

@@ -5,8 +5,8 @@ import Array.Byte
 index# ∷ A → I → F64
 index# = indexDoubleArray#
 
-read# ∷ M s → I → ST s F64
+read# ∷ M s → I → ST# s F64
 read# = readDoubleArray#
 
-write# ∷ M s → I → F64 → ST_ s
+write# ∷ M s → I → F64 → ST_# s
 write# = writeDoubleArray#

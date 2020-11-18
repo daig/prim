@@ -5,16 +5,16 @@ type A = Array#
 type M = MutableArray#
 
 
-new ∷ I → a → ST s (M s a)
+new ∷ I → a → ST# s (M s a)
 new = newArray#
 
 eq ∷ M s a → M s a → B#
 eq = sameMutableArray#
 
-read ∷ M s a → I → ST s a
+read ∷ M s a → I → ST# s a
 read = readArray#
 
-write ∷ M s a → I → a → ST_ s
+write ∷ M s a → I → a → ST_# s
 write = writeArray#
 
 -- | Number of elements
@@ -32,11 +32,11 @@ index# ∷ A a → I → (# a #)
 index# = indexArray#
 
 -- | Make a mutable array immutable, without copying.
-freeze## ∷ M s a → ST s (A a)
+freeze## ∷ M s a → ST# s (A a)
 freeze## = unsafeFreezeArray#
 
 -- | Make an immutable array mutable, without copying.
-thaw## ∷ A a → ST s (M s a)
+thaw## ∷ A a → ST# s (M s a)
 thaw## = unsafeThawArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -49,7 +49,7 @@ copy# ∷ A a -- ^ source
       → M s a -- ^ destination
       → I -- ^ destination offset
       → I -- ^ number of elements to copy
-      → ST_ s
+      → ST_# s
 copy# = copyArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -62,7 +62,7 @@ copyM# ∷ M s a -- ^ source
        → M s a -- ^ destination
        → I -- ^ destination offset
        → I -- ^ number of elements to copy
-       → ST_ s
+       → ST_# s
 copyM# = copyMutableArray#
 
 -- | Create a new array with the elements from the source array.
@@ -82,25 +82,25 @@ clone# = cloneArray#
 cloneM# ∷ M s a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST s (M s a)
+        → ST# s (M s a)
 cloneM# = cloneMutableArray#
 
 freeze# ∷ M s a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST s (A a)
+        → ST# s (A a)
 freeze# = freezeArray#
 
 thaw# ∷  A a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST s (M s a)
+        → ST# s (M s a)
 thaw# = thawArray#
 
 cas# ∷ M s a
     → I -- ^ Source offset
     → a -- ^ Expected old value
     → a -- ^ New value
-    → ST s (# B#, a #) -- ^ Whether the swap failed, and the actual new value
+    → ST# s (# B#, a #) -- ^ Whether the swap failed, and the actual new value
 cas# as o a0 a1 s0 = case casArray# as o a0 a1 s0 of
   (# s1, failed', a #) → (# s1, (# failed', a #) #)

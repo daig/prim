@@ -7,7 +7,7 @@ type M = MutableByteArray#
 
 -- | Create a new uninitialized mutable byte array of specified size (in bytes),
 -- in the specified state thread.
-new ∷ I → ST s (M s)
+new ∷ I → ST# s (M s)
 new = newByteArray#
 
 infix 4 ≡
@@ -15,19 +15,19 @@ infix 4 ≡
 (≡) = sameMutableByteArray#
 eq = sameMutableByteArray#
 
-shrink ∷ M s → I → ST_ s
+shrink ∷ M s → I → ST_# s
 shrink = shrinkMutableByteArray#
 
 -- | Number of elements
 size ∷ A → I
 size = sizeofByteArray#
 
--- | Number of elements. Must be in @ST@ because of possible resizes.
-sizeM ∷ M s → ST s I
+-- | Number of elements. Must be in @ST#@ because of possible resizes.
+sizeM ∷ M s → ST# s I
 sizeM = getSizeofMutableByteArray#
 
 -- | Make a mutable array immutable, without copying.
-freeze## ∷ M s → ST s (A)
+freeze## ∷ M s → ST# s (A)
 freeze## = unsafeFreezeByteArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -40,7 +40,7 @@ copy# ∷ A -- ^ source
       → M s -- ^ destination
       → I -- ^ destination offset
       → I -- ^ number of elements to copy
-      → ST_ s
+      → ST_# s
 copy# = copyByteArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -53,7 +53,7 @@ copyM# ∷ M s -- ^ source
        → M s -- ^ destination
        → I -- ^ destination offset
        → I -- ^ number of elements to copy
-       → ST_ s
+       → ST_# s
 copyM# = copyMutableByteArray#
 
 -- | Copy a range of the @A@ to the memory range starting at the @Ref.Byte@.
@@ -65,7 +65,7 @@ copyToRef# ∷ A -- ^ source
             → I -- ^ source offset
             → Ref.Byte -- ^ destination
             → I -- ^ number of elements to copy
-            → ST_ s
+            → ST_# s
 copyToRef# = copyByteArrayToAddr#
 
 -- | Copy a range of the @A@ to the memory range starting at the @Ref.Byte@.
@@ -77,7 +77,7 @@ copyToRefM# ∷ M s -- ^ source
              → I -- ^ source offset
              → Ref.Byte -- ^ destination
              → I -- ^ number of elements to copy
-             → ST_ s
+             → ST_# s
 copyToRefM# = copyMutableByteArrayToAddr#
 
 -- |Copy a memory range starting at the @Ref.Byte@ to the specified range in the
@@ -91,7 +91,7 @@ copyFromRef# ∷ Ref.Byte -- ^ source
               → M s -- ^ destination
               → I -- ^ destination offset
               → I -- ^ number of elements to copy
-              → ST_ s
+              → ST_# s
 copyFromRef# = copyAddrToByteArray#
 
 -- | Set a slice to the specified byte.
@@ -99,7 +99,7 @@ set ∷ M s
     → I -- ^ slice start offset
     → I -- ^ slice length in bytes
     → I -- ^ the byte to set them to
-    → ST_ s
+    → ST_# s
 set = setByteArray#
 
 

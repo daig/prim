@@ -6,12 +6,12 @@ import Ref.Byte
 index# ∷ I {- ^ Offset in elments -} → Ref → I64
 index# i r = r !# i
 
-(!!#) ∷ Ref → I {- ^ Offset in elements -} → ST s I64
+(!!#) ∷ Ref → I {- ^ Offset in elements -} → ST# s I64
 (!!#) = readInt64OffAddr#
-read# ∷ I {- ^ Offset in elments -} → Ref → ST s I64
+read# ∷ I {- ^ Offset in elments -} → Ref → ST# s I64
 read# i r = r !!# i
 
-(¡#) ∷ Ref → I {- ^ Offset in elements -} → I64 → ST_ s
+(¡#) ∷ Ref → I {- ^ Offset in elements -} → I64 → ST_# s
 (¡#) = writeInt64OffAddr#
-write# ∷ I {- ^ Offset in elements -} → I64 → Ref → ST_ s
+write# ∷ I {- ^ Offset in elements -} → I64 → Ref → ST_# s
 write# i x r = (r ¡# i) x

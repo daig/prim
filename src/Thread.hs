@@ -7,26 +7,26 @@ type Id = ThreadId#
 -- | The physical capability (Hardware thread) a 'Thread' is running on
 type Cap = I
 
-fork ∷ a → IO Id
+fork ∷ a → IO# Id
 fork = fork#
-forkOn ∷ Cap → a → IO Id
+forkOn ∷ Cap → a → IO# Id
 forkOn u = forkOn# u
 -- | Kill a thread with the given exception (toException)
-kill# ∷ Id → a → IO_
+kill# ∷ Id → a → IO_#
 kill# = killThread#
-yield ∷ IO_
+yield ∷ IO_#
 yield = yield#
-here ∷ IO Id
+here ∷ IO# Id
 here = myThreadId#
 -- | Label a thread with the given cstring pointer
-label# ∷ Id → Ref.Byte → IO_
+label# ∷ Id → Ref.Byte → IO_#
 label# = labelThread#
-bound' ∷ IO B#
+bound' ∷ IO# B#
 bound' = isCurrentThreadBound#
 -- TODO: put this somewhere else
-noDuplicate ∷ ST_ s
+noDuplicate ∷ ST_# s
 noDuplicate = noDuplicate#
-status ∷ Id → IO (# Status, Cap, B# #)
+status ∷ Id → IO# (# Status, Cap, B# #)
 status n s = case threadStatus# n s of
   (# s', status, cap, bound' #) → (# s', (# status, cap, bound' #) #)
 
@@ -38,7 +38,7 @@ pattern BlockedOnBlackHole = 2#
 pattern BlockedOnRead = 3#
 pattern BlockedOnWrite = 4#
 pattern BlockedOnDelay = 5#
-pattern BlockedOnSTM = 6#
+pattern BlockedOnSTM# = 6#
 -- | Win32 only
 pattern BlockedOnDoProc = 7#
 

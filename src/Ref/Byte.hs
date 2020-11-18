@@ -34,5 +34,5 @@ toAny ∷ Ref→ (# a #)
 toAny = addrToAny#
 
 -- | Must be run on an evaluated value, not a thunk
-fromAny# ∷ a → IO Ref
+fromAny# ∷ a → IO# Ref
 fromAny# = anyToAddr#

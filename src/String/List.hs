@@ -24,7 +24,7 @@ foreign import ccall unsafe "debugLn"
 foreign import ccall unsafe "debugErrLn"
     c_debugErrLn ∷ MutableByteArray# RealWorld → GHC.Types.IO ()
 
-mkMBA ∷ S → IO (MutableByteArray# RealWorld)
+mkMBA ∷ S → IO# (MutableByteArray# RealWorld)
 mkMBA xs s0 = -- Start with 1 so that we have space to put in a \0 at
               -- the end
               case len 1# xs of

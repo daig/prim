@@ -11,7 +11,7 @@ fromRef ∷ Ref.Byte → (# a #)
 fromRef = addrToAny#
 
 -- | Must be run on an evaluated value, not a thunk
-toRef# ∷ a → IO Ref.Byte
+toRef# ∷ a → IO# Ref.Byte
 toRef# = anyToAddr#
 
 unpackClosure ∷ a → (# Ref.Byte, Array.Byte, Array.Boxed b #)

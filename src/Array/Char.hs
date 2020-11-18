@@ -8,8 +8,8 @@ index## ∷ A → I {- ^ Offset in bytes -} → Char
 index## = indexWord8ArrayAsWideChar#
 
 
-read# ∷ M s → I → ST s Char
+read# ∷ M s → I → ST# s Char
 read# = readWideCharArray#
 
-write# ∷ M s → I → Char → ST_ s
+write# ∷ M s → I → Char → ST_# s
 write# = writeWideCharArray#

@@ -8,8 +8,8 @@ index# = indexInt16Array#
 index## ∷ A → I {- ^ Offset in bytes -} → I16#
 index## = indexWord8ArrayAsInt16#
 
-read# ∷ M s → I → ST s I16#
+read# ∷ M s → I → ST# s I16#
 read# = readInt16Array#
 
-write# ∷ M s → I → I16# → ST_ s
+write# ∷ M s → I → I16# → ST_# s
 write# = writeInt16Array#

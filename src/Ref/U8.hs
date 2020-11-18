@@ -6,12 +6,12 @@ index# ∷ I {- ^ Offset in elments -} → Ref → U8#
 index# i r = r !# i
 
 
-(!!#) ∷ Ref → I {- ^ Offset in elements -} → ST s U8#
+(!!#) ∷ Ref → I {- ^ Offset in elements -} → ST# s U8#
 (!!#) = readWord8OffAddr#
-read# ∷ I {- ^ Offset in elments -} → Ref → ST s U8#
+read# ∷ I {- ^ Offset in elments -} → Ref → ST# s U8#
 read# i r = r !!# i
 
-(¡#) ∷ Ref → I {- ^ Offset in elements -} → U8# → ST_ s
+(¡#) ∷ Ref → I {- ^ Offset in elements -} → U8# → ST_# s
 (¡#) = writeWord8OffAddr#
-write# ∷ I {- ^ Offset in elements -} → U8# → Ref → ST_ s
+write# ∷ I {- ^ Offset in elements -} → U8# → Ref → ST_# s
 write# i x r = (r ¡# i) x

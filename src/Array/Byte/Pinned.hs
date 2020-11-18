@@ -2,11 +2,11 @@ module Array.Byte.Pinned where
 import qualified Ref
 import Array.Byte hiding (new)
 
-new ∷ I → ST s (M s)
+new ∷ I → ST# s (M s)
 new = newPinnedByteArray#
 
 -- TODO: add docs for which arg is which
-newAligned ∷ I → I → ST s (M s)
+newAligned ∷ I → I → ST# s (M s)
 newAligned = newAlignedPinnedByteArray#
 
 pinned' ∷ A → B#
