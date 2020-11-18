@@ -75,4 +75,5 @@ library
                  , Syntax.ImplicitParam
                  , Maybe
                  , Magic
+                 , Classy
   build-depends: ghc-prim ^>= 0.6.1
