@@ -39,7 +39,6 @@ library
                  , U, U.U64, U.U32, U.U16, U.U8, U16, U8
                  , F64, F32
                  , ST, IO, IO.STM
-                 , Ref
                  , Ref.Weak, Ref.Stable, Ref.Stable.Name, Ref.Byte
                  , Ref.Char8, Ref.Char
                  , Ref.I64, Ref.I32, Ref.I16, Ref.I8

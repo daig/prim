@@ -1,6 +1,6 @@
 module Array.Byte where
 import qualified Array
-import qualified Ref
+import qualified Ref.Byte as Byte
 
 type A = Array.Byte
 type M = MutableByteArray#
@@ -56,38 +56,38 @@ copyM# ∷ M s -- ^ source
        → ST_# s
 copyM# = copyMutableByteArray#
 
--- | Copy a range of the @A@ to the memory range starting at the @Ref.Byte@.
--- The @A@ and the memory region at @Ref.Byte@ must fully contain the specified ranges, but this is not checked.
--- The @Ref.Byte@ must not point into the @A@ (e.g. if the @A@ were pinned), but this is not checked either. 
+-- | Copy a range of the @A@ to the memory range starting at the @Byte.Ref@.
+-- The @A@ and the memory region at @Byte.Ref@ must fully contain the specified ranges, but this is not checked.
+-- The @Byte.Ref@ must not point into the @A@ (e.g. if the @A@ were pinned), but this is not checked either. 
 --
 -- Warning: this can fail with an unchecked exception.
 copyToRef# ∷ A -- ^ source
             → I -- ^ source offset
-            → Ref.Byte -- ^ destination
+            → Byte.Ref -- ^ destination
             → I -- ^ number of elements to copy
             → ST_# s
 copyToRef# = copyByteArrayToAddr#
 
--- | Copy a range of the @A@ to the memory range starting at the @Ref.Byte@.
--- The @A@ and the memory region at @Ref.Byte@ must fully contain the specified ranges, but this is not checked.
--- The @Ref.Byte@ must not point into the @A@ (e.g. if the @A@ were pinned), but this is not checked either. 
+-- | Copy a range of the @A@ to the memory range starting at the @Byte.Ref@.
+-- The @A@ and the memory region at @Byte.Ref@ must fully contain the specified ranges, but this is not checked.
+-- The @Byte.Ref@ must not point into the @A@ (e.g. if the @A@ were pinned), but this is not checked either. 
 --
 -- Warning: this can fail with an unchecked exception.
 copyToRefM# ∷ M s -- ^ source
              → I -- ^ source offset
-             → Ref.Byte -- ^ destination
+             → Byte.Ref -- ^ destination
              → I -- ^ number of elements to copy
              → ST_# s
 copyToRefM# = copyMutableByteArrayToAddr#
 
--- |Copy a memory range starting at the @Ref.Byte@ to the specified range in the
---    @Mutable@. The memory region at @Ref.Byte@ and the @A@ must fully
---    contain the specified ranges, but this is not checked. The @Ref.Byte@ must not
+-- |Copy a memory range starting at the @Byte.Ref@ to the specified range in the
+--    @Mutable@. The memory region at @Byte.Ref@ and the @A@ must fully
+--    contain the specified ranges, but this is not checked. The @Byte.Ref@ must not
 --    point into the @Mutable@ (e.g. if the @Mutable@ were pinned),
 --    but this is not checked either.
 --
 --    Warning: This can fail with an unchecked exception.
-copyFromRef# ∷ Ref.Byte -- ^ source
+copyFromRef# ∷ Byte.Ref -- ^ source
               → M s -- ^ destination
               → I -- ^ destination offset
               → I -- ^ number of elements to copy

@@ -1,5 +1,4 @@
 module Ref.Boxed where
-import qualified Ref
 
 type Ref = MutVar#
 

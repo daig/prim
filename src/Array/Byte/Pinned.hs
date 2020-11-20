@@ -1,5 +1,5 @@
 module Array.Byte.Pinned where
-import qualified Ref
+import qualified Ref.Byte as Byte
 import Array.Byte hiding (new)
 
 new ∷ I → ST# s (M s)
@@ -15,5 +15,5 @@ pinned' = isByteArrayPinned#
 pinnedM' ∷ M s → B#
 pinnedM' = isMutableByteArrayPinned#
 
-contents ∷ A → Ref.Byte
+contents ∷ A → Byte.Ref
 contents = byteArrayContents#
