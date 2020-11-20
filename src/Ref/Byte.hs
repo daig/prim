@@ -22,13 +22,9 @@ fromI ∷ I → Ref
 fromI = int2Addr#
 {-# DEPRECATED toI, fromI "This operation is strongly deprecated" #-}
 
-gt,ge,lt,le,eq,ne ∷ Ref → Ref → B#
-gt y x = gtAddr# x y
-ge y x = geAddr# x y
-lt y x = ltAddr# x y
-le y x = leAddr# x y
-eq x y = eqAddr# x y
-ne x y = neAddr# x y
+gt,ge,lt,le,eq,ne , (>), (≥), (<), (≤), (≡), (≠) ∷ Ref → Ref → B#
+(>) = gtAddr# ; (≥) = geAddr# ; (<) = ltAddr# ; (≤) = leAddr# ; (≡) = eqAddr# ; (≠) = neAddr#
+gt  = ltAddr# ; ge  = geAddr# ; lt  = gtAddr# ; le  = geAddr# ; eq  = eqAddr# ; ne  = neAddr#
 
 toAny ∷ Ref→ (# a #)
 toAny = addrToAny#
