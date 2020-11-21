@@ -3,10 +3,10 @@ module I.I16 (I16#, module I.I16) where
 fromI ∷ I → I16#
 fromI = narrow16Int#
 
-(+), (-), (*) ∷ I16# → I16# → I16#
+(+), (-), (×) ∷ I16# → I16# → I16#
 x + y = narrow16Int# (x +# y)
 x - y = narrow16Int# (x -# y)
-x * y = narrow16Int# (x *# y)
+x × y = narrow16Int# (x *# y)
 add, sub, mul, quot, rem ∷ I16# → I16# → I16#
 add y x = narrow16Int# (x +# y)
 sub y x = narrow16Int# (x -# y)

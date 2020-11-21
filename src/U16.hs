@@ -11,10 +11,10 @@ fromU = narrowWord16#
 (≡) = eqWord16#; eq = eqWord16#
 (≠) = neWord16#; ne = neWord16#
 
-(+), (-), (*), add, sub, mul ∷ U16 → U16 → U16
+(+), (-), (×), add, sub, mul ∷ U16 → U16 → U16
 (+) = plusWord16#; add = plusWord16#
 (-) = subWord16#; sub y x = x - y
-(*) = timesWord16#; mul = timesWord16#
+(×) = timesWord16#; mul = timesWord16#
 (//), (%%), quot, rem ∷ U16 → U16 → U16
 (//) = quotWord16#; quot y x = x // y
 (%%) = remWord16#; rem y x = x %% y

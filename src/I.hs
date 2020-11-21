@@ -9,10 +9,10 @@ pattern Max, Min ∷ I
 pattern Max =  0x7FFFFFFFFFFFFFFF#
 pattern Min = -0x8000000000000000#
 
-(+), (-), (*), add, sub, mul ∷ I → I → I
+(+), (-), (×), add, sub, mul ∷ I → I → I
 (+) = (+#); (-) = (-#)
 -- | Low word of signed integer multiply
-(*) = (*#)
+(×) = (*#)
 add y x = x +# y; sub y x = x -# y
 -- | Low word of signed integer multiply
 mul y x = x *# y
@@ -34,7 +34,7 @@ mul y x = x *# y
 --
 --     If in doubt, return non-zero, but do make an effort to create the
 --     correct answer for small args, since otherwise the performance of
---     @(*) ∷ I → I → I@ will be poor.
+--     @(×) ∷ I → I → I@ will be poor.
 mulMayOflo ∷ I → I → B#
 mulMayOflo x y = mulIntMayOflo# x y
 negate ∷ I → I
@@ -90,7 +90,7 @@ infix 4 >, ≥, <, ≤, ≡, ≠
 (≡) = (==#); (≠) = (/=#)
 gt = (<#); ge = (<=#); lt = (>#); le = (>=#); eq = (==#); ne = (/=#)
 
--- * Conversions
+-- × Conversions
 
 toU ∷ I → U
 toU = int2Word#

@@ -3,10 +3,10 @@ module U.U8 (U8#, module U.U8) where
 fromU64 ∷ U64 → U8#
 fromU64 = narrow8Word#
 
-(+),(-),(*) ∷ U8# → U8# → U8#
+(+),(-),(×) ∷ U8# → U8# → U8#
 x + y = narrow8Word# (plusWord# x y)
 x - y = narrow8Word# (minusWord# x y)
-x * y = narrow8Word# (timesWord# x y)
+x × y = narrow8Word# (timesWord# x y)
 add, sub, mul ∷ U8# → U8# → U8#
 add y x = narrow8Word# (plusWord# x y)
 sub y x = narrow8Word# (minusWord# x y)
@@ -16,7 +16,7 @@ pattern Max, Min ∷ U8#
 pattern Max = 0xFF##
 pattern Min = 0##
 
--- * Bitwise operations
+-- × Bitwise operations
 -- | Count the number of set bits
 popCnt,clz,ctz ∷ U8# → U8#
 popCnt = popCnt8#; clz = clz8#; ctz = ctz8#

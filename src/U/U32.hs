@@ -3,10 +3,10 @@ module U.U32 (U32#, module U.U32) where
 fromU ∷ U → U32#
 fromU = narrow32Word#
 
-(+),(-),(*) ∷ U32# → U32# → U32#
+(+),(-),(×) ∷ U32# → U32# → U32#
 x + y = narrow32Word# (plusWord# x y)
 x - y = narrow32Word# (minusWord# x y)
-x * y = narrow32Word# (timesWord# x y)
+x × y = narrow32Word# (timesWord# x y)
 add, sub, mul ∷ U32# → U32# → U32#
 add y x = narrow32Word# (plusWord# x y)
 sub y x = narrow32Word# (minusWord# x y)
@@ -16,7 +16,7 @@ pattern Max, Min ∷ U32#
 pattern Max =  0xFFFFFFFF##
 pattern Min = 0##
 
--- * Bitwise operations
+-- × Bitwise operations
 
 -- | Count the number of set bits
 popCnt,clz,ctz ∷ U32# → U32#

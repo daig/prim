@@ -4,8 +4,8 @@ import qualified GHC.Types as GHC
 import B
 #include "MachDeps.h"
 
-(+),(-),(*) ∷ U → U → U
-(+) = plusWord#; (-) = minusWord#; (*) = timesWord#
+(+),(-),(×) ∷ U → U → U
+(+) = plusWord#; (-) = minusWord#; (×) = timesWord#
 add,sub,mul, quot, rem, div, mod ∷ U → U → U
 add y x = plusWord# x y; sub y x = minusWord# x y; mul y x = timesWord# x y
 
@@ -79,7 +79,7 @@ pattern Max, Min ∷ U
 pattern Max = 0xFFFFFFFFFFFFFFFF##
 pattern Min = 0##
 
--- * Bitwise operations
+-- × Bitwise operations
 infixl 7 ∧
 infixl 6 ⊕
 infixl 5 ∨ 

@@ -68,11 +68,11 @@ coerce = GHC.coerce
 --         The following uses of @unsafeCoerce\#@ are supposed to work (i.e. not lead to
 --         spurious compile-time or run-time crashes (segfault)):
 --
---          * Casting any lifted type to 'Any'
+--          × Casting any lifted type to 'Any'
 --
---          * Casting 'Any' back to the real type
+--          × Casting 'Any' back to the real type
 --
---          * Casting between two types that have the same runtime representation.  One case is when
+--          × Casting between two types that have the same runtime representation.  One case is when
 --            the two types differ only in \"phantom\" type parameters, for example
 --            @Ptr Int@ to @Ptr Float@, or @[Int]@ to @[Float]@ when the list is
 --            known to be empty.  Also, a @newtype@ of a type @T@ has the same representation

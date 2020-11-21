@@ -12,10 +12,10 @@ fromI = narrowInt8#
 (≡) = eqInt8#; eq = eqInt8#
 (≠) = neInt8#; ne = neInt8#
 
-(+), (-), (*), add, sub, mul ∷ I8 → I8 → I8
+(+), (-), (×), add, sub, mul ∷ I8 → I8 → I8
 (+) = plusInt8#; add = plusInt8#
 (-) = subInt8#; sub y x = x - y
-(*) = timesInt8#; mul = timesInt8#
+(×) = timesInt8#; mul = timesInt8#
 (⁄⁄), (%%), quot, rem ∷ I8 → I8 → I8
 (⁄⁄) = quotInt8#; quot y x = x ⁄⁄ y
 (%%) = remInt8#; rem y x = x %% y

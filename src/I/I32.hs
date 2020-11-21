@@ -6,10 +6,10 @@ fromI ∷ I → I32
 fromI = narrow32Int#
 
 
-(+), (-), (*) ∷ I32 → I32 → I32
+(+), (-), (×) ∷ I32 → I32 → I32
 x + y = narrow32Int# (x +# y)
 x - y = narrow32Int# (x -# y)
-x * y = narrow32Int# (x *# y)
+x × y = narrow32Int# (x *# y)
 add, sub, mul, quot, rem ∷ I32 → I32 → I32
 add y x = narrow32Int# (x +# y)
 sub y x = narrow32Int# (x -# y)

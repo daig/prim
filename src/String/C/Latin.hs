@@ -31,25 +31,25 @@ is a waste.
 Moreover, inlining early may interfere with a variety of rules that are supposed
 to match unpack#,
 
- * BuiltInRules in PrelRules.hs; e.g.
+ × BuiltInRules in PrelRules.hs; e.g.
        eqString (unpack# (Lit s1)) (unpack# (Lit s2)
           = s1 == s2
 
- * unpacking rules; e.g. in GHC.Base,
+ × unpacking rules; e.g. in GHC.Base,
        unpack# a
           = build (foldr# a)
 
- * stream fusion rules; e.g. in the `text` library,
+ × stream fusion rules; e.g. in the `text` library,
        unstream (S.map safe (S.streamList (GHC.unpack# a)))
           = unpack# a
 
 Moreover, we want to make it CONLIKE, so that:
 
-* the rules in PrelRules will fire when the string is let-bound.
+× the rules in PrelRules will fire when the string is let-bound.
   E.g. the eqString rule in PrelRules
    eqString (unpack# (Lit s1)) (unpack# (Lit s2) = s1==s2
 
-* exprIsConApp_maybe will see the string when we have
+× exprIsConApp_maybe will see the string when we have
      let x = unpack# "foo"#
      ...(case x of algs)...
 
@@ -84,7 +84,7 @@ foldr# ∷ S → (Char → a → a) → a → a
 
 {-# NOINLINE foldr# #-}
 -- At one stage I had NOINLINE [0] on the grounds that, unlike
--- unpack#, there *is* some point in inlining
+-- unpack#, there ×is× some point in inlining
 -- foldr#, because we get better code for the
 -- higher-order function call.  BUT there may be a lot of
 -- literal strings, and making a separate 'unpack' loop for
