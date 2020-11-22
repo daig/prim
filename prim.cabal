@@ -45,7 +45,7 @@ library
                  , Ref.U64, Ref.U32, Ref.U16, Ref.U8
                  , Ref.F32, Ref.F64
                  , Ref.Ref.Byte, Ref.Ref.Stable
-                 , Ref.Boxed, Ref.STM, Ref.Lock
+                 , Ref.Boxed, Ref.STM, Ref.Block
                  , Tuple
                  , Array, Array.Small, Array.Boxed
                  , Array.Byte, Array.Byte.Pinned, Array.Byte.Unpinned

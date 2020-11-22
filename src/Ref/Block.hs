@@ -1,4 +1,4 @@
-module Ref.Lock where
+module Ref.Block where
 
 type Ref = MVar#
 
