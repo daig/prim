@@ -1,3 +1,0 @@
-module Linear where
-
-type (⊸) = (->)

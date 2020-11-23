@@ -71,7 +71,6 @@ library
                  , Nat
                  , Stock.Eq, Stock.Ord, Stock.Ord.Ordering
                  , Stock.Char, Stock.Double, Stock.Float, Stock.Int, Stock.Word, Stock.IO
-                 , Linear
                  , Syntax.ImplicitParam
                  , Maybe
                  , Magic
