@@ -1,8 +1,10 @@
-module I8 (I8, module I8) where
+module I.I8.Packed where
+import Prelude hiding (I8)
 
-fromI ∷ I → I8
-fromI = narrowInt8#
+type I8 = Int8#
 
+pattern I8 ∷ I → I8
+pattern I8 i ← (extendInt8# → i) where I8 = narrowInt8#
 
 (>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ I8 → I8 → B#
 (>) = gtInt8#; gt = ltInt8#

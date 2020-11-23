@@ -1,7 +1,10 @@
-module I16 (I16, module I16) where
+module I.I16.Packed where
+import Prelude hiding (I16)
 
-fromI ∷ I → I16
-fromI = narrowInt16#
+type I16 = Int16#
+
+pattern I16 ∷ I → I16
+pattern I16 i ← (extendInt16# → i) where I16 = narrowInt16#
 
 (>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ I16 → I16 → B#
 (>) = gtInt16#; gt = ltInt16#

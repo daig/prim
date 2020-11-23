@@ -14,15 +14,13 @@ type Char8# = Char#
 -- The exact range for a given implementation can be determined by using
 -- 'I.Min' and 'I.Max'.
 type I = Int#
-type I64 = I
-type I32# = I
-type I16# = I
-type I8# = I
+newtype I64 ∷ TYPE IntRep where I64  ∷ I → I64
+newtype I32 ∷ TYPE IntRep where I32# ∷ I → I32
+newtype I16 ∷ TYPE IntRep where I16# ∷ I → I16
+newtype I8  ∷ TYPE IntRep where I8#  ∷ I → I8
 
 type B = GHC.Bool
 type B# = I
-type I16 = Int16#
-type I8 = Int8#
 
 -- | An unsigned integral type, with the same size as 'I'.
 type U = Word#

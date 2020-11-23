@@ -1,29 +1,27 @@
-module I.I32 (I32#, module I.I32) where
+module I.I32 (I32(I32#,I32), module I.I32) where
 
-type I32 = I
-
-fromI ∷ I → I32
-fromI = narrow32Int#
-
+-- | Narrow a machine 'I' to 32 bits
+pattern I32 ∷ I → I32
+pattern I32 i ← (coerce narrow32Int# → i) where I32 = coerce
 
 (+), (-), (×) ∷ I32 → I32 → I32
-x + y = narrow32Int# (x +# y)
-x - y = narrow32Int# (x -# y)
-x × y = narrow32Int# (x *# y)
+(I32 x) + (I32 y) = I32 (x +# y)
+(I32 x) - (I32 y) = I32 (x -# y)
+(I32 x) × (I32 y) = I32 (x *# y)
 add, sub, mul, quot, rem ∷ I32 → I32 → I32
-add y x = narrow32Int# (x +# y)
-sub y x = narrow32Int# (x -# y)
-mul y x = narrow32Int# (x *# y)
-quot y x = narrow32Int# (quotInt# x y)
-rem y x = narrow32Int# (remInt# x y)
+add (I32 y) (I32 x) = I32 (x +# y)
+sub (I32 y) (I32 x) = I32 (x -# y)
+mul (I32 y) (I32 x) = I32 (x *# y)
+quot (I32 y) (I32 x) = I32 (quotInt# x y)
+rem (I32 y) (I32 x) = I32 (remInt# x y)
 
 quotRem ∷ I32 → I32 → (# I32, I32 #)
-quotRem y x = case quotRemInt# x y of
-  (# q, r #) → (# narrow32Int# q, narrow32Int# r #)
+quotRem (I32 y) (I32 x) = case quotRemInt# x y of
+  (# q, r #) → (# I32 q, I32 r #)
 
 shiftL# ∷ I → I32 → I32
-shiftL# i x = narrow32Int# (uncheckedIShiftL# x i)
+shiftL# i (I32 x) = I32 (uncheckedIShiftL# x i)
 
 pattern Max, Min ∷ I32
-pattern Max =  0x7FFFFFFF#
-pattern Min = -0x80000000#
+pattern Max =  I32# 0x7FFFFFFF#
+pattern Min = I32# -0x80000000#

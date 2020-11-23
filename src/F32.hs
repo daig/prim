@@ -39,5 +39,5 @@ toF64 = float2Double#
 fromF64 ∷ F64 → F32
 fromF64 = double2Float#
 
-decode ∷ F32 → (# I32#, I32# #)
-decode = decodeFloat_Int#
+decode ∷ F32 → (# I32, I32 #)
+decode = coerce decodeFloat_Int#

@@ -110,16 +110,16 @@ toF32 = int2Float#
 toF64 ∷ I → F64
 toF64 = int2Double#
 
-toI8# ∷ I → I8#
-toI8# = narrow8Int#
-toI16# ∷ I → I16#
-toI16# = narrow16Int#
-toI32# ∷ I → I32#
-toI32# = narrow32Int#
-toI8 ∷ I → I8
-toI8 = narrowInt8#
-toI16 ∷ I → I16
-toI16 = narrowInt16#
+--toI8# ∷ I → I8#
+--toI8# = narrow8Int#
+--toI16# ∷ I → I16#
+--toI16# = narrow16Int#
+--toI32# ∷ I → I32#
+--toI32# = narrow32Int#
+--toI8 ∷ I → I8
+--toI8 = narrowInt8#
+--toI16 ∷ I → I16
+--toI16 = narrowInt16#
 
 
 -- |Shift right arithmetic.  Result undefined if shift amount is not

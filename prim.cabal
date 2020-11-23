@@ -32,10 +32,11 @@ library
                     , KindSignatures, PolyKinds, ConstraintKinds, TypeOperators, RankNTypes
                     , BlockArguments, UnicodeSyntax
                     , PatternSynonyms, ViewPatterns
+                    , DataKinds, UnliftedNewtypes, GADTs
   hs-source-dirs: src
   other-modules: Prelude
   exposed-modules: Char , B, Type
-                 , I, I.I64, I.I32, I.I16, I.I8, I16, I8
+                 , I, I.I64, I.I32, I.I16, I.I8, I.I8.Packed I.I16.Packed
                  , U, U.U64, U.U32, U.U16, U.U8, U16, U8
                  , F64, F32
                  , ST, IO, IO.STM
