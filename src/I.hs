@@ -43,9 +43,9 @@ negate ∷ I → I
 negate = negateInt#
 -- | Rounds towards 0. The behavior is undefined if the first argument is zero.
 quot, rem ∷ I {- ^ divisor -}  → I {- ^ dividend -} → I
-(%%), (⁄⁄) ∷ I {- ^ dividend -}  → I {- ^ divisor -} → I
+(%%), (//) ∷ I {- ^ dividend -}  → I {- ^ divisor -} → I
 quot y x = quotInt# x y
-(⁄⁄) = quotInt#
+(//) = quotInt#
 -- |Satisfies @(add (rem y x) (mul y (quot y x)) == x@. The
 --     behavior is undefined if the first argument is zero.
 rem y x = remInt# x y
@@ -57,11 +57,11 @@ quotRem y x = quotRemInt# x y
 -- These functions have built-in rules.
 -- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
 div,mod ∷ I {- ^ divisor -} → I {- ^ dividend -} → I
-(%), (⁄) ∷ I {- ^ dividend -}  → I {- ^ divisor -} → I
+(%), (/) ∷ I {- ^ dividend -}  → I {- ^ divisor -} → I
 div y x = GHC.divInt# x y; {-# inline div #-}
 mod y x = GHC.modInt# x y; {-# inline mod #-}
 (%) = GHC.modInt#; {-# inline (%) #-}
-(⁄) = GHC.divInt#; {-# inline (⁄) #-}
+(/) = GHC.divInt#; {-# inline (/) #-}
 -- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
 divMod ∷ I {- ^ divisor -} → I {- ^ dividend -} → (# I, I #) {- ^ (div, mod) -}
 divMod y x | B# (gt 0# x) ∧ B# (lt 0# y) = case quotRem y (x -# 1# ) of
