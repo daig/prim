@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : Cast between identical representations
+--------------------------------------------------------------------
 {-# language TypeApplications #-}
 module Coerce
   (type (≑)

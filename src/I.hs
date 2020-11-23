@@ -9,6 +9,8 @@ pattern Max, Min ∷ I
 pattern Max =  0x7FFFFFFFFFFFFFFF#
 pattern Min = -0x8000000000000000#
 
+-- * Arithmetic Operations
+
 (+), (-), (×), add, sub, mul ∷ I → I → I
 (+) = (+#); (-) = (-#)
 -- | Low word of signed integer multiply
@@ -83,6 +85,8 @@ addC y x = addIntC# x y
 --           or too small to fit in an @I@).
 subC y x = subIntC# x y
 
+-- * Comparison Operators
+
 infix 4 >, ≥, <, ≤, ≡, ≠
 (>),(≥),(<),(≤),(≡),(≠),
   gt,ge,lt,le,eq,ne ∷ I → I → B#
@@ -90,7 +94,7 @@ infix 4 >, ≥, <, ≤, ≡, ≠
 (≡) = (==#); (≠) = (/=#)
 gt = (<#); ge = (<=#); lt = (>#); le = (>=#); eq = (==#); ne = (/=#)
 
--- × Conversions
+-- * Conversions
 
 toU ∷ I → U
 toU = int2Word#
