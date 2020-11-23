@@ -1,7 +1,10 @@
-module U16 (U16, module U16) where
+module U.U16.Packed where
+import Prelude hiding (U16)
 
-fromU ∷ U → U16
-fromU = narrowWord16#
+type U16 = Word16#
+
+pattern U16 ∷ U → U16
+pattern U16 i ← (extendWord16# → i) where U16 = narrowWord16#
 
 (>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ U16 → U16 → B#
 (>) = gtWord16#; gt = ltWord16#

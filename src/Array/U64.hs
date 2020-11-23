@@ -2,13 +2,13 @@ module Array.U64 where
 import Array.Byte
 
 index# ∷ A → I {- ^ Offset in elments -} → U64
-index# = indexWord64Array#
+index# = coerce indexWord64Array#
 
 index## ∷ A → I {- ^ Offset in bytes -} → U64
-index## = indexWord8ArrayAsWord64#
+index## = coerce indexWord8ArrayAsWord64#
 
 read# ∷ MA s → I → ST# s U64
-read# = readWord8Array#
+read# = coerce readWord64Array#
 
 write# ∷ MA s → I → U64 → ST_# s
-write# = writeWord8Array#
+write# = coerce writeWord64Array#

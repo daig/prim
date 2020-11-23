@@ -1,7 +1,10 @@
-module U8 (U8, module U8) where
+module U.U8.Packed where
+import Prelude hiding (U8)
 
-fromU ∷ U → U8
-fromU = narrowWord8#
+type U8 = Word8#
+
+pattern U8 ∷ U → U8
+pattern U8 i ← (extendWord8# → i) where U8 = narrowWord8#
 
 (>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ U8 → U8 → B#
 (>) = gtWord8#; gt = ltWord8#

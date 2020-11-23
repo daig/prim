@@ -1,35 +1,33 @@
-module U.U32 (U32#, module U.U32) where
+module U.U32 (U32(U32#,U32),module U.U32) where
 
-fromU ∷ U → U32#
-fromU = narrow32Word#
+-- | Narrow a machine 'U' to 32 bits
+pattern U32 ∷ U → U32
+pattern U32 i ← (coerce narrow32Word# → i) where U32 = coerce
+{-# complete U32 #-}
 
-(+),(-),(×) ∷ U32# → U32# → U32#
-x + y = narrow32Word# (plusWord# x y)
-x - y = narrow32Word# (minusWord# x y)
-x × y = narrow32Word# (timesWord# x y)
-add, sub, mul ∷ U32# → U32# → U32#
-add y x = narrow32Word# (plusWord# x y)
-sub y x = narrow32Word# (minusWord# x y)
-mul y x = narrow32Word# (timesWord# x y)
+(+),(-),(×) ∷ U32 → U32 → U32
+x + y = U32 (coerce plusWord# x y)
+x - y = U32 (coerce minusWord# x y)
+x × y = U32 (coerce timesWord# x y)
 
-pattern Max, Min ∷ U32#
-pattern Max =  0xFFFFFFFF##
-pattern Min = 0##
+pattern Max, Min ∷ U32
+pattern Max =  U32# 0xFFFFFFFF##
+pattern Min = U32# 0##
 
 -- × Bitwise operations
 
 -- | Count the number of set bits
-popCnt,clz,ctz ∷ U32# → U32#
-popCnt = popCnt32#; clz = clz32#; ctz = ctz32#
+popCnt,clz,ctz ∷ U32 → U32
+popCnt = coerce popCnt32#; clz = coerce clz32#; ctz = coerce ctz32#
 
-byteSwap ∷ U32# → U32#
-byteSwap = byteSwap32#
+byteSwap ∷ U32 → U32
+byteSwap = coerce byteSwap32#
 
-pext ∷ U32# → U → U32#
-pext y x = pext32# x y
-pdep ∷ U32# → U → U
-pdep y x = pdep32# x y
+pext ∷ U → U32 → U32
+pext = coerce pext32#
+pdep ∷ U → U32 → U
+pdep = coerce pdep32#
 
 -- | Reverse the order of the bits.
-reverse ∷ U32# → U32#
-reverse = bitReverse32#
+reverse ∷ U32 → U32
+reverse = coerce bitReverse32#

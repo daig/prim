@@ -64,17 +64,6 @@ toF32 = word2Float#
 toF64 ∷ U → F64
 toF64 = word2Double#
 
-toU8# ∷ U → U8#
-toU8# = narrow8Word#
-toU16# ∷ U → U16#
-toU16# = narrow16Word#
-toU32# ∷ U → U32#
-toU32# = narrow32Word#
-toU8 ∷ U → U8
-toU8 = narrowWord8#
-toU16 ∷ U → U16
-toU16 = narrowWord16#
-
 pattern Max, Min ∷ U
 pattern Max = 0xFFFFFFFFFFFFFFFF##
 pattern Min = 0##
@@ -105,8 +94,8 @@ shiftRL i w | B# (i >=# WORD_SIZE_IN_BITS#) = 0##
             | T = uncheckedShiftRL# w i
 
 -- | Count the number of set bits
-popCnt,clz,ctz ∷ U → U8#
-popCnt = popCnt#; clz = clz#; ctz = ctz#
+popCnt,clz,ctz ∷ U → U8
+popCnt = coerce popCnt#; clz = coerce clz#; ctz = coerce ctz#
 
 byteSwap ∷ U → U
 byteSwap = byteSwap#

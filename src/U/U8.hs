@@ -1,31 +1,29 @@
-module U.U8 (U8#, module U.U8) where
+module U.U8 (U8, module U.U8) where
 
-fromU64 ∷ U64 → U8#
-fromU64 = narrow8Word#
+-- | Narrow a machine 'U' to 8 bits
+pattern U8 ∷ U → U8
+pattern U8 i ← (coerce narrow8Word# → i) where U8 = coerce
+{-# complete U8 #-}
 
-(+),(-),(×) ∷ U8# → U8# → U8#
-x + y = narrow8Word# (plusWord# x y)
-x - y = narrow8Word# (minusWord# x y)
-x × y = narrow8Word# (timesWord# x y)
-add, sub, mul ∷ U8# → U8# → U8#
-add y x = narrow8Word# (plusWord# x y)
-sub y x = narrow8Word# (minusWord# x y)
-mul y x = narrow8Word# (timesWord# x y)
+(+),(-),(×) ∷ U8 → U8 → U8
+x + y = U8 (coerce plusWord# x y)
+x - y = U8 (coerce minusWord# x y)
+x × y = U8 (coerce timesWord# x y)
 
-pattern Max, Min ∷ U8#
-pattern Max = 0xFF##
-pattern Min = 0##
+pattern Max, Min ∷ U8
+pattern Max = U8# 0xFF##
+pattern Min = U8# 0##
 
 -- × Bitwise operations
 -- | Count the number of set bits
-popCnt,clz,ctz ∷ U8# → U8#
-popCnt = popCnt8#; clz = clz8#; ctz = ctz8#
+popCnt,clz,ctz ∷ U8 → U8
+popCnt = coerce popCnt8#; clz = coerce clz8#; ctz = coerce ctz8#
 
-pext ∷ U8# → U64 → U8#
-pext y x = pext8# x y
-pdep ∷ U8# → U64 → U64
-pdep y x = pdep8# x y
+pext ∷ U64 → U8 → U8
+pext = coerce pext8#
+pdep ∷ U64 → U8 → U64
+pdep = coerce pdep8#
 
 -- | Reverse the order of the bits.
-reverse ∷ U8# → U8#
-reverse = bitReverse8#
+reverse ∷ U8 → U8
+reverse = coerce bitReverse8#

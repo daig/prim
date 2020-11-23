@@ -24,12 +24,10 @@ type B# = I
 
 -- | An unsigned integral type, with the same size as 'I'.
 type U = Word#
-type U64 = U
-type U32# = U
-type U16# = U
-type U8# = U
-type U16 = Word16#
-type U8 = Word8#
+newtype U64 ∷ TYPE WordRep where U64  ∷ U → U64
+newtype U32 ∷ TYPE WordRep where U32# ∷ U → U32
+newtype U16 ∷ TYPE WordRep where U16# ∷ U → U16
+newtype U8  ∷ TYPE WordRep where U8#  ∷ U → U8
 
 -- | Single-precision floating point numbers.
 -- It is desirable that this type be at least equal in range and precision

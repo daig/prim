@@ -37,7 +37,7 @@ library
   other-modules: Prelude
   exposed-modules: Char , B, Type
                  , I, I.I64, I.I32, I.I16, I.I8, I.I8.Packed I.I16.Packed
-                 , U, U.U64, U.U32, U.U16, U.U8, U16, U8
+                 , U, U.U64, U.U32, U.U16, U.U8, U.U8.Packed, U.U16.Packed
                  , F64, F32
                  , ST, IO, IO.STM
                  , P.Weak, P.Stable, P.Stable.Name, P.Byte
