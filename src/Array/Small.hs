@@ -2,30 +2,30 @@ module Array.Small where
 import Prelude hiding (Array)
 
 type A = SmallArray#
-type M = SmallMutableArray#
+type MA = SmallMutableArray#
 
-new ∷ I → a → ST# s (M s a)
+new ∷ I → a → ST# s (MA s a)
 new = newSmallArray#
 
-(≡), eq ∷ M s a → M s a → B#
+(≡), eq ∷ MA s a → MA s a → B#
 (≡) = sameSmallMutableArray#; eq = sameSmallMutableArray#
 
-shrink ∷ M s a → I → ST_# s
+shrink ∷ MA s a → I → ST_# s
 shrink = shrinkSmallMutableArray#
 
-read ∷ M s a → I → ST# s a
+read ∷ MA s a → I → ST# s a
 read = readSmallArray#
 
-write ∷ M s a → I → a → ST_# s
+write ∷ MA s a → I → a → ST_# s
 write = writeSmallArray#
 
 -- | Number of elements
 size ∷ A a → I
 size = sizeofSmallArray#
 
--- | Number of elements. Must be in @ST#@ because of possible resizes.
-sizeM# ∷ M s a → ST# s I
-sizeM# = getSizeofSmallMutableArray#
+-- | Number of elements. MAust be in @ST#@ because of possible resizes.
+sizeMA# ∷ MA s a → ST# s I
+sizeMA# = getSizeofSmallMutableArray#
 
 -- | Read from the specified index of an immutable array.
 -- The result is packaged into an unboxed unary tuple; the result itself is not yet evaluated.
@@ -37,12 +37,12 @@ sizeM# = getSizeofSmallMutableArray#
 index# ∷ A a → I → (# a #)
 index# = indexSmallArray#
 
--- | Make a mutable array immutable, without copying.
-freeze## ∷ M s a → ST# s (A a)
+-- | MAake a mutable array immutable, without copying.
+freeze## ∷ MA s a → ST# s (A a)
 freeze## = unsafeFreezeSmallArray#
 
--- | Make an immutable array mutable, without copying.
-thaw## ∷ A a → ST# s (M s a)
+-- | MAake an immutable array mutable, without copying.
+thaw## ∷ A a → ST# s (MA s a)
 thaw## = unsafeThawSmallArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -52,7 +52,7 @@ thaw## = unsafeThawSmallArray#
 -- Warning: this can fail with an unchecked exception.
 copy# ∷ A a -- ^ source
       → I -- ^ source offset
-      → M s a -- ^ destination
+      → MA s a -- ^ destination
       → I -- ^ destination offset
       → I -- ^ number of elements to copy
       → ST_# s
@@ -63,13 +63,13 @@ copy# = copySmallArray#
 -- The two arrays must not be the same array in different states, but this is not checked either.
 --
 -- Warning: this can fail with an unchecked exception.
-copyM# ∷ M s a -- ^ source
+copyMA# ∷ MA s a -- ^ source
        → I -- ^ source offset
-       → M s a -- ^ destination
+       → MA s a -- ^ destination
        → I -- ^ destination offset
        → I -- ^ number of elements to copy
        → ST_# s
-copyM# = copySmallMutableArray#
+copyMA# = copySmallMutableArray#
 
 -- | Create a new array with the elements from the source array.
 -- The provided array must fully contain the specified range, but this is not checked.
@@ -85,13 +85,13 @@ clone# = cloneSmallArray#
 -- The provided array must fully contain the specified range, but this is not checked.
 --
 -- Warning: this can fail with an unchecked exception.
-cloneM# ∷ M s a
+cloneMA# ∷ MA s a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST# s (M s a)
-cloneM# = cloneSmallMutableArray#
+        → ST# s (MA s a)
+cloneMA# = cloneSmallMutableArray#
 
-freeze# ∷ M s a
+freeze# ∷ MA s a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
         → ST# s (A a)
@@ -100,10 +100,10 @@ freeze# = freezeSmallArray#
 thaw# ∷  A a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST# s (M s a)
+        → ST# s (MA s a)
 thaw# = thawSmallArray#
 
-cas ∷ M s a
+cas ∷ MA s a
     → I -- ^ Source offset
     → a -- ^ Expected old value
     → a -- ^ New value

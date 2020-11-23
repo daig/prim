@@ -1,7 +1,7 @@
 module RTS.Prefetch.Array.M where
-import qualified Array.Byte
+import qualified Array.Byte as Byte
 
-t0, t1, t2, t3 ∷ Array.Byte.M s → I {- ^ offset -} → ST_# s
+t0, t1, t2, t3 ∷ Byte.MA s → I {- ^ offset -} → ST_# s
 t0 = prefetchMutableByteArray0#
 t1 = prefetchMutableByteArray1#
 t2 = prefetchMutableByteArray2#

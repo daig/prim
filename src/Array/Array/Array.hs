@@ -1,12 +1,12 @@
 module Array.Array.Array where
-import qualified Array
-import Array.Array
+import qualified Array.Byte as Byte
+import Array.Array as Array
 
-index# ∷ A → I → Array.Unlifted
+index# ∷ A → I → Array.A
 index# = indexArrayArrayArray#
 
-read# ∷ M s → I → ST# s Array.Unlifted
+read# ∷ MA s → I → ST# s Array.A
 read# = readArrayArrayArray#
 
-write# ∷ M s → I → Array.Unlifted → ST_# s
+write# ∷ MA s → I → Array.A → ST_# s
 write# = writeArrayArrayArray#

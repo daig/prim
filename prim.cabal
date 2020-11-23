@@ -47,7 +47,7 @@ library
                  , Ref.Ref.Byte, Ref.Ref.Stable
                  , Ref.Boxed, Ref.STM, Ref.Block
                  , Tuple
-                 , Array, Array.Small, Array.Boxed
+                 , Array.Small, Array.Boxed
                  , Array.Byte, Array.Byte.Pinned, Array.Byte.Unpinned
                  , Array.Char, Array.Char8
                  , Array.F32, Array.F64

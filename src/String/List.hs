@@ -1,30 +1,27 @@
 {-# language UnliftedFFITypes #-}
 module String.List where
-import qualified GHC.Types
+import Prelude hiding (IO,Char)
+import Stock.IO
+import Stock.Char
+import Array.Byte (MA)
 
-type S = [GHC.Types.Char]
+type S = [Char]
 
-debugLn ∷ S → GHC.Types.IO ()
-debugLn xs = GHC.Types.IO (\s0 →
-                 case mkMBA xs s0 of
-                 (# s1, mba #) →
-                     case c_debugLn mba of
-                     GHC.Types.IO f → f s1)
+debugLn ∷ S → IO ()
+debugLn xs = IO \ s → case mkMBA xs s of
+                 (# s', mba #) → case c_debugLn mba of IO f → f s'
 
-debugErrLn ∷ S → GHC.Types.IO ()
-debugErrLn xs = GHC.Types.IO (\s0 →
-                    case mkMBA xs s0 of
-                    (# s1, mba #) →
-                        case c_debugErrLn mba of
-                        GHC.Types.IO f → f s1)
+debugErrLn ∷ S → IO ()
+debugErrLn xs = IO \ s → case mkMBA xs s of
+                    (# s', mba #) → case c_debugErrLn mba of IO f → f s'
 
 foreign import ccall unsafe "debugLn"
-    c_debugLn ∷ MutableByteArray# RealWorld → GHC.Types.IO ()
+    c_debugLn ∷ MutableByteArray# (☸) → IO ()
 
 foreign import ccall unsafe "debugErrLn"
-    c_debugErrLn ∷ MutableByteArray# RealWorld → GHC.Types.IO ()
+    c_debugErrLn ∷ MutableByteArray# (☸) → IO ()
 
-mkMBA ∷ S → IO# (MutableByteArray# RealWorld)
+mkMBA ∷ S → IO# (MutableByteArray# (☸))
 mkMBA xs s0 = -- Start with 1 so that we have space to put in a \0 at
               -- the end
               case len 1# xs of
@@ -37,7 +34,7 @@ mkMBA xs s0 = -- Start with 1 so that we have space to put in a \0 at
           len l (_ : xs') = len (l +# 1#) xs'
 
           write mba offset [] s = writeCharArray# mba offset '\0'# s
-          write mba offset (GHC.Types.C# x : xs') s
+          write mba offset (C# x : xs') s
               = case writeCharArray# mba offset x s of
                 s' →
                     write mba (offset +# 1#) xs' s'

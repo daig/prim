@@ -7,8 +7,8 @@ index# = indexWord32Array#
 index## ∷ A → I {- ^ Offset in bytes -} → U32#
 index## = indexWord8ArrayAsWord32#
 
-read# ∷ M s → I → ST# s U32#
+read# ∷ MA s → I → ST# s U32#
 read# = readWord32Array#
 
-write# ∷ M s → I → U32# → ST_# s
+write# ∷ MA s → I → U32# → ST_# s
 write# = writeWord32Array#

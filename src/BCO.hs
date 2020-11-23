@@ -1,10 +1,11 @@
 module BCO where
-import qualified Array
+import qualified Array.Byte as Byte
+import qualified Array.Boxed as Boxed
 
 type BCO = BCO#
 
 mkApUpd0 ∷ BCO → (# a #)
 mkApUpd0 = mkApUpd0#
 
-new ∷ Array.Byte → Array.Byte → Array.Boxed a → I → Array.Byte → ST# s BCO
+new ∷ Byte.A → Byte.A → Boxed.A a → I → Byte.A → ST# s BCO
 new = newBCO#

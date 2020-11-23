@@ -1,20 +1,20 @@
 module Array.Boxed where
-import qualified Array
+import qualified Array.Byte as Byte
 
 type A = Array#
-type M = MutableArray#
+type MA = MutableArray#
 
 
-new ∷ I → a → ST# s (M s a)
+new ∷ I → a → ST# s (MA s a)
 new = newArray#
 
-eq ∷ M s a → M s a → B#
+eq ∷ MA s a → MA s a → B#
 eq = sameMutableArray#
 
-read ∷ M s a → I → ST# s a
+read ∷ MA s a → I → ST# s a
 read = readArray#
 
-write ∷ M s a → I → a → ST_# s
+write ∷ MA s a → I → a → ST_# s
 write = writeArray#
 
 -- | Number of elements
@@ -31,12 +31,12 @@ size = sizeofArray#
 index# ∷ A a → I → (# a #)
 index# = indexArray#
 
--- | Make a mutable array immutable, without copying.
-freeze## ∷ M s a → ST# s (A a)
+-- | MAake a mutable array immutable, without copying.
+freeze## ∷ MA s a → ST# s (A a)
 freeze## = unsafeFreezeArray#
 
--- | Make an immutable array mutable, without copying.
-thaw## ∷ A a → ST# s (M s a)
+-- | MAake an immutable array mutable, without copying.
+thaw## ∷ A a → ST# s (MA s a)
 thaw## = unsafeThawArray#
 
 -- | Copy the elements from the source array to the destination array.
@@ -46,7 +46,7 @@ thaw## = unsafeThawArray#
 -- Warning: this can fail with an unchecked exception.
 copy# ∷ A a -- ^ source
       → I -- ^ source offset
-      → M s a -- ^ destination
+      → MA s a -- ^ destination
       → I -- ^ destination offset
       → I -- ^ number of elements to copy
       → ST_# s
@@ -57,13 +57,13 @@ copy# = copyArray#
 -- The two arrays must not be the same array in different states, but this is not checked either.
 --
 -- Warning: this can fail with an unchecked exception.
-copyM# ∷ M s a -- ^ source
+copyMA# ∷ MA s a -- ^ source
        → I -- ^ source offset
-       → M s a -- ^ destination
+       → MA s a -- ^ destination
        → I -- ^ destination offset
        → I -- ^ number of elements to copy
        → ST_# s
-copyM# = copyMutableArray#
+copyMA# = copyMutableArray#
 
 -- | Create a new array with the elements from the source array.
 -- The provided array must fully contain the specified range, but this is not checked.
@@ -79,13 +79,13 @@ clone# = cloneArray#
 -- The provided array must fully contain the specified range, but this is not checked.
 --
 -- Warning: this can fail with an unchecked exception.
-cloneM# ∷ M s a
+cloneMA# ∷ MA s a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST# s (M s a)
-cloneM# = cloneMutableArray#
+        → ST# s (MA s a)
+cloneMA# = cloneMutableArray#
 
-freeze# ∷ M s a
+freeze# ∷ MA s a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
         → ST# s (A a)
@@ -94,10 +94,10 @@ freeze# = freezeArray#
 thaw# ∷  A a
         → I -- ^ Source offset
         → I -- ^ number of elements to copy
-        → ST# s (M s a)
+        → ST# s (MA s a)
 thaw# = thawArray#
 
-cas# ∷ M s a
+cas# ∷ MA s a
     → I -- ^ Source offset
     → a -- ^ Expected old value
     → a -- ^ New value

@@ -3,7 +3,11 @@
 module I (I, module I) where
 import B (pattern B#,(∧), pattern T)
 import qualified GHC.Classes as GHC (divInt#,modInt#)
+
+import Coerce
+
 #include "MachDeps.h"
+
 
 pattern Max, Min ∷ I
 pattern Max =  0x7FFFFFFFFFFFFFFF#
@@ -157,3 +161,16 @@ and, or, xor ∷ I → I → I
 and = andI#
 or = orI#
 xor = xorI#
+
+
+data Foo = Foo (# I , I , I #)
+foo ∷ Foo → (J , J , J)
+foo (Foo (# a , b , c #)) = (J a,J b,J c)
+data Bar = Bar (# I , (# I,I #) #)
+bar ∷ Bar → (J , J , J)
+bar (Bar (# a , (# b , c #) #)) = (J a,J b, J c)
+data J = J I
+
+aa = Bar (# 1#, (# 2#, 3# #) #)
+bb ∷ Foo
+bb = coerce# aa

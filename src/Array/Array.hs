@@ -5,25 +5,25 @@
 module Array.Array where
 
 type A = ArrayArray#
-type M = MutableArrayArray#
+type MA = MutableArrayArray#
 
-new ∷ I → ST# s (M s)
+new ∷ I → ST# s (MA s)
 new = newArrayArray#
 
-(≡), eq ∷ M s → M s → B#
+(≡), eq ∷ MA s → MA s → B#
 (≡) = sameMutableArrayArray#; eq = sameMutableArrayArray#
 
-freeze## ∷ M s → ST# s A
+freeze## ∷ MA s → ST# s A
 freeze## = unsafeFreezeArrayArray#
 
 size ∷ A → I
 size = sizeofArrayArray#
 
-sizeM ∷ M s → I
-sizeM = sizeofMutableArrayArray#
+sizeMA ∷ MA s → I
+sizeMA = sizeofMutableArrayArray#
 
-copy# ∷ A → I → M s → I → I → ST_# s
+copy# ∷ A → I → MA s → I → I → ST_# s
 copy# = copyArrayArray#
 
-copyM# ∷ M s → I → M s → I → I → ST_# s
-copyM# = copyMutableArrayArray#
+copyMA# ∷ MA s → I → MA s → I → I → ST_# s
+copyMA# = copyMutableArrayArray#

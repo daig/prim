@@ -1,7 +1,8 @@
 -- | Description : Operations on arbitrary lifted types
 module Any (module Any, Any, seq) where
 import qualified Ref.Byte as Byte
-import qualified Array
+import qualified Array.Byte as Byte
+import qualified Array.Boxed as Boxed
 import GHC.Types as X (Any)
 
 eq# ∷ a → a → B#
@@ -14,7 +15,7 @@ fromRef = addrToAny#
 toRef# ∷ a → IO# Byte.Ref
 toRef# = anyToAddr#
 
-unpackClosure ∷ a → (# Byte.Ref, Array.Byte, Array.Boxed b #)
+unpackClosure ∷ a → (# Byte.Ref, Byte.A, Boxed.A b #)
 unpackClosure = unpackClosure# 
 
 getApStackVal ∷ a → I → (# I, b #)

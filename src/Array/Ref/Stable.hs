@@ -8,8 +8,8 @@ index# = indexStablePtrArray#
 index## ∷ A → I {- ^ Offset in bytes -} → Stable.Ref a
 index## = indexWord8ArrayAsStablePtr#
 
-read# ∷ M s → I → ST# s (Stable.Ref a)
+read# ∷ MA s → I → ST# s (Stable.Ref a)
 read# = readStablePtrArray#
 
-write# ∷ M s → I → Stable.Ref a → ST_# s
+write# ∷ MA s → I → Stable.Ref a → ST_# s
 write# = writeStablePtrArray#
