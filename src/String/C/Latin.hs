@@ -6,7 +6,7 @@ import Prelude hiding (Char)
 import Stock.Char (Char(C#))
 import I hiding ((≡))
 import Char ((≡))
-import Ref.Char8
+import P.Char8
 import B
 
 --------------------------------------------------------------------------

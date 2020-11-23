@@ -39,13 +39,13 @@ library
                  , U, U.U64, U.U32, U.U16, U.U8, U16, U8
                  , F64, F32
                  , ST, IO, IO.STM
-                 , Ref.Weak, Ref.Stable, Ref.Stable.Name, Ref.Byte
-                 , Ref.Char8, Ref.Char
-                 , Ref.I64, Ref.I32, Ref.I16, Ref.I8
-                 , Ref.U64, Ref.U32, Ref.U16, Ref.U8
-                 , Ref.F32, Ref.F64
-                 , Ref.Ref.Byte, Ref.Ref.Stable
-                 , Ref.Boxed, Ref.STM, Ref.Block
+                 , P.Weak, P.Stable, P.Stable.Name, P.Byte
+                 , P.Char8, P.Char
+                 , P.I64, P.I32, P.I16, P.I8
+                 , P.U64, P.U32, P.U16, P.U8
+                 , P.F32, P.F64
+                 , P.P.Byte, P.P.Stable
+                 , P.Boxed, P.STM, P.Block
                  , Tuple
                  , Array.Small, Array.Boxed
                  , Array.Byte, Array.Byte.Pinned, Array.Byte.Unpinned
@@ -53,7 +53,7 @@ library
                  , Array.F32, Array.F64
                  , Array.I64, Array.I32, Array.I16, Array.I8
                  , Array.U64, Array.U32, Array.U16, Array.U8
-                 , Array.Ref.Stable
+                 , Array.Stable
                  , Array.Array, Array.Array.Byte, Array.Array.Array
                  , Thread
                  , Compact
@@ -65,7 +65,7 @@ library
                  , Any, BCO
                  , RTS.Rep
                  , RTS.Block, Optimizer
-                 , RTS.Prefetch.Any, RTS.Prefetch.Ref, RTS.Prefetch.Array, RTS.Prefetch.Array.M
+                 , RTS.Prefetch.Any, RTS.Prefetch.P, RTS.Prefetch.Array, RTS.Prefetch.Array.M
                  , String, String.C, String.C.Latin, String.C.UTF8, String.List
                  , Nat
                  , Stock.Eq, Stock.Ord, Stock.Ord.Ordering

@@ -1,6 +1,6 @@
 -- | Description : Operations on arbitrary lifted types
 module Any (module Any, Any, seq) where
-import qualified Ref.Byte as Byte
+import qualified P.Byte as Byte
 import qualified Array.Byte as Byte
 import qualified Array.Boxed as Boxed
 import GHC.Types as X (Any)
@@ -8,14 +8,14 @@ import GHC.Types as X (Any)
 eq# ∷ a → a → B#
 eq# = reallyUnsafePtrEquality#
 
-fromRef ∷ Byte.Ref → (# a #)
-fromRef = addrToAny#
+fromP ∷ Byte.P → (# a #)
+fromP = addrToAny#
 
 -- | Must be run on an evaluated value, not a thunk
-toRef# ∷ a → IO# Byte.Ref
-toRef# = anyToAddr#
+toP# ∷ a → IO# Byte.P
+toP# = anyToAddr#
 
-unpackClosure ∷ a → (# Byte.Ref, Byte.A, Boxed.A b #)
+unpackClosure ∷ a → (# Byte.P, Byte.A, Boxed.A b #)
 unpackClosure = unpackClosure# 
 
 getApStackVal ∷ a → I → (# I, b #)

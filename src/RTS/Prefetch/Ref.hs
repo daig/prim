@@ -1,8 +1,0 @@
-module RTS.Prefetch.Ref where
-import qualified Ref.Byte as Byte
-
-t0, t1, t2, t3 ∷ Byte.Ref → I {- ^ offset -} → ST_# s
-t0 = prefetchAddr0#
-t1 = prefetchAddr1#
-t2 = prefetchAddr2#
-t3 = prefetchAddr3#

@@ -1,22 +1,22 @@
-module Ref.Weak where
-import qualified Ref.Byte as Byte
+module P.Weak where
+import qualified P.Byte as Byte
 
-type Ref = Weak#
+type P = Weak#
 
-new ∷ k → v → IO# x → IO# (Ref v)
+new ∷ k → v → IO# x → IO# (P v)
 new = mkWeak# 
 
-newNoFinalizer ∷ k → v → IO# (Ref v)
+newNoFinalizer ∷ k → v → IO# (P v)
 newNoFinalizer = mkWeakNoFinalizer#
 
-addFinalizer ∷ Byte.Ref → Byte.Ref → B# → Byte.Ref → Ref v → IO# B#
+addFinalizer ∷ Byte.P → Byte.P → B# → Byte.P → P v → IO# B#
 addFinalizer = addCFinalizerToWeak#
 
-deref ∷ Ref v → IO# (Maybe# v)
+deref ∷ P v → IO# (Maybe# v)
 deref w s0 = case deRefWeak# w s0 of
   (# s1, alive', v #) → (# s1, (# alive', v #) #)
 
-finalize ∷ Ref v → IO# (Maybe#  (IO# x))
+finalize ∷ P v → IO# (Maybe#  (IO# x))
 finalize w s0 = case finalizeWeak# w s0 of
   (# s1, alive', finalizer #) → (# s1, (# alive', finalizer #) #)
 

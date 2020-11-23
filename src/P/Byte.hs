@@ -1,36 +1,36 @@
 {-# language PatternSynonyms #-}
-module Ref.Byte where
+module P.Byte where
 
-type Ref = Addr#
+type P = Addr#
 
 -- | hack to expose nullAddr#
-pattern Null ∷ Ref
+pattern Null ∷ P
 pattern Null <- nullAddr# where Null = nullAddr#
 
 -- |Advances the given address by the given offset in bytes.
-(∔) ∷ I → Ref → Ref
+(∔) ∷ I → P → P
 i ∔ a = plusAddr# a i
 
 -- |Computes the offset required to get from the second to the first argument.
-(⨪) ∷ Ref → Ref → I
+(⨪) ∷ P → P → I
 (⨪) = minusAddr#
 
-(.//) ∷ Ref → I → I
+(.//) ∷ P → I → I
 (.//) = remAddr#
 
-toI ∷ Ref → I
+toI ∷ P → I
 toI = addr2Int#
-fromI ∷ I → Ref
+fromI ∷ I → P
 fromI = int2Addr#
 {-# DEPRECATED toI, fromI "This operation is strongly deprecated" #-}
 
-gt,ge,lt,le,eq,ne , (>), (≥), (<), (≤), (≡), (≠) ∷ Ref → Ref → B#
+gt,ge,lt,le,eq,ne , (>), (≥), (<), (≤), (≡), (≠) ∷ P → P → B#
 (>) = gtAddr# ; (≥) = geAddr# ; (<) = ltAddr# ; (≤) = leAddr# ; (≡) = eqAddr# ; (≠) = neAddr#
 gt  = ltAddr# ; ge  = geAddr# ; lt  = gtAddr# ; le  = geAddr# ; eq  = eqAddr# ; ne  = neAddr#
 
-toAny ∷ Ref → (# a #)
+toAny ∷ P → (# a #)
 toAny = addrToAny#
 
 -- | Must be run on an evaluated value, not a thunk
-fromAny# ∷ a → IO# Ref
+fromAny# ∷ a → IO# P
 fromAny# = anyToAddr#

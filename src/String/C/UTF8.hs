@@ -8,7 +8,7 @@ import Stock.Char (Char(C#))
 import B
 import Char ((≤),(≡),toI,fromI)
 import I ((+),(-),shiftL#)
-import Ref.Char8 ((!#))
+import P.Char8 ((!#))
 
 -- There's really no point in inlining this for the same reasons as
 -- unpack. See Note [Inlining unpack#] above for details.
