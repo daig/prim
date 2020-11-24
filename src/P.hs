@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : Raw unmanaged pointers
+--------------------------------------------------------------------
 {-# language TypeSynonymInstances,UnliftedNewtypes, GADTs, TypeOperators #-}
 module P where
 import Char
