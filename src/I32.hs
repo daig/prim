@@ -1,4 +1,4 @@
-module I.I32 (I32(I32#,I32), module I.I32) where
+module I32 (I32(I32#,I32), module I32) where
 
 -- | Narrow a machine 'I' to 32 bits
 pattern I32 ∷ I → I32

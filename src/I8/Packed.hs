@@ -1,4 +1,4 @@
-module I.I8.Packed where
+module I8.Packed where
 import Prelude hiding (I8)
 
 type I8 = Int8#

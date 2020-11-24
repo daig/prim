@@ -1,4 +1,4 @@
-module U.U16.Packed where
+module U16.Packed where
 import Prelude hiding (U16)
 
 type U16 = Word16#

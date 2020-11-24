@@ -1,4 +1,4 @@
-module I.I16.Packed where
+module I16.Packed where
 import Prelude hiding (I16)
 
 type I16 = Int16#

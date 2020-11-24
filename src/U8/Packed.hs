@@ -1,4 +1,4 @@
-module U.U8.Packed where
+module U8.Packed where
 import Prelude hiding (U8)
 
 type U8 = Word8#

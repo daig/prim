@@ -1,5 +1,5 @@
 
-module I.I8 (I8(I8#,I8), module I.I8) where
+module I8 (I8(I8#,I8), module I8) where
 
 -- | Narrow a machine 'I' to 8 bits
 pattern I8 ∷ I → I8

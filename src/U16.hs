@@ -1,4 +1,4 @@
-module U.U16 (U16(U16#,U16), module U.U16) where
+module U16 (U16(U16#,U16), module U16) where
 
 -- | Narrow a machine 'U' to 16 bits
 pattern U16 ∷ U → U16

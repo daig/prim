@@ -1,4 +1,4 @@
-module U.U8 (U8, module U.U8) where
+module U8 (U8, module U8) where
 
 -- | Narrow a machine 'U' to 8 bits
 pattern U8 ∷ U → U8

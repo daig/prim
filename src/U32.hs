@@ -1,4 +1,4 @@
-module U.U32 (U32(U32#,U32),module U.U32) where
+module U32 (U32(U32#,U32),module U32) where
 
 -- | Narrow a machine 'U' to 32 bits
 pattern U32 ∷ U → U32
