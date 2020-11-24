@@ -33,7 +33,9 @@ library
                     , BlockArguments, UnicodeSyntax
                     , PatternSynonyms, ViewPatterns
                     , DataKinds, UnliftedNewtypes, GADTs
-                    , TypeSynonymInstances, TypeFamilies
+                    , TypeSynonymInstances, TypeFamilies, DerivingStrategies
+                    , StandaloneDeriving, GeneralizedNewtypeDeriving
+
   hs-source-dirs: src
   other-modules: Prelude
   exposed-modules: Char , B, Type

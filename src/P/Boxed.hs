@@ -11,8 +11,7 @@ read = readMutVar#
 write ∷ P s a → a → ST_# s
 write = writeMutVar#
 
-(≡), eq ∷ P s a → P s a → B#
-(≡) = sameMutVar#; eq = sameMutVar#
+instance (≡) (P s a) where (≡) = sameMutVar#
 
 -- | Modify the contents of a @P.Boxed@, returning the previous contents and the result of applying the given function to the previous contents. Note that this isn't strictly speaking the correct type for this function; it should really be MutVar# s a → (a → (a,b)) → State# s → (# State# s, a, (a, b) #), but we don't know about pairs here.
 -- 

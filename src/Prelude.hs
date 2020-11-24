@@ -10,10 +10,6 @@ import qualified GHC.Types as GHC
 -- The exact range for a given implementation can be determined by using
 -- 'I.Min' and 'I.Max'.
 type I = Int#
-newtype I64 ∷ TYPE IntRep where I64  ∷ I → I64
-newtype I32 ∷ TYPE IntRep where I32# ∷ I → I32
-newtype I16 ∷ TYPE IntRep where I16# ∷ I → I16
-newtype I8  ∷ TYPE IntRep where I8#  ∷ I → I8
 
 type B = GHC.Bool
 type B# = I
@@ -63,4 +59,6 @@ type IO# (a ∷ TYPE r) = ST# (☸) a
 -- | A computation performing some I\/O
 type IO_# = ST_# (☸)
 
-class (≡) (a ∷ TYPE r) where (≡) ∷ a → a → B#
+infix 4 >, ≥, <, ≤, ≡, ≠
+class (≡) (a ∷ TYPE r) where (≡), (≠) ∷ a → a → B#
+class (≤) (a ∷ TYPE r) where (>),(≥),(<),(≤) ∷ a → a → B#

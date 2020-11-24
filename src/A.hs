@@ -3,6 +3,10 @@ module A where
 import P hiding (Prim)
 import Char8
 import Char
+import I32 (I32(..))
+import I16 (I16(..))
+import I8 (I8(..))
+import I64 (I64(..))
 import qualified P.Stable as Stable
 
 

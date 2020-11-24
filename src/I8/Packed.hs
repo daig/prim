@@ -6,13 +6,15 @@ type I8 = Int8#
 pattern I8 ∷ I → I8
 pattern I8 i ← (extendInt8# → i) where I8 = narrowInt8#
 
-(>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ I8 → I8 → B#
-(>) = gtInt8#; gt = ltInt8#
-(≥) = geInt8#; ge = leInt8#
-(<) = ltInt8#; lt = gtInt8#
-(≤) = leInt8#; le = geInt8#
-(≡) = eqInt8#; eq = eqInt8#
-(≠) = neInt8#; ne = neInt8#
+instance (≤) I8 where
+  (>) = gtInt8#
+  (≥) = geInt8#
+  (<) = ltInt8#
+  (≤) = leInt8#
+instance (≡) I8 where
+  (≡) = eqInt8#
+  (≠) = neInt8#
+
 
 (+), (-), (×), add, sub, mul ∷ I8 → I8 → I8
 (+) = plusInt8#; add = plusInt8#

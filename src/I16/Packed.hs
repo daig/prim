@@ -6,13 +6,14 @@ type I16 = Int16#
 pattern I16 ∷ I → I16
 pattern I16 i ← (extendInt16# → i) where I16 = narrowInt16#
 
-(>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ I16 → I16 → B#
-(>) = gtInt16#; gt = ltInt16#
-(≥) = geInt16#; ge = leInt16#
-(<) = ltInt16#; lt = gtInt16#
-(≤) = leInt16#; le = geInt16#
-(≡) = eqInt16#; eq = eqInt16#
-(≠) = neInt16#; ne = neInt16#
+instance (≤) I16 where
+  (>) = gtInt16#
+  (≥) = geInt16#
+  (<) = ltInt16#
+  (≤) = leInt16#
+instance (≡) I16 where
+  (≡) = eqInt16#
+  (≠) = neInt16#
 
 (+), (-), (×), add, sub, mul ∷ I16 → I16 → I16
 (+) = plusInt16#; add = plusInt16#

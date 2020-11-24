@@ -68,9 +68,9 @@ mod y x = GHC.modInt# x y; {-# inline mod #-}
 (/) = GHC.divInt#; {-# inline (/) #-}
 -- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
 divMod ∷ I {- ^ divisor -} → I {- ^ dividend -} → (# I, I #) {- ^ (div, mod) -}
-divMod y x | B# (gt 0# x) ∧ B# (lt 0# y) = case quotRem y (x -# 1# ) of
+divMod y x | B# (0# < x) ∧ B# (0# > y) = case quotRem y (x -# 1# ) of
                                     (# q, r #) → (# q -# 1#, r +# y +# 1# #)
-           | B# (lt 0# x) ∧ B# (gt 0# y) = case quotRem y (x +# 1# ) of
+           | B# (0# > x) ∧ B# (0# < y) = case quotRem y (x +# 1# ) of
                                     (# q, r #) → (# q -# 1#, r +# y +# 1# #)
            | T = quotRem y x
 
@@ -91,12 +91,14 @@ subC y x = subIntC# x y
 
 -- * Comparison Operators
 
-infix 4 >, ≥, <, ≤, ≡, ≠
-(>),(≥),(<),(≤),(≡),(≠),
-  gt,ge,lt,le,eq,ne ∷ I → I → B#
-(>) = (>#); (≥) = (>=#); (<) = (<#); (≤) = (<=#)
-(≡) = (==#); (≠) = (/=#)
-gt = (<#); ge = (<=#); lt = (>#); le = (>=#); eq = (==#); ne = (/=#)
+instance (≤) I where
+  (>) = (># )
+  (≥) = (>=# )
+  (<) = (<# )
+  (≤) = (<=# )
+instance (≡) I where
+  (≡) = (==# )
+  (≠) = (/=# )
 
 -- * Conversions
 
@@ -161,16 +163,3 @@ and, or, xor ∷ I → I → I
 and = andI#
 or = orI#
 xor = xorI#
-
-
-data Foo = Foo (# I , I , I #)
-foo ∷ Foo → (J , J , J)
-foo (Foo (# a , b , c #)) = (J a,J b,J c)
-data Bar = Bar (# I , (# I,I #) #)
-bar ∷ Bar → (J , J , J)
-bar (Bar (# a , (# b , c #) #)) = (J a,J b, J c)
-data J = J I
-
-aa = Bar (# 1#, (# 2#, 3# #) #)
-bb ∷ Foo
-bb = coerce# aa

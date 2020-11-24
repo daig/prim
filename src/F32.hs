@@ -1,4 +1,5 @@
 module F32 (F32, module F32) where
+import I32 (I32(..))
 
 (+),(-),(×),(/) ∷ F32 → F32 → F32
 (+) = plusFloat#; (-) = minusFloat#; (×) = timesFloat#; (/) = divideFloat#

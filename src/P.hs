@@ -5,6 +5,10 @@
 module P where
 import Char
 import Char8
+import I32 (I32(..))
+import I16 (I16(..))
+import I64 (I64(..))
+import I8 (I8(..))
 import qualified P.Stable as Stable
 
 -- | An arbitrary machine address assumed to point outside the garbage-collected heap

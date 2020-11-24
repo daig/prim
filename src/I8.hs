@@ -1,10 +1,14 @@
-
 module I8 (I8(I8#,I8), module I8) where
+import I ()
 
+newtype I8  ∷ TYPE IntRep where I8#  ∷ I → I8
 -- | Narrow a machine 'I' to 8 bits
 pattern I8 ∷ I → I8
 pattern I8 i ← (coerce narrow8Int# → i) where I8 = coerce
 {-# complete I8 #-}
+
+deriving newtype instance (≡) I8
+deriving newtype instance (≤) I8
 
 (+), (-), (×) ∷ I8 → I8 → I8
 (I8 x) + (I8 y) = I8 (x +# y)

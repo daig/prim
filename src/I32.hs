@@ -1,8 +1,14 @@
 module I32 (I32(I32#,I32), module I32) where
+import I ()
+import I8 (I8(..))
 
+newtype I32 ∷ TYPE IntRep where I32# ∷ I → I32
 -- | Narrow a machine 'I' to 32 bits
 pattern I32 ∷ I → I32
 pattern I32 i ← (coerce narrow32Int# → i) where I32 = coerce
+
+deriving newtype instance (≡) I32
+deriving newtype instance (≤) I32
 
 (+), (-), (×) ∷ I32 → I32 → I32
 (I32 x) + (I32 y) = I32 (x +# y)
