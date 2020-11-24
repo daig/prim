@@ -58,13 +58,14 @@ newNoFinalizer = mkWeakNoFinalizer#
 addFinalizer ∷ Raw.P → Raw.P → B# → Raw.P → P v → IO# B#
 addFinalizer = addCFinalizerToWeak#
 
-deref ∷ P v → IO# (Maybe# v)
-deref w s0 = case deRefWeak# w s0 of
+-- | Retrieve the value associated with a @Weak.P@ if it (the key)
+-- is still alive to the GC.
+read' ∷ P v → IO# (Maybe# v)
+read' w s0 = case deRefWeak# w s0 of
   (# s1, alive', v #) → (# s1, (# alive', v #) #)
 
-finalize ∷ P v → IO# (Maybe#  (IO# x))
-finalize w s0 = case finalizeWeak# w s0 of
-  (# s1, alive', finalizer #) → (# s1, (# alive', finalizer #) #)
-
-touch ∷ k → IO_#
-touch = touch#
+-- | Retrieve the finalizer associated with a @Weak.P@ if it (the key)
+-- is still alive to the GC.
+finalizer' ∷ P v → IO# (Maybe# (IO# x))
+finalizer' w s0 = case finalizeWeak# w s0 of
+  (# s1, alive', f #) → (# s1, (# alive', f #) #)

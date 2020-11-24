@@ -23,3 +23,10 @@ getApStackVal = getApStackVal#
 
 size# ∷ a → I {- ^ # machine words -}
 size# = closureSize#
+
+-- | Keep a value alive to the GC.
+-- It only makes sense to apply touch to lifted types on the heap.
+--
+-- see <https://gitlab.haskell.org/ghc/ghc/-/wikis/hidden-dangers-of-touch The Hidden Dangers of touch#>
+touch ∷ k → IO_#
+touch = touch#
