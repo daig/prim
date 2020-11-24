@@ -1,5 +1,9 @@
+{-# language InstanceSigs, TypeSynonymInstances #-}
 module A where
-import P
+import P hiding (Prim)
+import Char8
+import Char
+import qualified P.Stable as Stable
 
 
 type A = ByteArray#
@@ -122,3 +126,90 @@ compare# ∷ A -- ^ source1
          → I -- ^ number of bytes to compare
          → I -- ^ a number less-than, equal-to, or greater-than @0#@
 compare# = compareByteArrays#
+
+class Prim (a ∷ TYPE r) where
+  index# ∷ A → I {- ^ Offset in elements -} → a
+  index## ∷ A → I {- ^ Offset in bytes -} → a
+  read# ∷ MA s → I → ST# s a
+  write# ∷ MA s → I → a → ST_# s
+instance Prim Char8 where
+  index# ∷ A → I {- ^ Offset in 4-byte words -} → Char8
+  index# = coerce indexCharArray#
+  index## = coerce indexWord8ArrayAsChar#
+  read# = coerce readCharArray#
+  write# = coerce writeCharArray#
+instance Prim Char where
+  index# = indexWideCharArray#
+  index## = indexWord8ArrayAsWideChar#
+  read# = readWideCharArray#
+  write# = writeWideCharArray#
+instance Prim F32 where
+  index# = indexFloatArray#
+  index## = indexWord8ArrayAsFloat#
+  read# = readFloatArray#
+  write# = writeFloatArray#
+instance Prim F64 where
+  index# = indexDoubleArray#
+  index## = indexWord8ArrayAsDouble#
+  read# = readDoubleArray#
+  write# = writeDoubleArray#
+instance Prim I8 where
+  index# = coerce indexInt8Array#
+  index## = coerce indexInt8Array#
+  read# = coerce readInt8Array#
+  write# = coerce writeInt8Array#
+instance Prim I16 where
+  index# = coerce indexInt16Array#
+  index## = coerce indexWord8ArrayAsInt16#
+  read# = coerce readInt16Array#
+  write# = coerce writeInt16Array#
+instance Prim I32 where
+  index# = coerce indexInt32Array#
+  index## = coerce indexWord8ArrayAsInt32#
+  read# = coerce readInt32Array#
+  write# = coerce writeInt32Array#
+instance Prim I64 where
+  index# = coerce indexInt64Array#
+  index## = coerce indexWord8ArrayAsInt64#
+  read# = coerce readInt64Array#
+  write# = coerce writeInt64Array#
+instance Prim I where
+  index# = coerce indexIntArray#
+  index## = coerce indexWord8ArrayAsInt#
+  read# = coerce readIntArray#
+  write# = coerce writeIntArray#
+instance Prim U8 where
+  index# = coerce indexWord8Array#
+  index## = coerce indexWord8Array#
+  read# = coerce readWord8Array#
+  write# = coerce writeWord8Array#
+instance Prim U16 where
+  index# = coerce indexWord16Array#
+  index## = coerce indexWord8ArrayAsWord16#
+  read# = coerce readWord16Array#
+  write# = coerce writeWord16Array#
+instance Prim U32 where
+  index# = coerce indexWord32Array#
+  index## = coerce indexWord8ArrayAsWord32#
+  read# = coerce readWord32Array#
+  write# = coerce writeWord32Array#
+instance Prim U64 where
+  index# = coerce indexWord64Array#
+  index## = coerce indexWord8ArrayAsWord64#
+  read# = coerce readWord64Array#
+  write# = coerce writeWord64Array#
+instance Prim U where
+  index# = coerce indexWordArray#
+  index## = coerce indexWord8ArrayAsWord#
+  read# = coerce readWordArray#
+  write# = coerce writeWordArray#
+instance Prim P where
+  index# = coerce indexAddrArray#
+  index## = coerce indexWord8ArrayAsAddr#
+  read# = coerce readAddrArray#
+  write# = coerce writeAddrArray#
+instance Prim (Stable.P a) where
+  index# = indexStablePtrArray#
+  index## = indexWord8ArrayAsStablePtr#
+  read# = readStablePtrArray#
+  write# = writeStablePtrArray#

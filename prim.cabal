@@ -45,11 +45,6 @@ library
                  , Tuple
                  , Array.Small, Array.Boxed
                  , A, A.Pinned, A.Unpinned
-                 , A.Char, A.Char8
-                 , A.F32, A.F64
-                 , A.I64, A.I32, A.I16, A.I8
-                 , A.U64, A.U32, A.U16, A.U8
-                 , A.Stable
                  , Array.Array, Array.Array.Byte, Array.Array.Array
                  , Thread
                  , Compact
