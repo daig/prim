@@ -2,8 +2,7 @@ module P.STM where
 
 type P = TVar#
 
-(≡), eq ∷ P s a → P s a → B#
-(≡) = sameTVar#; eq = sameTVar#
+instance (≡) (P s a) where (≡) = sameTVar#
 
 new ∷ a → ST# s (P s a)
 new = newTVar#

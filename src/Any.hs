@@ -2,7 +2,7 @@
 module Any (module Any, Any, seq) where
 import P
 import A
-import qualified Array.Boxed as Boxed
+import qualified A.Boxed as Boxed
 import GHC.Types as X (Any)
 
 eq# ∷ a → a → B#

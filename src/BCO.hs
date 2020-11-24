@@ -1,6 +1,6 @@
 module BCO where
 import A (A)
-import qualified Array.Boxed as Boxed
+import qualified A.Boxed as Boxed
 
 type BCO = BCO#
 

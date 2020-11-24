@@ -33,6 +33,7 @@ library
                     , BlockArguments, UnicodeSyntax
                     , PatternSynonyms, ViewPatterns
                     , DataKinds, UnliftedNewtypes, GADTs
+                    , TypeSynonymInstances, TypeFamilies
   hs-source-dirs: src
   other-modules: Prelude
   exposed-modules: Char , B, Type
@@ -43,7 +44,7 @@ library
                  , P, P.Weak, P.Stable, P.Stable.Name
                  , P.Boxed, P.STM, P.Sync
                  , Tuple
-                 , Array.Small, Array.Boxed
+                 , A.Small, A.Boxed
                  , A, A.Pinned, A.Unpinned
                  , Array.Array, Array.Array.Byte, Array.Array.Array
                  , Thread

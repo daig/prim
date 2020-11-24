@@ -62,3 +62,5 @@ type (☸) = RealWorld
 type IO# (a ∷ TYPE r) = ST# (☸) a
 -- | A computation performing some I\/O
 type IO_# = ST_# (☸)
+
+class (≡) (a ∷ TYPE r) where (≡) ∷ a → a → B#
