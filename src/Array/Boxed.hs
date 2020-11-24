@@ -1,5 +1,5 @@
 module Array.Boxed where
-import qualified Array.Byte as Byte
+import qualified A as Byte
 
 type A = Array#
 type MA = MutableArray#

@@ -1,6 +1,6 @@
 -- | Description : Packed 'Array.Byte' Arrays of 'I16'
-module Array.I16 where
-import Array.Byte
+module A.I16 where
+import A
 
 index# ∷ A → I {- ^ Offset in elments -} → I16
 index# = coerce indexInt16Array#

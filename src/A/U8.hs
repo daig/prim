@@ -1,5 +1,5 @@
-module Array.U8 where
-import Array.Byte
+module A.U8 where
+import A
 
 index# ∷ A → I → U8
 index# = coerce indexWord8Array#

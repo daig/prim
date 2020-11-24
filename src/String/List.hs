@@ -3,7 +3,7 @@ module String.List where
 import Prelude hiding (IO,Char)
 import Stock.IO
 import Stock.Char
-import Array.Byte (MA)
+import A
 
 type S = [Char]
 
@@ -16,12 +16,12 @@ debugErrLn xs = IO \ s → case mkMBA xs s of
                     (# s', mba #) → case c_debugErrLn mba of IO f → f s'
 
 foreign import ccall unsafe "debugLn"
-    c_debugLn ∷ MutableByteArray# (☸) → IO ()
+    c_debugLn ∷ MA (☸) → IO ()
 
 foreign import ccall unsafe "debugErrLn"
-    c_debugErrLn ∷ MutableByteArray# (☸) → IO ()
+    c_debugErrLn ∷ MA (☸) → IO ()
 
-mkMBA ∷ S → IO# (MutableByteArray# (☸))
+mkMBA ∷ S → IO# (MA (☸))
 mkMBA xs s0 = -- Start with 1 so that we have space to put in a \0 at
               -- the end
               case len 1# xs of

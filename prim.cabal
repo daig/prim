@@ -44,12 +44,12 @@ library
                  , P.Boxed, P.STM, P.Sync
                  , Tuple
                  , Array.Small, Array.Boxed
-                 , Array.Byte, Array.Byte.Pinned, Array.Byte.Unpinned
-                 , Array.Char, Array.Char8
-                 , Array.F32, Array.F64
-                 , Array.I64, Array.I32, Array.I16, Array.I8
-                 , Array.U64, Array.U32, Array.U16, Array.U8
-                 , Array.Stable
+                 , A, A.Pinned, A.Unpinned
+                 , A.Char, A.Char8
+                 , A.F32, A.F64
+                 , A.I64, A.I32, A.I16, A.I8
+                 , A.U64, A.U32, A.U16, A.U8
+                 , A.Stable
                  , Array.Array, Array.Array.Byte, Array.Array.Array
                  , Thread
                  , Compact

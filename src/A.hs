@@ -1,9 +1,15 @@
-module Array.Byte where
+module A where
 import P
 
 
 type A = ByteArray#
 type MA = MutableByteArray#
+
+pinned' ∷ A → B#
+pinned' = isByteArrayPinned#
+
+pinnedMA' ∷ MA s → B#
+pinnedMA' = isMutableByteArrayPinned#
 
 -- | Create a new uninitialized mutable byte array of specified size (in bytes),
 -- in the specified state thread.
@@ -15,19 +21,22 @@ infix 4 ≡
 (≡) = sameMutableByteArray#
 eq = sameMutableByteArray#
 
-shrink ∷ MA s → I → ST_# s
+-- | Must be ≤ current 'sizeMA'
+shrink ∷ MA s → I {- ^ # bytes #-} → ST_# s
 shrink = shrinkMutableByteArray#
 
 -- | Number of elements
 size ∷ A → I
 size = sizeofByteArray#
 
--- | Number of elements. MAust be in @ST#@ because of possible resizes.
+-- | Number of elements.
+--
+-- note: In @ST#@ because of possible resizes.
 sizeMA ∷ MA s → ST# s I
 sizeMA = getSizeofMutableByteArray#
 
 -- | MAake a mutable array immutable, without copying.
-freeze## ∷ MA s → ST# s (A)
+freeze## ∷ MA s → ST# s A
 freeze## = unsafeFreezeByteArray#
 
 -- | Copy the elements from the source array to the destination array.

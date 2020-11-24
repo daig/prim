@@ -1,5 +1,5 @@
-module Array.U32 where
-import Array.Byte
+module A.U32 where
+import A
 
 index# ∷ A → I {- ^ Offset in elments -} → U32
 index# = coerce indexWord32Array#

@@ -1,5 +1,5 @@
-module Array.Stable where
-import Array.Byte
+module A.Stable where
+import A
 import qualified P.Stable as Stable
 
 index# ∷ A → I {- ^ Offset in elments -} → Stable.P a

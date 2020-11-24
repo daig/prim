@@ -1,7 +1,7 @@
 module RTS.Prefetch.Array where
-import qualified Array.Byte as Byte
+import A
 
-t0, t1, t2, t3 ∷ Byte.A → I {- ^ offset -} → ST_# s
+t0, t1, t2, t3 ∷ A → I {- ^ offset -} → ST_# s
 t0 = prefetchByteArray0#
 t1 = prefetchByteArray1#
 t2 = prefetchByteArray2#

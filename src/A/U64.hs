@@ -1,5 +1,5 @@
-module Array.U64 where
-import Array.Byte
+module A.U64 where
+import A
 
 index# ∷ A → I {- ^ Offset in elments -} → U64
 index# = coerce indexWord64Array#

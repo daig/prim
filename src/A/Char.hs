@@ -1,5 +1,5 @@
-module Array.Char where
-import Array.Byte
+module A.Char where
+import A
 import Char
 
 index# ∷ A → I {- ^ Offset in 4-byte words -} → Char

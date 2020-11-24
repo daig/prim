@@ -1,6 +1,6 @@
 -- | Description : Packed 'Array.Byte' Arrays of 'I64'
-module Array.I64 where
-import Array.Byte
+module A.I64 where
+import A
 
 
 index# ∷ A → I {- ^ Offset in elments -} → I64

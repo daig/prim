@@ -1,6 +1,6 @@
 -- | Description : Packed 'Array.Byte' Arrays of 'F64'
-module Array.F32 where
-import Array.Byte
+module A.F32 where
+import A
 
 index# ∷ A → I → F32
 index# = indexFloatArray#

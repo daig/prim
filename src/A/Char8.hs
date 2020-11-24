@@ -1,6 +1,6 @@
-module Array.Char8 where
+module A.Char8 where
 import Char8
-import Array.Byte
+import A
 
 index# ∷ A → I {- ^ offset in bytes -} → Char8
 index# = coerce indexCharArray#

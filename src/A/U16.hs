@@ -1,5 +1,5 @@
-module Array.U16 where
-import Array.Byte
+module A.U16 where
+import A
 
 index# ∷ A → I {- ^ Offset in elments -} → U16
 index# = coerce indexWord16Array#

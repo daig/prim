@@ -1,6 +1,6 @@
 -- | Description : Packed 'Array.Byte' Arrays of 'I32'
-module Array.I32 where
-import Array.Byte
+module A.I32 where
+import A
 
 index# ∷ A → I {- ^ Offset in elments -} → I32
 index# = coerce indexInt32Array#

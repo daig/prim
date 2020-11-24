@@ -1,6 +1,6 @@
 -- | Description : Packed 'Array.Byte' Arrays of 'I8'
-module Array.I8 where
-import Array.Byte
+module A.I8 where
+import A
 
 index# ∷ A → I {- ^ Offset in elments -} → I8
 index# = coerce indexInt8Array#
