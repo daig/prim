@@ -70,4 +70,5 @@ library
                  , Maybe
                  , Magic
                  , Typeable
+                 , X
   build-depends: ghc-prim ^>= 0.6.1
