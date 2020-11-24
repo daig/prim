@@ -1,8 +1,9 @@
 module Compact where
-import qualified P.Byte as Byte
+import P
+
 
 type Compact = Compact#
-type Block# = (# Byte.P, U64 #)
+type Block# = (# P, U64 #)
 
 new ∷ U64 → IO# Compact
 new = coerce compactNew#
@@ -19,14 +20,14 @@ head ∷ Compact → IO# Block#
 head c s0 = case compactGetFirstBlock# c s0 of
   (# s1, a, n #) → (# s1, (# a, U64 n #) #)
 
-next ∷ Compact → Byte.P → IO# Block#
+next ∷ Compact → P → IO# Block#
 next c a0 s0 = case coerce compactGetNextBlock# c a0 s0 of
   (# s1, a1, n #) → (# s1, (# a1, n #) #)
 
-allocate ∷ Block# → IO# Byte.P
+allocate ∷ Block# → IO# P
 allocate (# a, n #) = coerce compactAllocateBlock# n a
 
-fixup ∷ Byte.P → Byte.P → IO# (# Compact, Byte.P #)
+fixup ∷ P → P → IO# (# Compact, P #)
 fixup b0 root s0 = case compactFixupPointers# b0 root s0 of
   (# s1, c, b1 #) → (# s1, (# c, b1 #) #)
 

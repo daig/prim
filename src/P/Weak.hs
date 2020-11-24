@@ -1,5 +1,5 @@
 module P.Weak where
-import qualified P.Byte as Byte
+import qualified P as Raw
 
 type P = Weak#
 
@@ -9,7 +9,7 @@ new = mkWeak#
 newNoFinalizer ∷ k → v → IO# (P v)
 newNoFinalizer = mkWeakNoFinalizer#
 
-addFinalizer ∷ Byte.P → Byte.P → B# → Byte.P → P v → IO# B#
+addFinalizer ∷ Raw.P → Raw.P → B# → Raw.P → P v → IO# B#
 addFinalizer = addCFinalizerToWeak#
 
 deref ∷ P v → IO# (Maybe# v)

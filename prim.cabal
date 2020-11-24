@@ -40,12 +40,7 @@ library
                  , U, U64, U32, U16, U16.Packed, U8, U8.Packed
                  , F64, F32
                  , ST, IO, IO.STM
-                 , P.Weak, P.Stable, P.Stable.Name, P.Byte
-                 , P.Char8, P.Char
-                 , P.I64, P.I32, P.I16, P.I8
-                 , P.U64, P.U32, P.U16, P.U8
-                 , P.F32, P.F64
-                 , P.P.Byte, P.P.Stable
+                 , P, P.Weak, P.Stable, P.Stable.Name
                  , P.Boxed, P.STM, P.Block
                  , Tuple
                  , Array.Small, Array.Boxed

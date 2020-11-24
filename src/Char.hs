@@ -1,4 +1,7 @@
-module Char (Char,Char8#, module Char) where
+module Char (Char, pattern Char ,module Char) where
+
+-- | 31-bit Unicode code points
+type Char = Char#
 
 (>),(≥),(<),(≤),(≡),(≠), 
   gt,ge,lt,le,eq,ne ∷ Char → Char → B#
@@ -7,7 +10,5 @@ module Char (Char,Char8#, module Char) where
 gt = ltChar#; ge = leChar#; lt = gtChar#; le = geChar#
 eq = eqChar#; ne = neChar#
 
-fromI ∷ I → Char
-fromI = chr#
-toI ∷ Char → I
-toI = ord#
+pattern Char ∷ I → Char
+pattern Char{toI} ← (ord# → toI) where Char = chr#

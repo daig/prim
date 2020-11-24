@@ -1,6 +1,7 @@
 {-# language PatternSynonyms #-}
 module Thread where
-import qualified P.Byte as Byte
+import P
+
 
 type Id = ThreadId#
 
@@ -20,7 +21,7 @@ here ∷ IO# Id
 here = myThreadId#
 -- | Label a thread with the given cstring pointer
 -- Used in debugging output if the RTS was compiled to support it.
-label# ∷ Id → Byte.P → IO_#
+label# ∷ Id → P → IO_#
 label# = labelThread#
 bound' ∷ IO# B#
 bound' = isCurrentThreadBound#

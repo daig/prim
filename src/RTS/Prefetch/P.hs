@@ -1,7 +1,8 @@
 module RTS.Prefetch.P where
-import qualified P.Byte as Byte
+import P
 
-t0, t1, t2, t3 ∷ Byte.P → I {- ^ offset -} → ST_# s
+
+t0, t1, t2, t3 ∷ P → I {- ^ offset -} → ST_# s
 t0 = prefetchAddr0#
 t1 = prefetchAddr1#
 t2 = prefetchAddr2#

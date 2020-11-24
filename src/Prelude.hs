@@ -5,10 +5,6 @@ import GHC.Prim  as X
 import GHC.Types as X (TYPE,RuntimeRep(..),VecCount(..),VecElem(..))
 import qualified GHC.Types as GHC
 
--- | 31-bit Unicode code points
-type Char = Char#
--- | 8-bit Latin-1 code points
-type Char8# = Char#
 
 -- | A fixed-precision integer type with at least the range @[-2^29 .. 2^29-1]@.
 -- The exact range for a given implementation can be determined by using

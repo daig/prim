@@ -6,7 +6,7 @@ import Prelude hiding (Char)
 import Stock.Char (Char(C#))
 import I hiding ((≡))
 import Char ((≡))
-import P.Char8
+import P
 import B
 
 --------------------------------------------------------------------------
@@ -56,7 +56,7 @@ Moreover, we want to make it CONLIKE, so that:
 All of this goes for unpackUtf8# too.
 -}
 
-
+{-
 unpack# ∷ S → String.List
 {-# NOINLINE CONLIKE unpack# #-}
 unpack# ref = unpack 0# where
@@ -107,3 +107,4 @@ unpackN#  ref len = unpack [] (len - 1#) where
       | T           =
          case ref !# i of
             ch → unpack (C# ch : acc) (i - 1#)
+-}
