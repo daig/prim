@@ -60,7 +60,7 @@ library
                  , Enum
                  , Any, BCO
                  , RTS.Rep
-                 , RTS.Block, Optimizer
+                 , RTS.Block, Inline
                  , RTS.Prefetch.Any, RTS.Prefetch.P, RTS.Prefetch.Array, RTS.Prefetch.Array.M
                  , String, String.C, String.C.Latin, String.C.UTF8, String.List
                  , Nat
@@ -68,7 +68,6 @@ library
                  , Stock.Char, Stock.Double, Stock.Float, Stock.Int, Stock.Word, Stock.IO
                  , Syntax.ImplicitParam
                  , Maybe
-                 , Magic
                  , Typeable
                  , X
   build-depends: ghc-prim ^>= 0.6.1
