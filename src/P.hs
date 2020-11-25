@@ -44,7 +44,7 @@ toAny = addrToAny#
 fromAny# ∷ a → IO# P
 fromAny# = anyToAddr#
 
-class Prim (a ∷ TYPE r) where
+class Prim (a ∷ T_ r) where
   index# ∷ P → I {- ^ Offset in elements -} → a
   read#  ∷ P → I {- ^ Offset in elements -} → ST# s a
   write# ∷ P → I {- ^ Offset in elements -} → a → ST_# s

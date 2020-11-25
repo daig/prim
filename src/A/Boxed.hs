@@ -7,7 +7,7 @@ type A = Array#
 type MA = MutableArray#
 
 
-class Array (a ∷ T → TYPE UnliftedRep) where
+class Array (a ∷ T → T_A) where
   new ∷ I → x → ST# s (M (a x) s)
   read ∷ M (a x) s → I → ST# s x
   write ∷ M (a x) s → I → x → ST_# s
@@ -56,7 +56,7 @@ class Array (a ∷ T → TYPE UnliftedRep) where
 (≡) = sameMutableArray#
 
 
-class Index (x ∷ TYPE r) (a ∷ TYPE rr) where index ∷ a → I → x
+class Index (x ∷ T_ r) (a ∷ T_ rr) where index ∷ a → I → x
 instance Size (Array# a) where size = sizeofArray#
 instance Array Array# where
   new = newArray#

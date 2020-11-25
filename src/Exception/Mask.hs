@@ -44,7 +44,7 @@ uninterruptible = maskUninterruptible#
 state ∷ IO# State
 state = coerce getMaskingState#
 
-newtype State ∷ TYPE IntRep where State# ∷ I → State
+newtype State ∷ T_I where State# ∷ I → State
 pattern Unmasked ∷ State
 pattern Unmasked = State# 0#
 pattern Uninterruptible ∷ State

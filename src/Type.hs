@@ -6,6 +6,7 @@ import qualified GHC.Types as GHC
 -- | The kind of constraints, like @Show a@
 type C = GHC.Constraint
 
+type T_ = TYPE
 type T = TYPE 'LiftedRep
 type T_I = TYPE 'IntRep
 type T_I8 = TYPE 'Int8Rep

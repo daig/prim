@@ -8,7 +8,7 @@ import qualified I
 #include "MachDeps.h"
 
 
-newtype I64 ∷ TYPE IntRep where I64  ∷ I → I64
+newtype I64 ∷ T_I where I64  ∷ I → I64
 pattern Max, Min ∷ I64
 pattern Max =  I64 0x7FFFFFFFFFFFFFFF#
 pattern Min = I64 -0x8000000000000000#

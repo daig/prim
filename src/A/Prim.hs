@@ -10,15 +10,15 @@ import I64 (I64(..))
 import P (P)
 import qualified P.Stable as Stable
 
-class Index# (x ∷ TYPE r) (a ∷ TYPE r') where
+class Index# (x ∷ T_ r) (a ∷ T_ r') where
   index# ∷ a → I {- ^ Offset in elements -} → x
 
-class Index## (x ∷ TYPE r) (a ∷ TYPE r') where
+class Index## (x ∷ T_ r) (a ∷ T_ r') where
   index## ∷ a → I {- ^ Offset in bytes -} → x
 
-class Read# (x ∷ TYPE r) (a ∷ TYPE r') where
+class Read# (x ∷ T_ r) (a ∷ T_ r') where
   read# ∷ M a s → I → ST# s x
-class Write# (x ∷ TYPE r) (a ∷ TYPE r') where
+class Write# (x ∷ T_ r) (a ∷ T_ r') where
   write# ∷ M a s → I → x → ST_# s
 
 -- | Offset in 4-byte words

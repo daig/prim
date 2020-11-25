@@ -2,7 +2,7 @@ module IO.STM where
 import IO
 import GHC.Prim
 
-type STM# (a ∷ TYPE r) = IO# a
+type STM# (a ∷ T_ r) = IO# a
 
 run ∷ STM# a → IO# a
 run = atomically#

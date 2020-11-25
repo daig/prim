@@ -1,6 +1,6 @@
 {-# OPTIONS_HADDOCK not-home  #-}
 {-# language NoImplicitPrelude,TypeOperators #-}
-module Prelude (module Prelude, module X, type TYPE) where
+module Prelude (module Prelude, module X, type T_) where
 import GHC.Prim  as X
 import Type as X
 import qualified GHC.Types as GHC
@@ -11,7 +11,7 @@ import qualified GHC.Types as GHC
 -- 'I.Min' and 'I.Max'.
 type I = Int#
 
-newtype I8  ∷ TYPE IntRep where I8#  ∷ I → I8
+newtype I8  ∷ T_I where I8#  ∷ I → I8
 -- | Narrow a machine 'I' to 8 bits
 pattern I8 ∷ I → I8
 pattern I8 i ← (coerce narrow8Int# → i) where I8 = coerce
@@ -53,7 +53,7 @@ type F32 = Float#
 type F64 = Double#
 
 -- | Primitive maybe type represented by a tag and (possibly invalid) value.
-type Maybe# (a ∷ TYPE r) = (# B# , a #)
+type Maybe# (a ∷ T_ r) = (# B# , a #)
 
 -- | @Token@ is the primitive, unlifted type of states.
 -- It has one type parameter, thus @Token (☸)@, or @Token s@,
@@ -62,7 +62,7 @@ type Maybe# (a ∷ TYPE r) = (# B# , a #)
 -- It is represented by nothing at all. 
 type Token = State#
 -- | A stateful computation returning an @a@, threaded by the @Token s@
-type ST# s (a ∷ TYPE r) = Token s → (# Token s, a #)
+type ST# s (a ∷ T_ r) = Token s → (# Token s, a #)
 -- | A stateful value action by the @Token s@
 type ST_# s = Token s → Token s
 
@@ -72,10 +72,10 @@ type ST_# s = Token s → Token s
 type (☸) = RealWorld
 
 -- | A computation performing some I\/O before returning a value of type @a@.
-type IO# (a ∷ TYPE r) = ST# (☸) a
+type IO# (a ∷ T_ r) = ST# (☸) a
 -- | A computation performing some I\/O
 type IO_# = ST_# (☸)
 
 infix 4 >, ≥, <, ≤, ≡, ≠
-class (≡) (a ∷ TYPE r) where (≡), (≠) ∷ a → a → B#
-class (≤) (a ∷ TYPE r) where (>),(≥),(<),(≤) ∷ a → a → B#
+class (≡) (a ∷ T_ r) where (≡), (≠) ∷ a → a → B#
+class (≤) (a ∷ T_ r) where (>),(≥),(<),(≤) ∷ a → a → B#

@@ -33,7 +33,7 @@ status n s = case threadStatus# n s of
   (# s', status, cap, bound' #) → (# s', (# Status# status, cap, bound' #) #)
 
 -- * Constants for why_blocked field of a TSO from rts/Constants.h
-newtype Status ∷ TYPE IntRep where Status# ∷ I → Status
+newtype Status ∷ T_I where Status# ∷ I → Status
 pattern Running, BlockedOnMVar, BlockedOnBlackHole, BlockedOnRead, BlockedOnWrite, BlockedOnDelay, BlockedOnSTM, BlockedOnDoProc, BlockedOnCCall, BlockedOnCCall_Interruptible
   ,BlockedOnMsgThrowTo, ThreadMigrating, BlockedOnMVarRead, BlockedOnIOCompletion, ThreadFinished, ThreadDied ∷ Status
 pattern Running = Status# 0#

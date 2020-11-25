@@ -1,7 +1,7 @@
 module I16 (I16(I16#,I16), module I16) where
 import I ()
 
-newtype I16 ∷ TYPE IntRep where I16# ∷ I → I16
+newtype I16 ∷ T_I where I16# ∷ I → I16
 -- | Narrow a machine 'I' to 16 bits
 pattern I16 ∷ I → I16
 pattern I16 i ← (coerce narrow16Int# → i) where I16 = coerce

@@ -23,12 +23,12 @@ type family M (a ∷ k) (s ∷ T) = (ma ∷ k) | ma → a where
   M ArrayArray# s = MutableArrayArray# s
   M P s = P
 
-class Size (a ∷ TYPE UnliftedRep) where
+class Size (a ∷ T_A) where
   -- | Number of elements
   size ∷ a → I
 -- | # of bytes
 
-class Copy (src ∷ TYPE r) (dst ∷ TYPE r') (s ∷ T) where
+class Copy (src ∷ T_ r) (dst ∷ T_ r') (s ∷ T) where
   -- | Copy the elements from the source to the destination.
   -- Both must fully contain the specified ranges and not overlap in memory,
   -- but this is not checked.
