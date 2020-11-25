@@ -1,14 +1,13 @@
+--------------------------------------------------------------------
+-- | Description : 16-bit Signed Integer operations
+--------------------------------------------------------------------
 module I16 (I16(I16#,I16), module I16) where
 import I ()
 
-newtype I16 ∷ T_I where I16# ∷ I → I16
--- | Narrow a machine 'I' to 16 bits
-pattern I16 ∷ I → I16
-pattern I16 i ← (coerce narrow16Int# → i) where I16 = coerce
-{-# complete I16 #-}
-
 deriving newtype instance (≡) I16
 deriving newtype instance (≤) I16
+deriving newtype instance (⊕) I16
+instance (¬) I16 where (¬) (I16 u) = I16 (u ¬)
 
 (+), (-), (×) ∷ I16 → I16 → I16
 (I16 x) + (I16 y) = I16 (x +# y)

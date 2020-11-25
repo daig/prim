@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : Machine Word sized Unsigned Integer type
+--------------------------------------------------------------------
 {-# language CPP #-}
 module U (U, module U) where
 import qualified GHC.Types as GHC
@@ -64,16 +67,8 @@ pattern Max, Min ∷ U
 pattern Max = 0xFFFFFFFFFFFFFFFF##
 pattern Min = 0##
 
--- × Bitwise operations
-infixl 7 ∧
-infixl 6 ⊕
-infixl 5 ∨ 
-(∧),(∨),(⊕) ∷ U → U → U
-(∧) = and#; (∨) = or#; (⊕) = xor#
-and,or,xor ∷ U → U → U
-and = and#; or = or#; xor = xor#
-not ∷ U → U
-not = not#
+instance (⊕) U where (∧) = and#; (∨) = or#; (⊕) = xor#
+instance (¬) U where (¬) = not#
 
 -- | Shift left.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.

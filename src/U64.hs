@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : 64-bit Unsigned Integer operations
+--------------------------------------------------------------------
 {-# language CPP #-}
 module U64 (U64(..), module U64) where
 import qualified GHC.Types as GHC
@@ -7,6 +10,8 @@ import qualified U
 
 deriving newtype instance (≡) U64
 deriving newtype instance (≤) U64
+deriving newtype instance (⊕) U64
+deriving newtype instance (¬) U64
 
 
 (+),(-),(×) ∷ U64 → U64 → U64
@@ -62,15 +67,6 @@ toF64 = coerce word2Double#
 pattern Max, Min ∷ U64
 pattern Max = U64 0xFFFFFFFFFFFFFFFF##
 pattern Min = U64 0##
-
--- × Bitwise operations
-infixl 7 ∧
-infixl 6 ⊕
-infixl 5 ∨ 
-(∧),(∨),(⊕) ∷ U64 → U64 → U64
-(∧) = coerce and#; (∨) = coerce or#; (⊕) = coerce xor#
-not ∷ U64 → U64
-not = coerce not#
 
 shiftL#, shiftRL# ∷ U64 → I → U64
 shiftL, shiftRL ∷ I → U64 → U64

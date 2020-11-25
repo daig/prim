@@ -1,9 +1,12 @@
+--------------------------------------------------------------------
+-- | Description : Machine Word sized Signed Integer type
+--------------------------------------------------------------------
 {-# language CPP #-}
 {-# language BangPatterns #-}
 module I (I, module I) where
 import qualified GHC.Classes as GHC (divInt#,modInt#)
 
-import B
+import {-# source #-} B
 
 #include "MachDeps.h"
 
@@ -143,11 +146,7 @@ shiftR i x = case i ≥ WORD_SIZE_IN_BITS# of
   T → case x < 0# of {T → -1#; F → 0#}
   F → uncheckedIShiftRA# x i
 
--- | Bitwise negation. @not n = -n - 1@
-not ∷ I → I
-not = notI#
-
-{-# DEPRECATED shiftL#, shiftRL#, and, or, xor "Signed logical bitwise operations are rarely sensible, prefer U instead" #-}
+{-# DEPRECATED shiftL#, shiftRL# "Signed logical bitwise operations are rarely sensible, prefer U instead" #-}
 
 shiftL#, shiftL, shiftRL#, shiftRL ∷ I → I → I
 -- | Shift left.  Result undefined if shift amount is not
@@ -165,7 +164,7 @@ shiftRL# i x = uncheckedIShiftRL# x i
 -- | Shift right logical.  Result 0 if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 shiftRL i x = case i ≥ WORD_SIZE_IN_BITS# of {T → 0#; F → uncheckedIShiftRL# x i}
-and, or, xor ∷ I → I → I
-and = andI#
-or = orI#
-xor = xorI#
+
+-- | @(n ¬) = -n - 1@
+instance (⊕) I where (∧) = andI#; (∨) = orI#; (⊕) = xorI#
+instance (¬) I where (¬) = notI#

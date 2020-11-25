@@ -14,8 +14,22 @@ type I = Int#
 newtype I8  ∷ T_I where I8#  ∷ I → I8
 -- | Narrow a machine 'I' to 8 bits
 pattern I8 ∷ I → I8
-pattern I8 i ← (coerce narrow8Int# → i) where I8 = coerce
+pattern I8 i ← (coerce → i) where I8 = coerce narrow8Int#
 {-# complete I8 #-}
+
+newtype I16  ∷ T_I where I16#  ∷ I → I16
+-- | Narrow a machine 'I' to 16 bits
+pattern I16 ∷ I → I16
+pattern I16 i ← (coerce → i) where I16 = coerce narrow16Int#
+{-# complete I16 #-}
+
+newtype I32  ∷ T_I where I32#  ∷ I → I32
+-- | Narrow a machine 'I' to 32 bits
+pattern I32 ∷ I → I32
+pattern I32 i ← (coerce → i) where I32 = coerce narrow32Int#
+{-# complete I32 #-}
+
+newtype I64 ∷ T_I where I64  ∷ I → I64
 
 newtype B ∷ T_I where B# ∷ I → B
 pattern F ∷ B
@@ -30,19 +44,19 @@ type U = Word#
 newtype U8  ∷ T_U where U8#  ∷ U → U8
 -- | Narrow a machine 'U' to 8 bits
 pattern U8 ∷ U → U8
-pattern U8 i ← (coerce narrow8Word# → i) where U8 = coerce
+pattern U8 i ← (coerce → i) where U8 = coerce narrow8Word#
 {-# complete U8 #-}
 
 newtype U16 ∷ T_U where U16# ∷ U → U16
 -- | Narrow a machine 'U' to 16 bits
 pattern U16 ∷ U → U16
-pattern U16 i ← (coerce narrow16Word# → i) where U16 = coerce
+pattern U16 i ← (coerce → i) where U16 = coerce narrow16Word#
 {-# complete U16 #-}
 
 newtype U32 ∷ T_U where U32# ∷ U → U32
 -- | Narrow a machine 'U' to 32 bits
 pattern U32 ∷ U → U32
-pattern U32 i ← (coerce narrow32Word# → i) where U32 = coerce
+pattern U32 i ← (coerce → i) where U32 = coerce narrow32Word#
 {-# complete U32 #-}
 
 newtype U64 ∷ T_U where U64  ∷ U → U64
@@ -82,4 +96,11 @@ type IO_# = ST_# (☸)
 
 infix 4 >, ≥, <, ≤, ≡, ≠
 class (≡) (a ∷ T_ r) where (≡), (≠) ∷ a → a → B
-class (≤) (a ∷ T_ r) where (>),(≥),(<),(≤) ∷ a → a → B
+class (≡) a ⇒ (≤) (a ∷ T_ r) where (>),(≥),(<),(≤) ∷ a → a → B
+
+-- | Bitwise algebriac operations
+class (⊕) (a ∷ T_ r) where (∧), (∨), (⊕) ∷ a → a → a
+class (¬) (a ∷ T_ r) where (¬) ∷ a → a
+infixl 3 ∧
+infixl 2 ⊕
+infixl 1 ∨

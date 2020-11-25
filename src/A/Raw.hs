@@ -9,7 +9,6 @@ import I64 (I64(..))
 import P (P,(∔))
 import qualified P.Stable as Stable
 import A
-import qualified B
 
 
 type A = ByteArray#
@@ -24,7 +23,7 @@ new = newByteArray#
 -- see https://gitlab.haskell.org/ghc/ghc/-/issues/13908
 instance (≡) (MA s) where
   (≡) = coerce sameMutableByteArray#
-  a ≠ b = B.not (a ≡ b)
+  a ≠ b = (¬) (a ≡ b)
 
 -- * Pinned Arrays
 

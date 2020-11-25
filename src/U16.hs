@@ -1,8 +1,13 @@
+--------------------------------------------------------------------
+-- | Description : 16-bit Unsigned Integer operations
+--------------------------------------------------------------------
 module U16 (U16(U16#,U16), module U16) where
 import U ()
 
 deriving newtype instance (≡) U16
 deriving newtype instance (≤) U16
+deriving newtype instance (⊕) U16
+instance (¬) U16 where (¬) (U16 u) = U16 (u ¬)
 
 
 (+),(-),(×) ∷ U16 → U16 → U16

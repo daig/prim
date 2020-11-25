@@ -1,15 +1,17 @@
+--------------------------------------------------------------------
+-- | Description : Small Boxed Arrays
+--------------------------------------------------------------------
 module A.Small where
 import Prelude hiding (Array)
 import A
 import A.Prim
-import qualified B
 
 type A = SmallArray#
 type MA = SmallMutableArray#
 
 instance (≡) (MA s a) where
   x ≡ y= coerce do sameSmallMutableArray# x y
-  x ≠ y = B.not (x ≡ y)
+  x ≠ y = (¬) (x ≡ y)
 
 instance Shrink (A a) where shrink = shrinkSmallMutableArray#
 

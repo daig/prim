@@ -1,8 +1,13 @@
+--------------------------------------------------------------------
+-- | Description : 32-bit Unsigned Integer operations
+--------------------------------------------------------------------
 module U32 (U32(U32#,U32),module U32) where
 import U ()
 
 deriving newtype instance (≡) U32
 deriving newtype instance (≤) U32
+deriving newtype instance (⊕) U32
+instance (¬) U32 where (¬) (U32 u) = U32 (u ¬)
 
 
 (+),(-),(×) ∷ U32 → U32 → U32

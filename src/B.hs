@@ -1,9 +1,7 @@
 module B (B(B#,F,T), module B) where
+import Num
+import I ()
 
 
-infixl 3 ∧
-infixl 2 ∨
-(∧), (∨) ∷ B → B → B
-(∧) = coerce andI#; (∨) = coerce orI#;
-not ∷ B → B
-not = coerce xorI# 1#
+deriving newtype instance (⊕) B
+instance (¬) B where (¬) = (T ⊕)

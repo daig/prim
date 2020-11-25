@@ -1,8 +1,14 @@
-module U8 (U8, module U8) where
+--------------------------------------------------------------------
+-- | Description : 8-bit Unsigned Integer operations
+--------------------------------------------------------------------
+{-# language PostfixOperators #-}
+module U8 (U8(U8#,U8), module U8) where
 import U ()
 
 deriving newtype instance (≡) U8
 deriving newtype instance (≤) U8
+deriving newtype instance (⊕) U8
+instance (¬) U8 where (¬) (U8 u) = U8 (u ¬)
 
 (+),(-),(×) ∷ U8 → U8 → U8
 x + y = U8 (coerce plusWord# x y)

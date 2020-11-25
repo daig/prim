@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : Typeclasses for Array operations
+--------------------------------------------------------------------
 {-# language TypeFamilyDependencies, FlexibleInstances,InstanceSigs,MultiParamTypeClasses #-}
 module A where
 import P hiding (Prim)

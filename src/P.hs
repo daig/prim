@@ -16,7 +16,7 @@ type P = Addr#
 
 -- | hack to expose nullAddr#
 pattern Null ∷ P
-pattern Null <- nullAddr# where Null = nullAddr#
+pattern Null ← nullAddr# where Null = nullAddr#
 
 -- |Advances the given address by the given offset in bytes.
 (∔) ∷ I → P → P

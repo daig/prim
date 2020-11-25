@@ -1,8 +1,13 @@
+--------------------------------------------------------------------
+-- | Description : 8-bit Signed Integer operations
+--------------------------------------------------------------------
 module I8 (I8(I8#,I8), module I8) where
 import I ()
 
 deriving newtype instance (≡) I8
 deriving newtype instance (≤) I8
+deriving newtype instance (⊕) I8
+instance (¬) I8 where (¬) (I8 u) = I8 (u ¬)
 
 (+), (-), (×) ∷ I8 → I8 → I8
 (I8 x) + (I8 y) = I8 (x +# y)

@@ -37,6 +37,7 @@ library
                     , StandaloneDeriving, GeneralizedNewtypeDeriving
                     , FlexibleInstances, MultiParamTypeClasses, AllowAmbiguousTypes
                     , TypeFamilyDependencies
+                    , PostfixOperators
 
   hs-source-dirs: src
   other-modules: Prelude
@@ -70,4 +71,5 @@ library
                  , Maybe
                  , Typeable
                  , X
+                 , Bits, Cmp
   build-depends: ghc-prim ^>= 0.6.1
