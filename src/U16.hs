@@ -1,4 +1,8 @@
 module U16 (U16(U16#,U16), module U16) where
+import U ()
+
+deriving newtype instance (≡) U16
+deriving newtype instance (≤) U16
 
 
 (+),(-),(×) ∷ U16 → U16 → U16

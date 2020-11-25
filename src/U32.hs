@@ -1,4 +1,8 @@
 module U32 (U32(U32#,U32),module U32) where
+import U ()
+
+deriving newtype instance (≡) U32
+deriving newtype instance (≤) U32
 
 
 (+),(-),(×) ∷ U32 → U32 → U32

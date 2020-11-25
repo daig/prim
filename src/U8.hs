@@ -1,4 +1,8 @@
 module U8 (U8, module U8) where
+import U ()
+
+deriving newtype instance (≡) U8
+deriving newtype instance (≤) U8
 
 (+),(-),(×) ∷ U8 → U8 → U8
 x + y = U8 (coerce plusWord# x y)

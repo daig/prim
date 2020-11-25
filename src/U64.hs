@@ -5,6 +5,9 @@ import B hiding (not#)
 import qualified U
 #include "MachDeps.h"
 
+deriving newtype instance (≡) U64
+deriving newtype instance (≤) U64
+
 
 (+),(-),(×) ∷ U64 → U64 → U64
 (+) = coerce plusWord#; (-) = coerce minusWord#; (×) = coerce timesWord#
