@@ -10,15 +10,9 @@ import I64 (I64(..))
 import qualified P.Stable as Stable
 import qualified B
 
---type family M (a ∷ k) = (ma ∷ T → k) | ma → a where
-  --M Array# = MutableArray#
-  --M SmallArray# = SmallMutableArray#
-  --M ByteArray# = MutableByteArray#
-  --M ArrayArray# = MutableArrayArray#
-
 type family M (a ∷ k) (s ∷ T) = (ma ∷ k) | ma → a where
-  M (Array# a) s = MutableArray# s a
-  M (SmallArray# a) s = SmallMutableArray# s a
+  M (Array# x) s = MutableArray# s x
+  M (SmallArray# x) s = SmallMutableArray# s x
   M ByteArray# s = MutableByteArray# s
   M ArrayArray# s = MutableArrayArray# s
   M P s = P
@@ -40,3 +34,5 @@ class Copy (src ∷ T_ r) (dst ∷ T_ r') (s ∷ T) where
        → I -- ^ Destination Offset (bytes)
        → I -- ^ :ta
        → ST_# s
+
+class Shrink (a ∷ T_A) where shrink ∷ M a s → I → ST_# s

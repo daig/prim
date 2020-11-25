@@ -2,16 +2,16 @@ module A.Small where
 import Prelude hiding (Array)
 import A
 import A.Prim
+import qualified B
 
 type A = SmallArray#
 type MA = SmallMutableArray#
 
-(≡) ∷ MA s a → MA s a → B#
-(≡) = sameSmallMutableArray#
+instance (≡) (MA s a) where
+  (≡) = sameSmallMutableArray#
+  x ≠ y = B.not# (x ≡ y)
 
-
-shrink ∷ MA s a → I → ST_# s
-shrink = shrinkSmallMutableArray#
+instance Shrink (A a) where shrink = shrinkSmallMutableArray#
 
 -- | /WARNING/ unsafe in the presence of resize operations
 instance Size (A a) where size = sizeofSmallArray#

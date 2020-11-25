@@ -1,5 +1,5 @@
 {-# language InstanceSigs #-}
-module A.Raw (A,module A.Raw)where
+module A.Raw where
 import Char (Char(..))
 import Char8 (Char8(..))
 import I8 (I8(..))
@@ -8,8 +8,8 @@ import I32 (I32(..))
 import I64 (I64(..))
 import P (P,(∔))
 import qualified P.Stable as Stable
-import qualified B
 import A
+import qualified B
 
 
 type A = ByteArray#
@@ -56,9 +56,8 @@ pinnedMA' = isMutableByteArrayPinned#
 resize ∷ MA s → I → ST# s (MA s)
 resize = resizeMutableByteArray#
 
--- | New length must be ≤ current 'sizeMA'
-shrink ∷ MA s → I {- ^ # bytes #-} → ST_# s
-shrink = shrinkMutableByteArray#
+-- | New length (bytes) must be ≤ current 'sizeMA'
+instance Shrink A where shrink = shrinkMutableByteArray#
 
 -- | Number of bytes.
 --
@@ -81,14 +80,22 @@ set ∷ MA s
 set = setByteArray#
 
 -- | Lexicographic comparison.
--- Warning: Both arrays mus fully contain the specified ranges, but this is not checked.
+-- Warning: Both arrays must fully contain the specified ranges, but this is not checked.
 compare# ∷ A -- ^ source1
          → I -- ^ source1 offset
          → A -- ^ source2
          → I -- ^ source2 offset
          → I -- ^ number of bytes to compare
-         → I -- ^ a number less-than, equal-to, or greater-than @0#@
-compare# = compareByteArrays#
+         → Ordering 
+compare# = coerce compareByteArrays#
+
+-- | a number less-than, equal-to, or greater-than @0#@
+newtype Ordering ∷ T_I where Ordering# ∷ I → Ordering
+pattern LT ∷ Ordering
+pattern LT ← ((\(Ordering# i) → i < 0# ) → 1# ) where LT = Ordering# -1#
+pattern GT ← ((\(Ordering# i) → i > 0# ) → 1# ) where GT = Ordering# 1#
+pattern EQ ← ((\(Ordering# i) → i ≡ 0# ) → 1# ) where EQ = Ordering# 1#
+{-# complete LT, GT, EQ #-}
 
 instance Copy A (MA s) s where copy = copyByteArray#
 instance Copy (MA s) (MA s) s where copy = copyMutableByteArray#
