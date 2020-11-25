@@ -52,7 +52,7 @@ library
                  , A.Small, A.Boxed
                  , A, A.Prim
                  , Array.Array, Array.Array.Byte, Array.Array.Array
-                 , Thread
+                 , Thread, Thread.Status
                  , Compact
                  , Proxy
                  , Coerce

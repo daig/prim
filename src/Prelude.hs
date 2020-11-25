@@ -71,7 +71,7 @@ type F32 = Float#
 type F64 = Double#
 
 -- | Primitive maybe type represented by a tag and (possibly invalid) value.
-type Maybe# (a ∷ T_ r) = (# B , a #)
+type Maybe# (a ∷ T_ r)  = (# B , a #)
 
 -- | @Token@ is the primitive, unlifted type of states.
 -- It has one type parameter, thus @Token (☸)@, or @Token s@,
