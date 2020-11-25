@@ -1,4 +1,5 @@
 module P.Stable where
+import Prelude hiding (P)
 
 type P = StablePtr#
 

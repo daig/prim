@@ -1,4 +1,5 @@
 module P.Boxed where
+import Prelude hiding (P)
 
 type P = MutVar#
 

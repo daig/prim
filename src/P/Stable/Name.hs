@@ -1,4 +1,5 @@
 module P.Stable.Name where
+import Prelude hiding (P)
 
 type P = StableName#
 

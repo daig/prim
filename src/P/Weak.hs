@@ -3,6 +3,8 @@
 --------------------------------------------------------------------
 module P.Weak where
 import qualified P as Raw
+import Prelude hiding (P)
+
 
 {-|
 A weak pointer expressing a relashionship between a /key/ and a /value/ of type @v@:
@@ -69,3 +71,10 @@ read' w s0 = case deRefWeak# w s0 of
 finalizer' ∷ P v → IO# (Maybe# (IO# x))
 finalizer' w s0 = case finalizeWeak# w s0 of
   (# s1, alive', f #) → (# s1, (# B# alive', f #) #)
+
+-- | Keep a value alive to the GC.
+-- It only makes sense to apply touch to lifted types on the heap.
+--
+-- see <https://gitlab.haskell.org/ghc/ghc/-/wikis/hidden-dangers-of-touch The Hidden Dangers of touch#>
+touch ∷ k → IO_#
+touch = touch#

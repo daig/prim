@@ -2,7 +2,7 @@
 -- | Description : Raw unmanaged pointers
 --------------------------------------------------------------------
 {-# language TypeSynonymInstances,UnliftedNewtypes, GADTs, TypeOperators #-}
-module P where
+module P (P,module P) where
 import Char
 import Char8
 import I32 (I32(..))
@@ -11,8 +11,6 @@ import I64 (I64(..))
 import I8 (I8(..))
 import qualified P.Stable as Stable
 
--- | An arbitrary machine address assumed to point outside the garbage-collected heap
-type P = Addr#
 
 -- | hack to expose nullAddr#
 pattern Null ∷ P

@@ -3,7 +3,7 @@
 --
 -- See <https://www.microsoft.com/en-us/research/wp-content/uploads/2016/07/lw-conc.pdf Lightweight Concurrency Primitives for GHC>
 --------------------------------------------------------------------
-module Spark where
+module RTS.Spark where
 
 -- |Mark a thunk for parallel evaluation, adding it to the /spark pool/.
 -- When the spark pool is full, new sparks are ignored.

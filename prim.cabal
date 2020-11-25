@@ -53,23 +53,24 @@ library
                  , A, A.Prim
                  , Array.Array, Array.Array.Byte, Array.Array.Array
                  , Thread, Thread.Status
-                 , Compact
-                 , Proxy
-                 , Coerce
+                 , RTS.Compact
+                 , RTS.Trace
+                 , GHC.Proxy
+                 , GHC.Coerce
                  , Exception, Exception.Mask
-                 , Spark
+                 , RTS.Spark
                  , Enum
-                 , Any, BCO
-                 , RTS.Rep
-                 , RTS.Block, Inline
+                 , RTS.ByteCode
+                 , GHC.Rep
+                 , IO.Block, GHC.Inline
                  , RTS.Prefetch.Any, RTS.Prefetch.P, RTS.Prefetch.Array, RTS.Prefetch.Array.M
                  , String, String.C, String.C.Latin, String.C.UTF8, String.List
-                 , Nat
+                 , GHC.Nat, GHC.Symbol
                  , Stock.Eq, Stock.Ord, Stock.Ord.Ordering
                  , Stock.Char, Stock.Double, Stock.Float, Stock.Int, Stock.Word, Stock.IO
                  , Syntax.ImplicitParam
                  , Maybe
-                 , Typeable
+                 , GHC.Typeable
                  , X
                  , Bits, Cmp
   build-depends: ghc-prim ^>= 0.6.1

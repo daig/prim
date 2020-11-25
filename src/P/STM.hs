@@ -1,4 +1,5 @@
 module P.STM where
+import Prelude hiding (P)
 
 type P = TVar#
 

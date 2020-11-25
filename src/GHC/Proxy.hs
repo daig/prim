@@ -1,5 +1,5 @@
 {-# language PatternSynonyms #-}
-module Proxy where
+module GHC.Proxy where
 
 type Proxy = Proxy#
 

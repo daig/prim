@@ -1,4 +1,4 @@
-module Compact where
+module RTS.Compact where
 import P
 
 

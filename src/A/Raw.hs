@@ -9,6 +9,7 @@ import I64 (I64(..))
 import P (P,(∔))
 import qualified P.Stable as Stable
 import A
+import Ordering
 
 
 type A = ByteArray#
@@ -87,14 +88,6 @@ compare# ∷ A -- ^ source1
          → I -- ^ number of bytes to compare
          → Ordering 
 compare# = coerce compareByteArrays#
-
--- | a number less-than, equal-to, or greater-than @0#@
-newtype Ordering ∷ T_I where Ordering# ∷ I → Ordering
-pattern LT ∷ Ordering
-pattern LT ← ((\(Ordering# i) → i < 0# ) → T ) where LT = Ordering# -1#
-pattern GT ← ((\(Ordering# i) → i > 0# ) → T ) where GT = Ordering# 1#
-pattern EQ ← ((\(Ordering# i) → i ≡ 0# ) → T ) where EQ = Ordering# 1#
-{-# complete LT, GT, EQ #-}
 
 instance Copy A (MA s) s where copy = copyByteArray#
 instance Copy (MA s) (MA s) s where copy = copyMutableByteArray#

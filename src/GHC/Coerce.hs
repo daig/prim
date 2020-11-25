@@ -2,13 +2,14 @@
 -- | Description : Cast between identical representations
 --------------------------------------------------------------------
 {-# language TypeApplications #-}
-module Coerce
+module GHC.Coerce
   (type (≑)
   ,coerce
   ,coerce#
- , GHC.unsafeCoerce# -- | Very unsafe coerce that may not get inlined correctly.
+  ,GHC.unsafeCoerce# -- | Very unsafe coerce that may not get inlined correctly.
                      -- Only use if you know it will not be called at higher order.
                      -- Magically levity polymorphic, unlike 'coerce#'
+  ,GHC.Any
  ) where
 import qualified Prelude as GHC
 import qualified GHC.Types as GHC

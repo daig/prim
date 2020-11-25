@@ -3,6 +3,7 @@
 -- | Description : Blocking concurrent references
 --------------------------------------------------------------------
 module P.Sync where
+import Prelude hiding (P)
 
 -- | A synchronising variable, used for communication between concurrent threads.
 -- It can be thought of as a box, which may be empty or full.

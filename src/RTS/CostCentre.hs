@@ -1,4 +1,4 @@
-module CostCentre where
+module RTS.CostCentre where
 
 type Stack = Addr#
 

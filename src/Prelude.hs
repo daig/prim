@@ -104,3 +104,6 @@ class (¬) (a ∷ T_ r) where (¬) ∷ a → a
 infixl 3 ∧
 infixl 2 ⊕
 infixl 1 ∨
+
+-- | An arbitrary machine address assumed to point outside the garbage-collected heap
+type P = Addr#
