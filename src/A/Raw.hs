@@ -23,8 +23,8 @@ new = newByteArray#
 --
 -- see https://gitlab.haskell.org/ghc/ghc/-/issues/13908
 instance (≡) (MA s) where
-  (≡) = sameMutableByteArray#
-  a ≠ b = B.not# (a ≡ b)
+  (≡) = coerce sameMutableByteArray#
+  a ≠ b = B.not (a ≡ b)
 
 -- * Pinned Arrays
 
@@ -44,11 +44,11 @@ aligned = newAlignedPinnedByteArray#
 contents ∷ A → P
 contents = byteArrayContents#
 
-pinned' ∷ A → B#
-pinned' = isByteArrayPinned#
+pinned' ∷ A → B
+pinned' = coerce isByteArrayPinned#
 
-pinnedMA' ∷ MA s → B#
-pinnedMA' = isMutableByteArrayPinned#
+pinnedMA' ∷ MA s → B
+pinnedMA' = coerce isMutableByteArrayPinned#
 
 -- * Operations
 
@@ -92,9 +92,9 @@ compare# = coerce compareByteArrays#
 -- | a number less-than, equal-to, or greater-than @0#@
 newtype Ordering ∷ T_I where Ordering# ∷ I → Ordering
 pattern LT ∷ Ordering
-pattern LT ← ((\(Ordering# i) → i < 0# ) → 1# ) where LT = Ordering# -1#
-pattern GT ← ((\(Ordering# i) → i > 0# ) → 1# ) where GT = Ordering# 1#
-pattern EQ ← ((\(Ordering# i) → i ≡ 0# ) → 1# ) where EQ = Ordering# 1#
+pattern LT ← ((\(Ordering# i) → i < 0# ) → T ) where LT = Ordering# -1#
+pattern GT ← ((\(Ordering# i) → i > 0# ) → T ) where GT = Ordering# 1#
+pattern EQ ← ((\(Ordering# i) → i ≡ 0# ) → T ) where EQ = Ordering# 1#
 {-# complete LT, GT, EQ #-}
 
 instance Copy A (MA s) s where copy = copyByteArray#

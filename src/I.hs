@@ -1,10 +1,9 @@
 {-# language CPP #-}
 {-# language BangPatterns #-}
 module I (I, module I) where
-import B (pattern B#,(∧), pattern T)
 import qualified GHC.Classes as GHC (divInt#,modInt#)
 
-import Coerce
+import B
 
 #include "MachDeps.h"
 
@@ -41,8 +40,8 @@ mul y x = x *# y
 --     If in doubt, return non-zero, but do make an effort to create the
 --     correct answer for small args, since otherwise the performance of
 --     @(×) ∷ I → I → I@ will be poor.
-mulMayOflo ∷ I → I → B#
-mulMayOflo x y = mulIntMayOflo# x y
+mulMayOflo ∷ I → I → B
+mulMayOflo = coerce mulIntMayOflo#
 negate ∷ I → I
 negate = negateInt#
 -- | Rounds towards 0. The behavior is undefined if the first argument is zero.
@@ -68,37 +67,45 @@ mod y x = GHC.modInt# x y; {-# inline mod #-}
 (/) = GHC.divInt#; {-# inline (/) #-}
 -- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
 divMod ∷ I {- ^ divisor -} → I {- ^ dividend -} → (# I, I #) {- ^ (div, mod) -}
-divMod y x | B# (0# < x) ∧ B# (0# > y) = case quotRem y (x -# 1# ) of
+{-
+divMod y x | B (0# < x) ∧ B (0# > y) = case quotRem y (x -# 1# ) of
                                     (# q, r #) → (# q -# 1#, r +# y +# 1# #)
-           | B# (0# > x) ∧ B# (0# < y) = case quotRem y (x +# 1# ) of
+           | B (0# > x) ∧ B (0# < y) = case quotRem y (x +# 1# ) of
                                     (# q, r #) → (# q -# 1#, r +# y +# 1# #)
            | T = quotRem y x
+-}
+
+divMod y x = case (0# < x) ∧ (0# > y) of
+  T → case quotRem y (x -# 1# ) of (# q, r #) → (# q -# 1#, r +# y +# 1# #)
+  F → case (0# > x) ∧ (0# < y) of
+    T → case quotRem y (x +# 1# ) of (# q, r #) → (# q -# 1#, r +# y +# 1# #)
+    F → quotRem y x
 
 
-addC, subC ∷ I → I → (# I, B# #)
+addC, subC ∷ I → I → (# I, B #)
 -- |Add signed integers reporting overflow.
 --           First member of result is the sum truncated to an @I@;
 --           second member is zero if the true sum fits in an @I@,
 --           nonzero if overflow occurred (the sum is either too large
 --           or too small to fit in an @I@).
-addC y x = addIntC# x y
+addC = coerce addIntC#
 -- |Subtract signed integers reporting overflow.
 --           First member of result is the difference truncated to an @I@;
 --           second member is zero if the true difference fits in an @I@,
 --           nonzero if overflow occurred (the difference is either too large
 --           or too small to fit in an @I@).
-subC y x = subIntC# x y
+subC = coerce subIntC#
 
 -- * Comparison Operators
 
 instance (≤) I where
-  (>) = (># )
-  (≥) = (>=# )
-  (<) = (<# )
-  (≤) = (<=# )
+  (>) = coerce (># )
+  (≥) = coerce (>=# )
+  (<) = coerce (<# )
+  (≤) = coerce (<=# )
 instance (≡) I where
-  (≡) = (==# )
-  (≠) = (/=# )
+  (≡) = coerce (==# )
+  (≠) = coerce (/=# )
 
 -- * Conversions
 
@@ -132,8 +139,9 @@ shiftR# = uncheckedIShiftRA#
 -- |Shift right arithmetic.  Result 0 or -1 (depending on sign)
 -- if shift amount is not in the range 0 to word size - 1 inclusive.
 shiftR ∷ I → I → I
-shiftR i x | B# (i ≥ WORD_SIZE_IN_BITS#) = if B# (x < 0#) then (-1#) else 0#
-           | T = uncheckedIShiftRA# x i
+shiftR i x = case i ≥ WORD_SIZE_IN_BITS# of
+  T → case x < 0# of {T → -1#; F → 0#}
+  F → uncheckedIShiftRA# x i
 
 -- | Bitwise negation. @not n = -n - 1@
 not ∷ I → I
@@ -148,8 +156,7 @@ shiftL# i x = uncheckedIShiftL# x i
 
 -- | Shift left.  Result 0 if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
-shiftL i x | B# (i ≥ WORD_SIZE_IN_BITS#) = 0#
-           | T = uncheckedIShiftL# x i
+shiftL i x = case i ≥ WORD_SIZE_IN_BITS# of {T → 0#; F → uncheckedIShiftL# x i}
 
 
 -- | Shift right logical.  Result undefined if shift amount is not
@@ -157,8 +164,7 @@ shiftL i x | B# (i ≥ WORD_SIZE_IN_BITS#) = 0#
 shiftRL# i x = uncheckedIShiftRL# x i
 -- | Shift right logical.  Result 0 if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
-shiftRL i x | B# (i ≥ WORD_SIZE_IN_BITS#) = 0#
-            | T = uncheckedIShiftRL# x i
+shiftRL i x = case i ≥ WORD_SIZE_IN_BITS# of {T → 0#; F → uncheckedIShiftRL# x i}
 and, or, xor ∷ I → I → I
 and = andI#
 or = orI#

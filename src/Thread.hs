@@ -23,14 +23,14 @@ here = myThreadId#
 -- Used in debugging output if the RTS was compiled to support it.
 label# ∷ Id → P → IO_#
 label# = labelThread#
-bound' ∷ IO# B#
-bound' = isCurrentThreadBound#
+bound' ∷ IO# B
+bound' = coerce isCurrentThreadBound#
 -- TODO: put this somewhere else
 noDuplicate ∷ ST_# s
 noDuplicate = noDuplicate#
-status ∷ Id → IO# (# Status, Cap, B# #)
+status ∷ Id → IO# (# Status, Cap, B #)
 status n s = case threadStatus# n s of
-  (# s', status, cap, bound' #) → (# s', (# Status# status, cap, bound' #) #)
+  (# s', status, cap, bound' #) → (# s', (# Status# status, cap, B# bound' #) #)
 
 -- * Constants for why_blocked field of a TSO from rts/Constants.h
 newtype Status ∷ T_I where Status# ∷ I → Status

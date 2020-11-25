@@ -33,12 +33,8 @@ decodeI64 ∷ F64 → (# I64, I16 #) -- ^ (mantissa , base-2 exponent)
 decodeI64 = coerce decodeDouble_Int64#
 
 
-infix 4 >, ≥, <, ≤, ≡, ≠
-(>),(≥),(<),(≤),(≡),(≠)
-  ,gt, ge, lt, le, eq, ne ∷ F64 → F64 → B#
-(>) = (>##); (≥) = (>=##); (<) = (<##); (≤) = (<=##)
-(≡) = (==##); (≠) = (/=##)
-gt = (<##); ge = (<=##); lt = (>##); le = (>=##); eq = (==##); ne = (/=##)
+instance (≤) F64 where (>) = coerce (>##); (≥) = coerce (>=##); (<) = coerce (<##); (≤) = coerce (<=##)
+instance (≡) F64 where (≡) = coerce (==##); (≠) = coerce (/=##)
 
 fromI ∷ I → F64
 fromI = int2Double#

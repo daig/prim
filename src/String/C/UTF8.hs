@@ -6,7 +6,6 @@ import String.C
 import Prelude hiding (Char)
 import Stock.Char (Char(C#))
 import B
-import Char ((≤),pattern Char)
 import Char8
 import I ((+),(-),shiftL#)
 {-
@@ -20,13 +19,13 @@ unpack# addr = unpack 0# where
     -- consequently GHC won't evaluate the expression unless it is absolutely
     -- needed.
     unpack nh
-      | B# (ch# ≡ '\0'# ) = []
-      | B# (ch# ≤ '\x7F'# ) = C# ch# : unpack (nh + 1#)
-      | B# (ch# ≤ '\xDF'# ) =
+      | B (ch# ≡ '\0'# ) = []
+      | B (ch# ≤ '\x7F'# ) = C# ch# : unpack (nh + 1#)
+      | B (ch# ≤ '\xDF'# ) =
           let !c = C# (Char (shiftL# 6# (toI ch            - 0xC0#) +
                                (toI (addr !# (nh + 1#)) - 0x80#)))
           in c : unpack (nh + 2#)
-      | B# (ch# ≤ '\xEF'#) =
+      | B (ch# ≤ '\xEF'#) =
           let !c = C# (Char (shiftL# 12# (toI ch                      - 0xE0#) +
                               shiftL#  6# (toI (addr !# (nh + 1#)) - 0x80#) +
                                           (toI (addr !# (nh + 2#)) - 0x80#)))

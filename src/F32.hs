@@ -23,13 +23,8 @@ sinh = sinhFloat#; cosh = coshFloat#; tanh = tanhFloat#
 pow ∷ F32 → F32 → F32
 pow y x = powerFloat# x y
 
-infix 4 >, ≥, <, ≤, ≡, ≠
-(>),(≥),(<),(≤),(≡),(≠),
-  gt,ge,lt,le,eq,ne ∷ F32 → F32 → B#
-(>) = gtFloat#; (≥) = geFloat#; (<) = ltFloat#; (≤) = leFloat#
-(≡) = eqFloat#; (≠) = neFloat#
-gt = ltFloat#; ge = leFloat#; lt = gtFloat#; le = geFloat#
-eq = eqFloat#; ne = neFloat#
+instance (≤) F32 where (>) = coerce gtFloat#; (≥) = coerce geFloat#; (<) = coerce ltFloat#; (≤) = coerce leFloat#
+instance (≡) F32 where (≡) = coerce eqFloat#; (≠) = coerce neFloat#
 
 toI ∷ F32 → I
 toI = float2Int#

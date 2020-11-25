@@ -8,5 +8,4 @@ new = makeStablePtr#
 deref ∷ P a → IO# a
 deref = deRefStablePtr#
 
-(≡), eq ∷ P a → P a → B#
-(≡) = eqStablePtr#; eq = eqStablePtr#
+instance (≡) (P a) where p ≡ q= coerce (eqStablePtr# p q)

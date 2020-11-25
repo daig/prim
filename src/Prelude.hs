@@ -17,8 +17,12 @@ pattern I8 ∷ I → I8
 pattern I8 i ← (coerce narrow8Int# → i) where I8 = coerce
 {-# complete I8 #-}
 
-type B = GHC.Bool
-type B# = I
+newtype B ∷ T_I where B# ∷ I → B
+pattern F ∷ B
+pattern F = B# 0#
+pattern T ∷ B
+pattern T = B# 1#
+{-# complete F, T #-}
 
 -- | An unsigned integral type, with the same size as 'I'.
 type U = Word#
@@ -53,7 +57,7 @@ type F32 = Float#
 type F64 = Double#
 
 -- | Primitive maybe type represented by a tag and (possibly invalid) value.
-type Maybe# (a ∷ T_ r) = (# B# , a #)
+type Maybe# (a ∷ T_ r) = (# B , a #)
 
 -- | @Token@ is the primitive, unlifted type of states.
 -- It has one type parameter, thus @Token (☸)@, or @Token s@,
@@ -77,5 +81,5 @@ type IO# (a ∷ T_ r) = ST# (☸) a
 type IO_# = ST_# (☸)
 
 infix 4 >, ≥, <, ≤, ≡, ≠
-class (≡) (a ∷ T_ r) where (≡), (≠) ∷ a → a → B#
-class (≤) (a ∷ T_ r) where (>),(≥),(<),(≤) ∷ a → a → B#
+class (≡) (a ∷ T_ r) where (≡), (≠) ∷ a → a → B
+class (≤) (a ∷ T_ r) where (>),(≥),(<),(≤) ∷ a → a → B

@@ -33,9 +33,8 @@ pattern P# ∷ I → P
 pattern P# i ← (addr2Int# → i) where P# = int2Addr#
 {-# DEPRECATED P# "This pattern is strongly deprecated" #-}
 
-(>), (≥), (<), (≤) ∷ P → P → B#
-(>) = gtAddr# ; (≥) = geAddr# ; (<) = ltAddr# ; (≤) = leAddr# ; 
-instance (≡) P where (≡) = eqAddr# ; (≠) = neAddr#
+instance (≤) P where (>) = coerce gtAddr# ; (≥) = coerce geAddr# ; (<) = coerce ltAddr# ; (≤) = coerce leAddr# ; 
+instance (≡) P where (≡) = coerce eqAddr# ; (≠) = coerce neAddr#
 
 toAny ∷ P → (# a #)
 toAny = addrToAny#

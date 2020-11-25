@@ -5,8 +5,8 @@ import A.Raw
 import qualified A.Boxed as Boxed
 import GHC.Types as X (Any)
 
-eq# ∷ a → a → B#
-eq# = reallyUnsafePtrEquality#
+eq# ∷ a → a → B
+eq# x y = coerce do reallyUnsafePtrEquality# x y
 
 fromP ∷ P → (# a #)
 fromP = addrToAny#

@@ -9,11 +9,11 @@ new ∷ U64 → IO# Compact
 new = coerce compactNew#
 resize ∷ Compact → U64 → IO_#
 resize = coerce compactResize#
-elem' ∷ a → Compact → IO# B#
-elem' a c = compactContains# c a
+elem' ∷ a → Compact → IO# B
+elem' a c = coerce do compactContains# c a
 
-elemOfAny' ∷ a → IO# B#
-elemOfAny' = compactContainsAny#
+elemOfAny' ∷ a → IO# B
+elemOfAny' a = coerce do compactContainsAny# a
 
 -- | The address and size (in bytes) of the first block of a @Compact@
 head ∷ Compact → IO# Block#

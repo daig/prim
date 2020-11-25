@@ -3,6 +3,7 @@ module U (U, module U) where
 import qualified GHC.Types as GHC
 import B hiding (not#)
 #include "MachDeps.h"
+import I ()
 
 (+),(-),(×) ∷ U → U → U
 (+) = plusWord#; (-) = minusWord#; (×) = timesWord#
@@ -37,22 +38,17 @@ divMod y x = quotRemWord# x y
 --           second member is zero if the true sum fits in an @U@,
 --           nonzero if overflow occurred (the sum is either too large
 --           or too small to fit in an @U@).
-addC, subC ∷ U → U → (# U, B# #)
-addC y x = addWordC# x y
+addC, subC ∷ U → U → (# U, B #)
+addC = coerce addWordC#
 -- |Subtract signed integers reporting overflow.
 --           First member of result is the difference truncated to an @U@;
 --           second member is zero if the true difference fits in an @U@,
 --           nonzero if overflow occurred (the difference is either too large
 --           or too small to fit in an @U@).
-subC y x = subWordC# x y
+subC = coerce subWordC#
 
-infix 4 >, ≥, <, ≤, ≡, ≠
-(>),(≥),(<),(≤),(≡),(≠) ∷ U → U → B#
-(>) = gtWord#; (≥) = geWord#; (<) = ltWord#; (≤) = leWord#
-(≡) = eqWord#; (≠) = neWord#
-gt,ge,lt,le,eq,ne ∷ U → U → B#
-gt = ltWord#; ge = leWord#; lt = gtWord#; le = geWord#
-eq = eqWord#; ne = neWord#
+instance (≤) U where (>) = coerce gtWord#; (≥) = coerce geWord#; (<) = coerce ltWord#; (≤) = coerce leWord#
+instance (≡) U where (≡) = coerce eqWord#; (≠) = coerce neWord#
 
 fromI ∷ I → U
 fromI = int2Word#
@@ -83,15 +79,13 @@ not = not#
 --           in the range 0 to word size - 1 inclusive.
 shiftL#, shiftRL#, shiftL ∷ I → U → U
 shiftL# i w = uncheckedShiftL# w i
-shiftL i w | B# (i >=# WORD_SIZE_IN_BITS#) = 0##
-           | T = uncheckedShiftL# w i
+shiftL i w = case i ≥ WORD_SIZE_IN_BITS# of {T → 0##; F → uncheckedShiftL# w i}
 
 
 -- |Shift right logical.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 shiftRL# i w = uncheckedShiftRL# w i
-shiftRL i w | B# (i >=# WORD_SIZE_IN_BITS#) = 0##
-            | T = uncheckedShiftRL# w i
+shiftRL i w = case i ≥ WORD_SIZE_IN_BITS# of {T → 0##; F → uncheckedShiftRL# w i}
 
 -- | Count the number of set bits
 popCnt,clz,ctz ∷ U → U8

@@ -6,13 +6,9 @@ type U8 = Word8#
 pattern U8 ∷ U → U8
 pattern U8 i ← (extendWord8# → i) where U8 = narrowWord8#
 
-(>),(≥),(<),(≤),(≡),(≠), gt,ge,lt,le,eq,ne ∷ U8 → U8 → B#
-(>) = gtWord8#; gt = ltWord8#
-(≥) = geWord8#; ge = leWord8#
-(<) = ltWord8#; lt = gtWord8#
-(≤) = leWord8#; le = geWord8#
-(≡) = eqWord8#; eq = eqWord8#
-(≠) = neWord8#; ne = neWord8#
+instance (≤) U8 where (>) = coerce gtWord8#; (≥) = coerce geWord8#
+                      (<) = coerce ltWord8#; (≤) = coerce leWord8#
+instance (≡) U8 where (≡) = coerce eqWord8#; (≠) = coerce neWord8#
 
 (+), (-), (×), add, sub, mul ∷ U8 → U8 → U8
 (+) = plusWord8#; add = plusWord8#

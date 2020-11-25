@@ -60,7 +60,7 @@ unpack# ∷ S → String.List
 {-# NOINLINE CONLIKE unpack# #-}
 unpack# ref = unpack 0# where
     unpack nh
-      | B# (ch ≡ '\0'#) = []
+      | B (ch ≡ '\0'#) = []
       | T               = C# ch : unpack (nh + 1#)
       where !ch = ref !# nh
 
@@ -69,7 +69,7 @@ unpackAppend# ∷ S → String.List → String.List
      -- See the NOINLINE note on unpack#
 unpackAppend# ref rest = unpack 0# where
     unpack nh
-      | B# (ch ≡ '\0'#) = rest
+      | B (ch ≡ '\0'#) = rest
       | T                         = C# ch : unpack (nh + 1#)
       where !ch = ref !# nh
 
@@ -91,7 +91,7 @@ foldr# ∷ S → (Char → a → a) → a → a
 
 foldr# ref f z = unpack 0# where
     unpack nh
-      | B# (ch ≡ '\0'#) = z
+      | B (ch ≡ '\0'#) = z
       | T               = C# ch `f` unpack (nh + 1#)
       where !ch = ref !# nh
 
@@ -102,7 +102,7 @@ unpackN# ∷ S → I → String.List
 unpackN# _ref 0#   = []
 unpackN#  ref len = unpack [] (len - 1#) where
      unpack acc i
-      | B# (i < 0#) = acc
+      | B (i < 0#) = acc
       | T           =
          case ref !# i of
             ch → unpack (C# ch : acc) (i - 1#)

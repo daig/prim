@@ -10,8 +10,7 @@ type MA = MutableArrayArray#
 new ∷ I → ST# s (MA s)
 new = newArrayArray#
 
-(≡), eq ∷ MA s → MA s → B#
-(≡) = sameMutableArrayArray#; eq = sameMutableArrayArray#
+instance (≡) (MA s) where (≡) = coerce sameMutableArrayArray#
 
 freeze## ∷ MA s → ST# s A
 freeze## = unsafeFreezeArrayArray#

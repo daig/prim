@@ -51,9 +51,9 @@ class Array (a ∷ T → T_A) where
       → I -- ^ Source offset
       → x -- ^ Expected old value
       → x -- ^ New value
-      → ST# s (# B#, x #) -- ^ Whether the swap failed, and the actual new value
-(≡) ∷ MA s x → MA s x → B#
-(≡) = sameMutableArray#
+      → ST# s (# B, x #) -- ^ Whether the swap failed, and the actual new value
+
+instance (≡) (MA s x) where x ≡ y = coerce do sameMutableArray# x y
 
 
 class Index (x ∷ T_ r) (a ∷ T_ rr) where index ∷ a → I → x
@@ -70,7 +70,7 @@ instance Array Array# where
   clone# = cloneArray#
   cloneM# = cloneMutableArray#
   cas as o a0 a1 s0 = case casArray# as o a0 a1 s0 of
-    (# s1, failed', a #) → (# s1, (# failed', a #) #)
+    (# s1, failed', a #) → (# s1, (# B# failed', a #) #)
 instance Array SmallArray# where
   new = newSmallArray#
   read = readSmallArray#
@@ -83,7 +83,7 @@ instance Array SmallArray# where
   clone# = cloneSmallArray#
   cloneM# = cloneSmallMutableArray#
   cas as o a0 a1 s0 = case casSmallArray# as o a0 a1 s0 of
-    (# s1, failed', a #) → (# s1, (# failed', a #) #)
+    (# s1, failed', a #) → (# s1, (# B# failed', a #) #)
 
 instance Copy (A a) (MA s a) s where copy = copyArray#
 instance Copy (MA s a) (MA s a) s where copy = copyMutableArray#

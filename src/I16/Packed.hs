@@ -7,13 +7,13 @@ pattern I16 ∷ I → I16
 pattern I16 i ← (extendInt16# → i) where I16 = narrowInt16#
 
 instance (≤) I16 where
-  (>) = gtInt16#
-  (≥) = geInt16#
-  (<) = ltInt16#
-  (≤) = leInt16#
+  (>) = coerce gtInt16#
+  (≥) = coerce geInt16#
+  (<) = coerce ltInt16#
+  (≤) = coerce leInt16#
 instance (≡) I16 where
-  (≡) = eqInt16#
-  (≠) = neInt16#
+  (≡) = coerce eqInt16#
+  (≠) = coerce neInt16#
 
 (+), (-), (×), add, sub, mul ∷ I16 → I16 → I16
 (+) = plusInt16#; add = plusInt16#

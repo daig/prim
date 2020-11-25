@@ -55,17 +55,17 @@ new = mkWeak#
 newNoFinalizer ∷ k → v → IO# (P v)
 newNoFinalizer = mkWeakNoFinalizer#
 
-addFinalizer ∷ Raw.P → Raw.P → B# → Raw.P → P v → IO# B#
-addFinalizer = addCFinalizerToWeak#
+addFinalizer ∷ Raw.P → Raw.P → B → Raw.P → P v → IO# B
+addFinalizer p0 p1 (B# b) p2 q = coerce do addCFinalizerToWeak# p0 p1 b p2 q
 
 -- | Retrieve the value associated with a @Weak.P@ if it (the key)
 -- is still alive to the GC.
 read' ∷ P v → IO# (Maybe# v)
 read' w s0 = case deRefWeak# w s0 of
-  (# s1, alive', v #) → (# s1, (# alive', v #) #)
+  (# s1, alive', v #) → (# s1, (# B# alive', v #) #)
 
 -- | Retrieve the finalizer associated with a @Weak.P@ if it (the key)
 -- is still alive to the GC.
 finalizer' ∷ P v → IO# (Maybe# (IO# x))
 finalizer' w s0 = case finalizeWeak# w s0 of
-  (# s1, alive', f #) → (# s1, (# alive', f #) #)
+  (# s1, alive', f #) → (# s1, (# B# alive', f #) #)

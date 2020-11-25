@@ -1,3 +1,4 @@
+{-# language ScopedTypeVariables, TypeApplications #-}
 --------------------------------------------------------------------
 -- | Description : Blocking concurrent references
 --------------------------------------------------------------------
@@ -10,11 +11,11 @@ module P.Sync where
 -- connecting 'take' and 'write' calls between threads
 type P = MVar#
 
-(≡), eq ∷ P s a → P s a → B#
-(≡) = sameMVar#; eq = sameMVar#
+eq ∷ P s a → P s a → B
+eq p q = B# (sameMVar# p q)
 
-empty' ∷ P s a → ST# s B#
-empty' = isEmptyMVar#
+empty' ∷ P s a → ST# s B
+empty' p = coerce (isEmptyMVar# p)
 
 -- | A new empty @Sync.P@
 new ∷ ST# s (P s a)
@@ -30,7 +31,7 @@ take = takeMVar#
 -- | Without blocking, 'take' the current value if it exists, leaving it empty.
 take' ∷ P s a → ST# s (Maybe# a) {- ^ The value if the @Sync.P@ was full -}
 take' r s0 = case tryTakeMVar# r s0 of
-  (# s1, full', a #) → (# s1, (# full', a #) #)
+  (# s1, full', a #) → (# s1, (# B# full', a #) #)
 
 -- | Block until the @Sync.P@ is full and atomically read the next 'write' value
 -- without 'take'ing it, leaving it full.
@@ -41,7 +42,7 @@ read = readMVar#
 -- ,leaving it in the same empty/full state.
 read' ∷ P s a → ST# s (Maybe# a) {- ^ The value if the @Sync.P@ was full/unlocked -}
 read' r s0 = case tryReadMVar# r s0 of
-  (# s1, full', a #) → (# s1, (# full', a #) #)
+  (# s1, full', a #) → (# s1, (# B# full', a #) #)
 
 -- | Block until the @Sync.P@ is empty, then write the value, leaving it full.
 --
@@ -51,5 +52,5 @@ write ∷ P s a → a → ST_# s
 write = putMVar#
 
 -- | Without blocking, try to 'write' to the @Sync.P@ unless it's full, leaving it full.
-write' ∷ P s a → a → ST# s B# {- ^ whether the write succeeded -}
-write' = tryPutMVar#
+write' ∷ P s a → a → ST# s B {- ^ whether the write succeeded -}
+write' p a = coerce (tryPutMVar# p a)

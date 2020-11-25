@@ -32,7 +32,7 @@ add2 = coerce plusWord2#
 --           second member is zero if the true sum fits in an @U64@,
 --           nonzero if overflow occurred (the sum is either too large
 --           or too small to fit in an @U64@).
-addC, subC ∷ U64 → U64 → (# U64, B# #)
+addC, subC ∷ U64 → U64 → (# U64, B #)
 addC = coerce addWordC#
 -- |Subtract signed integers reporting overflow.
 --           First member of result is the difference truncated to an @U64@;
@@ -42,7 +42,7 @@ addC = coerce addWordC#
 subC = coerce subWordC#
 
 infix 4 >, ≥, <, ≤, ≡, ≠
-(>),(≥),(<),(≤),(≡),(≠) ∷ U64 → U64 → B#
+(>),(≥),(<),(≤),(≡),(≠) ∷ U64 → U64 → B
 (>) = coerce gtWord#; (≥) = coerce geWord#; (<) = coerce ltWord#; (≤) = coerce leWord#
 (≡) = coerce eqWord#; (≠) = coerce neWord#
 

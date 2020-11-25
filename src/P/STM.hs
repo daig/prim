@@ -2,7 +2,7 @@ module P.STM where
 
 type P = TVar#
 
-instance (≡) (P s a) where (≡) = sameTVar#
+instance (≡) (P s a) where p ≡ q = coerce do sameTVar# p q
 
 new ∷ a → ST# s (P s a)
 new = newTVar#

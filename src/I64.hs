@@ -1,7 +1,6 @@
 {-# language CPP #-}
 {-# language BangPatterns #-}
 module I64 (I64(..), module I64) where
-import B (pattern B#,(∧), pattern T)
 import qualified GHC.Classes as GHC (divInt#,modInt#)
 import qualified I
 
@@ -44,7 +43,7 @@ mul = coerce (*# )
 --     I64f in doubt, return non-zero, but do make an effort to create the
 --     correct answer for small args, since otherwise the performance of
 --     @(×) ∷ I64 → I64 → I64@ will be poor.
-mulMayOflo ∷ I64 → I64 → B#
+mulMayOflo ∷ I64 → I64 → B
 mulMayOflo x y = coerce mulIntMayOflo# x y
 negate ∷ I64 → I64
 negate = coerce negateInt#
@@ -71,7 +70,7 @@ mod y x = coerce GHC.modInt# x y; {-# inline mod #-}
 (/) = coerce GHC.divInt#; {-# inline (/) #-}
 
 
-addC, subC ∷ I64 → I64 → (# I64, B# #)
+addC, subC ∷ I64 → I64 → (# I64, B #)
 -- |Add signed integers reporting overflow.
 --           First member of result is the sum truncated to an @I64@;
 --           second member is zero if the true sum fits in an @I64@,
@@ -88,7 +87,7 @@ subC = coerce subIntC#
 -- * Comparison Operators
 
 infix 4 >, ≥, <, ≤, ≡, ≠
-(>),(≥),(<),(≤),(≡),(≠) ∷ I64 → I64 → B#
+(>),(≥),(<),(≤),(≡),(≠) ∷ I64 → I64 → B
 (>) = coerce (>#); (≥) = coerce (>=#); (<) = coerce (<#); (≤) = coerce (<=#)
 (≡) = coerce (==#); (≠) = coerce (/=#)
 

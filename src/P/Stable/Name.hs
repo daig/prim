@@ -4,7 +4,6 @@ type P = StableName#
 
 new ∷ a → IO# (P a)
 new = makeStableName#
-(≡), eq ∷ P a → P a → B#
-(≡) = eqStableName#; eq = eqStableName#
+instance (≡) (P a) where (≡) = coerce eqStableName#
 toI ∷ P a → I
 toI = stableNameToInt#

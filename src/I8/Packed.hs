@@ -7,13 +7,13 @@ pattern I8 ∷ I → I8
 pattern I8 i ← (extendInt8# → i) where I8 = narrowInt8#
 
 instance (≤) I8 where
-  (>) = gtInt8#
-  (≥) = geInt8#
-  (<) = ltInt8#
-  (≤) = leInt8#
+  (>) = coerce gtInt8#
+  (≥) = coerce geInt8#
+  (<) = coerce ltInt8#
+  (≤) = coerce leInt8#
 instance (≡) I8 where
-  (≡) = eqInt8#
-  (≠) = neInt8#
+  (≡) = coerce eqInt8#
+  (≠) = coerce neInt8#
 
 
 (+), (-), (×), add, sub, mul ∷ I8 → I8 → I8
