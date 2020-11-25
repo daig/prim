@@ -35,6 +35,8 @@ library
                     , DataKinds, UnliftedNewtypes, GADTs
                     , TypeSynonymInstances, TypeFamilies, DerivingStrategies
                     , StandaloneDeriving, GeneralizedNewtypeDeriving
+                    , FlexibleInstances, MultiParamTypeClasses, AllowAmbiguousTypes
+                    , TypeFamilyDependencies
 
   hs-source-dirs: src
   other-modules: Prelude
@@ -47,7 +49,7 @@ library
                  , P.Boxed, P.STM, P.Sync
                  , Tuple
                  , A.Small, A.Boxed
-                 , A, A.Pinned, A.Unpinned
+                 , A, A.Prim
                  , Array.Array, Array.Array.Byte, Array.Array.Array
                  , Thread
                  , Compact

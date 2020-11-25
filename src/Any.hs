@@ -1,7 +1,7 @@
 -- | Description : Operations on arbitrary lifted types
 module Any (module Any, Any, seq) where
 import P
-import A
+import A.Raw
 import qualified A.Boxed as Boxed
 import GHC.Types as X (Any)
 

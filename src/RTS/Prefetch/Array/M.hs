@@ -1,5 +1,5 @@
 module RTS.Prefetch.Array.M where
-import A
+import A.Raw
 
 t0, t1, t2, t3 ∷ MA s → I {- ^ offset -} → ST_# s
 t0 = prefetchMutableByteArray0#

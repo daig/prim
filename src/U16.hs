@@ -1,9 +1,5 @@
 module U16 (U16(U16#,U16), module U16) where
 
--- | Narrow a machine 'U' to 16 bits
-pattern U16 ∷ U → U16
-pattern U16 i ← (coerce narrow16Word# → i) where U16 = coerce
-{-# complete U16 #-}
 
 (+),(-),(×) ∷ U16 → U16 → U16
 x + y = U16 (coerce plusWord# x y)

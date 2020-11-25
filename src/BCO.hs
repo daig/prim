@@ -1,5 +1,5 @@
 module BCO where
-import A (A)
+import A.Raw (A)
 import qualified A.Boxed as Boxed
 
 type BCO = BCO#

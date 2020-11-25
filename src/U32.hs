@@ -1,9 +1,5 @@
 module U32 (U32(U32#,U32),module U32) where
 
--- | Narrow a machine 'U' to 32 bits
-pattern U32 ∷ U → U32
-pattern U32 i ← (coerce narrow32Word# → i) where U32 = coerce
-{-# complete U32 #-}
 
 (+),(-),(×) ∷ U32 → U32 → U32
 x + y = U32 (coerce plusWord# x y)

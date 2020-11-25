@@ -1,5 +1,5 @@
 module Array.Array.Byte where
-import qualified A as Byte
+import qualified A.Raw as Byte
 import Array.Array
 
 index# ∷ A → I → Byte.A

@@ -1,10 +1,5 @@
 module U8 (U8, module U8) where
 
--- | Narrow a machine 'U' to 8 bits
-pattern U8 ∷ U → U8
-pattern U8 i ← (coerce narrow8Word# → i) where U8 = coerce
-{-# complete U8 #-}
-
 (+),(-),(×) ∷ U8 → U8 → U8
 x + y = U8 (coerce plusWord# x y)
 x - y = U8 (coerce minusWord# x y)
