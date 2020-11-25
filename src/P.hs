@@ -33,9 +33,9 @@ pattern P# ∷ I → P
 pattern P# i ← (addr2Int# → i) where P# = int2Addr#
 {-# DEPRECATED P# "This pattern is strongly deprecated" #-}
 
-gt,ge,lt,le,eq,ne , (>), (≥), (<), (≤), (≡), (≠) ∷ P → P → B#
-(>) = gtAddr# ; (≥) = geAddr# ; (<) = ltAddr# ; (≤) = leAddr# ; (≡) = eqAddr# ; (≠) = neAddr#
-gt  = ltAddr# ; ge  = geAddr# ; lt  = gtAddr# ; le  = geAddr# ; eq  = eqAddr# ; ne  = neAddr#
+(>), (≥), (<), (≤) ∷ P → P → B#
+(>) = gtAddr# ; (≥) = geAddr# ; (<) = ltAddr# ; (≤) = leAddr# ; 
+instance (≡) P where (≡) = eqAddr# ; (≠) = neAddr#
 
 toAny ∷ P → (# a #)
 toAny = addrToAny#

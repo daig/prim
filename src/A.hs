@@ -1,4 +1,4 @@
-{-# language InstanceSigs, TypeSynonymInstances #-}
+{-# language FlexibleInstances,InstanceSigs,MultiParamTypeClasses #-}
 module A where
 import P hiding (Prim)
 import Char8
@@ -8,6 +8,7 @@ import I16 (I16(..))
 import I8 (I8(..))
 import I64 (I64(..))
 import qualified P.Stable as Stable
+import qualified B
 
 
 type A = ByteArray#
@@ -19,25 +20,22 @@ pinned' = isByteArrayPinned#
 pinnedMA' ∷ MA s → B#
 pinnedMA' = isMutableByteArrayPinned#
 
--- | Create a new uninitialized mutable byte array of specified size (in bytes),
--- in the specified state thread.
-new ∷ I → ST# s (MA s)
-new = newByteArray#
+-- | Only Mutable arrays have identity with sensible equality.
+--
+-- see https://gitlab.haskell.org/ghc/ghc/-/issues/13908
+instance (≡) (MA s) where
+  (≡) = sameMutableByteArray#
+  a ≠ b = B.not# (a ≡ b)
 
-infix 4 ≡
-(≡), eq ∷ MA s → MA s → B#
-(≡) = sameMutableByteArray#
-eq = sameMutableByteArray#
-
--- | Must be ≤ current 'sizeMA'
+-- | New length must be ≤ current 'sizeMA'
 shrink ∷ MA s → I {- ^ # bytes #-} → ST_# s
 shrink = shrinkMutableByteArray#
 
--- | Number of elements
+-- | Number of bytes
 size ∷ A → I
 size = sizeofByteArray#
 
--- | Number of elements.
+-- | Number of bytes.
 --
 -- note: In @ST#@ because of possible resizes.
 sizeMA ∷ MA s → ST# s I
@@ -47,69 +45,18 @@ sizeMA = getSizeofMutableByteArray#
 freeze## ∷ MA s → ST# s A
 freeze## = unsafeFreezeByteArray#
 
--- | Copy the elements from the source array to the destination array.
--- Both arrays must fully contain the specified ranges, but this is not checked.
--- The two arrays must not be the same array in different states, but this is not checked either.
---
--- Warning: this can fail with an unchecked exception.
-copy# ∷ A -- ^ source
-      → I -- ^ source offset
-      → MA s -- ^ destination
-      → I -- ^ destination offset
-      → I -- ^ number of elements to copy
-      → ST_# s
-copy# = copyByteArray#
-
--- | Copy the elements from the source array to the destination array.
--- Both arrays must fully contain the specified ranges, but this is not checked.
--- The two arrays must not be the same array in different states, but this is not checked either.
---
--- Warning: this can fail with an unchecked exception.
-copyMA# ∷ MA s -- ^ source
-       → I -- ^ source offset
-       → MA s -- ^ destination
-       → I -- ^ destination offset
-       → I -- ^ number of elements to copy
-       → ST_# s
-copyMA# = copyMutableByteArray#
-
--- | Copy a range of the @A@ to the memory range starting at the @P@.
--- The @A@ and the memory region at @P@ must fully contain the specified ranges, but this is not checked.
--- The @P@ must not point into the @A@ (e.g. if the @A@ were pinned), but this is not checked either. 
---
--- Warning: this can fail with an unchecked exception.
-copyToP# ∷ A -- ^ source
-            → I -- ^ source offset
-            → P -- ^ destination
-            → I -- ^ number of elements to copy
-            → ST_# s
-copyToP# = copyByteArrayToAddr#
-
--- | Copy a range of the @A@ to the memory range starting at the @P@.
--- The @A@ and the memory region at @P@ must fully contain the specified ranges, but this is not checked.
--- The @P@ must not point into the @A@ (e.g. if the @A@ were pinned), but this is not checked either. 
---
--- Warning: this can fail with an unchecked exception.
-copyToPMA# ∷ MA s -- ^ source
-             → I -- ^ source offset
-             → P -- ^ destination
-             → I -- ^ number of elements to copy
-             → ST_# s
-copyToPMA# = copyMutableByteArrayToAddr#
-
--- |Copy a memory range starting at the @P@ to the specified range in the
---    @Mutable@. The memory region at @P@ and the @A@ must fully
---    contain the specified ranges, but this is not checked. The @P@ must not
---    point into the @Mutable@ (e.g. if the @Mutable@ were pinned),
---    but this is not checked either.
---
---    Warning: This can fail with an unchecked exception.
-copyFromP# ∷ P -- ^ source
-              → MA s -- ^ destination
-              → I -- ^ destination offset
-              → I -- ^ number of elements to copy
-              → ST_# s
-copyFromP# = copyAddrToByteArray#
+class Copy (src ∷ TYPE r) (dst ∷ TYPE r') (s ∷ T) where
+  -- | Copy the elements from the source to the destination.
+  -- Both must fully contain the specified ranges and not overlap in memory,
+  -- but this is not checked.
+  --
+  -- Warning: this can fail with an unchecked exception.
+  copy ∷ src → I → dst → I → I → ST_# s
+instance Copy A (MA s) s where copy = copyByteArray#
+instance Copy (MA s) (MA s) s where copy = copyMutableByteArray#
+instance Copy A P s where copy src i dst j n = copyByteArrayToAddr# src i (j ∔ dst) n
+instance Copy (MA s) P s where copy src i dst j n = copyMutableByteArrayToAddr# src i (j ∔ dst) n
+instance Copy P (MA s) s where copy src i dst j n = copyAddrToByteArray# (i ∔ src) dst j n
 
 -- | Set a slice to the specified byte.
 set ∷ MA s
@@ -118,8 +65,6 @@ set ∷ MA s
     → I -- ^ the byte to set them to
     → ST_# s
 set = setByteArray#
-
-
 
 -- | Lexicographic comparison.
 -- Warning: Both arrays mus fully contain the specified ranges, but this is not checked.

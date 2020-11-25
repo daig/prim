@@ -5,7 +5,6 @@ import String.C
 import Prelude hiding (Char)
 import Stock.Char (Char(C#))
 import I hiding ((≡))
-import Char ((≡))
 import P
 import B
 

@@ -6,7 +6,7 @@ import String.C
 import Prelude hiding (Char)
 import Stock.Char (Char(C#))
 import B
-import Char ((≤),(≡), eq, le, pattern Char)
+import Char ((≤),pattern Char)
 import Char8
 import I ((+),(-),shiftL#)
 {-

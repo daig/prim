@@ -1,7 +1,7 @@
 {-# language CPP #-}
 module U64 (U64(..), module U64) where
 import qualified GHC.Types as GHC
-import B
+import B hiding (not#)
 import qualified U
 #include "MachDeps.h"
 

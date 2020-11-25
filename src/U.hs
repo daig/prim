@@ -1,7 +1,7 @@
 {-# language CPP #-}
 module U (U, module U) where
 import qualified GHC.Types as GHC
-import B
+import B hiding (not#)
 #include "MachDeps.h"
 
 (+),(-),(×) ∷ U → U → U

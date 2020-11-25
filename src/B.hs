@@ -12,6 +12,8 @@ infixl 3 ∧#
 infixl 2 ∨#
 (∧#), (∨#) ∷ B# → B# → B#
 (∧#) = andI#; (∨#) = orI#;
+not# ∷ B# → B#
+not# = xorI# 1#
 
 
 pattern B# ∷ B# → B
