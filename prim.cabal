@@ -63,7 +63,7 @@ library
                  , RTS.ByteCode
                  , GHC.Rep
                  , IO.Block, GHC.Inline
-                 , RTS.Prefetch.Any, RTS.Prefetch.P, RTS.Prefetch.Array, RTS.Prefetch.Array.M
+                 , RTS.Prefetch
                  , String, String.C, String.C.Latin, String.C.UTF8, String.List
                  , GHC.Nat, GHC.Symbol
                  , Stock.Eq, Stock.Ord, Stock.Ord.Ordering
