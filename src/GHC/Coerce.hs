@@ -13,7 +13,6 @@ module GHC.Coerce
  ) where
 import qualified Prelude as GHC
 import qualified GHC.Types as GHC
-import Type
 import qualified Stock.Word as Stock
 
 -- | @≑@ is a two-parameter class that has instances for types @a@ and @b@ if

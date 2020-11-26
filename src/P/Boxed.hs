@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : Mutable References to boxed values
+--------------------------------------------------------------------
 module P.Boxed where
 import Prelude hiding (P)
 

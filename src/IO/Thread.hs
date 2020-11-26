@@ -1,7 +1,7 @@
 {-# language PatternSynonyms #-}
-module Thread where
+module IO.Thread where
 import P
-import Thread.Status
+import IO.Thread.Status
 
 
 type Id = ThreadId#

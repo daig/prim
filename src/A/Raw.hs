@@ -62,12 +62,18 @@ instance Shrink A where shrink = shrinkMutableByteArray#
 -- | Number of bytes.
 --
 -- note: In @ST#@ because of possible resizes.
-sizeMA ∷ MA s → ST# s I
-sizeMA = getSizeofMutableByteArray#
+sizeM ∷ MA s → ST# s I
+sizeM = getSizeofMutableByteArray#
 
--- | Make a mutable array immutable, without copying.
-freeze## ∷ MA s → ST# s A
-freeze## = unsafeFreezeByteArray#
+instance Freeze## A where freeze## = unsafeFreezeByteArray#
+instance Freeze# A where
+  freeze# a off n s = case new n s of
+    (# s' , ma #) → case copy a off ma 0# n s' of s'' → freeze## ma s''
+-- | This is just a cast
+instance Thaw## A where thaw## a s = (# s , unsafeCoerce# a #)
+instance Thaw# A where
+  thaw# a off n s = case new n s of
+    (# s' , ma #) → case copy a off ma 0# n s' of s'' → (# s'' , ma #)
 
 instance Size A where size = sizeofByteArray#
 
@@ -94,5 +100,3 @@ instance Copy (MA s) (MA s) s where copy = copyMutableByteArray#
 instance Copy A P s where copy src i dst j n = copyByteArrayToAddr# src i (j ∔ dst) n
 instance Copy (MA s) P s where copy src i dst j n = copyMutableByteArrayToAddr# src i (j ∔ dst) n
 instance Copy P (MA s) s where copy src i dst j n = copyAddrToByteArray# (i ∔ src) dst j n
-
-

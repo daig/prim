@@ -1,7 +1,7 @@
-module Thread.Status (Status(Status#,Running,Finished,Died,Migrating,BlockedOn), blocked'
-                     ,Reason(Reason#,MVar,BlackHole,Read,Write,Delay,STM,DoProc
-                     ,CCall,CCall_Interruptible,MsgThrowTo,MVarRead,IOCompletion)
-                     ) where
+module IO.Thread.Status (Status(Status#,Running,Finished,Died,Migrating,BlockedOn), blocked'
+                        ,Reason(Reason#,MVar,BlackHole,Read,Write,Delay,STM,DoProc
+                        ,CCall,CCall_Interruptible,MsgThrowTo,MVarRead,IOCompletion)
+                        ) where
 import B ()
 
 -- * Constants for why_blocked field of a TSO from rts/Constants.h

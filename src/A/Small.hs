@@ -9,6 +9,11 @@ import A.Prim
 type A = SmallArray#
 type MA = SmallMutableArray#
 
+instance Freeze## (A x) where freeze## = unsafeFreezeSmallArray#
+instance Freeze# (A x) where freeze# = freezeSmallArray#
+instance Thaw## (A x) where thaw## = unsafeThawSmallArray#
+instance Thaw# (A x) where thaw# = thawSmallArray#
+
 instance (≡) (MA s a) where
   x ≡ y= coerce do sameSmallMutableArray# x y
   x ≠ y = (¬) (x ≡ y)
@@ -25,7 +30,8 @@ sizeMA# = getSizeofSmallMutableArray#
 instance Copy (A a) (MA s a) s where copy = copySmallArray#
 instance Copy (MA s a) (MA s a) s where copy = copySmallMutableArray#
 
-instance Write# (a ∷ T) (A a)  where write#  = writeSmallArray#
-instance Read# (a ∷ T) (A a)  where read#  = readSmallArray#
 -- | Forces the indexing but not the value. For more laziness use 'A.Small.index#'
-instance Index# (a ∷ T) (A a) where index# a i = case indexSmallArray# a i of (# a #) → a
+instance (x ∷ T) ∈ (A x) where
+  write#  = writeSmallArray#
+  read#  = readSmallArray#
+  index# a i = case indexSmallArray# a i of (# a #) → a

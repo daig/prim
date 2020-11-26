@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : ByteCode operations for interpreters (GHCI)
+--------------------------------------------------------------------
 {-# language ScopedTypeVariables,TypeApplications #-}
 module RTS.ByteCode where
 import A.Raw (A)

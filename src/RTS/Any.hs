@@ -1,15 +1,22 @@
 --------------------------------------------------------------------
 -- | Description : Operations on any lifted value
 --------------------------------------------------------------------
-module RTS.Any (seq, module RTS.Lifted) where
+module RTS.Any (seq, module RTS.Any) where
+import A.Raw
+import qualified A.Boxed as Boxed
 
+-- | Compare pointers, which may be moved by the GC.
+-- __/Warning:/__ this can fail with an unchecked exception.
 eq# ∷ a → a → B
 eq# x y = coerce do reallyUnsafePtrEquality# x y
 
--- | Must be run on an evaluated value, not a thunk
+-- | Find the address of an evaluated value (not a thunk)
 toP# ∷ a → IO# P
 toP# = anyToAddr#
 
+-- | Interpret value if valid or fail spectacularly.
+-- The addressing happens when the unboxed tuple is matched,
+-- but the value is not evaluated.
 fromP ∷ P → (# a #)
 fromP = addrToAny#
 

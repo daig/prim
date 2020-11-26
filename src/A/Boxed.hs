@@ -19,10 +19,6 @@ class Array (a ∷ T → T_A) where
   -- reduces references to the argument array, allowing it to be garbage collected more promptly.
   -- Warning: this can fail with an unchecked exception.
   index# ∷ a x → I → (# x #)
-  -- | Make a mutable array immutable, without copying.
-  freeze## ∷ M (a x) s → ST# s (a x)
-  -- | Make an immutable array mutable, without copying.
-  thaw## ∷ a x → ST# s (M (a x) s)
   -- | Create a new array with the elements from the source array.
   -- The provided array must fully contain the specified range, but this is not checked.
   --
@@ -39,14 +35,6 @@ class Array (a ∷ T → T_A) where
           → I -- ^ Source offset
           → I -- ^ number of elements to copy
           → ST# s (M (a x) s)
-  freeze# ∷ M (a x) s
-          → I -- ^ Source offset
-          → I -- ^ number of elements to copy
-          → ST# s (a x)
-  thaw# ∷  a x
-          → I -- ^ Source offset
-          → I -- ^ number of elements to copy
-          → ST# s (M (a x) s)
   cas ∷ M (a x) s
       → I -- ^ Source offset
       → x -- ^ Expected old value
@@ -56,6 +44,11 @@ class Array (a ∷ T → T_A) where
 instance (≡) (MA s x) where x ≡ y = coerce do sameMutableArray# x y
 
 
+instance Freeze## (A x) where freeze## = unsafeFreezeArray#
+instance Freeze# (A x) where freeze# = freezeArray#
+instance Thaw## (A x) where thaw## = unsafeThawArray#
+instance Thaw# (A x) where thaw# = thawArray#
+
 class Index (x ∷ T_ r) (a ∷ T_ rr) where index ∷ a → I → x
 instance Size (Array# a) where size = sizeofArray#
 instance Array Array# where
@@ -63,10 +56,6 @@ instance Array Array# where
   read = readArray#
   write = writeArray#
   index# = indexArray#
-  freeze## = unsafeFreezeArray#
-  freeze# = freezeArray#
-  thaw## = unsafeThawArray#
-  thaw# = thawArray#
   clone# = cloneArray#
   cloneM# = cloneMutableArray#
   cas as o a0 a1 s0 = case casArray# as o a0 a1 s0 of
@@ -76,10 +65,6 @@ instance Array SmallArray# where
   read = readSmallArray#
   write = writeSmallArray#
   index# = indexSmallArray#
-  freeze## = unsafeFreezeSmallArray#
-  freeze# = freezeSmallArray#
-  thaw## = unsafeThawSmallArray#
-  thaw# = thawSmallArray#
   clone# = cloneSmallArray#
   cloneM# = cloneSmallMutableArray#
   cas as o a0 a1 s0 = case casSmallArray# as o a0 a1 s0 of
@@ -88,7 +73,8 @@ instance Array SmallArray# where
 instance Copy (A a) (MA s a) s where copy = copyArray#
 instance Copy (MA s a) (MA s a) s where copy = copyMutableArray#
 
-instance Write# (a ∷ T) (A a)  where write#  = writeArray#
-instance Read# (a ∷ T) (A a)  where read#  = readArray#
--- | Forces the indexing but not the value. For more laziness use 'A.Boxed.index#'
-instance Index# (a ∷ T) (A a) where index# a i = case indexArray# a i of (# a #) → a
+-- | Forces the indexing but not the value. For more laziness use 'A.Small.index#'
+instance (x ∷ T) ∈ (A x) where
+  write#  = writeArray#
+  read#  = readArray#
+  index# a i = case indexArray# a i of (# a #) → a

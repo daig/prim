@@ -3,6 +3,7 @@
 -- Eg. We cannot store an 'Addr', because it might be null, but we can store "Array.Byte",
 -- and more "Array.Array"
 module Array.Array where
+import A
 
 type A = ArrayArray#
 type MA = MutableArrayArray#
@@ -12,17 +13,17 @@ new = newArrayArray#
 
 instance (≡) (MA s) where (≡) = coerce sameMutableArrayArray#
 
-freeze## ∷ MA s → ST# s A
-freeze## = unsafeFreezeArrayArray#
+instance Freeze## A where freeze## = unsafeFreezeArrayArray#
+instance Freeze# A where
+  freeze# a off n s = case new n s of
+    (# s' , ma #) → case copy a off ma 0# n s' of s'' → freeze## ma s''
+-- | This is just a cast
+instance Thaw## A where thaw## a s = (# s , unsafeCoerce# a #)
+instance Thaw# A where
+  thaw# a off n s = case new n s of
+    (# s' , ma #) → case copy a off ma 0# n s' of s'' → (# s'' , ma #)
 
-size ∷ A → I
-size = sizeofArrayArray#
-
-sizeMA ∷ MA s → I
-sizeMA = sizeofMutableArrayArray#
-
-copy# ∷ A → I → MA s → I → I → ST_# s
-copy# = copyArrayArray#
-
-copyMA# ∷ MA s → I → MA s → I → I → ST_# s
-copyMA# = copyMutableArrayArray#
+instance Size A where size = size
+instance Size (MA s) where size = sizeofMutableArrayArray#
+instance Copy A (MA s) s where copy = copyArrayArray#
+instance Copy (MA s) (MA s) s where copy = copyMutableArrayArray#

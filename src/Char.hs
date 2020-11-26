@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : 31-bit Unicode code points
+--------------------------------------------------------------------
 module Char (Char, pattern Char ,module Char) where
 
 -- | 31-bit Unicode code points

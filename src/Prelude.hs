@@ -2,7 +2,7 @@
 {-# language NoImplicitPrelude,TypeOperators #-}
 module Prelude (module Prelude, module X, type T_) where
 import GHC.Prim  as X
-import Type as X
+import T as X
 import qualified GHC.Types as GHC
 
 

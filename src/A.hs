@@ -25,6 +25,23 @@ class Size (a ∷ T_A) where
   size ∷ a → I
 -- | # of bytes
 
+-- | Make a mutable array immutable, without copying.
+class Freeze## (a ∷ T_ r) where freeze## ∷ M a s → ST# s a
+  -- | Make an immutable array mutable, without copying.
+class Thaw## (a ∷ T_ r) where thaw## ∷ a → ST# s (M a s)
+class Thaw# (a ∷ T_ r) where
+  thaw# ∷  a
+          → I -- ^ Source offset
+          → I -- ^ number of elements to copy
+          → ST# s (M a s)
+
+-- | Create a new immutable array from a mutable by copying
+class Freeze# (a ∷ T_ r) where
+  freeze# ∷ M a s
+          → I -- ^ Source offset
+          → I -- ^ number of elements to copy
+          → ST# s a
+
 class Copy (src ∷ T_ r) (dst ∷ T_ r') (s ∷ T) where
   -- | Copy the elements from the source to the destination.
   -- Both must fully contain the specified ranges and not overlap in memory,
@@ -35,7 +52,7 @@ class Copy (src ∷ T_ r) (dst ∷ T_ r') (s ∷ T) where
        → I -- ^ Source Offset (bytes)
        → dst
        → I -- ^ Destination Offset (bytes)
-       → I -- ^ :ta
+       → I -- ^ Number of elements to copy
        → ST_# s
 
 class Shrink (a ∷ T_A) where shrink ∷ M a s → I → ST_# s

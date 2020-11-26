@@ -10,17 +10,13 @@ import I64 (I64(..))
 import P (P)
 import qualified P.Stable as Stable
 
-class Index# (x ∷ T_ r) (a ∷ T_ r') where
+class (x ∷ T_ r) ∈ (a ∷ T_ r') where
   index# ∷ a → I {- ^ Offset in elements -} → x
-
-class Index## (x ∷ T_ r) (a ∷ T_ r') where
   index## ∷ a → I {- ^ Offset in bytes -} → x
-
-class Read# (x ∷ T_ r) (a ∷ T_ r') where
   read# ∷ M a s → I → ST# s x
-class Write# (x ∷ T_ r) (a ∷ T_ r') where
   write# ∷ M a s → I → x → ST_# s
 
+{-
 -- | Offset in 4-byte words
 instance Index#  Char8       ByteArray#  where index# = coerce indexCharArray#
 instance Index## Char8       ByteArray#  where index## = coerce indexWord8ArrayAsChar#
@@ -150,4 +146,5 @@ instance Prim (Stable.P a) where
   index## = indexWord8ArrayAsStablePtr#
   read# = readStablePtrArray#
   write# = writeStablePtrArray#
+  -}
   -}

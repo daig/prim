@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : Primitive side-effecting/stateful computations
+--------------------------------------------------------------------
 module IO (Token,ST#,ST_#,type (☸),IO#,IO_#,run) where
 import GHC.Magic
 
