@@ -13,6 +13,13 @@ import I64 (I64(..))
 import qualified P.Stable as Stable
 import qualified B
 
+
+class New# (a ∷ T_ r) where new# ∷ I {-^ size in elements -} → ST# s (M a s)
+class Shrink (a ∷ T_A) where shrink ∷ M a s → I → ST_# s
+
+-- | Size in elements. Uninitialized entries point recursively to the array itself.
+instance New# ArrayArray# where new# = newArrayArray#
+
 type family M (a ∷ k) (s ∷ T) = (ma ∷ k) | ma → a where
   M (Array# x) s = MutableArray# s x
   M (SmallArray# x) s = SmallMutableArray# s x
@@ -27,7 +34,7 @@ class Size (a ∷ T_A) where
 
 -- | Make a mutable array immutable, without copying.
 class Freeze## (a ∷ T_ r) where freeze## ∷ M a s → ST# s a
-  -- | Make an immutable array mutable, without copying.
+-- | Make an immutable array mutable, without copying.
 class Thaw## (a ∷ T_ r) where thaw## ∷ a → ST# s (M a s)
 class Thaw# (a ∷ T_ r) where
   thaw# ∷  a
@@ -55,4 +62,10 @@ class Copy (src ∷ T_ r) (dst ∷ T_ r') (s ∷ T) where
        → I -- ^ Number of elements to copy
        → ST_# s
 
-class Shrink (a ∷ T_A) where shrink ∷ M a s → I → ST_# s
+class (x ∷ T_ r) ∈ (a ∷ T_ r') where
+  index# ∷ a → I {- ^ Offset in elements -} → x
+  index## ∷ a → I {- ^ Offset in bytes -} → x
+  read# ∷ M a s → I → ST# s x
+  write# ∷ M a s → I → x → ST_# s
+  -- | Initialize an array
+  new ∷ I {-^ size in elements -} → x → ST# s (M a s)

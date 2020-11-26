@@ -1,2 +1,2 @@
-module Eq ((≡)(..)) where
+module Eq (type (≡)(..)) where
 

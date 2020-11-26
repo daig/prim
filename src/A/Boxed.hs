@@ -6,9 +6,7 @@ import A.Prim
 type A = Array#
 type MA = MutableArray#
 
-
 class Array (a ∷ T → T_A) where
-  new ∷ I → x → ST# s (M (a x) s)
   read ∷ M (a x) s → I → ST# s x
   write ∷ M (a x) s → I → x → ST_# s
   -- | Read from the specified index of an immutable array.
@@ -49,10 +47,11 @@ instance Freeze# (A x) where freeze# = freezeArray#
 instance Thaw## (A x) where thaw## = unsafeThawArray#
 instance Thaw# (A x) where thaw# = thawArray#
 
+instance New# (A x) where new# n = newArray# n (let x = x in x)
+
 class Index (x ∷ T_ r) (a ∷ T_ rr) where index ∷ a → I → x
-instance Size (Array# a) where size = sizeofArray#
+instance Size (Array# a) where size = sizeofArray# 
 instance Array Array# where
-  new = newArray#
   read = readArray#
   write = writeArray#
   index# = indexArray#
@@ -61,7 +60,6 @@ instance Array Array# where
   cas as o a0 a1 s0 = case casArray# as o a0 a1 s0 of
     (# s1, failed', a #) → (# s1, (# B# failed', a #) #)
 instance Array SmallArray# where
-  new = newSmallArray#
   read = readSmallArray#
   write = writeSmallArray#
   index# = indexSmallArray#

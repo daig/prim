@@ -13,6 +13,7 @@ instance Freeze## (A x) where freeze## = unsafeFreezeSmallArray#
 instance Freeze# (A x) where freeze# = freezeSmallArray#
 instance Thaw## (A x) where thaw## = unsafeThawSmallArray#
 instance Thaw# (A x) where thaw# = thawSmallArray#
+instance New# (A x) where new# n = newSmallArray# n (let x = x in x)
 
 instance (≡) (MA s a) where
   x ≡ y= coerce do sameSmallMutableArray# x y

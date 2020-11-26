@@ -54,6 +54,7 @@ library
                  , Array.Array, Array.Array.Byte, Array.Array.Array
                  , IO.Thread, IO.Thread.Status
                  , RTS.Compact
+                 , RTS.CostCentre, RTS.CostCentre.Stack
                  , RTS.Trace
                  , RTS.Any
                  , GHC.Proxy

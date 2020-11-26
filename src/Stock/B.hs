@@ -1,6 +1,14 @@
-module Stock.B (B(F,T), module Stock.B) where
-import GHC.Types (Bool(..))
+{-# language TypeApplications,NoImplicitPrelude #-}
+module Stock.B (B, module Stock.B) where
+import GHC.Prim (dataToTag#)
+import GHC.Types (Bool(..),isTrue#)
 import GHC.Classes as GHC ((&&),(||),not)
+import qualified B as Prim
+import GHC.Coerce
+import Bits
+import Stock.Eq
+
+type B = Bool
 
 pattern F ∷ B
 pattern F = False
@@ -9,14 +17,8 @@ pattern T = True
 {-# complete F,T #-}
 
 pattern B ∷ Prim.B → B
-pattern B i ← (coerce dataToTag# → b) where B b = coerce isTrue# b
+pattern B b ← (coerce (dataToTag# @B) → b) where B b = coerce isTrue# b
 {-# complete B #-}
 
-(∧), (∨), and, or ∷ B → B → B
-infixr 3 ∧ ; infixr 2 ∨
-(∧) = (&&); (∨) = (||)
-and = (&&); or  = (||) 
-{-# inline (∧) #-}; {-# inline (∨) #-}
-{-# inline and #-}; {-# inline or #-}
-not ∷ B → B
-not = GHC.not
+instance (⊕) B where (∧) = (&&); (∨) = (||); (⊕) = (/=)
+instance (¬) B where (¬) = GHC.not
