@@ -23,13 +23,25 @@ instance (≡) (P s a) where p ≡ q = B# do sameMutVar# p q
 
 
 -- | Note that this isn't strictly speaking the correct type for this function;
--- it should really be P s a -> (a -> (a,b)) -> ST# s (# a, (a, b) #),
--- but we don't know about pairs here. The pair is lazy and not forced.
+-- it should really be @P s a -> (a -> (a,...)) -> ST# s (# a, (a,...) #)@,
+-- where (a,...) is any record type with a first field of @a@ (eg any sized tuple).
+-- That the first field has the right type is not checked, and will be unsafely
+-- coerced.
+--
+-- The return is lazy and not forced. This allows control over evaluation and sharing between
+-- The updated value and return value, eg:
+--
+-- @
+-- modify mv \ a → let foo = expensive a in ([3,foo],foo)
+-- @
+--
+-- See <https://mail.haskell.org/pipermail/ghc-devs/2019-October.txt discussion>
+-- for "atomicModifyMutVar2"
 --
 -- Warning: this can fail with an unchecked exception.
 modify2 ∷ P s a
-       → (a → ab)
-       → ST# s (# a, ab #) -- ^ Previous contents and the result of applying the function
+       → (a → c)
+       → ST# s (# a, c #) -- ^ Previous contents and the result of applying the function
 modify2 r f s0 = case atomicModifyMutVar2# r f s0 of
   (# s1, old, new #) → (# s1, (# old, new #) #)
 
