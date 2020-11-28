@@ -2,7 +2,7 @@
 -- | Description : Operations on any lifted value
 --------------------------------------------------------------------
 module RTS.Any (seq, module RTS.Any) where
-import A.Raw
+import Bytes
 import qualified A.Boxed as Boxed
 
 -- | Compare pointers, which may be moved by the GC.

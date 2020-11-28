@@ -1,12 +1,12 @@
 module A.Unlifted.Byte where
-import qualified A.Raw as Byte
+import qualified Bytes
 import Refs
 
-index# ∷ A → I → Byte.A
+index# ∷ A → I → Bytes.A
 index# = indexByteArrayArray#
 
-read# ∷ MA s → I → ST# s Byte.A
+read# ∷ MA s → I → ST# s Bytes.A
 read# = readByteArrayArray#
 
-write# ∷ MA s → I → Byte.A → ST_# s
+write# ∷ MA s → I → Bytes.A → ST_# s
 write# = writeByteArrayArray#

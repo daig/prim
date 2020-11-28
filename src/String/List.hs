@@ -3,7 +3,7 @@ module String.List where
 import Prelude hiding (IO,Char)
 import Stock.IO
 import Stock.Char
-import A.Raw
+import Bytes
 
 type S = [Char]
 

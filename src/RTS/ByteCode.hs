@@ -3,7 +3,7 @@
 --------------------------------------------------------------------
 {-# language ScopedTypeVariables,TypeApplications #-}
 module RTS.ByteCode where
-import A.Raw (A)
+import Bytes (A)
 import qualified A.Boxed as Boxed
 
 type BCO = BCO#
