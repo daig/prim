@@ -3,26 +3,27 @@ module String.List where
 import Prelude hiding (IO,Char)
 import Stock.IO
 import Stock.Char
-import Bytes
+import A
+import qualified A.Byte as Byte
 
 type S = [Char]
 
 debugLn ∷ S → IO ()
-debugLn xs = IO \ s → case mkMBA xs s of
+debugLn xs = IO \ s → case pack xs s of
                  (# s', mba #) → case c_debugLn mba of IO f → f s'
 
 debugErrLn ∷ S → IO ()
-debugErrLn xs = IO \ s → case mkMBA xs s of
+debugErrLn xs = IO \ s → case pack xs s of
                     (# s', mba #) → case c_debugErrLn mba of IO f → f s'
 
 foreign import ccall unsafe "debugLn"
-    c_debugLn ∷ MA (☸) → IO ()
+    c_debugLn ∷ Byte.MA (☸) → IO ()
 
 foreign import ccall unsafe "debugErrLn"
-    c_debugErrLn ∷ MA (☸) → IO ()
+    c_debugErrLn ∷ Byte.MA (☸) → IO ()
 
-mkMBA ∷ S → IO# (MA (☸))
-mkMBA xs s0 = -- Start with 1 so that we have space to put in a \0 at
+pack ∷ S → IO# (Byte.MA (☸))
+pack xs s0 = -- Start with 1 so that we have space to put in a \0 at
               -- the end
               case len 1# xs of
               l →

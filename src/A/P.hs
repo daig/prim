@@ -5,6 +5,12 @@ import Char8
 import P
 import qualified P.Stable as Stable
 
+-- | @Raw.P@ are already mutable
+type instance M P s = P
+
+-- | "A.P"
+instance (♭) a ⇒ (a ∷ T_ r) ∈ P where index# = indexP#; read# = readP#; write# = writeP#
+{-
 -- | Offset in 4-byte words
 instance Char8 ∈ P where
   index# = coerce indexCharOffAddr#
@@ -70,3 +76,4 @@ instance (Stable.P a) ∈ P where
   index# = indexStablePtrOffAddr#
   read#   = readStablePtrOffAddr#
   write#  = writeStablePtrOffAddr#
+  -}

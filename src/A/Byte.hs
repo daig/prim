@@ -1,20 +1,20 @@
-{-# language InstanceSigs #-}
-module Bytes where
-import Char (Char(..))
-import Char8 (Char8(..))
-import I8 (I8(..))
-import I16 (I16(..))
-import I32 (I32(..))
-import I64 (I64(..))
-import U8 (U8(..))
-import P (P,(∔))
+--------------------------------------------------------------------
+-- | Description : Raw Byte Arrays
+--
+-- Untyped region of 'U8' bytes. Useful for packing heterogeneous records.
+-- For homogenous arrays prefer "A.Unboxed"
+--------------------------------------------------------------------
+module A.Byte where
+import {-# source #-} A
 import qualified P.Stable as Stable
-import A
 import Ordering
-
+import P
+import IO
 
 type A = ByteArray#
 type MA = MutableByteArray#
+type instance M A s = MA s
+
 
 -- | Only Mutable arrays have identity with sensible equality.
 --
@@ -35,7 +35,6 @@ pinned = newPinnedByteArray#
 -- TODO: add docs for which arg is which
 aligned ∷ I → I → ST# s (MA s)
 aligned = newAlignedPinnedByteArray#
-
 
 -- | Address may change between GC cycles so this is only safe for pinned arrays
 contents ∷ A → P
@@ -67,9 +66,14 @@ instance 𝔸 A where
   thaw# a off n s = case new# n s of
     (# s' , ma #) → case copy a off ma 0# n s' of s'' → (# s'' , ma #)
   new# = newByteArray#
+
   len = sizeofByteArray#
   lenM# = sizeofMutableByteArray#
   lenM = getSizeofMutableByteArray#
+  clone# a off n = IO.run \ s → case thaw## a s of
+    (# s' , ma #) → case freeze# ma off n s' of (# _ , a' #) → a'
+  cloneM# ma off n = \s → case new# n s of
+    (# s' , ma' #) → case copy ma off ma 0# n s' of s'' → (# s'' , ma' #)
 
 -- | Set a slice to the specified byte.
 set ∷ MA s
@@ -89,73 +93,19 @@ compare# ∷ A -- ^ source1
          → Ordering 
 compare# = coerce compareByteArrays#
 
+-- | Given an array, an offset in machine words, the expected old value, and the
+-- new value, perform an atomic compare and swap i.e. write the new value if the
+-- current value matches the provided old value. Returns the value of the
+-- element before the operation. Implies a full memory barrier.
+cas# ∷ MA s → I       -- ^ offset in machine words
+            → U       -- ^ expected old value
+            → U       -- ^ new value
+            → ST# s U -- ^ actual old value
+cas# ma o (word2Int# → x0) (word2Int# → x1) s =
+  case casIntArray# ma o x0 x1 s of (# s , x #) → (# s , int2Word# x #)
+
 instance Copy A (MA s) s where copy = copyByteArray#
 instance Copy (MA s) (MA s) s where copy = copyMutableByteArray#
 instance Copy A P s where copy src i dst j n = copyByteArrayToAddr# src i (j ∔ dst) n
 instance Copy (MA s) P s where copy src i dst j n = copyMutableByteArrayToAddr# src i (j ∔ dst) n
 instance Copy P (MA s) s where copy src i dst j n = copyAddrToByteArray# (i ∔ src) dst j n
--- | Offset in 4-byte words
-instance Char8 ∈ A where
-  index# = coerce indexWord8ArrayAsChar#
-  read#   = coerce readWord8ArrayAsChar#
-  write#  = coerce writeWord8ArrayAsChar#
-instance Char ∈ A where
-  index# = indexWord8ArrayAsWideChar#
-  read#   = readWord8ArrayAsWideChar#
-  write#  = writeWord8ArrayAsWideChar#
-instance F32 ∈ A where
-  index# = indexWord8ArrayAsFloat#
-  read# = readWord8ArrayAsFloat#
-  write# = writeWord8ArrayAsFloat#
-instance F64 ∈ A where
-  index# = indexWord8ArrayAsDouble#
-  read# = readWord8ArrayAsDouble#
-  write# = writeWord8ArrayAsDouble#
-instance I8 ∈ A where
-  index# = coerce indexInt8Array#
-  read#   = coerce readInt8Array#
-  write#  = coerce writeInt8Array#
-instance I16 ∈ A where
-  index# = coerce indexWord8ArrayAsInt16#
-  read# = coerce readWord8ArrayAsInt16#
-  write# = coerce writeWord8ArrayAsInt16#
-instance I32 ∈ A where
-  index# = coerce indexWord8ArrayAsInt32#
-  read# = coerce readWord8ArrayAsInt32#
-  write# = coerce writeWord8ArrayAsInt32#
-instance I64 ∈ A where
-  index# = coerce indexWord8ArrayAsInt64#
-  read# = coerce readWord8ArrayAsInt64#
-  write# = coerce writeWord8ArrayAsInt64#
-instance I ∈ A where
-  index# = indexWord8ArrayAsInt#
-  read# = readWord8ArrayAsInt#
-  write# = writeWord8ArrayAsInt#
-instance U8 ∈ A where
-  index# = coerce indexWord8Array#
-  read#   = coerce readWord8Array#
-  write#  = coerce writeWord8Array#
-instance U16 ∈ A where
-  index# = coerce indexWord8ArrayAsWord16#
-  read# = coerce readWord8ArrayAsWord16#
-  write# = coerce writeWord8ArrayAsWord16#
-instance U32 ∈ A where
-  index# = coerce indexWord8ArrayAsWord32#
-  read# = coerce readWord8ArrayAsWord32#
-  write# = coerce writeWord8ArrayAsWord32#
-instance U64 ∈ A where
-  index# = coerce indexWord8ArrayAsWord64#
-  read# = coerce readWord8ArrayAsWord64#
-  write# = coerce writeWord8ArrayAsWord64#
-instance U ∈ A where
-  index# = indexWord8ArrayAsWord#
-  read# = readWord8ArrayAsWord#
-  write# = writeWord8ArrayAsWord#
-instance P ∈ A where
-  index# = indexWord8ArrayAsAddr#
-  read# = readWord8ArrayAsAddr#
-  write# = writeWord8ArrayAsAddr#
-instance (Stable.P a) ∈ A where
-  index# = indexWord8ArrayAsStablePtr#
-  read# = readWord8ArrayAsStablePtr#
-  write# = writeWord8ArrayAsStablePtr#

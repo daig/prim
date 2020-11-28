@@ -1,8 +1,11 @@
+--------------------------------------------------------------------
+-- | Description : Operations on sum types
+--------------------------------------------------------------------
 {-# language BangPatterns, ScopedTypeVariables, RankNTypes, TypeApplications #-}
-module Enum
+module Any.Enum
   (-- | Must be evaluated, not a thunk
    dataToTag# 
-  -- | @a@ must be an enum type
+  -- | @a@ must be an enum type (no payload)
   ,tagToEnum#
   ,toI
   ) where
@@ -16,7 +19,7 @@ Returns the 'tag' of a constructor application; this function is used
 by the deriving code for Eq, Ord and Enum.
 
 The primitive dataToTag# requires an evaluated constructor application
-as its argument, so we provide getTag as a wrapper that performs the
+as its argument, so we provide @toI@ as a wrapper that performs the
 evaluation before calling dataToTag#.  We could have dataToTag#
 evaluate its argument, but we prefer to do it this way because (a)
 dataToTag# can be an inline primop if it doesn't need to do any

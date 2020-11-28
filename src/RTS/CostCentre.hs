@@ -2,11 +2,10 @@
 module RTS.CostCentre (CString,CostCentre(CC#,CC),label,module_,srcSpan) where
 import I 
 import A
-import Bytes
 import A.P
 
 newtype CostCentre ∷ T_P where CC# ∷ P → CostCentre
-deriving via (P) instance (CostCentre ∈ P)
+deriving newtype instance (♭) CostCentre
 type CString = P
 
 label,module_,srcSpan ∷ CostCentre → CString

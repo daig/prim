@@ -3,8 +3,8 @@
 --------------------------------------------------------------------
 {-# language ScopedTypeVariables,TypeApplications #-}
 module RTS.ByteCode where
-import Bytes (A)
-import qualified A.Boxed as Boxed
+import qualified A.Byte as Byte
+import qualified A.Boxed.Big as Big
 
 type BCO = BCO#
 
@@ -13,11 +13,11 @@ type BCO = BCO#
 mkApUpd0 ∷ BCO → (# a #)
 mkApUpd0 = mkApUpd0#
 
-new ∷ A -- ^ instructions
-    → A -- ^ literals
-    → Boxed.A a -- ^ pointers
+new ∷ Byte.A -- ^ instructions
+    → Byte.A -- ^ literals
+    → Big.A a -- ^ pointers
     → I -- ^ arity
-    → A -- ^ static reference table usage bitmap
+    → Byte.A -- ^ static reference table usage bitmap
     → ST# s BCO
 new = newBCO#
 

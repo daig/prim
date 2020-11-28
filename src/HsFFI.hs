@@ -15,11 +15,13 @@
 -- and good hooks for documentation.
 --------------------------------------------------------------------
 {-# language ForeignFunctionInterface, CApiFFI, UnliftedFFITypes, GHCForeignImportPrim #-}
-module HsFFI where
+module HsFFI (module HsFFI, module X) where
 import Stock.Int
+import Stock.Word
 import Stock.Float
 import Stock.Double
 import Stock.IO
+import HsFFI.Rounding as X
 
 foreign import capi "HsFFI.h value HS_INT_MAX" int_max ∷ Int
 foreign import capi "HsFFI.h value HS_INT_MIN" int_min ∷ Int
@@ -32,21 +34,13 @@ foreign import capi "HsFFI.h value HS_INT32_MIN" int32_min ∷ Int
 foreign import capi "HsFFI.h value HS_INT64_MAX" int64_max ∷ Int
 foreign import capi "HsFFI.h value HS_INT64_MIN" int64_min ∷ Int
 
-foreign import capi "HsFFI.h value HS_WORD_MAX" word_max ∷ Int
-foreign import capi "HsFFI.h value HS_WORD8_MAX" word8_max ∷ Int
-foreign import capi "HsFFI.h value HS_WORD16_MAX" word16_max ∷ Int
-foreign import capi "HsFFI.h value HS_WORD32_MAX" word32_max ∷ Int
-foreign import capi "HsFFI.h value HS_WORD64_MAX" word64_max ∷ Int
+foreign import capi "HsFFI.h value HS_WORD_MAX" word_max ∷ Word
+foreign import capi "HsFFI.h value HS_WORD8_MAX" word8_max ∷ Word
+foreign import capi "HsFFI.h value HS_WORD16_MAX" word16_max ∷ Word
+foreign import capi "HsFFI.h value HS_WORD32_MAX" word32_max ∷ Word
+foreign import capi "HsFFI.h value HS_WORD64_MAX" word64_max ∷ Word
 
 -- * 'F32'
-
-newtype Rounding = Rounding# Int
-pattern Indeterminable = Rounding# (-1)
-pattern Zero = Rounding# 0
-pattern Nearest = Rounding# 1
-pattern Inf = Rounding# 2
-pattern Inf_ = Rounding# 2
-
 
 -- | This is the value of the base, or radix, of the exponent representation.
 -- This is guaranteed to be a constant expression, unlike the other macros

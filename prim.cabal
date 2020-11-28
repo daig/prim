@@ -37,11 +37,12 @@ library
                     , StandaloneDeriving, GeneralizedNewtypeDeriving
                     , FlexibleInstances, MultiParamTypeClasses, AllowAmbiguousTypes
                     , TypeFamilyDependencies
-                    , PostfixOperators, TypeApplications
+                    , PostfixOperators, TypeApplications, FlexibleContexts
+                    , LambdaCase
 
   hs-source-dirs: src
   other-modules: Prelude
-  exposed-modules: Char , B, T
+  exposed-modules: Char , Char8,  B, T
                  , I, I64, I32, I16, I16.Packed, I8, I8.Packed
                  , U, U64, U32, U16, U16.Packed, U8, U8.Packed
                  , F64, F32
@@ -49,20 +50,18 @@ library
                  , P, P.Weak, P.Stable, P.Stable.Name
                  , P.Boxed, P.STM, P.Sync
                  , Tuple
-                 , A.Small, A.Boxed
-                 , A, A.Unboxed
-                 , Bytes , Refs
-                 , A.Unlifted.Byte, A.Unlifted.Array
+                 , A.P
+                 , A.Boxed, A.Boxed.Big
+                 , A, A.Byte, A.Prim , A.Array
                  , IO.Thread, IO.Thread.Status
                  , RTS.Compact
                  , RTS.CostCentre, RTS.CostCentre.Stack
                  , RTS.Trace
-                 , RTS.Any
+                 , Any , Any.Enum
                  , GHC.Proxy
                  , GHC.Coerce
                  , Exception, Exception.Mask
                  , RTS.Spark
-                 , Enum
                  , RTS.ByteCode
                  , IO.Block, GHC.Inline
                  , RTS.Prefetch
@@ -75,5 +74,5 @@ library
                  , GHC.Typeable
                  , X
                  , Bits, Cmp
-                 , HsFFI
+                 , HsFFI, HsFFI.Rounding
   build-depends: ghc-prim ^>= 0.6.1, rts

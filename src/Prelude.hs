@@ -13,6 +13,9 @@ type I = Int#
 
 type Char = Char#
 
+-- | 8-bit Latin-1 code points
+newtype Char8 ∷ T_U where Char8# ∷ Char → Char8
+
 newtype I8  ∷ T_I where I8#  ∷ I → I8
 -- | Narrow a machine 'I' to 8 bits
 pattern I8 ∷ I → I8

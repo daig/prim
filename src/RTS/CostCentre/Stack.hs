@@ -14,7 +14,6 @@ module RTS.CostCentre.Stack
   ) where
 import I 
 import A
-import Bytes
 import A.P
 import qualified RTS.CostCentre as CC
 import RTS.CostCentre (CostCentre(..))
@@ -26,8 +25,7 @@ import qualified String.C as S
 
 newtype CCS ∷ T_P where CCS# ∷ P → CCS 
 deriving newtype instance (≡) CCS
-deriving via (P) instance (CCS ∈ P)
-
+deriving newtype instance (♭) CCS
 
 head ∷ CCS → CostCentre
 head (CCS# p) = index# p 8#
