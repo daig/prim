@@ -10,11 +10,11 @@ module RTS.CostCentre.Stack
   -- * Primitive Operations
   , get , getCurrent, clear
   -- * Utility operations
-  , toStrings
+--  , toStrings
   ) where
 import I 
 import A
-import A.Raw
+import Bytes
 import A.P
 import qualified RTS.CostCentre as CC
 import RTS.CostCentre (CostCentre(..))
@@ -22,7 +22,7 @@ import Stock.Char
 import Stock.Eq
 import qualified Stock.B as Stock
 import IO
-import qualified GHC.CString as GHC
+import qualified String.C as S
 
 newtype CCS ∷ T_P where CCS# ∷ P → CCS 
 deriving newtype instance (≡) CCS
@@ -30,9 +30,9 @@ deriving via (P) instance (CCS ∈ P)
 
 
 head ∷ CCS → CostCentre
-head (CCS# p) = index## p 8#
+head (CCS# p) = index# p 8#
 parent ∷ CCS → CCS
-parent (CCS# p) = index## p 16#
+parent (CCS# p) = index# p 16#
 
 pattern Null ← CCS# nullAddr# where Null = CCS# nullAddr#
 
@@ -55,6 +55,7 @@ getCurrent a =  coerce do getCurrentCCS# a
 clear ∷ ST# s a → ST# s a
 clear = clearCCS#
 
+{-
 -- | Format a 'CSS' as a list of lines.
 toStrings :: CCS -> [[Char]]
 toStrings ccs0 = go ccs0 []
@@ -62,9 +63,10 @@ toStrings ccs0 = go ccs0 []
     go ∷ CCS → [[Char]] → [[Char]]
     go ccs acc = case ccs of
        Null → acc
-       CCS (CC (GHC.unpackCString# → lbl) (GHC.unpackCString# → mdl) (GHC.unpackCString# → loc)) parent
+       CCS (CC (unpack# → lbl) (unpack# → mdl) (unpack# → loc)) parent
          → if mdl == "MAIN" ∧ lbl == "MAIN" then acc
              else go parent ((mdl ++ '.':lbl ++ ' ':'(':loc ++ ")") : acc)
 infixr 5 ++
 [] ++ bs = bs
 (a : as) ++ bs = a : as ++ bs
+-}

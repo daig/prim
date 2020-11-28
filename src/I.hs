@@ -166,5 +166,4 @@ shiftRL# i x = uncheckedIShiftRL# x i
 shiftRL i x = case i ≥ WORD_SIZE_IN_BITS# of {T → 0#; F → uncheckedIShiftRL# x i}
 
 -- | @(n ¬) = -n - 1@
-instance (⊕) I where (∧) = andI#; (∨) = orI#; (⊕) = xorI#
-instance (¬) I where (¬) = notI#
+instance 𝔹 I where (∧) = andI#; (∨) = orI#; (⊕) = xorI#; (¬) = notI#

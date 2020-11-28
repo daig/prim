@@ -8,8 +8,11 @@ import I8 (I8(..))
 
 deriving newtype instance (≡) I32
 deriving newtype instance (≤) I32
-deriving newtype instance (⊕) I32
-instance (¬) I32 where (¬) (I32 u) = I32 (u ¬)
+instance 𝔹 I32 where
+  (∧) = coerce ((∧) @_ @I)
+  (∨) = coerce ((∨) @_ @I)
+  (⊕) = coerce ((⊕) @_ @I)
+  (¬) (I32 u) = I32 (u ¬)
 
 (+), (-), (×) ∷ I32 → I32 → I32
 (I32 x) + (I32 y) = I32 (x +# y)

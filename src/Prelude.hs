@@ -11,6 +11,8 @@ import qualified GHC.Types as GHC
 -- 'I.Min' and 'I.Max'.
 type I = Int#
 
+type Char = Char#
+
 newtype I8  ∷ T_I where I8#  ∷ I → I8
 -- | Narrow a machine 'I' to 8 bits
 pattern I8 ∷ I → I8
@@ -99,8 +101,9 @@ class (≡) (a ∷ T_ r) where (≡), (≠) ∷ a → a → B
 class (≡) a ⇒ (≤) (a ∷ T_ r) where (>),(≥),(<),(≤) ∷ a → a → B
 
 -- | Bitwise algebriac operations
-class (⊕) (a ∷ T_ r) where (∧), (∨), (⊕) ∷ a → a → a
-class (¬) (a ∷ T_ r) where (¬) ∷ a → a
+class 𝔹 (a ∷ T_ r) where
+  (∧), (∨), (⊕) ∷ a → a → a
+  (¬) ∷ a → a
 infixl 3 ∧
 infixl 2 ⊕
 infixl 1 ∨

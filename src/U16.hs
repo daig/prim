@@ -6,8 +6,11 @@ import U ()
 
 deriving newtype instance (≡) U16
 deriving newtype instance (≤) U16
-deriving newtype instance (⊕) U16
-instance (¬) U16 where (¬) (U16 u) = U16 (u ¬)
+instance 𝔹 U16 where
+  (∧) = coerce ((∧) @_ @U)
+  (∨) = coerce ((∨) @_ @U)
+  (⊕) = coerce ((⊕) @_ @U)
+  (¬) (U16 u) = U16 (u ¬)
 
 
 (+),(-),(×) ∷ U16 → U16 → U16

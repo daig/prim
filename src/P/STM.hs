@@ -3,6 +3,7 @@ import Prelude hiding (P)
 
 type P = TVar#
 
+-- | "IO.STM" references
 instance (≡) (P s a) where p ≡ q = coerce do sameTVar# p q
 
 new ∷ a → ST# s (P s a)
@@ -16,5 +17,3 @@ readIO = readTVarIO#
 
 write ∷ P s a → a → ST_# s
 write = writeTVar#
-
-

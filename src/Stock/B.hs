@@ -20,5 +20,4 @@ pattern B ∷ Prim.B → B
 pattern B b ← (coerce (dataToTag# @B) → b) where B b = coerce isTrue# b
 {-# complete B #-}
 
-instance (⊕) B where (∧) = (&&); (∨) = (||); (⊕) = (/=)
-instance (¬) B where (¬) = GHC.not
+instance 𝔹 B where (∧) = (&&); (∨) = (||); (⊕) = (/=); (¬) = GHC.not

@@ -1,5 +1,5 @@
 {-# language InstanceSigs #-}
-module A.Raw where
+module Bytes where
 import Char (Char(..))
 import Char8 (Char8(..))
 import I8 (I8(..))
@@ -15,11 +15,6 @@ import Ordering
 
 type A = ByteArray#
 type MA = MutableByteArray#
-
-
-  --new n x s = case new# n s of
-    --(# s' , ma #) → case set ma 0# n x s' of
-      --s'' → (# s'' , ma #)
 
 -- | Only Mutable arrays have identity with sensible equality.
 --
@@ -76,9 +71,7 @@ instance 𝔸 A where
   lenM# = sizeofMutableByteArray#
   lenM = getSizeofMutableByteArray#
 
-
 -- | Set a slice to the specified byte.
-
 set ∷ MA s
     → I  -- ^ slice start offset
     → I  -- ^ slice length in bytes
@@ -101,86 +94,68 @@ instance Copy (MA s) (MA s) s where copy = copyMutableByteArray#
 instance Copy A P s where copy src i dst j n = copyByteArrayToAddr# src i (j ∔ dst) n
 instance Copy (MA s) P s where copy src i dst j n = copyMutableByteArrayToAddr# src i (j ∔ dst) n
 instance Copy P (MA s) s where copy src i dst j n = copyAddrToByteArray# (i ∔ src) dst j n
-{-
 -- | Offset in 4-byte words
 instance Char8 ∈ A where
-  index# = coerce indexCharArray#
-  index## = coerce indexWord8ArrayAsChar#
-  read#   = coerce readCharArray#
-  write#  = coerce writeCharArray#
+  index# = coerce indexWord8ArrayAsChar#
+  read#   = coerce readWord8ArrayAsChar#
+  write#  = coerce writeWord8ArrayAsChar#
 instance Char ∈ A where
-  index# = indexWideCharArray#
-  index## = indexWord8ArrayAsWideChar#
-  read#   = readWideCharArray#
-  write#  = writeWideCharArray#
+  index# = indexWord8ArrayAsWideChar#
+  read#   = readWord8ArrayAsWideChar#
+  write#  = writeWord8ArrayAsWideChar#
 instance F32 ∈ A where
-  index# = indexFloatArray#
-  index## = indexWord8ArrayAsFloat#
-  read#   = readFloatArray#
-  write#  = writeFloatArray#
+  index# = indexWord8ArrayAsFloat#
+  read# = readWord8ArrayAsFloat#
+  write# = writeWord8ArrayAsFloat#
 instance F64 ∈ A where
-  index# = indexDoubleArray#
-  index## = indexWord8ArrayAsDouble#
-  read#   = readDoubleArray#
-  write#  = writeDoubleArray#
+  index# = indexWord8ArrayAsDouble#
+  read# = readWord8ArrayAsDouble#
+  write# = writeWord8ArrayAsDouble#
 instance I8 ∈ A where
   index# = coerce indexInt8Array#
-  index## = coerce indexInt8Array#
   read#   = coerce readInt8Array#
   write#  = coerce writeInt8Array#
 instance I16 ∈ A where
-  index# = coerce indexInt16Array#
-  index## = coerce indexWord8ArrayAsInt16#
-  read#   = coerce readInt16Array#
-  write#  = coerce writeInt16Array#
+  index# = coerce indexWord8ArrayAsInt16#
+  read# = coerce readWord8ArrayAsInt16#
+  write# = coerce writeWord8ArrayAsInt16#
 instance I32 ∈ A where
-  index# = coerce indexInt32Array#
-  index## = coerce indexWord8ArrayAsInt32#
-  read#   = coerce readInt32Array#
-  write#  = coerce writeInt32Array#
+  index# = coerce indexWord8ArrayAsInt32#
+  read# = coerce readWord8ArrayAsInt32#
+  write# = coerce writeWord8ArrayAsInt32#
 instance I64 ∈ A where
-  index# = coerce indexInt64Array#
-  index## = coerce indexWord8ArrayAsInt64#
-  read#   = coerce readInt64Array#
-  write#  = coerce writeInt64Array#
+  index# = coerce indexWord8ArrayAsInt64#
+  read# = coerce readWord8ArrayAsInt64#
+  write# = coerce writeWord8ArrayAsInt64#
 instance I ∈ A where
-  index# = indexIntArray#
-  index## = indexWord8ArrayAsInt#
-  read#   = readIntArray#
-  write#  = writeIntArray#
+  index# = indexWord8ArrayAsInt#
+  read# = readWord8ArrayAsInt#
+  write# = writeWord8ArrayAsInt#
 instance U8 ∈ A where
   index# = coerce indexWord8Array#
-  index## = coerce indexWord8Array#
   read#   = coerce readWord8Array#
   write#  = coerce writeWord8Array#
 instance U16 ∈ A where
-  index# = coerce indexWord16Array#
-  index## = coerce indexWord8ArrayAsWord16#
-  read#   = coerce readWord16Array#
-  write#  = coerce writeWord16Array#
+  index# = coerce indexWord8ArrayAsWord16#
+  read# = coerce readWord8ArrayAsWord16#
+  write# = coerce writeWord8ArrayAsWord16#
 instance U32 ∈ A where
-  index# = coerce indexWord32Array#
-  index## = coerce indexWord8ArrayAsWord32#
-  read#   = coerce readWord32Array#
-  write#  = coerce writeWord32Array#
+  index# = coerce indexWord8ArrayAsWord32#
+  read# = coerce readWord8ArrayAsWord32#
+  write# = coerce writeWord8ArrayAsWord32#
 instance U64 ∈ A where
-  index# = coerce indexWord64Array#
-  index## = coerce indexWord8ArrayAsWord64#
-  read#   = coerce readWord64Array#
-  write#  = coerce writeWord64Array#
+  index# = coerce indexWord8ArrayAsWord64#
+  read# = coerce readWord8ArrayAsWord64#
+  write# = coerce writeWord8ArrayAsWord64#
 instance U ∈ A where
-  index# = indexWordArray#
-  index## = indexWord8ArrayAsWord#
-  read#   = readWordArray#
-  write#  = writeWordArray#
+  index# = indexWord8ArrayAsWord#
+  read# = readWord8ArrayAsWord#
+  write# = writeWord8ArrayAsWord#
 instance P ∈ A where
-  index# = indexAddrArray#
-  index## = indexWord8ArrayAsAddr#
-  read#   = readAddrArray#
-  write#  = writeAddrArray#
+  index# = indexWord8ArrayAsAddr#
+  read# = readWord8ArrayAsAddr#
+  write# = writeWord8ArrayAsAddr#
 instance (Stable.P a) ∈ A where
-  index# = indexStablePtrArray#
-  index## = indexWord8ArrayAsStablePtr#
-  read#   = readStablePtrArray#
-  write#  = writeStablePtrArray#
-  -}
+  index# = indexWord8ArrayAsStablePtr#
+  read# = readWord8ArrayAsStablePtr#
+  write# = writeWord8ArrayAsStablePtr#

@@ -37,7 +37,7 @@ library
                     , StandaloneDeriving, GeneralizedNewtypeDeriving
                     , FlexibleInstances, MultiParamTypeClasses, AllowAmbiguousTypes
                     , TypeFamilyDependencies
-                    , PostfixOperators
+                    , PostfixOperators, TypeApplications
 
   hs-source-dirs: src
   other-modules: Prelude
@@ -50,8 +50,9 @@ library
                  , P.Boxed, P.STM, P.Sync
                  , Tuple
                  , A.Small, A.Boxed
-                 , A, A.Prim
-                 , Array.Array, Array.Array.Byte, Array.Array.Array
+                 , A, A.Unboxed
+                 , Bytes , Refs
+                 , A.Unlifted.Byte, A.Unlifted.Array
                  , IO.Thread, IO.Thread.Status
                  , RTS.Compact
                  , RTS.CostCentre, RTS.CostCentre.Stack
@@ -74,4 +75,5 @@ library
                  , GHC.Typeable
                  , X
                  , Bits, Cmp
-  build-depends: ghc-prim ^>= 0.6.1
+                 , HsFFI
+  build-depends: ghc-prim ^>= 0.6.1, rts

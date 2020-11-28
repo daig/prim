@@ -6,5 +6,8 @@ import Num
 import I ()
 
 
-deriving newtype instance (⊕) B
-instance (¬) B where (¬) = (T ⊕)
+instance 𝔹 B where
+  (∧) = coerce ((∧) @_ @I)
+  (∨) = coerce ((∨) @_ @I)
+  (⊕) = coerce ((⊕) @_ @I)
+  (¬) = (T ⊕)

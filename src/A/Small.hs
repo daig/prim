@@ -9,11 +9,15 @@ import A.Prim
 type A = SmallArray#
 type MA = SmallMutableArray#
 
-instance Freeze## (A x) where freeze## = unsafeFreezeSmallArray#
-instance Freeze# (A x) where freeze# = freezeSmallArray#
-instance Thaw## (A x) where thaw## = unsafeThawSmallArray#
-instance Thaw# (A x) where thaw# = thawSmallArray#
-instance New# (A x) where new# n = newSmallArray# n (let x = x in x)
+instance 𝔸 (A x) where
+  freeze## = unsafeFreezeSmallArray#
+  freeze# = freezeSmallArray#
+  thaw## = unsafeThawSmallArray#
+  thaw# = thawSmallArray#
+  new# n = newSmallArray# n (let x = x in x)
+  len = sizeofSmallArray#
+  lenM# = sizeofSmallMutableArray#
+  lenM = getSizeofSmallMutableArray#
 
 instance (≡) (MA s a) where
   x ≡ y= coerce do sameSmallMutableArray# x y
@@ -21,8 +25,6 @@ instance (≡) (MA s a) where
 
 instance Shrink (A a) where shrink = shrinkSmallMutableArray#
 
--- | /WARNING/ unsafe in the presence of resize operations
-instance Size (A a) where size = sizeofSmallArray#
 
 -- | Number of elements. MAust be in @ST#@ because of possible resizes.
 sizeMA# ∷ MA s a → ST# s I

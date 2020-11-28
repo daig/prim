@@ -1,6 +1,6 @@
 module Exception where
 
--- | Can only catch values with an @Exception@ instance.
+-- | Catches /all/ types of exceptions by unsafely coercing it to @e@
 --
 --  Async exceptions are masked automatically during
 --  the execution of an exception handler.

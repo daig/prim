@@ -67,8 +67,7 @@ pattern Max, Min ∷ U
 pattern Max = 0xFFFFFFFFFFFFFFFF##
 pattern Min = 0##
 
-instance (⊕) U where (∧) = and#; (∨) = or#; (⊕) = xor#
-instance (¬) U where (¬) = not#
+instance 𝔹 U where (∧) = and#; (∨) = or#; (⊕) = xor#; (¬) = not#
 
 -- | Shift left.  Result undefined if shift amount is not
 --           in the range 0 to word size - 1 inclusive.

@@ -7,8 +7,11 @@ import U ()
 
 deriving newtype instance (≡) U8
 deriving newtype instance (≤) U8
-deriving newtype instance (⊕) U8
-instance (¬) U8 where (¬) (U8 u) = U8 (u ¬)
+instance 𝔹 U8 where
+  (∧) = coerce ((∧) @_ @U)
+  (∨) = coerce ((∨) @_ @U)
+  (⊕) = coerce ((⊕) @_ @U)
+  (¬) (U8 u) = U8 (u ¬)
 
 (+),(-),(×) ∷ U8 → U8 → U8
 x + y = U8 (coerce plusWord# x y)

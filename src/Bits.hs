@@ -1,4 +1,4 @@
 --------------------------------------------------------------------
 -- | Description : Typeclasses for bitwise operations
 --------------------------------------------------------------------
-module Bits (type (⊕)(..), type (¬)(..)) where
+module Bits (type 𝔹(..)) where

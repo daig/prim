@@ -16,8 +16,7 @@ pattern Min = I64 -0x8000000000000000#
 
 deriving newtype instance (≡) I64
 deriving newtype instance (≤) I64
-deriving newtype instance (⊕) I64
-deriving newtype instance (¬) I64
+deriving newtype instance 𝔹 I64
 
 -- * Arithmetic Operations
 

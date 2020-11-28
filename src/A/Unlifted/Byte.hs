@@ -1,6 +1,6 @@
-module Array.Array.Byte where
+module A.Unlifted.Byte where
 import qualified A.Raw as Byte
-import Array.Array
+import Refs
 
 index# ∷ A → I → Byte.A
 index# = indexByteArrayArray#

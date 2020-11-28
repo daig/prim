@@ -2,7 +2,7 @@
 module RTS.CostCentre (CString,CostCentre(CC#,CC),label,module_,srcSpan) where
 import I 
 import A
-import A.Raw
+import Bytes
 import A.P
 
 newtype CostCentre ∷ T_P where CC# ∷ P → CostCentre
@@ -10,9 +10,9 @@ deriving via (P) instance (CostCentre ∈ P)
 type CString = P
 
 label,module_,srcSpan ∷ CostCentre → CString
-label (CC# p) = index## p 8#
-module_ (CC# p) = index## p 16#
-srcSpan (CC# p) = index## p 24#
+label (CC# p) = index# p 8#
+module_ (CC# p) = index# p 16#
+srcSpan (CC# p) = index# p 24#
 pattern CC ∷ CString -- ^ Label
            → CString -- ^ module
            → CString -- ^ Source Span

@@ -6,8 +6,11 @@ import U ()
 
 deriving newtype instance (≡) U32
 deriving newtype instance (≤) U32
-deriving newtype instance (⊕) U32
-instance (¬) U32 where (¬) (U32 u) = U32 (u ¬)
+instance 𝔹 U32 where
+  (∧) = coerce ((∧) @_ @U)
+  (∨) = coerce ((∨) @_ @U)
+  (⊕) = coerce ((⊕) @_ @U)
+  (¬) (U32 u) = U32 (u ¬)
 
 
 (+),(-),(×) ∷ U32 → U32 → U32

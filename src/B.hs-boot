@@ -1,4 +1,3 @@
 module B where
 
-instance (⊕) B
-instance (¬) B
+instance 𝔹 B

@@ -39,18 +39,23 @@ class Array (a ∷ T → T_A) where
       → x -- ^ New value
       → ST# s (# B, x #) -- ^ Whether the swap failed, and the actual new value
 
-instance (≡) (MA s x) where x ≡ y = coerce do sameMutableArray# x y
+instance (≡) (MA s x) where
+  x ≡ y = coerce do sameMutableArray# x y
+  x ≠ y = ((coerce do sameMutableArray# x y) ¬)
 
 
-instance Freeze## (A x) where freeze## = unsafeFreezeArray#
-instance Freeze# (A x) where freeze# = freezeArray#
-instance Thaw## (A x) where thaw## = unsafeThawArray#
-instance Thaw# (A x) where thaw# = thawArray#
-
-instance New# (A x) where new# n = newArray# n (let x = x in x)
+-- | @lenM#@ is safe
+instance 𝔸 (A x) where
+  freeze## = unsafeFreezeArray#
+  freeze# = freezeArray#
+  thaw## = unsafeThawArray#
+  thaw# = thawArray#
+  new# n = let e = raise# "A.Boxed.new#: unintialized index" in newArray# n e
+  len = sizeofArray# 
+  lenM# = sizeofMutableArray# 
+  lenM ma = \s → (# s , sizeofMutableArray# ma #)
 
 class Index (x ∷ T_ r) (a ∷ T_ rr) where index ∷ a → I → x
-instance Size (Array# a) where size = sizeofArray# 
 instance Array Array# where
   read = readArray#
   write = writeArray#
@@ -73,6 +78,7 @@ instance Copy (MA s a) (MA s a) s where copy = copyMutableArray#
 
 -- | Forces the indexing but not the value. For more laziness use 'A.Small.index#'
 instance (x ∷ T) ∈ (A x) where
+  new = newArray#
   write#  = writeArray#
   read#  = readArray#
   index# a i = case indexArray# a i of (# a #) → a
