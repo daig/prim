@@ -1,20 +1,20 @@
 {-# language DerivingVia,TypeApplications #-}
-module RTS.CostCentre (CString,CostCentre(CC#,CC),label,module_,srcSpan) where
+module RTS.CostCentre (CostCentre(CC#,CC),label,module_,srcSpan) where
 import I 
 import A
 import A.P
+import String.C
 
-newtype CostCentre ∷ T_P where CC# ∷ P → CostCentre
+newtype CostCentre ∷ T_P where CC# ∷ P# → CostCentre
 deriving newtype instance (♭) CostCentre
-type CString = P
 
-label,module_,srcSpan ∷ CostCentre → CString
-label (CC# p) = index# p 8#
-module_ (CC# p) = index# p 16#
-srcSpan (CC# p) = index# p 24#
-pattern CC ∷ CString -- ^ Label
-           → CString -- ^ module
-           → CString -- ^ Source Span
+label,module_,srcSpan ∷ CostCentre → S
+label (CC# p) = indexP# p 8#
+module_ (CC# p) = indexP# p 16#
+srcSpan (CC# p) = indexP# p 24#
+pattern CC ∷ S -- ^ Label
+           → S -- ^ module
+           → S -- ^ Source Span
            → CostCentre
 pattern CC l m s ← (\p → (# label p, module_ p, srcSpan p #) → (# l,m,s #))
 {-# complete CC #-}
@@ -30,9 +30,9 @@ ccsToStrings ccs0 = go ccs0 []
        _ → do
 
         cc  <- ccsCC ccs
-        lbl <- GHC.peekCString utf8 =<< ccLabel cc
-        mdl <- GHC.peekCString utf8 =<< ccModule cc
-        loc <- GHC.peekCString utf8 =<< ccSrcSpan cc
+        lbl <- GHC.peekS utf8 =<< ccLabel cc
+        mdl <- GHC.peekS utf8 =<< ccModule cc
+        loc <- GHC.peekS utf8 =<< ccSrcSpan cc
         parent <- ccsParent ccs
         if (mdl == "MAIN" && lbl == "MAIN")
            then return acc

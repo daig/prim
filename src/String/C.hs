@@ -14,5 +14,4 @@ import Stock.Char
 -- | Null-terminated C-like Strings
 --
 -- Not a newtype because it would interfere with literal syntax
-type S = P
-
+type S = P#

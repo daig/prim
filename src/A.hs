@@ -16,9 +16,11 @@ import qualified P.Stable as Stable
 import qualified B
 import {-# source #-} qualified A.Prim as Prim
 import Stock.Int
-import qualified A.Byte as Byte
 #include "MachDeps.h"
 #include "HsBaseConfig.h"
+
+type Bytes = ByteArray#
+type MBytes = MutableByteArray#
 
 class 𝔸 (a ∷ T_A) where
   -- | Uninitialized array.
@@ -63,9 +65,7 @@ class 𝔸 a ⇒ Shrink (a ∷ T_A) where shrink ∷ M a s → I → ST_# s
 
 
 type family M (a ∷ k) (s ∷ T) = (ma ∷ k) | ma → a
-{-
-  M ArrayArray# s = MutableArrayArray# s
-  -}
+type instance M Bytes s = MBytes s
 
 class Copy (src ∷ T_ r) (dst ∷ T_ r') s where
   -- | Copy the elements from the source to the destination.
@@ -91,15 +91,15 @@ class (x ∷ T_ r) ∈ (a ∷ T_ r') where
 class (♭) (a ∷ T_ r) where
   size ∷ I {- ^ # elements -} → I {- ^ size in bytes -}
   align ∷ I → I
-  indexA# ∷ Byte.A → I → a
-  readA# ∷ Byte.MA s → I → ST# s a
-  writeA# ∷ Byte.MA s → I → a → ST_# s
-  indexP# ∷ P → I → a
-  readP# ∷ P → I → ST# s a
-  writeP# ∷ P → I → a → ST_# s
-  indexB# ∷ Byte.A → I → a
-  readB# ∷ Byte.MA s → I → ST# s a
-  writeB# ∷ Byte.MA s → I → a → ST_# s
+  indexA# ∷ Bytes → I → a
+  readA# ∷ MBytes s → I → ST# s a
+  writeA# ∷ M Bytes s → I → a → ST_# s
+  indexP# ∷ P# → I → a
+  readP# ∷ P# → I → ST# s a
+  writeP# ∷ P# → I → a → ST_# s
+  indexB# ∷ Bytes → I → a
+  readB# ∷ MBytes s → I → ST# s a
+  writeB# ∷ MBytes s → I → a → ST_# s
 
 #define INST_PRIM(T,S,A,IA,RA,WA,IP,RP,WP,IB,RB,WB) \
 instance (♭) T where \
@@ -127,7 +127,7 @@ INST_PRIM(U32, SIZEOF_WORD32, ALIGNMENT_WORD32, indexWord32Array, readWord32Arra
 INST_PRIM(U64, SIZEOF_WORD64, ALIGNMENT_WORD64, indexWord64Array, readWord64Array, writeWord64Array, indexWord64OffAddr, readWord64OffAddr, writeWord64OffAddr, indexWord8ArrayAsWord64, readWord8ArrayAsWord64, writeWord8ArrayAsWord64)
 INST_PRIM(Char, SIZEOF_HSCHAR, ALIGNMENT_HSCHAR, indexWideCharArray, readWideCharArray, writeWideCharArray, indexWideCharOffAddr, readWideCharOffAddr, writeWideCharOffAddr, indexWord8ArrayAsWideChar, readWord8ArrayAsWideChar, writeWord8ArrayAsWideChar)
 INST_PRIM(Char8, SIZEOF_HSCHAR, ALIGNMENT_HSCHAR, indexCharArray, readCharArray, writeCharArray, indexCharOffAddr, readCharOffAddr, writeCharOffAddr, indexWord8ArrayAsChar, readWord8ArrayAsChar, writeWord8ArrayAsChar)
-INST_PRIM(P, SIZEOF_HSPTR, ALIGNMENT_HSPTR, indexAddrArray, readAddrArray, writeAddrArray, indexAddrOffAddr, readAddrOffAddr, writeAddrOffAddr, indexWord8ArrayAsAddr, readWord8ArrayAsAddr, writeWord8ArrayAsAddr)
+INST_PRIM(P#, SIZEOF_HSPTR, ALIGNMENT_HSPTR, indexAddrArray, readAddrArray, writeAddrArray, indexAddrOffAddr, readAddrOffAddr, writeAddrOffAddr, indexWord8ArrayAsAddr, readWord8ArrayAsAddr, writeWord8ArrayAsAddr)
 instance (♭) (Stable.P a) where
   size = (SIZEOF_HSSTABLEPTR# I.×)
   align i = case i I.% ALIGNMENT_HSSTABLEPTR# of {0# → i ;off → i I.+ (ALIGNMENT_HSSTABLEPTR# I.- off)}
@@ -137,4 +137,7 @@ instance (♭) (Stable.P a) where
   indexP# = indexStablePtrOffAddr#
   readP# = readStablePtrOffAddr# 
   writeP# = writeStablePtrOffAddr#
+  indexB# = indexWord8ArrayAsStablePtr#
+  readB# = readWord8ArrayAsStablePtr# 
+  writeB# = writeWord8ArrayAsStablePtr#
 

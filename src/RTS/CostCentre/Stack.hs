@@ -23,14 +23,14 @@ import qualified Stock.B as Stock
 import IO
 import qualified String.C as S
 
-newtype CCS ∷ T_P where CCS# ∷ P → CCS 
+newtype CCS ∷ T_P where CCS# ∷ P# → CCS 
 deriving newtype instance (≡) CCS
 deriving newtype instance (♭) CCS
 
 head ∷ CCS → CostCentre
-head (CCS# p) = index# p 8#
+head (CCS# p) = indexP# p 8#
 parent ∷ CCS → CCS
-parent (CCS# p) = index# p 16#
+parent (CCS# p) = indexP# p 16#
 
 pattern Null ← CCS# nullAddr# where Null = CCS# nullAddr#
 

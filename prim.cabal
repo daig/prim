@@ -52,12 +52,12 @@ library
                  , Tuple
                  , A.P
                  , A.Boxed, A.Boxed.Big
-                 , A, A.Byte, A.Prim , A.Array
+                 , A, A.Prim , A.Array
                  , IO.Thread, IO.Thread.Status
                  , RTS.Compact
                  , RTS.CostCentre, RTS.CostCentre.Stack
                  , RTS.Trace
-                 , Any , Any.Enum
+                 , Any , Any.Enum, Any.ClosureType
                  , GHC.Proxy
                  , GHC.Coerce
                  , Exception, Exception.Mask

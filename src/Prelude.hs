@@ -112,4 +112,4 @@ infixl 2 ⊕
 infixl 1 ∨
 
 -- | An arbitrary machine address assumed to point outside the garbage-collected heap
-type P = Addr#
+type P# = Addr#

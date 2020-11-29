@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
--- | Description : Unboxed Homogeneous "A.Byte"
+-- | Description : Unlifted Primitive Arrays
 --------------------------------------------------------------------
 {-# language TypeApplications, DerivingVia, InstanceSigs #-}
 {-# language FlexibleContexts #-}
@@ -11,8 +11,8 @@ import I8 (I8(..))
 import I16 (I16(..))
 import I32 (I32(..))
 import I64 (I64(..))
-import P (P,(∔))
-import A.P ()
+import P ((∔))
+import A.P (P(..))
 import qualified P.Stable as Stable
 import A
 import Ordering
@@ -22,7 +22,9 @@ import qualified I
 newtype A    (x ∷ T_ r) ∷ T_A where A#  ∷ ∀   r (x ∷ T_ r). ByteArray#          → A    x
 newtype MA s (x ∷ T_ r) ∷ T_A where MA# ∷ ∀ s r (x ∷ T_ r). MutableByteArray# s → MA s x
 type instance M (A (x ∷ T_ r)) s = MA s x
-deriving newtype instance (≡) (MA s x)
+instance (≡) (MA s x) where
+  (≡) = coerce sameMutableByteArray#
+  as ≠ bs = (¬) (as ≡ bs)
 
 -- * Pinned Arrays
 
@@ -39,7 +41,7 @@ aligned = coerce newAlignedPinnedByteArray#
 
 
 -- | Address may change between GC cycles so this is only safe for pinned arrays
-contents ∷ A x → P
+contents ∷ A x → P#
 contents = coerce byteArrayContents#
 
 pinned' ∷ A x → B
@@ -55,12 +57,12 @@ resize ∷ MA s x → I → ST# s (MA s x)
 resize = coerce resizeMutableByteArray#
 
 -- | New length (bytes) must be ≤ current 'sizeMA'
-instance Shrink (A x) where shrink = coerce shrinkMutableByteArray#
+instance (♭) x ⇒ Shrink (A x) where shrink = coerce shrinkMutableByteArray#
 
 -- | 'thaw##' is just a cast
 --
 -- 'new' Unpinned w/ init size in bytes
-instance 𝔸 (A x) where
+instance (♭) x ⇒ 𝔸 (A (x ∷ T_ r)) where
   freeze## = coerce unsafeFreezeByteArray#
   freeze# a off n s = case new# n s of
     (# s' , ma #) → case copy a off ma 0# n s' of s'' → freeze## ma s''
@@ -101,15 +103,14 @@ compare# ∷ A U8 -- ^ source1
          → Ordering 
 compare# = coerce compareByteArrays#
 
-instance Copy (A x) (MA s x) s where copy = coerce copyByteArray#
-instance Copy (MA s x) (MA s x) s where copy = coerce copyMutableByteArray#
-instance Copy (A x) P s where copy src i dst j n = coerce copyByteArrayToAddr# src i (j ∔ dst) n
-instance Copy (MA s x) P s where copy src i dst j n = coerce copyMutableByteArrayToAddr# src i (j ∔ dst) n
-instance Copy P (MA s x) s where copy src i dst j n = coerce copyAddrToByteArray# (i ∔ src) dst j n
-
+instance Copy (A (x ∷ T_ r)) (MA s x) s where copy = coerce copyByteArray#
+instance Copy (MA s (x ∷ T_ r)) (MA s x) s where copy = coerce copyMutableByteArray#
+instance Copy (A x) (P x) s where copy src i (P# dst) j n = coerce copyByteArrayToAddr# src i (j ∔ dst) n
+instance Copy (MA s x) (P x) s where copy src i (P# dst) j n = coerce copyMutableByteArrayToAddr# src i (j ∔ dst) n
+instance Copy (P x) (MA s x) s where copy (P# src) i dst j n = coerce copyAddrToByteArray# (i ∔ src) dst j n
 
 -- | "A.Prim"
-instance (♭) a ⇒ a ∈ A a where
+instance (♭) a ⇒ (a ∷ T_ r) ∈ (A a) where
   index# (A# a) = indexA# a
   read# (MA# ma) = readA# ma
   write# (MA# ma) = writeA# ma

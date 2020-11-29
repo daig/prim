@@ -4,7 +4,7 @@
 -- and more "A.Array"
 module A.Array where
 import A
-import qualified A.Byte as Byte
+import qualified A.Prim as Prim
 import qualified P.Stable.Name as Name
 import I
 import IO (run)
@@ -48,19 +48,21 @@ instance (♯) a ⇒ a ∈ A where
   index# = indexAA#
   read# = readAA#
   write# = writeAA#
+
   
+-- | Primitive boxed unlifted types that fit natively into Unlifted Arrays
 class (♯) (a ∷ T_A) where
   indexAA# ∷ A → I → a
   readAA# ∷ MA s → I → ST# s a
   writeAA# ∷ MA s → I → a → ST_# s
   readM# ∷ MA s → I → ST# s (M a s)
   writeM# ∷ MA s → I → M a s → ST_# s
-instance (♯) Byte.A where
-  indexAA# = indexByteArrayArray#
-  readAA# = readByteArrayArray#
-  writeAA# = writeByteArrayArray#
-  readM# = readMutableByteArrayArray#
-  writeM# = writeMutableByteArrayArray#
+instance (♯) (Prim.A x) where
+  indexAA# = coerce indexByteArrayArray#
+  readAA# = coerce readByteArrayArray#
+  writeAA# = coerce writeByteArrayArray#
+  readM# = coerce readMutableByteArrayArray#
+  writeM# = coerce writeMutableByteArrayArray#
 instance (♯) A where
   indexAA# = indexArrayArrayArray#
   readAA# = readArrayArrayArray#

@@ -1,15 +1,20 @@
+{-# language RoleAnnotations #-}
 module A.P where
 import A
 import Char
 import Char8
-import P
 import qualified P.Stable as Stable
 
--- | @Raw.P@ are already mutable
-type instance M P s = P
+-- | Immutable raw pointer
+newtype P (x ∷ T_ r) ∷ T_P where P# ∷ ∀ r (x ∷ T_ r). P# → P x
+
+type instance M (P (x ∷ T_ r)) s = P x
 
 -- | "A.P"
-instance (♭) a ⇒ (a ∷ T_ r) ∈ P where index# = indexP#; read# = readP#; write# = writeP#
+instance (♭) a ⇒ (a ∷ T_ r) ∈ P a where
+  index# (P# p) = indexP# p
+  read# (P# p) = readP# p
+  write# (P# p) = writeP# p
 {-
 -- | Offset in 4-byte words
 instance Char8 ∈ P where

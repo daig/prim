@@ -4,7 +4,6 @@
 -- see <http://ezyang.com/papers/ezyang15-cnf.pdf Efficient Communication and Collection with Compact Normal Forms>
 --------------------------------------------------------------------
 module RTS.Compact where
-import P
 
 
 -- | Contains fully evaluated immutable data.
@@ -14,7 +13,7 @@ import P
 -- Data in a @Compact@ can be deserialized at any time by the same binary that
 -- produced it.
 type Compact = Compact#
-type Block# = (# P, U64 #) -- ^ Address and Utilized Size (bytes)
+type Block# = (# P#, U64 #) -- ^ Address and Utilized Size (bytes)
 
 -- | Create a new CNF with a single compact block.
 -- The argument is the capacity of the compact block (in bytes, not words).
@@ -42,7 +41,7 @@ head c s0 = case compactGetFirstBlock# c s0 of
 -- | Get the next block. 'Null' if it's the last.
 --
 -- Warning: Address must really be in the compact.
-next# ∷ Compact → P {- ^ Block address -} → IO# Block#
+next# ∷ Compact → P# {- ^ Block address -} → IO# Block#
 next# c a0 s0 = case coerce compactGetNextBlock# c a0 s0 of
   (# s1, a1, n #) → (# s1, (# a1, n #) #)
 
@@ -53,10 +52,10 @@ next# c a0 s0 = case coerce compactGetNextBlock# c a0 s0 of
 -- The resulting block is not known to the GC until 'fixup' is
 -- called on it, and care must be taken so that the address does not escape or
 -- memory will be leaked.
-allocate ∷ Block# → IO# P
+allocate ∷ Block# → IO# P#
 allocate (# a, n #) = coerce compactAllocateBlock# n a
 
-fixup ∷ P → P → IO# (# Compact, P #)
+fixup ∷ P# → P# → IO# (# Compact, P# #)
 fixup b0 root s0 = case compactFixupPointers# b0 root s0 of
   (# s1, c, b1 #) → (# s1, (# c, b1 #) #)
 

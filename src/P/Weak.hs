@@ -2,8 +2,6 @@
 -- | Description : Pointer for controlling GC aliveness and finalizers
 --------------------------------------------------------------------
 module P.Weak where
-import qualified P as Raw
-import Prelude hiding (P)
 
 
 {-|
@@ -57,7 +55,7 @@ new = mkWeak#
 newNoFinalizer ∷ k → v → IO# (P v)
 newNoFinalizer = mkWeakNoFinalizer#
 
-addFinalizer ∷ Raw.P → Raw.P → B → Raw.P → P v → IO# B
+addFinalizer ∷ P# → P# → B → P# → P v → IO# B
 addFinalizer p0 p1 (B# b) p2 q = coerce do addCFinalizerToWeak# p0 p1 b p2 q
 
 -- | Retrieve the value associated with a @Weak.P@ if it (the key)

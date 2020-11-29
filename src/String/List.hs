@@ -1,12 +1,12 @@
 {-# language UnliftedFFITypes #-}
 module String.List where
-import Prelude hiding (IO,Char)
+import Prelude hiding (IO)
 import Stock.IO
-import Stock.Char
+import qualified Stock.Char as Stock
 import A
-import qualified A.Byte as Byte
+import A.Prim
 
-type S = [Char]
+type S = [Stock.Char]
 
 debugLn ∷ S → IO ()
 debugLn xs = IO \ s → case pack xs s of
@@ -17,25 +17,26 @@ debugErrLn xs = IO \ s → case pack xs s of
                     (# s', mba #) → case c_debugErrLn mba of IO f → f s'
 
 foreign import ccall unsafe "debugLn"
-    c_debugLn ∷ Byte.MA (☸) → IO ()
+    c_debugLn ∷ MA (☸) Char → IO ()
 
 foreign import ccall unsafe "debugErrLn"
-    c_debugErrLn ∷ Byte.MA (☸) → IO ()
+    c_debugErrLn ∷ MA (☸) Char → IO ()
 
-pack ∷ S → IO# (Byte.MA (☸))
+pack ∷ S → IO# (MA (☸) Char)
 pack xs s0 = -- Start with 1 so that we have space to put in a \0 at
               -- the end
               case len 1# xs of
               l →
-                  case newByteArray# l s0 of
+                  case new# l s0 of
                   (# s1, mba #) →
                       case write mba 0# xs s1 of
                       s2 → (# s2, mba #)
     where len l [] = l
           len l (_ : xs') = len (l +# 1#) xs'
 
-          write mba offset [] s = writeCharArray# mba offset '\0'# s
-          write mba offset (C# x : xs') s
-              = case writeCharArray# mba offset x s of
+          write ∷ MA s Char → I → S → ST_# s
+          write mba offset [] s = write# mba offset '\0'# s
+          write mba offset (Stock.C# x : xs') s
+              = case write# mba offset x s of
                 s' →
                     write mba (offset +# 1#) xs' s'
