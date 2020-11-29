@@ -25,12 +25,11 @@ import qualified String.C as S
 
 newtype CCS ∷ T_P where CCS# ∷ P# → CCS 
 deriving newtype instance (≡) CCS
-deriving newtype instance (♭) CCS
 
 head ∷ CCS → CostCentre
-head (CCS# p) = indexP# p 8#
+head (CCS# p) = CC# (indexP# p 8#)
 parent ∷ CCS → CCS
-parent (CCS# p) = indexP# p 16#
+parent (CCS# p) = CCS# (indexP# p 16#)
 
 pattern Null ← CCS# nullAddr# where Null = CCS# nullAddr#
 

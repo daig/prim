@@ -6,7 +6,7 @@
 module Any (seq, module Any) where
 import A.Prim
 import qualified A.Boxed.Big as Big
-import A.P
+import P
 import Stock.Int
 -- #include "ClosureTypes.h"
 

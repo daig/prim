@@ -4,6 +4,7 @@
 {-# language TypeApplications, DerivingVia, InstanceSigs #-}
 {-# language FlexibleContexts #-}
 {-# language CPP #-}
+{-# language ScopedTypeVariables #-}
 module A.Prim where
 import Char (Char(..))
 import Char8 (Char8(..))
@@ -11,8 +12,7 @@ import I8 (I8(..))
 import I16 (I16(..))
 import I32 (I32(..))
 import I64 (I64(..))
-import P ((∔))
-import A.P (P(..))
+import P
 import qualified P.Stable as Stable
 import A
 import Ordering
@@ -21,7 +21,6 @@ import qualified I
 
 newtype A    (x ∷ T_ r) ∷ T_A where A#  ∷ ∀   r (x ∷ T_ r). ByteArray#          → A    x
 newtype MA s (x ∷ T_ r) ∷ T_A where MA# ∷ ∀ s r (x ∷ T_ r). MutableByteArray# s → MA s x
-type instance M (A (x ∷ T_ r)) s = MA s x
 instance (≡) (MA s x) where
   (≡) = coerce sameMutableByteArray#
   as ≠ bs = (¬) (as ≡ bs)
@@ -59,10 +58,10 @@ resize = coerce resizeMutableByteArray#
 -- | New length (bytes) must be ≤ current 'sizeMA'
 instance (♭) x ⇒ Shrink (A x) where shrink = coerce shrinkMutableByteArray#
 
--- | 'thaw##' is just a cast
---
--- 'new' Unpinned w/ init size in bytes
-instance (♭) x ⇒ 𝔸 (A (x ∷ T_ r)) where
+-- | "A.Prim" -
+-- 'thaw##' is just a cast.
+-- @new#@ unpinned w/ init size in bytes.
+instance 𝔸 (A (x ∷ T_ r)) where
   freeze## = coerce unsafeFreezeByteArray#
   freeze# a off n s = case new# n s of
     (# s' , ma #) → case copy a off ma 0# n s' of s'' → freeze## ma s''

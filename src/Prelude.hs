@@ -113,3 +113,8 @@ infixl 1 ∨
 
 -- | An arbitrary machine address assumed to point outside the garbage-collected heap
 type P# = Addr#
+
+type Bytes = ByteArray#
+type MBytes = MutableByteArray#
+type Refs = ArrayArray#
+type MRefs = MutableArrayArray#

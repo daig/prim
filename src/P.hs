@@ -27,9 +27,12 @@ i ∔ a = plusAddr# a i
 (.//) ∷ P# → I → I
 (.//) = remAddr#
 
-pattern P# ∷ I → P#
-pattern P# i ← (addr2Int# → i) where P# = int2Addr#
-{-# DEPRECATED P# "This pattern is strongly deprecated" #-}
+pattern Addr# ∷ I → P#
+pattern Addr# i ← (addr2Int# → i) where Addr# = int2Addr#
+{-# DEPRECATED Addr# "This pattern is strongly deprecated" #-}
+
+-- | Immutable raw pointer to a valid memory region containing sum number of @x@
+newtype P (x ∷ T_ r) ∷ T_P where P# ∷ ∀ r (x ∷ T_ r). P# → P x
 
 instance (≤) P# where (>) = coerce gtAddr# ; (≥) = coerce geAddr# ; (<) = coerce ltAddr# ; (≤) = coerce leAddr# ; 
 instance (≡) P# where (≡) = coerce eqAddr# ; (≠) = coerce neAddr#

@@ -1,7 +1,7 @@
 {-# language DerivingVia #-}
 module RTS.Prefetch where
 import A.Prim
-import A.P
+import P
 
 class Prefetch (a ∷ T_ r) s where
   t0,t1,t2,t3 ∷ a → ST_# s

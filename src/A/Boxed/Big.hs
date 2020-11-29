@@ -7,14 +7,13 @@ import A
 
 type A = Array#
 type MA = MutableArray#
-type instance M (A x) s = MA s x
 
 instance (≡) (MA s x) where
   x ≡ y = coerce do sameMutableArray# x y
   x ≠ y = ((coerce do sameMutableArray# x y) ¬)
 
 
--- | "A.Boxed" @new#@ initializes undefined. @lenM#@ is safe.
+-- | "A.Boxed.Big" - @new#@ initializes undefined. @lenM#@ is safe.
 instance 𝔸 (A x) where
   freeze## = unsafeFreezeArray#
   freeze# = freezeArray#

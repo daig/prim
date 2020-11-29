@@ -4,7 +4,7 @@
 {-# language TypeFamilyDependencies, FlexibleInstances,InstanceSigs,MultiParamTypeClasses #-}
 {-# language CPP #-}
 {-# language QuantifiedConstraints #-}
-module A where
+module A (Bytes,MBytes,Refs,MRefs,module A)where
 import P hiding (Prim)
 import Char
 import I32 (I32(..))
@@ -15,12 +15,14 @@ import I
 import qualified P.Stable as Stable
 import qualified B
 import {-# source #-} qualified A.Prim as Prim
+import {-# source #-} qualified A.Array as Ref
+import {-# source #-} qualified A.Boxed.Big as Big
+import {-# source #-} qualified A.Boxed as Boxed
+import qualified P.STM as STM
 import Stock.Int
 #include "MachDeps.h"
 #include "HsBaseConfig.h"
 
-type Bytes = ByteArray#
-type MBytes = MutableByteArray#
 
 class 𝔸 (a ∷ T_A) where
   -- | Uninitialized array.
@@ -63,9 +65,14 @@ class 𝔸 (a ∷ T_A) where
           → ST# s (M a s)
 class 𝔸 a ⇒ Shrink (a ∷ T_A) where shrink ∷ M a s → I → ST_# s
 
-
-type family M (a ∷ k) (s ∷ T) = (ma ∷ k) | ma → a
-type instance M Bytes s = MBytes s
+type family M (a ∷ k) (s ∷ T) = (ma ∷ k) | ma → a where
+  M Bytes s = MBytes s
+  M Refs  s = MRefs s
+  M (P (x ∷ T_ r)) s = P x
+  M (Prim.A (x ∷ T_ r_prim)) s = Prim.MA s x
+  M (Boxed.A (x ∷ T)) s = Boxed.MA s x
+  M (Big.A (x_big ∷ T)) s = Big.MA s x_big
+  M (Ref.A (x ∷ T_A)) s = Ref.MA s x
 
 class Copy (src ∷ T_ r) (dst ∷ T_ r') s where
   -- | Copy the elements from the source to the destination.
@@ -141,3 +148,8 @@ instance (♭) (Stable.P a) where
   readB# = readWord8ArrayAsStablePtr# 
   writeB# = writeWord8ArrayAsStablePtr#
 
+-- | "A.P"
+instance (♭) a ⇒ (a ∷ T_ r) ∈ P a where
+  index# (P# p) = indexP# p
+  read# (P# p) = readP# p
+  write# (P# p) = writeP# p

@@ -7,9 +7,8 @@ import A
 
 type A = SmallArray#
 type MA = SmallMutableArray#
-type instance M (A x) s = MA s x
 
--- | "A.Boxed" @new#@ initializes undefined.
+-- | "A.Boxed" - @new#@ initializes undefined.
 instance 𝔸 (A x) where
   freeze## = unsafeFreezeSmallArray#
   freeze# = freezeSmallArray#

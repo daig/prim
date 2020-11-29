@@ -6,7 +6,6 @@ import A.P
 import String.C
 
 newtype CostCentre ∷ T_P where CC# ∷ P# → CostCentre
-deriving newtype instance (♭) CostCentre
 
 label,module_,srcSpan ∷ CostCentre → S
 label (CC# p) = indexP# p 8#
