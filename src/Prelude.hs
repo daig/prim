@@ -131,6 +131,6 @@ class ℕ a ⇒ ℤ (a ∷ T_ r) where
   (//%%) ∷ a → a → (# a , a #)
   (-) ∷ a → a → a
   negate ∷ a → a
-class ℕ a ⇒ ℚ (a ∷ T_ r) where (÷) ∷ a → a → a
-class ℚ a ⇒ ℝ (a ∷ T_ r) where
+class ℤ a ⇒ ℝ (a ∷ T_ r) where
   abs,exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a
+  (**) ∷ a → a → a
