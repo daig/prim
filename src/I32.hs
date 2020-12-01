@@ -8,6 +8,20 @@ import I8 (I8(..))
 
 deriving newtype instance (≡) I32
 deriving newtype instance (≤) I32
+instance ℕ I32 where
+  (I32 x) + (I32 y) = I32 (x +# y)
+  (I32 x) × (I32 y) = I32 (x *# y)
+  (I32 x) / (I32 y) = I32 (divInt# x y)
+  (I32 x) % (I32 y) = I32 (modInt# x y)
+  (I32 x) /% (I32 y) = case x //%% y of (# d, m #) → (# I32 d, I32 m #)
+instance ℤ I32 where
+  negate (I32 x) = I32 (negateInt# x)
+  (I32 x) - (I32 y) = I32 (x -# y)
+  I32 x // I32 y = I32 (quotInt# x y)
+  I32 x %% I32 y = I32 (remInt# x y)
+  I32 x //%% I32 y = case quotRemInt# x y of (# q, r #) → (# I32 q, I32 r #)
+-- | /Warning/: Bitwise operations rarely make sense on signed ints,
+-- Consider using 'U' instead.
 instance 𝔹 I32 where
   (∧) = coerce ((∧) @_ @I)
   (∨) = coerce ((∨) @_ @I)

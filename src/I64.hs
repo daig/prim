@@ -16,17 +16,12 @@ pattern Min = I64 -0x8000000000000000#
 
 deriving newtype instance (≡) I64
 deriving newtype instance (≤) I64
+deriving newtype instance ℕ I64
+deriving newtype instance ℤ I64
+-- | /Warning/: Bitwise operations rarely make sense on signed ints,
+-- Consider using 'U' instead.
 deriving newtype instance 𝔹 I64
 
--- * Arithmetic Operations
-
-(+), (-), (×), add, sub, mul ∷ I64 → I64 → I64
-(+) = coerce (+#); (-) = coerce (-#)
--- | Low word of signed integer multiply
-(×) = coerce (*# )
-add = coerce (+# ); sub = coerce (-# )
--- | Low word of signed integer multiply
-mul = coerce (*# )
 -- |Return non-zero if there is any possibility that the upper word of a
 --     signed integer multiply might contain useful information.  Return
 --     zero only if you are completely sure that no overflow can occur.
@@ -48,30 +43,6 @@ mul = coerce (*# )
 --     @(×) ∷ I64 → I64 → I64@ will be poor.
 mulMayOflo ∷ I64 → I64 → B
 mulMayOflo x y = coerce mulIntMayOflo# x y
-negate ∷ I64 → I64
-negate = coerce negateInt#
--- | Rounds towards 0. The behavior is undefined if the first argument is zero.
-quot, rem ∷ I64 {- ^ divisor -}  → I64 {- ^ dividend -} → I64
-(%%), (//) ∷ I64 {- ^ dividend -}  → I64 {- ^ divisor -} → I64
-quot y x = coerce quotInt# x y
-(//) = coerce quotInt#
--- |Satisfies @(add (rem y x) (mul y (quot y x)) == x@. The
---     behavior is undefined if the first argument is zero.
-rem y x = coerce remInt# x y
-(%%) = coerce remInt#
--- | Rounds towards 0. The behavior is undefined if the first argument is zero.
-quotRem ∷ I64 → I64 → (# I64, I64 #)
-quotRem = coerce quotRemInt#
-
--- These functions have built-in rules.
--- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
-div,mod ∷ I64 {- ^ divisor -} → I64 {- ^ dividend -} → I64
-(%), (/) ∷ I64 {- ^ dividend -}  → I64 {- ^ divisor -} → I64
-div y x = coerce GHC.divInt# x y; {-# inline div #-}
-mod y x = coerce GHC.modInt# x y; {-# inline mod #-}
-(%) = coerce GHC.modInt#; {-# inline (%) #-}
-(/) = coerce GHC.divInt#; {-# inline (/) #-}
-
 
 addC, subC ∷ I64 → I64 → (# I64, B #)
 -- |Add signed integers reporting overflow.
@@ -86,13 +57,6 @@ addC = coerce addIntC#
 --           nonzero if overflow occurred (the difference is either too large
 --           or too small to fit in an @I64@).
 subC = coerce subIntC#
-
--- * Comparison Operators
-
-infix 4 >, ≥, <, ≤, ≡, ≠
-(>),(≥),(<),(≤),(≡),(≠) ∷ I64 → I64 → B
-(>) = coerce (>#); (≥) = coerce (>=#); (<) = coerce (<#); (≤) = coerce (<=#)
-(≡) = coerce (==#); (≠) = coerce (/=#)
 
 -- * Conversions
 
@@ -132,7 +96,7 @@ shiftR = coerce I.shiftR
 not ∷ I64 → I64
 not = coerce notI#
 
-{-# DEPRECATED shiftL#, shiftRL#, and, or, xor "Signed logical bitwise operations are rarely sensible, prefer U instead" #-}
+{-# DEPRECATED shiftL#, shiftRL# "Signed logical bitwise operations are rarely sensible, prefer U instead" #-}
 
 shiftL#, shiftRL# ∷ I64 → I → I64
 shiftL, shiftRL ∷ I → I64 → I
@@ -151,7 +115,3 @@ shiftRL# = coerce uncheckedIShiftRL#
 -- | Shift right logical.  Result 0 if shift amount is not
 --           in the range 0 to word size - 1 inclusive.
 shiftRL = coerce I.shiftRL
-and, or, xor ∷ I64 → I64 → I64
-and = coerce andI#
-or = coerce orI#
-xor = coerce xorI#

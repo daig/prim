@@ -4,7 +4,6 @@
 {-# language CPP #-}
 {-# language BangPatterns #-}
 module I (I, module I) where
-import qualified GHC.Classes as GHC (divInt#,modInt#)
 
 import {-# source #-} B
 
@@ -15,15 +14,33 @@ pattern Max, Min ∷ I
 pattern Max =  0x7FFFFFFFFFFFFFFF#
 pattern Min = -0x8000000000000000#
 
--- * Arithmetic Operations
+instance (≡) I where
+  (≡) = coerce (==# )
+  (≠) = coerce (/=# )
+instance (≤) I where
+  (>) = coerce (># )
+  (≥) = coerce (>=# )
+  (<) = coerce (<# )
+  (≤) = coerce (<=# )
+-- | Low word of signed integer multiply
+-- 
+-- Modular functions have built-in rules.
+instance ℕ I where
+  (+) = (+#); (×) = (*#)
+  (%) = modInt#; {-# inline (%) #-}
+  (/) = divInt#; {-# inline (/) #-}
+  x /% y = case 0# < x ∧ 0# > y of
+    T → case (x - 1# ) //%% y of (# q, r #) → (# q - 1#, r + y + 1# #)
+    F → case 0# > x ∧ 0# < y of
+      T → case (x + 1# ) //%% y of (# q, r #) → (# q - 1#, r + y + 1# #)
+      F → x //%% y
+instance ℤ I where
+  negate = negateInt#
+  (-) = (-#)
+  (//) = quotInt#
+  (%%) = remInt#
+  (//%%) = quotRemInt#
 
-(+), (-), (×), add, sub, mul ∷ I → I → I
-(+) = (+#); (-) = (-#)
--- | Low word of signed integer multiply
-(×) = (*#)
-add y x = x +# y; sub y x = x -# y
--- | Low word of signed integer multiply
-mul y x = x *# y
 -- |Return non-zero if there is any possibility that the upper word of a
 --     signed integer multiply might contain useful information.  Return
 --     zero only if you are completely sure that no overflow can occur.
@@ -45,31 +62,9 @@ mul y x = x *# y
 --     @(×) ∷ I → I → I@ will be poor.
 mulMayOflo ∷ I → I → B
 mulMayOflo = coerce mulIntMayOflo#
-negate ∷ I → I
-negate = negateInt#
--- | Rounds towards 0. The behavior is undefined if the first argument is zero.
-quot, rem ∷ I {- ^ divisor -}  → I {- ^ dividend -} → I
-(%%), (//) ∷ I {- ^ dividend -}  → I {- ^ divisor -} → I
-quot y x = quotInt# x y
-(//) = quotInt#
 -- |Satisfies @(add (rem y x) (mul y (quot y x)) == x@. The
 --     behavior is undefined if the first argument is zero.
-rem y x = remInt# x y
-(%%) = remInt#
--- | Rounds towards 0. The behavior is undefined if the first argument is zero.
-quotRem ∷ I → I → (# I, I #)
-quotRem y x = quotRemInt# x y
 
--- These functions have built-in rules.
--- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
-div,mod ∷ I {- ^ divisor -} → I {- ^ dividend -} → I
-(%), (/) ∷ I {- ^ dividend -}  → I {- ^ divisor -} → I
-div y x = GHC.divInt# x y; {-# inline div #-}
-mod y x = GHC.modInt# x y; {-# inline mod #-}
-(%) = GHC.modInt#; {-# inline (%) #-}
-(/) = GHC.divInt#; {-# inline (/) #-}
--- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
-divMod ∷ I {- ^ divisor -} → I {- ^ dividend -} → (# I, I #) {- ^ (div, mod) -}
 {-
 divMod y x | B (0# < x) ∧ B (0# > y) = case quotRem y (x -# 1# ) of
                                     (# q, r #) → (# q -# 1#, r +# y +# 1# #)
@@ -77,12 +72,6 @@ divMod y x | B (0# < x) ∧ B (0# > y) = case quotRem y (x -# 1# ) of
                                     (# q, r #) → (# q -# 1#, r +# y +# 1# #)
            | T = quotRem y x
 -}
-
-divMod y x = case (0# < x) ∧ (0# > y) of
-  T → case quotRem y (x -# 1# ) of (# q, r #) → (# q -# 1#, r +# y +# 1# #)
-  F → case (0# > x) ∧ (0# < y) of
-    T → case quotRem y (x +# 1# ) of (# q, r #) → (# q -# 1#, r +# y +# 1# #)
-    F → quotRem y x
 
 
 addC, subC ∷ I → I → (# I, B #)
@@ -100,15 +89,6 @@ addC = coerce addIntC#
 subC = coerce subIntC#
 
 -- * Comparison Operators
-
-instance (≤) I where
-  (>) = coerce (># )
-  (≥) = coerce (>=# )
-  (<) = coerce (<# )
-  (≤) = coerce (<=# )
-instance (≡) I where
-  (≡) = coerce (==# )
-  (≠) = coerce (/=# )
 
 -- * Conversions
 
@@ -165,5 +145,8 @@ shiftRL# i x = uncheckedIShiftRL# x i
 --           in the range 0 to word size - 1 inclusive.
 shiftRL i x = case i ≥ WORD_SIZE_IN_BITS# of {T → 0#; F → uncheckedIShiftRL# x i}
 
--- | @(n ¬) = -n - 1@
+-- | /Warning/: Bitwise operations rarely make sense on signed ints,
+-- Consider using 'U' instead.
+--
+-- @(n ¬) = -n - 1@
 instance 𝔹 I where (∧) = andI#; (∨) = orI#; (⊕) = xorI#; (¬) = notI#

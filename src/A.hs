@@ -110,8 +110,8 @@ class (♭) (a ∷ T_ r) where
 
 #define INST_PRIM(T,S,A,IA,RA,WA,IP,RP,WP,IB,RB,WB) \
 instance (♭) T where \
-  size = (S# I.×); \
-  align i = case i I.% A# of {0# → i ;off → i I.+ (A# I.- off)}; \
+  size = (S# ×); \
+  align i = case i % A# of {0# → i ;off → i + (A# - off)}; \
   indexA# = coerce IA#; \
   readA# = coerce RA#; \
   writeA# = coerce WA#; \
@@ -136,8 +136,8 @@ INST_PRIM(Char, SIZEOF_HSCHAR, ALIGNMENT_HSCHAR, indexWideCharArray, readWideCha
 INST_PRIM(Char8, SIZEOF_HSCHAR, ALIGNMENT_HSCHAR, indexCharArray, readCharArray, writeCharArray, indexCharOffAddr, readCharOffAddr, writeCharOffAddr, indexWord8ArrayAsChar, readWord8ArrayAsChar, writeWord8ArrayAsChar)
 INST_PRIM(P#, SIZEOF_HSPTR, ALIGNMENT_HSPTR, indexAddrArray, readAddrArray, writeAddrArray, indexAddrOffAddr, readAddrOffAddr, writeAddrOffAddr, indexWord8ArrayAsAddr, readWord8ArrayAsAddr, writeWord8ArrayAsAddr)
 instance (♭) (Stable.P a) where
-  size = (SIZEOF_HSSTABLEPTR# I.×)
-  align i = case i I.% ALIGNMENT_HSSTABLEPTR# of {0# → i ;off → i I.+ (ALIGNMENT_HSSTABLEPTR# I.- off)}
+  size = (SIZEOF_HSSTABLEPTR# ×)
+  align i = case i % ALIGNMENT_HSSTABLEPTR# of {0# → i ;off → i + (ALIGNMENT_HSSTABLEPTR# - off)}
   indexA# = indexStablePtrArray#
   readA# = readStablePtrArray#
   writeA# = writeStablePtrArray#

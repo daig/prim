@@ -6,17 +6,17 @@ import U ()
 
 deriving newtype instance (≡) U16
 deriving newtype instance (≤) U16
+instance ℕ U16 where
+  (U16 x) + (U16 y) = U16 (plusWord# x y)
+  (U16 x) × (U16 y) = U16 (timesWord# x y)
+  (U16 x) / (U16 y) = U16 (quotWord# x y)
+  (U16 x) % (U16 y) = U16 (remWord# x y)
+  (U16 x) /% (U16 y) = case quotRemWord# x y of (# d, m #) → (# U16 d, U16 m #)
 instance 𝔹 U16 where
   (∧) = coerce ((∧) @_ @U)
   (∨) = coerce ((∨) @_ @U)
   (⊕) = coerce ((⊕) @_ @U)
   (¬) (U16 u) = U16 (u ¬)
-
-
-(+),(-),(×) ∷ U16 → U16 → U16
-x + y = U16 (coerce plusWord# x y)
-x - y = U16 (coerce minusWord# x y)
-x × y = U16 (coerce timesWord# x y)
 
 pattern Max, Min ∷ U16
 pattern Max = U16# 0xFFFF##

@@ -6,6 +6,7 @@
 --------------------------------------------------------------------
 module I8.Packed where
 import Prelude hiding (I8)
+import B
 
 type I8 = Int8#
 
@@ -20,15 +21,16 @@ instance (≤) I8 where
 instance (≡) I8 where
   (≡) = coerce eqInt8#
   (≠) = coerce neInt8#
-
-
-(+), (-), (×), add, sub, mul ∷ I8 → I8 → I8
-(+) = plusInt8#; add = plusInt8#
-(-) = subInt8#; sub y x = x - y
-(×) = timesInt8#; mul = timesInt8#
-(//), (%%), quot, rem ∷ I8 → I8 → I8
-(//) = quotInt8#; quot y x = x // y
-(%%) = remInt8#; rem y x = x %% y
-
-quotRem ∷ I8 → I8 → (# I8, I8 #)
-quotRem y x = quotRemInt8# x y
+instance ℕ I8 where
+  (+) = plusInt8#; (×) = timesInt8#
+  x /% y = case I8 0# < x ∧ I8 0# > y of
+    T → case (x - I8 1# ) //%% y of (# q, r #) → (# q - I8 1#, r + y + I8 1# #)
+    F → case I8 0# > x ∧ I8 0# < y of
+      T → case (x + I8 1# ) //%% y of (# q, r #) → (# q - I8 1#, r + y + I8 1# #)
+      F → x //%% y
+instance ℤ I8 where
+  negate = negateInt8#
+  (-) = subInt8#
+  (//) = quotInt8#
+  (%%) = remInt8#
+  (//%%) = quotRemInt8#

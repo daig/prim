@@ -1,5 +1,6 @@
 module I16.Packed where
 import Prelude hiding (I16)
+import B
 
 type I16 = Int16#
 
@@ -14,14 +15,16 @@ instance (≤) I16 where
 instance (≡) I16 where
   (≡) = coerce eqInt16#
   (≠) = coerce neInt16#
-
-(+), (-), (×), add, sub, mul ∷ I16 → I16 → I16
-(+) = plusInt16#; add = plusInt16#
-(-) = subInt16#; sub y x = x - y
-(×) = timesInt16#; mul = timesInt16#
-(//), (%%), quot, rem ∷ I16 → I16 → I16
-(//) = quotInt16#; quot y x = x // y
-(%%) = remInt16#; rem y x = x %% y
-
-quotRem ∷ I16 → I16 → (# I16, I16 #)
-quotRem y x = quotRemInt16# x y
+instance ℕ I16 where
+  (+) = plusInt16#; (×) = timesInt16#
+  x /% y = case I16 0# < x ∧ I16 0# > y of
+    T → case (x - I16 1# ) //%% y of (# q, r #) → (# q - I16 1#, r + y + I16 1# #)
+    F → case I16 0# > x ∧ I16 0# < y of
+      T → case (x + I16 1# ) //%% y of (# q, r #) → (# q - I16 1#, r + y + I16 1# #)
+      F → x //%% y
+instance ℤ I16 where
+  negate = negateInt16#
+  (-) = subInt16#
+  (//) = quotInt16#
+  (%%) = remInt16#
+  (//%%) = quotRemInt16#

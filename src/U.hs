@@ -8,11 +8,11 @@ import B hiding (not#)
 #include "MachDeps.h"
 import I ()
 
-(+),(-),(×) ∷ U → U → U
-(+) = plusWord#; (-) = minusWord#; (×) = timesWord#
-add,sub,mul, quot, rem, div, mod ∷ U → U → U
-add y x = plusWord# x y; sub y x = minusWord# x y; mul y x = timesWord# x y
-
+instance ℕ U where
+  (+) = plusWord#; (×) = timesWord#
+  (/) = quotWord#; (%) = remWord#
+  (/%) = quotRemWord#
+(-) = minusWord#
 -- |Add unsigned integers, with the high part (carry) in the first
 --           component of the returned pair and the low part in the second
 --           component of the pair. See also @addC@.
@@ -23,7 +23,6 @@ add2 y x = plusWord2# x y
 quot y x = quotWord# x y
 div y x = quotWord# x y
 (//) = quotWord#
-(/) = quotWord#
 
 -- |Satisfies @(add (rem y x) (mul y (quot y x)) == x@. The
 --     behavior is undefined if the first argument is zero.

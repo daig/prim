@@ -4,6 +4,7 @@ module Prelude (module Prelude, module X, type T_) where
 import GHC.Prim  as X
 import T as X
 import qualified GHC.Types as GHC
+import GHC.Classes as X (divInt#,modInt#)
 
 
 -- | A fixed-precision integer type with at least the range @[-2^29 .. 2^29-1]@.
@@ -118,3 +119,18 @@ type Bytes = ByteArray#
 type MBytes = MutableByteArray#
 type Refs = ArrayArray#
 type MRefs = MutableArrayArray#
+
+class (≤) a ⇒ ℕ (a ∷ T_ r) where
+  (+), (×) ∷ a → a → a
+  -- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
+  (/), (%) ∷ a {- ^ dividend -}  → a {- ^ divisor -} → a
+  (/%) ∷ a → a → (# a , a #)
+class ℕ a ⇒ ℤ (a ∷ T_ r) where
+  (//),(%%) ∷ a → a → a
+  -- | Rounds towards 0. The behavior is undefined if the first argument is zero.
+  (//%%) ∷ a → a → (# a , a #)
+  (-) ∷ a → a → a
+  negate ∷ a → a
+class ℕ a ⇒ ℚ (a ∷ T_ r) where (÷) ∷ a → a → a
+class ℚ a ⇒ ℝ (a ∷ T_ r) where
+  abs,exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a

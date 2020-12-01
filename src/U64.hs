@@ -10,6 +10,7 @@ import qualified U
 
 deriving newtype instance (≡) U64
 deriving newtype instance (≤) U64
+deriving newtype instance ℕ U64
 deriving newtype instance 𝔹 U64
 
 
