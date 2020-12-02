@@ -11,7 +11,23 @@ import qualified U
 deriving newtype instance (≡) U64
 deriving newtype instance (≤) U64
 deriving newtype instance ℕ U64
-deriving newtype instance 𝔹 U64
+instance 𝔹 U64 where
+  (∧) = coerce ((∧) @_ @U)
+  (∨) = coerce ((∨) @_ @U)
+  (⊕) = coerce ((⊕) @_ @U)
+  (¬) (U64 u) = U64 (u ¬)
+  shiftL# (U64 w) (word2Int# → i) = U64 (uncheckedShiftL# w i)
+  shiftL w i = case i ≥ 64## of {T → U64 0##; F → shiftL# w i}
+  shiftR# (U64 w) (word2Int# → i) = U64 (uncheckedShiftRL# w i)
+  shiftR w i = case i ≥ 64## of {T → U64 0##; F → shiftL# w i}
+  shift (U64 w) i = case i ≥ 0# of
+    T → case i ≥  64# of {T → U64 0##; F → U64 (uncheckedShiftL# w i)}
+    F → case i ≤ -64# of {T → U64 0##; F → U64 (uncheckedShiftRL# w (negateInt# i))}
+  popCnt = coerce popCnt64#; clz = coerce clz64#; ctz = coerce ctz64#
+  byteSwap = coerce byteSwap64#
+  bitReverse = coerce bitReverse64#
+  pdep = coerce pdep64#; pext = coerce pext64#
+
 
 
 (+),(-),(×) ∷ U64 → U64 → U64
@@ -49,11 +65,6 @@ addC = coerce addWordC#
 --           or too small to fit in an @U64@).
 subC = coerce subWordC#
 
-infix 4 >, ≥, <, ≤, ≡, ≠
-(>),(≥),(<),(≤),(≡),(≠) ∷ U64 → U64 → B
-(>) = coerce gtWord#; (≥) = coerce geWord#; (<) = coerce ltWord#; (≤) = coerce leWord#
-(≡) = coerce eqWord#; (≠) = coerce neWord#
-
 fromI ∷ I → U64
 fromI = coerce int2Word#
 toI ∷ U64 → I
@@ -67,31 +78,3 @@ toF64 = coerce word2Double#
 pattern Max, Min ∷ U64
 pattern Max = U64 0xFFFFFFFFFFFFFFFF##
 pattern Min = U64 0##
-
-shiftL#, shiftRL# ∷ U64 → I → U64
-shiftL, shiftRL ∷ I → U64 → U64
--- | Shift left.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftL# = coerce uncheckedShiftL#
--- | Shift left.
-shiftL = coerce U.shiftL
-
-
--- |Shift right logical.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftRL# = coerce uncheckedShiftRL#
--- |Shift right logical.
-shiftRL = coerce U.shiftRL
-
--- | Count the number of set bits
-popCnt,clz,ctz ∷ U64 → U8
-popCnt = coerce popCnt#; clz = coerce clz#; ctz = coerce ctz#
-
-byteSwap ∷ U64 → U64
-byteSwap = coerce byteSwap#
-pdep, pext ∷ U64 → U64 → U64
-pdep = coerce pdep#; pext = coerce pext#
-
--- | Reverse the order of the bits.
-reverse ∷ U64 → U64
-reverse = coerce bitReverse#

@@ -1,5 +1,6 @@
 module U16.Packed where
 import Prelude hiding (U16)
+import B ()
 
 type U16 = Word16#
 
@@ -14,3 +15,9 @@ instance ℕ U16 where
   (/) = quotWord16#
   (%) = remWord16#
   (/%) = quotRemWord16#
+  addC a b = let c = a + b in (# c , c < a ∧ c < b #)
+  subC a b = let c = a U16.Packed.- b in (# c , c > a ∧ c > b #)
+
+-- | Unsigned modular subtraction.
+(-) ∷ U16 → U16 → U16
+(-) = subWord16#

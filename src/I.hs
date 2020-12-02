@@ -34,6 +34,8 @@ instance ℕ I where
     F → case 0# > x ∧ 0# < y of
       T → case (x + 1# ) //%% y of (# q, r #) → (# q - 1#, r + y + 1# #)
       F → x //%% y
+  addC a b = case addIntC# a b of (# x, b #) → (# x , b ≠ 0# #)
+  subC a b = case subIntC# a b of (# x, b #) → (# x , b ≠ 0# #)
 instance ℤ I where
   negate = negateInt#
   (-) = (-#)
@@ -112,41 +114,3 @@ toF64 = int2Double#
 --toI8 = narrowInt8#
 --toI16 ∷ I → I16
 --toI16 = narrowInt16#
-
-
--- |Shift right arithmetic.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftR# ∷ I → I → I
-shiftR# = uncheckedIShiftRA#
-
--- |Shift right arithmetic.  Result 0 or -1 (depending on sign)
--- if shift amount is not in the range 0 to word size - 1 inclusive.
-shiftR ∷ I → I → I
-shiftR i x = case i ≥ WORD_SIZE_IN_BITS# of
-  T → case x < 0# of {T → -1#; F → 0#}
-  F → uncheckedIShiftRA# x i
-
-{-# DEPRECATED shiftL#, shiftRL# "Signed logical bitwise operations are rarely sensible, prefer U instead" #-}
-
-shiftL#, shiftL, shiftRL#, shiftRL ∷ I → I → I
--- | Shift left.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftL# i x = uncheckedIShiftL# x i
-
--- | Shift left.  Result 0 if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftL i x = case i ≥ WORD_SIZE_IN_BITS# of {T → 0#; F → uncheckedIShiftL# x i}
-
-
--- | Shift right logical.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftRL# i x = uncheckedIShiftRL# x i
--- | Shift right logical.  Result 0 if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftRL i x = case i ≥ WORD_SIZE_IN_BITS# of {T → 0#; F → uncheckedIShiftRL# x i}
-
--- | /Warning/: Bitwise operations rarely make sense on signed ints,
--- Consider using 'U' instead.
---
--- @(n ¬) = -n - 1@
-instance 𝔹 I where (∧) = andI#; (∨) = orI#; (⊕) = xorI#; (¬) = notI#

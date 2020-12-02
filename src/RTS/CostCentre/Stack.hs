@@ -19,7 +19,6 @@ import qualified RTS.CostCentre as CC
 import RTS.CostCentre (CostCentre(..))
 import Stock.Char
 import Stock.Eq
-import qualified Stock.B as Stock
 import IO
 import qualified String.C as S
 

@@ -23,6 +23,8 @@ import Stock.Double
 import Stock.IO
 import HsFFI.Rounding as X
 
+-- TODO figure out how to get all the constants here as macros
+
 foreign import capi "HsFFI.h value HS_INT_MAX" int_max ∷ Int
 foreign import capi "HsFFI.h value HS_INT_MIN" int_min ∷ Int
 foreign import capi "HsFFI.h value HS_INT8_MAX" int8_max ∷ Int

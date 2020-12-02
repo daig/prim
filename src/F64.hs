@@ -1,8 +1,8 @@
-module F64 (F64, (+##), (-##), (*##), (/##), (>##), (>=##), (<#), (<=#), (==##)
-  ,module F64) where
-import I16 (I16(..))
-import I8 (I8(..))
-import I64 (I64(..))
+module F64 (F64 ,module F64) where
+import HsFFI hiding (Inf,Inf_)
+import Stock.Double
+import Stock.Eq
+import Stock.Bool
 
 instance (≡) F64 where (≡) = coerce (==##); (≠) = coerce (/=##)
 instance (≤) F64 where (>) = coerce (>##); (≥) = coerce (>=##); (<) = coerce (<##); (≤) = coerce (<=##)
@@ -10,6 +10,8 @@ instance ℕ F64 where
   (+) = (+##); (×) = (*##)
   (/) = (/##); _ % _ = 0.0##
   x /% y = (# x / y , 0.0## #)
+  addC a b = case a + b of {c@Inf  → (# Inf , T #); c → (# c , F #)}
+  subC a b = case a - b of {c@Inf_ → (# Inf_, T #); c → (# c , F #)}
 instance ℤ F64 where
   negate = negateDouble#; (-) = (-##)
   (//) = (/##); _ %% _ = 0.0##
@@ -38,3 +40,14 @@ toF32 ∷ F64 → F32
 toF32 = double2Float#
 fromF32 ∷ F32 → F64
 fromF32 = float2Double#
+
+pattern Inf ∷ F64
+pattern Inf ← (((1.0## / 0.0##) ≡) → T) where Inf = 1.0## / 0.0##
+pattern Inf_ ∷ F64
+pattern Inf_ ← (((-1.0## / 0.0##) ≡) → T) where Inf_ = -1.0## / 0.0##
+
+pattern Max ∷ F64
+pattern Max ← f64_max where Max = case f64_max of D# x → x
+pattern Min ∷ F64
+pattern Min ← f64_min where Min = case f64_min of D# x → x
+pattern Eps ← ((\x → f64_epsilon == D# x) → True) where Eps = case f64_epsilon of D# x → x

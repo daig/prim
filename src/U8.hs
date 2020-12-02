@@ -13,11 +13,25 @@ instance ℕ U8 where
   (U8 x) / (U8 y) = U8 (quotWord# x y)
   (U8 x) % (U8 y) = U8 (remWord# x y)
   (U8 x) /% (U8 y) = case quotRemWord# x y of (# d, m #) → (# U8 d, U8 m #)
+  addC (U8 a) (U8 b) = let c = a + b in (# U8 c , c > coerce Max #)
+  subC (U8 a) (U8 b) = case subC a b of (# x, b #) → (# U8 x , b #)
 instance 𝔹 U8 where
   (∧) = coerce ((∧) @_ @U)
   (∨) = coerce ((∨) @_ @U)
   (⊕) = coerce ((⊕) @_ @U)
-  (¬) (U8 u) = U8 (u ¬)
+  (¬) = (Max ⊕)
+  shiftL# (U8 w) (word2Int# → i) = U8 (uncheckedShiftL# w i)
+  shiftL w i = case i ≥ 8## of {T → U8# 0##; F → shiftL# w i}
+  shiftR# (U8 w) (word2Int# → i) = U8 (uncheckedShiftRL# w i)
+  shiftR w i = case i ≥ 8## of {T → U8# 0##; F → shiftL# w i}
+  shift (U8 w) i = case i ≥ 0# of
+    T → case i ≥  8# of {T → U8# 0##; F → U8 (uncheckedShiftL# w i)}
+    F → case i ≤ -8# of {T → U8# 0##; F → U8 (uncheckedShiftRL# w (negateInt# i))}
+  popCnt = coerce popCnt8#; clz = coerce clz8#; ctz = coerce ctz8#
+  byteSwap x = x
+  bitReverse = coerce bitReverse8#
+  pdep = coerce pdep8#; pext = coerce pext8#
+
 
 pattern Max, Min ∷ U8
 pattern Max = U8# 0xFF##

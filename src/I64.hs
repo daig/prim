@@ -18,9 +18,6 @@ deriving newtype instance (≡) I64
 deriving newtype instance (≤) I64
 deriving newtype instance ℕ I64
 deriving newtype instance ℤ I64
--- | /Warning/: Bitwise operations rarely make sense on signed ints,
--- Consider using 'U' instead.
-deriving newtype instance 𝔹 I64
 
 -- |Return non-zero if there is any possibility that the upper word of a
 --     signed integer multiply might contain useful information.  Return
@@ -80,38 +77,3 @@ toF64 = coerce int2Double#
 --toI648 = narrowInt8#
 --toI6416 ∷ I64 → I6416
 --toI6416 = narrowInt16#
-
-
--- |Shift right arithmetic.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftR# ∷ I64 → I → I64
-shiftR# = coerce uncheckedIShiftRA#
-
--- |Shift right arithmetic.  Result 0 or -1 (depending on sign)
--- if shift amount is not in the range 0 to word size - 1 inclusive.
-shiftR ∷ I → I64 → I64
-shiftR = coerce I.shiftR
-
--- | Bitwise negation. @not n = -n - 1@
-not ∷ I64 → I64
-not = coerce notI#
-
-{-# DEPRECATED shiftL#, shiftRL# "Signed logical bitwise operations are rarely sensible, prefer U instead" #-}
-
-shiftL#, shiftRL# ∷ I64 → I → I64
-shiftL, shiftRL ∷ I → I64 → I
--- | Shift left.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftL# = coerce uncheckedIShiftL#
-
--- | Shift left.  Result 0 if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftL = coerce I.shiftL
-
-
--- | Shift right logical.  Result undefined if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftRL# = coerce uncheckedIShiftRL#
--- | Shift right logical.  Result 0 if shift amount is not
---           in the range 0 to word size - 1 inclusive.
-shiftRL = coerce I.shiftRL

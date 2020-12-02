@@ -1,3 +1,4 @@
+{-# language ViewPatterns #-}
 module F32 (F32, module F32) where
 import I32 (I32(..))
 
@@ -7,6 +8,8 @@ instance ℕ F32 where
   (+) = plusFloat#; (×) = timesFloat#
   (/) = divideFloat#; _ % _ = 0.0#
   x /% y = (# x / y , 0.0# #)
+  addC a b = case a + b of {c@Inf  → (# Inf , T #); c → (# c , F #)}
+  subC a b = case a - b of {c@Inf_ → (# Inf_, T #); c → (# c , F #)}
 instance ℤ F32 where
   negate = negateFloat#; (-) = minusFloat#
   (//) = divideFloat#; _ %% _ = 0.0#
@@ -31,3 +34,8 @@ fromF64 = double2Float#
 
 decode ∷ F32 → (# I32, I32 #)
 decode = coerce decodeFloat_Int#
+
+pattern Inf ∷ F32
+pattern Inf ← (((1.0# / 0.0#) ≡) → T) where Inf = 1.0# / 0.0#
+pattern Inf_ ∷ F32
+pattern Inf_ ← (((-1.0# / 0.0#) ≡) → T) where Inf_ = -1.0# / 0.0#

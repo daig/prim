@@ -17,11 +17,23 @@ instance (≡) I16 where
   (≠) = coerce neInt16#
 instance ℕ I16 where
   (+) = plusInt16#; (×) = timesInt16#
+  x / y = case I16 0# < x ∧ I16 0# > y of
+    T → (x - I16 1# ) // y - I16 1#
+    F → case I16 0# > x ∧ I16 0# < y of
+      T → (x + I16 1# ) // y - I16 1#
+      F → x // y
+  x % y = case I16 0# < x ∧ I16 0# > y of
+    T → (x - I16 1# ) %% y + y + I16 1#
+    F → case I16 0# > x ∧ I16 0# < y of
+      T → (x + I16 1# ) %% y + y + I16 1#
+      F → x %% y
   x /% y = case I16 0# < x ∧ I16 0# > y of
     T → case (x - I16 1# ) //%% y of (# q, r #) → (# q - I16 1#, r + y + I16 1# #)
     F → case I16 0# > x ∧ I16 0# < y of
       T → case (x + I16 1# ) //%% y of (# q, r #) → (# q - I16 1#, r + y + I16 1# #)
       F → x //%% y
+  addC a b = let c = a + b in (# c , c < a ∧ c < b #)
+  subC a b = let c = a - b in (# c , c > a ∧ c > b #)
 instance ℤ I16 where
   negate = negateInt16#
   (-) = subInt16#

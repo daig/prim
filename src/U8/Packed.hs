@@ -1,5 +1,6 @@
 module U8.Packed where
 import Prelude hiding (U8)
+import B ()
 
 type U8 = Word8#
 
@@ -14,3 +15,13 @@ instance ℕ U8 where
   (/) = quotWord8#
   (%) = remWord8#
   (/%) = quotRemWord8#
+  addC a b = let c = a + b in (# c , c < a ∧ c < b #)
+  subC a b = let c = a U8.Packed.- b in (# c , c > a ∧ c > b #)
+
+-- | Unsigned modular subtraction.
+(-) ∷ U8 → U8 → U8
+(-) = subWord8#
+
+pattern Max, Min ∷ U8
+pattern Max = U8 0xFF##
+pattern Min = U8 0##

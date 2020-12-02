@@ -108,6 +108,33 @@ class (≡) a ⇒ (≤) (a ∷ T_ r) where (>),(≥),(<),(≤) ∷ a → a → B
 class 𝔹 (a ∷ T_ r) where
   (∧), (∨), (⊕) ∷ a → a → a
   (¬) ∷ a → a
+  -- | Shift left.  Result undefined if shift amount is not
+  --           in the range 0 to word @size - 1@ inclusive.
+  shiftL# ∷ a → U → a
+  -- | Shift left.  Result 0 if shift amount is not
+  --           in the range 0 to word @size - 1@ inclusive.
+  shiftL ∷ a → U → a
+  -- |Shift right logical.  Result undefined if shift amount is not
+  --           in the range 0 to word @size - 1@ inclusive.
+  shiftR# ∷ a → U → a
+  -- |Shift right logical.  Result 0 if shift amount is not
+  --           in the range 0 to @size - 1@ inclusive.
+  shiftR ∷ a → U → a
+  -- |Shift left logical.  Accepts negative offset for right shifts.
+  -- Result 0 if shift amount is not in the range @1 - size@ to @size - 1@ inclusive.
+  shift ∷ a → I → a 
+  -- | Count the number of set bits
+  popCnt ∷ a → U
+  -- | Count the number of leading zeroes
+  clz ∷ a → U
+  -- | Count the number of trailing zeroes
+  ctz ∷ a → U
+  -- | Swap the byte order
+  byteSwap ∷ a → a
+  -- | Reverse the order of the bits.
+  bitReverse ∷ a → a
+  pdep, pext ∷ a → a → a
+
 infixl 3 ∧
 infixl 2 ⊕
 infixl 1 ∨
@@ -120,12 +147,18 @@ type MBytes = MutableByteArray#
 type Refs = ArrayArray#
 type MRefs = MutableArrayArray#
 
+-- |Satisfies @((((x / y) × y) + (x % y) ≡ x@. The
 class (≤) a ⇒ ℕ (a ∷ T_ r) where
   (+), (×) ∷ a → a → a
   -- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
   (/), (%) ∷ a {- ^ dividend -}  → a {- ^ divisor -} → a
   (/%) ∷ a → a → (# a , a #)
+  -- |Add reporting overflow.
+  addC ∷ a → a → (# a, B #) -- ^ The truncated sum and whether it overflowed
+  -- |Subtract reporting overflow
+  subC ∷ a → a → (# a, B #) -- ^ The truncated subtraction and whether it underflowed
 class ℕ a ⇒ ℤ (a ∷ T_ r) where
+  -- |Satisfies @((((x // y) × y) + (x %% y) ≡ x@.
   (//),(%%) ∷ a → a → a
   -- | Rounds towards 0. The behavior is undefined if the first argument is zero.
   (//%%) ∷ a → a → (# a , a #)

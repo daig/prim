@@ -43,7 +43,7 @@ library
   hs-source-dirs: src
   other-modules: Prelude
   exposed-modules: Char , Char8,  B, T
-                 , I, I64, I32, I16, I16.Packed, I8, I8.Packed
+                 , I, I.Bits, I64, I32, I16, I16.Packed, I8, I8.Packed
                  , U, U64, U32, U16, U16.Packed, U8, U8.Packed
                  , F64, F32
                  , IO, IO.STM
@@ -67,7 +67,7 @@ library
                  , RTS.Prefetch
                  , String, String.C, String.C.Latin, String.C.UTF8, String.List
                  , GHC.Nat, GHC.Symbol
-                 , Stock.Eq, Stock.Ord, Stock.Ord.Ordering
+                 , Stock.Eq, Stock.Ord, Stock.Ord.Ordering, Stock.Bool
                  , Stock.Char, Stock.Double, Stock.Float, Stock.Int, Stock.Word, Stock.IO
                  , Syntax.ImplicitParam
                  , Maybe
@@ -75,4 +75,5 @@ library
                  , X
                  , Bits, Cmp
                  , HsFFI, HsFFI.Rounding
+                 , Num
   build-depends: ghc-prim ^>= 0.6.1, rts
