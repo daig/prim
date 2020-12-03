@@ -14,9 +14,7 @@ maintainer: dai@sodality.cc
 copyright: 2020 Sodality
 license: MIT
 
-dependencies:
-  - ghc-prim
-  - rts
+dependencies: ghc-prim
 default-extensions: MagicHash, UnboxedTuples
                   , KindSignatures, PolyKinds, ConstraintKinds, TypeOperators, RankNTypes
                   , BlockArguments, UnicodeSyntax
@@ -32,3 +30,8 @@ default-extensions: MagicHash, UnboxedTuples
 library:
   source-dirs: src
   other-modules: Prelude
+
+internal-libraries:
+  stock:
+    source-dirs: stock
+    other-modules: Prelude

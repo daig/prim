@@ -1,0 +1,1 @@
+module Float (Float(..)) where
