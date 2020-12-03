@@ -1,10 +1,8 @@
 --------------------------------------------------------------------
 -- | Description : Latin-1 (8-bit) encoding
 --------------------------------------------------------------------
-module String.C.Latin (module X, module String.C.Latin) where
+module String.C.Latin (type S, module String.C.Latin) where
 import GHC.CString
-import String.C as X
-import Prelude hiding (Char)
 
 -- | Unpack bytes until \null byte
 unpack# ∷ S → [Char]

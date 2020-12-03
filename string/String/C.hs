@@ -7,11 +7,10 @@
 --
 -- They are not aliased, in general @"foo"\# ≠ "foo"\#@
 --------------------------------------------------------------------
-module String.C (type S, Stock.Char.Char(..)) where
-import GHC.CString
-import Stock.Char
+module String.C where
+import GHC.Prim
 
 -- | Null-terminated C-like Strings
 --
 -- Not a newtype because it would interfere with literal syntax
-type S = P#
+type S = Addr#

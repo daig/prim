@@ -15,17 +15,34 @@ copyright: 2020 Sodality
 license: MIT
 
 dependencies: ghc-prim
-default-extensions: MagicHash, UnboxedTuples
-                  , KindSignatures, PolyKinds, ConstraintKinds, TypeOperators, RankNTypes
-                  , BlockArguments, UnicodeSyntax
-                  , PatternSynonyms, ViewPatterns
-                  , DataKinds, UnliftedNewtypes, GADTs
-                  , TypeSynonymInstances, TypeFamilies, DerivingStrategies
-                  , StandaloneDeriving, GeneralizedNewtypeDeriving
-                  , FlexibleInstances, MultiParamTypeClasses, AllowAmbiguousTypes
-                  , TypeFamilyDependencies
-                  , PostfixOperators, TypeApplications, FlexibleContexts
-                  , LambdaCase
+default-extensions:
+  - MagicHash
+  - UnboxedTuples
+  - KindSignatures
+  - PolyKinds
+  - ConstraintKinds
+  - TypeOperators
+  - RankNTypes
+  - BlockArguments
+  - UnicodeSyntax
+  - PatternSynonyms
+  - ViewPatterns
+  - DataKinds
+  - UnliftedNewtypes
+  - GADTs
+  - TypeSynonymInstances
+  - TypeFamilies
+  - DerivingStrategies
+  - StandaloneDeriving
+  - GeneralizedNewtypeDeriving
+  - FlexibleInstances
+  - MultiParamTypeClasses
+  - AllowAmbiguousTypes
+  - TypeFamilyDependencies
+  - PostfixOperators
+  - TypeApplications
+  - FlexibleContexts
+  - LambdaCase
 
 library:
   source-dirs: src
@@ -35,3 +52,8 @@ internal-libraries:
   stock:
     source-dirs: stock
     other-modules: Prelude
+    visibility: public
+  string:
+    other-modules: Prelude
+    source-dirs: string
+    visibility: public

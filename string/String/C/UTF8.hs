@@ -1,10 +1,8 @@
 --------------------------------------------------------------------
 -- | Description : UTF-8 encoding
 --------------------------------------------------------------------
-module String.C.UTF8 (module X, unpack#) where
+module String.C.UTF8 (type S, unpack#) where
 import GHC.CString
-import String.C as X
-import Prelude hiding (Char)
 
 -- | Unpack UTF-8 encoded 'Char' string
 unpack# ∷ S → [Char]
