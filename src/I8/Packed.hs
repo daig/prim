@@ -4,7 +4,7 @@
 -- These types actually pack bytes into a single word, as can be observed
 -- by 'RTS.Any.size#' on an unboxed tuple
 --------------------------------------------------------------------
-module I8.Packed where
+module I8.Packed () where
 import Prelude hiding (I8)
 import B
 

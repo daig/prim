@@ -22,4 +22,3 @@ void hsprimitive_memset_Double (HsDouble *, ptrdiff_t, size_t, HsDouble);
 void hsprimitive_memset_Char (HsChar *, ptrdiff_t, size_t, HsChar);
 
 #endif
-
