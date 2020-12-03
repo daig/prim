@@ -1,0 +1,34 @@
+name: prim
+github: daig/prim
+version: 0.1.0.9
+category: Prelude
+synopsis: A modern interface to ghc-prim
+description: This library reorganizes @ghc-prim@ in a sane but conservative way 
+  , without adding any fancy tricks like overloading or extra functions.
+  It's meant as a foundation for low-level programming in haskell, as well as (eventually),
+  a comprehensive home for documentation on ghc magic.
+
+stability: cursed
+author: Dai
+maintainer: dai@sodality.cc
+copyright: 2020 Sodality
+license: MIT
+
+dependencies:
+  - ghc-prim
+  - rts
+default-extensions: MagicHash, UnboxedTuples
+                  , KindSignatures, PolyKinds, ConstraintKinds, TypeOperators, RankNTypes
+                  , BlockArguments, UnicodeSyntax
+                  , PatternSynonyms, ViewPatterns
+                  , DataKinds, UnliftedNewtypes, GADTs
+                  , TypeSynonymInstances, TypeFamilies, DerivingStrategies
+                  , StandaloneDeriving, GeneralizedNewtypeDeriving
+                  , FlexibleInstances, MultiParamTypeClasses, AllowAmbiguousTypes
+                  , TypeFamilyDependencies
+                  , PostfixOperators, TypeApplications, FlexibleContexts
+                  , LambdaCase
+
+library:
+  source-dirs: src
+  other-modules: Prelude
