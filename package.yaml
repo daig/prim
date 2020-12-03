@@ -57,3 +57,7 @@ internal-libraries:
     other-modules: Prelude
     source-dirs: string
     visibility: public
+  ffi:
+    other-modules: []
+    source-dirs: ffi
+    visibility: public

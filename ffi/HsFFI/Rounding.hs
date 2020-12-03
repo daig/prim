@@ -3,11 +3,6 @@
 --------------------------------------------------------------------
 {-# language ForeignFunctionInterface, CApiFFI, UnliftedFFITypes, GHCForeignImportPrim #-}
 module HsFFI.Rounding (Rounding(Rounding#,Indeterminable,Zero,Nearest,Inf,Inf_)) where
-import Stock.Int
-import Stock.Word
-import Stock.Float
-import Stock.Double
-import Stock.IO
 
 -- | Rounding mode used by floating arithmetic
 newtype Rounding = Rounding# Int

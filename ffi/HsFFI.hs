@@ -16,11 +16,6 @@
 --------------------------------------------------------------------
 {-# language ForeignFunctionInterface, CApiFFI, UnliftedFFITypes, GHCForeignImportPrim #-}
 module HsFFI (module HsFFI, module X) where
-import Stock.Int
-import Stock.Word
-import Stock.Float
-import Stock.Double
-import Stock.IO
 import HsFFI.Rounding as X
 
 -- TODO figure out how to get all the constants here as macros
