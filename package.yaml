@@ -13,6 +13,8 @@ author: Dai
 maintainer: dai@sodality.cc
 copyright: 2020 Sodality
 license: MIT
+verbatim:
+  cabal-version: 3.4
 
 dependencies: ghc-prim
 default-extensions:
@@ -47,6 +49,17 @@ default-extensions:
 library:
   source-dirs: src
   other-modules: Prelude
+  dependencies:
+    - name: prim:stock
+      mixin:
+        - (Word as Stock.Word
+          ,Int as Stock.Int
+          ,Double as Stock.Double
+          ,Char as Stock.Char
+          ,Eq as Stock.Eq
+          ,Bool as Stock.Bool)
+    - prim:ffi
+    - prim:string
 
 internal-libraries:
   stock:

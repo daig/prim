@@ -1,19 +1,22 @@
 --------------------------------------------------------------------
 -- | Description : Cast between identical representations
 --------------------------------------------------------------------
-{-# language TypeApplications #-}
+{-# language NoImplicitPrelude #-}
 module GHC.Coerce
   (type (≑)
-  ,coerce
+  ,GHC.coerce
+  ,the
   ,coerce#
-  ,GHC.unsafeCoerce# -- | Very unsafe coerce that may not get inlined correctly.
-                     -- Only use if you know it will not be called at higher order.
-                     -- Magically levity polymorphic, unlike 'coerce#'
+  ,unsafeCoerce# -- | Very unsafe coerce that may not get inlined correctly.
+                   -- Only use on primitive types you know won't be called at
+                   -- higher order.
+                   -- Levity polymorphic, unlike 'coerce#'
   ,GHC.Any
  ) where
-import qualified Prelude as GHC
+import qualified GHC.Prim as GHC
 import qualified GHC.Types as GHC
 import qualified Stock.Word as Stock
+import GHC.Prim.Panic
 
 -- | @≑@ is a two-parameter class that has instances for types @a@ and @b@ if
 --      the compiler can infer that they have the same representation. This class
@@ -63,8 +66,10 @@ import qualified Stock.Word as Stock
 --      by Joachim Breitner, Richard A. Eisenberg, Simon Peyton Jones and Stephanie Weirich.
 type (≑) = GHC.Coercible
 
-coerce ∷ ∀ b a. a ≑ b ⇒ a → b
-coerce = GHC.coerce
+-- | 'coerce' with the target as the first type application argument.
+-- Only works on lifted types, unlike 'coerce'
+the ∷ b ≑ a ⇒ a → b
+the = GHC.coerce
 
 -- | Coerce any type into any other type.
 --
@@ -94,6 +99,11 @@ coerce = GHC.coerce
 -- __/Warning:/__ this can fail with an unchecked exception.
 -- To coerce (very unsafely) on unlifted types - use 'unsafeCoerce#' instead
 coerce# ∷ ∀ b a. a → b
-coerce# x = local_id (GHC.unsafeCoerce# x)
+coerce# x = local_id (unsafeCoerce# x)
+
+unsafeCoerce# :: forall (r1 :: GHC.RuntimeRep) (r2 :: GHC.RuntimeRep) (a :: GHC.TYPE r1) (b :: GHC.TYPE r2) . a -> b
+-- The unsafeCoerce# primop is not exportable but instead magically replaced at compile-time.
+unsafeCoerce# = panicError "GHC internal error: unsafeCoerce# not unfolded"#
+
 local_id ∷ a → a
 local_id x = x

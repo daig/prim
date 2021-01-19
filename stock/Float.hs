@@ -1,1 +1,1 @@
-module Float (Float(..)) where
+module Float (Float(..),eqFloat) where

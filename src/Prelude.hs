@@ -1,10 +1,12 @@
 {-# OPTIONS_HADDOCK not-home  #-}
 {-# language NoImplicitPrelude,TypeOperators #-}
-module Prelude (module Prelude, module X, type T_) where
-import GHC.Prim  as X
+module Prelude (module Prelude, module X) where
+import GHC.Prim as X hiding (Void#)
+import GHC.Coerce as X
 import T as X
 import qualified GHC.Types as GHC
 import GHC.Classes as X (divInt#,modInt#)
+import Void as X
 
 
 -- | A fixed-precision integer type with at least the range @[-2^29 .. 2^29-1]@.

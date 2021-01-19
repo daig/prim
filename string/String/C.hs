@@ -7,10 +7,7 @@
 --
 -- They are not aliased, in general @"foo"\# ≠ "foo"\#@
 --------------------------------------------------------------------
-module String.C where
-import GHC.Prim
+module String.C (type S, len#) where
 
--- | Null-terminated C-like Strings
---
--- Not a newtype because it would interfere with literal syntax
-type S = Addr#
+len# ∷ S → I; {-# inline len# #-}
+len# = cstringLength#

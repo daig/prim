@@ -1,5 +1,4 @@
 {- cabal repl --repl-options=-XNoImplicitPrelude -}
-:set -fno-code
 :load Prelude
 import Prelude
 :set -XImplicitPrelude

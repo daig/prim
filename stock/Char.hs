@@ -1,1 +1,2 @@
-module Char (Char(..)) where
+module Char (Char(..),eqChar,neChar) where
+

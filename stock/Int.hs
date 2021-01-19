@@ -1,1 +1,1 @@
-module Int (Int(..)) where
+module Int (Int(..),eqInt,neInt,gtInt,geInt,leInt,ltInt,compareInt) where

@@ -12,6 +12,7 @@ import qualified P.Weak as Weak
 import qualified P.Sync as Sync
 import I
 import IO (run)
+import GHC.Coerce
 
 
 newtype A (x ∷ T_A) ∷ T_A where A# ∷ Refs → A x

@@ -1,1 +1,1 @@
-module Double (Double(..)) where
+module Double (Double(..),eqDouble) where
