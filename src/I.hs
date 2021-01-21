@@ -26,7 +26,8 @@ instance (≤) I where
 -- 
 -- Modular functions have built-in rules.
 instance ℕ I where
-  (+) = (+#); (×) = (*#)
+  (+) = (+#)
+  (×) = (*#)
   (%) = modInt#; {-# inline (%) #-}
   (/) = divInt#; {-# inline (/) #-}
   x /% y = case 0# < x ∧ 0# > y of

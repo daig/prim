@@ -21,8 +21,8 @@ pattern Null ← nullAddr# where Null = nullAddr#
 i ∔ a = plusAddr# a i
 
 -- |Computes the offset required to get from the second to the first argument.
-(⨪) ∷ P# → P# → I
-(⨪) = minusAddr#
+(߸) ∷ P# → P# → I
+(߸) = minusAddr#
 
 (.//) ∷ P# → I → I
 (.//) = remAddr#

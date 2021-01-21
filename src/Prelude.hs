@@ -1,13 +1,12 @@
 {-# OPTIONS_HADDOCK not-home  #-}
 {-# language NoImplicitPrelude,TypeOperators #-}
 module Prelude (module Prelude, module X) where
-import GHC.Prim as X hiding (Void#)
+import GHC.Prim as X
 import GHC.Coerce as X
 import T as X
 import qualified GHC.Types as GHC
 import GHC.Classes as X (divInt#,modInt#)
 import Void as X
-
 
 -- | A fixed-precision integer type with at least the range @[-2^29 .. 2^29-1]@.
 -- The exact range for a given implementation can be determined by using
@@ -25,7 +24,7 @@ pattern I8 ∷ I → I8
 pattern I8 i ← (coerce → i) where I8 = coerce narrow8Int#
 {-# complete I8 #-}
 
-newtype I16  ∷ T_I where I16#  ∷ I → I16
+newtype I16  ∷ T_I where I16# ∷ I → I16
 -- | Narrow a machine 'I' to 16 bits
 pattern I16 ∷ I → I16
 pattern I16 i ← (coerce → i) where I16 = coerce narrow16Int#

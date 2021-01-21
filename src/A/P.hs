@@ -4,4 +4,3 @@ import A
 import Char
 import Char8
 import qualified P.Stable as Stable
-

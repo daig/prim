@@ -4,8 +4,14 @@ import Stock.Double
 import Stock.Eq
 import Stock.Bool
 
-instance (≡) F64 where (≡) = coerce (==##); (≠) = coerce (/=##)
-instance (≤) F64 where (>) = coerce (>##); (≥) = coerce (>=##); (<) = coerce (<##); (≤) = coerce (<=##)
+instance (≡) F64 where
+  (≡) = coerce (==##)
+  (≠) = coerce (/=##)
+instance (≤) F64 where
+  (>) = coerce (>##)
+  (≥) = coerce (>=##)
+  (<) = coerce (<##)
+  (≤) = coerce (<=##)
 instance ℕ F64 where
   (+) = (+##); (×) = (*##)
   (/) = (/##); _ % _ = 0.0##

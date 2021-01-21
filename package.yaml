@@ -1,13 +1,11 @@
 name: prim
 github: daig/prim
-version: 0.1.0.9
+version: 0.7.0.0
 category: Prelude
 synopsis: A modern interface to ghc-prim
-description: This library reorganizes @ghc-prim@ in a sane but conservative way 
-  , without adding any fancy tricks like overloading or extra functions.
-  It's meant as a foundation for low-level programming in haskell, as well as (eventually),
-  a comprehensive home for documentation on ghc magic.
-
+description: This library reorganizes @ghc-prim@
+             For usability and documentation of
+             low-level programming.
 stability: cursed
 author: Dai
 maintainer: dai@sodality.cc
