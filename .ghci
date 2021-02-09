@@ -2,3 +2,4 @@
 :load Prelude
 import Prelude
 :set -XImplicitPrelude
+:set -XNoLinearTypes

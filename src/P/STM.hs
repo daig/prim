@@ -1,10 +1,13 @@
 module P.STM where
 import Prelude hiding (P)
+import Prim.B
 
 type P = TVar#
 
 -- | "IO.STM" references
-instance (≡) (P s a) where p ≡ q = coerce do sameTVar# p q
+instance (≡) (P s a) where
+  p ≡ q = coerce do sameTVar# p q
+  p ≠ q = (coerce (sameTVar# p q) ¬)
 
 new ∷ a → ST# s (P s a)
 new = newTVar#

@@ -1,6 +1,6 @@
 module P.Stable where
 import Prelude hiding (P)
-import B ()
+import Prim.B ()
 
 type P = StablePtr#
 

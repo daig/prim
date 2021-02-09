@@ -1,1 +1,0 @@
-module Eq (type (≡)(..)) where

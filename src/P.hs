@@ -3,12 +3,12 @@
 --------------------------------------------------------------------
 {-# language TypeSynonymInstances,UnliftedNewtypes, GADTs, TypeOperators #-}
 module P (P#,module P) where
-import Char
-import Char8
-import I32 (I32(..))
-import I16 (I16(..))
-import I64 (I64(..))
-import I8 (I8(..))
+import Prim.Char
+import Prim.Char8
+import Prim.I32 (I32(..))
+import Prim.I16 (I16(..))
+import Prim.I64 (I64(..))
+import Prim.I8 (I8(..))
 import qualified P.Stable as Stable
 
 

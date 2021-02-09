@@ -15,9 +15,9 @@ module Any.ClosureType (ClosureType(ClosureType#,
   Atomically_Frame, Catch_Retry_Frame, Catch_STM_Frame, Whitehole, Small_Mut_Arr_Ptrs_Clean, Small_Mut_Arr_Ptrs_Dirty ,
   Small_Mut_Arr_Ptrs_Frozen_Dirty, Small_Mut_Arr_Ptrs_Frozen_Clean , Compact_NFData, NClosure_Types)
   ) where
-import A.Prim
-import qualified A.Boxed.Big as Big
-import A.P
+import Prim.A.Prim
+import qualified Prim.A.Boxed.Big as Big
+import Prim.A.P
 import Stock.Int
 -- #include "ClosureTypes.h"
 #include "rts/storage/ClosureTypes.h"

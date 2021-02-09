@@ -3,8 +3,8 @@
 --------------------------------------------------------------------
 {-# language ScopedTypeVariables,TypeApplications #-}
 module RTS.ByteCode (type BCO, module RTS.ByteCode) where
-import A.Prim
-import qualified A.Boxed.Big as Big
+import Prim.A.Prim
+import qualified Prim.A.Boxed.Big as Big
 
 -- | Wrape a @BCO@ in a @AP_UPD@ thunk which will be updated with the value of
 -- the @BCO@ when evaluated.

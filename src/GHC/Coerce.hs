@@ -11,7 +11,7 @@ module GHC.Coerce
                    -- Only use on primitive types you know won't be called at
                    -- higher order.
                    -- Levity polymorphic, unlike 'coerce#'
-  ,GHC.Any
+ ,GHC.Any
  ) where
 import qualified GHC.Prim as GHC
 import qualified GHC.Types as GHC
@@ -93,8 +93,6 @@ the = GHC.coerce
 --         have to do with GHC\'s internal representation details (for the cognoscenti, data values
 --         can be entered but function closures cannot).  If you want a safe type to cast things
 --         to, use @Any@, which is not an algebraic data type.
---
---
 --
 -- __/Warning:/__ this can fail with an unchecked exception.
 -- To coerce (very unsafely) on unlifted types - use 'unsafeCoerce#' instead

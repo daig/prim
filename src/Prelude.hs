@@ -3,10 +3,10 @@
 module Prelude (module Prelude, module X) where
 import GHC.Prim as X
 import GHC.Coerce as X
-import T as X
+import Type as X
 import qualified GHC.Types as GHC
 import GHC.Classes as X (divInt#,modInt#)
-import Void as X
+import Prim.Void as X
 
 -- | A fixed-precision integer type with at least the range @[-2^29 .. 2^29-1]@.
 -- The exact range for a given implementation can be determined by using
@@ -101,9 +101,19 @@ type IO# (a ∷ T_ r) = ST# (☸) a
 -- | A computation performing some I\/O
 type IO_# = ST_# (☸)
 
+-- | a number less-than, equal-to, or greater-than @0#@
+newtype Ordering ∷ T_I where Ordering# ∷ I → Ordering
+pattern LT ∷ Ordering
+pattern LT ← ((\(Ordering# i) → B# (i <# 0#) ) → T ) where LT = Ordering# -1#
+pattern GT ← ((\(Ordering# i) → B# (i ># 0#) ) → T ) where GT = Ordering# 1#
+pattern EQ ← ((\(Ordering# i) → B# (i ==# 0#) ) → T ) where EQ = Ordering# 0#
+{-# complete LT, GT, EQ #-}
+
 infix 4 >, ≥, <, ≤, ≡, ≠
 class (≡) (a ∷ T_ r) where (≡), (≠) ∷ a → a → B
-class (≡) a ⇒ (≤) (a ∷ T_ r) where (>),(≥),(<),(≤) ∷ a → a → B
+class (≡) a ⇒ (≤) (a ∷ T_ r) where
+  (>),(≥),(<),(≤) ∷ a → a → B
+  cmp ∷ a → a → Ordering
 
 -- | Bitwise algebriac operations
 class 𝔹 (a ∷ T_ r) where
