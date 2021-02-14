@@ -32,18 +32,18 @@ class (♭) (x ∷ T_ r) where
   size ∷ I {- ^ # elements -} → I {- ^ size in bytes -}
   align ∷ I → I
   indexA# ∷ Bytes → I → x
-  readA# ∷ MBytes s → I → ST# s x
-  writeA# ∷ M Bytes s → I → x → ST_# s
+  readA# ∷ MBytes s → I → ST s x
+  writeA# ∷ M Bytes s → I → x → ST_ s
   indexP# ∷ P# → I → x
-  readP# ∷ P# → I → ST# s x
-  writeP# ∷ P# → I → x → ST_# s
-  indexB# ∷ Bytes → I → x
-  readB# ∷ MBytes s → I → ST# s x
-  writeB# ∷ MBytes s → I → x → ST_# s
-  setB# ∷ MBytes s → I {- ^ offset -} → I {- ^ elements -} →  x → ST_# s
-  setP# ∷ P# → I {- ^ offset -} → I {- ^ elements -} → x → ST_# s
+  readP# ∷ P# → I → ST s x
+  writeP# ∷ P# → I → x → ST_ s
+  indexB ∷ Bytes → I → x
+  readB ∷ MBytes s → I → ST s x
+  writeB ∷ MBytes s → I → x → ST_ s
+  setB ∷ MBytes s → I {- ^ offset -} → I {- ^ elements -} →  x → ST_ s
+  setP# ∷ P# → I {- ^ offset -} → I {- ^ elements -} → x → ST_ s
 
-unio ∷ IO () → ST_# s
+unio ∷ IO () → ST_ s
 unio (IO io) s = case unsafeCoerce# io s of (# s' , _ #) → s'
 
 undefined# ∷ ∀ a. a
@@ -59,10 +59,10 @@ instance (♭) T where \
   indexP# = coerce IP#; \
   readP# = coerce RP#; \
   writeP# = coerce WP#; \
-  indexB# = coerce IB#; \
-  readB# = coerce RB#; \
-  writeB# = coerce WB#; \
-  setB# a i j x = unio (SB a i j x) ; \
+  indexB = coerce IB; \
+  readB = coerce RB; \
+  writeB = coerce WB; \
+  setB a i j x = unio (SB a i j x) ; \
   setP# a i j x = unio (SP a i j x)
 
 foreign import ccall unsafe "primitive-memops.h hsprimitive_memset_Word8"
@@ -83,16 +83,3 @@ INST_PRIM(U64, SIZEOF_WORD64, ALIGNMENT_WORD64, indexWord64Array, readWord64Arra
 INST_PRIM(Char, SIZEOF_HSCHAR, ALIGNMENT_HSCHAR, indexWideCharArray, readWideCharArray, writeWideCharArray, indexWideCharOffAddr, readWideCharOffAddr, writeWideCharOffAddr, indexWord8ArrayAsWideChar, readWord8ArrayAsWideChar, writeWord8ArrayAsWideChar, undefined#, undefined#)
 INST_PRIM(Char8, SIZEOF_HSCHAR, ALIGNMENT_HSCHAR, indexCharArray, readCharArray, writeCharArray, indexCharOffAddr, readCharOffAddr, writeCharOffAddr, indexWord8ArrayAsChar, readWord8ArrayAsChar, writeWord8ArrayAsChar, undefined#, undefined#)
 INST_PRIM(P#, SIZEOF_HSPTR, ALIGNMENT_HSPTR, indexAddrArray, readAddrArray, writeAddrArray, indexAddrOffAddr, readAddrOffAddr, writeAddrOffAddr, indexWord8ArrayAsAddr, readWord8ArrayAsAddr, writeWord8ArrayAsAddr, undefined#, undefined#)
-instance (♭) (Stable.P a) where
-  size = (SIZEOF_HSSTABLEPTR# ×)
-  align i = case i % ALIGNMENT_HSSTABLEPTR# of {0# → i ;off → i + (ALIGNMENT_HSSTABLEPTR# - off)}
-  indexA# = indexStablePtrArray#
-  readA# = readStablePtrArray#
-  writeA# = writeStablePtrArray#
-  indexP# = indexStablePtrOffAddr#
-  readP# = readStablePtrOffAddr# 
-  writeP# = writeStablePtrOffAddr#
-  indexB# = indexWord8ArrayAsStablePtr#
-  readB# = readWord8ArrayAsStablePtr# 
-  writeB# = writeWord8ArrayAsStablePtr#
-

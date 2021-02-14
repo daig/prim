@@ -31,7 +31,7 @@ eq# ∷ a → a → B
 eq# x y = coerce do reallyUnsafePtrEquality# x y
 
 -- | Find the address of an evaluated value (not a thunk)
-toP# ∷ a → IO# P#
+toP# ∷ a → IO P#
 toP# = anyToAddr#
 
 -- | Interpret value if valid or fail spectacularly.

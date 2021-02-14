@@ -4,15 +4,15 @@ module RTS.Exception where
 --
 --  Async exceptions are masked automatically during
 --  the execution of an exception handler.
-catch# ∷ IO# a → (e → IO# a) → IO# a
+catch# ∷ IO a → (e → IO a) → IO a
 catch# = Prelude.catch#
 
 -- | Raising values other than type @SomeException@ leads to segfault
 raise# ∷ ∀ (r ∷ RuntimeRep) (a ∷ T_ r) e. e → a
 raise# = Prelude.raise#
 -- | Raising values other than type @SomeException@ leads to segfault
-raiseIO# ∷ e → IO# a
-raiseIO# = Prelude.raiseIO#
+raiseIO ∷ e → IO a
+raiseIO = Prelude.raiseIO
 
 -- | Evaluate the argument to weak head normal form.
 -- Always produces a valid 'IO' action which throws on /execution/
@@ -25,5 +25,5 @@ raiseIO# = Prelude.raiseIO#
 -- care about exceptions, you may use 'seq'
 --
 -- see https://gitlab.haskell.org/ghc/ghc/-/blob/fc644b1a643128041cfec25db84e417851e28bab/compiler/GHC/Core/Opt/ConstantFold.hs#L1198
-eval ∷ a → IO# a
+eval ∷ a → IO a
 eval = seq#

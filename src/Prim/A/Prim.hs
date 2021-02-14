@@ -29,7 +29,7 @@ instance (≡) (MA s x) where
 
 -- * Operations
 
-resize ∷ MA s x → I → ST# s (MA s x)
+resize ∷ MA s x → I → ST s (MA s x)
 resize = coerce resizeMutableByteArray#
 
 -- | New length (bytes) must be ≤ current 'sizeMA'
@@ -57,7 +57,7 @@ instance 𝔸 (A (x ∷ T_ r)) where
 cas# ∷ MA s U → I       -- ^ offset in machine words
             → U       -- ^ expected old value
             → U       -- ^ new value
-            → ST# s U -- ^ actual old value
+            → ST s U -- ^ actual old value
 cas# (MA# ma) o (word2Int# → x0) (word2Int# → x1) s =
   case casIntArray# ma o x0 x1 s of (# s , x #) → (# s , int2Word# x #)
 
@@ -66,7 +66,7 @@ set ∷ MA s U8
     → I  -- ^ slice start offset
     → I  -- ^ slice length in bytes
     → U8 -- ^ the byte to set them to
-    → ST_# s
+    → ST_ s
 set ma i n (U8 b) = coerce setByteArray# ma i n (word2Int# b)
 
 -- | Lexicographic comparison.
@@ -99,6 +99,6 @@ instance (♭) a ⇒ (a ∷ T_ r) ∈ (A a) where
 -- For homogenous arrays prefer a well-typed 'A'
 instance (♭) a ⇒ a ∈ A U8 where
 --  new = newByteArray#
-  index# (A# a) = indexB# a
-  read# (MA# ma) = readB# ma
-  write# (MA# ma) = writeB# ma
+  index# (A# a) = indexB a
+  read# (MA# ma) = readB ma
+  write# (MA# ma) = writeB ma

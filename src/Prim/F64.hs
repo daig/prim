@@ -4,6 +4,11 @@ import Stock.Double
 import Stock.Eq
 import Stock.Bool
 
+-- | Double-precision floating point numbers.
+-- It is desirable that this type be at least equal in range and precision
+-- to the IEEE double-precision type.
+type F64 = Double#
+
 instance (≡) F64 where
   (≡) = coerce (==##)
   (≠) = coerce (/=##)

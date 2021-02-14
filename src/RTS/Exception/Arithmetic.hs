@@ -2,9 +2,9 @@
 module RTS.Exception.Arithmetic where
 import GHC.Prim.Exception as GHC
 
-foreign import prim "stg_raiseOverflowzh"  raiseOverflow  ∷ IO# Void
-foreign import prim "stg_raiseUnderflowzh" raiseUnderflow ∷ IO# Void
-foreign import prim "stg_raiseDivZZerozh"  raiseDivZero   ∷ IO# Void
+foreign import prim "stg_raiseOverflowzh"  raiseOverflow  ∷ IO Void
+foreign import prim "stg_raiseUnderflowzh" raiseUnderflow ∷ IO Void
+foreign import prim "stg_raiseDivZZerozh"  raiseDivZero   ∷ IO Void
 
 overflow#, underflow#, div0# ∷ a
 overflow# = GHC.raiseOverflow

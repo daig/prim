@@ -1,29 +1,22 @@
 --------------------------------------------------------------------
 -- | Description : Primitive boolean type
 --------------------------------------------------------------------
-module Prim.B (B(B#,F,T), module Prim.B) where
-import Prim.I ()
+{-# language NoImplicitPrelude #-}
+module Prim.B (B(B,F,T), module X) where
+import {-# source #-} Prim.I as X
+import Class.Prim.Cmp
+import Class.Prim.Bits
+
+newtype B ∷ T_I where B ∷ I → B
+pattern F ∷ B
+pattern F = B 0#
+pattern T ∷ B
+pattern T = B 1#
+{-# complete F, T #-}
 
 deriving newtype instance (≡) B
 deriving newtype instance (≤) B
-instance 𝔹 B where
-  (∧) = coerce andI#
-  (∨) = coerce orI#
-  (⊕) = coerce xorI#
-  (¬) = (T ⊕)
-  shiftL# (I1 x) i = I1 (uncheckedIShiftL# x (word2Int# i))
-  shiftL x = \case {0## → x; _ → F}
-  shiftR# (I1 x) i = I1 (uncheckedIShiftRL# x (word2Int# i))
-  shiftR = shiftL
-  shift x = \case {0# → x; _ → F}
-  popCnt = \case {F → 0##; T → 1##}
-  clz = \case {F → 1##; T → 0##}
-  ctz _ = 0##
-  byteSwap x = x
-  bitReverse x = x
-  pdep = (∧); pext = (∧)
-
-pattern B ∷ I → B
-pattern B i ← B# i where B i = 0# < i
-pattern I1 ∷ I → B
-pattern I1 i ← B# i where I1 i = B# (andI# 0# i)
+--pattern B ∷ I → B
+--pattern B i ← B i where B i = 0# < i
+--pattern I1 ∷ I → B
+--pattern I1 i ← B i where I1 i = B (andI# 0# i)

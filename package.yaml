@@ -9,14 +9,15 @@ description: This library reorganizes @ghc-prim@
 stability: cursed
 author: Dai
 maintainer: dai@sodality.cc
-copyright: 2020 Sodality
+copyright: 2021 Sodality
 license: MIT
 verbatim:
   cabal-version: 3.4
 
-dependencies: ghc-prim
 default-extensions:
   - MagicHash
+  - FunctionalDependencies
+  - ScopedTypeVariables
   - UnboxedTuples
   - KindSignatures
   - PolyKinds
@@ -48,22 +49,50 @@ library:
   source-dirs: src
   other-modules: Prelude
   dependencies:
-    - name: prim:stock
-      mixin:
-        - (Word as Stock.Word
-          ,Int as Stock.Int
-          ,Double as Stock.Double
-          ,Char as Stock.Char
-          ,Eq as Stock.Eq
-          ,Bool as Stock.Bool)
+    - microbase
     - prim:ffi
     - prim:string
 
 internal-libraries:
+  type:
+    source-dirs: type
+    other-modules: []
+    dependencies: ghc-prim
+  linear:
+    source-dirs: linear
+    other-modules: Prelude
+    default-extensions:
+      - CPP
+      - LinearTypes
+    dependencies:
+      - prim:type
+      - microbase
+  do:
+    source-dirs: do
+    other-modules: Prelude
+    default-extensions:
+      - CPP
+      - LinearTypes
+    dependencies:
+      - prim:type
+      - ghc-prim
+      - microbase
+  class:
+    source-dirs: class
+    other-modules: Prelude
+    dependencies:
+      - ghc-prim
+      - prim:type
+      - prim:ffi
+      - prim:linear
+      - prim:do
+      - microbase
   stock:
     source-dirs: stock
     other-modules: Prelude
     visibility: public
+    dependencies:
+      - microbase
   string:
     other-modules: Prelude
     source-dirs: string
@@ -72,3 +101,6 @@ internal-libraries:
     other-modules: []
     source-dirs: ffi
     visibility: public
+    includes: ffi/cbits/primitive-memops.h
+    c-sources: ffi/cbits/primitive-memops.c
+    dependencies: ghc-prim

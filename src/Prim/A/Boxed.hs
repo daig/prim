@@ -45,9 +45,9 @@ cas# ∷ MA s x
      → I -- ^ Source offset
      → x -- ^ Expected old value
      → x -- ^ New value
-     → ST# s (Maybe# x) -- ^ Whether the swap failed, and the actual new value
+     → ST s (Maybe# x) -- ^ Whether the swap failed, and the actual new value
 cas# as o a0 a1 s0 = case casSmallArray# as o a0 a1 s0 of
-  (# s1, failed', a #) → (# s1, (# B# failed', a #) #)
+  (# s1, failed', a #) → (# s1, (# B failed', a #) #)
 
 instance (≡) (MA s a) where
   x ≡ y= coerce do sameSmallMutableArray# x y
@@ -56,8 +56,8 @@ instance (≡) (MA s a) where
 instance Shrink (A a) where shrink = shrinkSmallMutableArray#
 
 
--- | Number of elements. MAust be in @ST#@ because of possible resizes.
-sizeMA# ∷ MA s a → ST# s I
+-- | Number of elements. MAust be in @ST@ because of possible resizes.
+sizeMA# ∷ MA s a → ST s I
 sizeMA# = getSizeofSmallMutableArray#
 
 -- | A.Small

@@ -4,7 +4,7 @@ import Prim.A.Prim
 import P
 
 class Prefetch (a ∷ T_ r) s where
-  t0,t1,t2,t3 ∷ a → ST_# s
+  t0,t1,t2,t3 ∷ a → ST_ s
 
 -- | W/ Byte Offset
 instance Prefetch (# P#, I #) s where

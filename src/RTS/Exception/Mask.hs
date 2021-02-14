@@ -15,7 +15,7 @@ module RTS.Exception.Mask (State(Unmasked,Uninterruptible,Interruptible)
                           ,async,uninterruptible,state)where
 import Prelude hiding (State#)
 
-async,unmask, uninterruptible ∷ IO# a → IO# a
+async,unmask, uninterruptible ∷ IO a → IO a
 -- | Execute the computation with asynchronous exceptions /blocked/.
 -- That is, any thread which attempts to raise an exception in
 -- the current thread with 'kill#' will be
@@ -41,7 +41,7 @@ unmask          = unmaskAsyncExceptions#
 
 uninterruptible = maskUninterruptible#
 
-state ∷ IO# State
+state ∷ IO State
 state = coerce getMaskingState#
 
 newtype State ∷ T_I where State# ∷ I → State

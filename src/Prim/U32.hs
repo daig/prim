@@ -4,6 +4,12 @@
 module Prim.U32 (U32(U32#,U32),module Prim.U32) where
 import Prim.U ()
 
+newtype U32 ∷ T_U where U32# ∷ U → U32
+-- | Narrow a machine 'U' to 32 bits
+pattern U32 ∷ U → U32
+pattern U32 i ← (coerce → i) where U32 = coerce narrow32Word#
+{-# complete U32 #-}
+
 deriving newtype instance (≡) U32
 deriving newtype instance (≤) U32
 instance ℕ U32 where

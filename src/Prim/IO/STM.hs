@@ -2,9 +2,9 @@ module Prim.IO.STM where
 import Prim.IO
 import GHC.Prim
 
-type STM# (a ∷ T_ r) = IO# a
+type STM# (a ∷ T_ r) = IO a
 
-run ∷ STM# a → IO# a
+run ∷ STM# a → IO a
 run = atomically#
 
 -- | Retry execution of the current memory transaction because it has seen values in TVars which mean that it should not continue (e.g. the TVars represent a shared buffer that is now empty).

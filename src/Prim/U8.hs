@@ -5,6 +5,12 @@
 module Prim.U8 (U8(U8#,U8), module Prim.U8) where
 import Prim.U ()
 
+newtype U8  ∷ T_U where U8#  ∷ U → U8
+-- | Narrow a machine 'U' to 8 bits
+pattern U8 ∷ U → U8
+pattern U8 i ← (coerce → i) where U8 = coerce narrow8Word#
+{-# complete U8 #-}
+
 deriving newtype instance (≡) U8
 deriving newtype instance (≤) U8
 instance ℕ U8 where

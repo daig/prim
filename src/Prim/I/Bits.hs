@@ -44,4 +44,4 @@ shiftRL i x = case i ≥ WORD_SIZE_IN_BITS# of {T → 0#; F → uncheckedIShiftR
 -- Consider using 'U' instead.
 --
 -- @(n ¬) = -n - 1@
-(∧) = andI#; (∨) = orI#; (⊕) = xorI#; (¬) = notI#
+(∧) = andI#; (∨) = orI#; (⊕) = xorI#; (¬) = notI

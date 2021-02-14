@@ -4,27 +4,22 @@
 {-# language CPP #-}
 {-# language BangPatterns #-}
 module Prim.I (I, module Prim.I) where
-
-import {-# source #-} Prim.B
+import Class.Prim.Num
+import Class.Prim.Cmp
+import Class.Prim.Bits
 
 #include "MachDeps.h"
+
+-- | A fixed-precision integer type with at least the range @[-2^29 .. 2^29-1]@.
+-- The exact range for a given implementation can be determined by using
+-- 'I.Min' and 'I.Max'.
+type I = Int#
 
 
 pattern Max, Min ∷ I
 pattern Max =  0x7FFFFFFFFFFFFFFF#
 pattern Min = -0x8000000000000000#
 
-instance (≡) I where
-  (≡) = coerce (==# )
-  (≠) = coerce (/=# )
-instance (≤) I where
-  (>) = coerce (># )
-  (≥) = coerce (>=# )
-  (<) = coerce (<# )
-  (≤) = coerce (<=# )
-  cmp a b = Ordering# (1# -# le' -# lt') where
-    B# lt' = a < b
-    B# le' = a ≤ b
 -- | Low word of signed integer multiply
 -- 
 -- Modular functions have built-in rules.
@@ -34,10 +29,10 @@ instance ℕ I where
   (%) = modInt#; {-# inline (%) #-}
   (/) = divInt#; {-# inline (/) #-}
   x /% y = case 0# < x ∧ 0# > y of
-    T → case (x - 1# ) //%% y of (# q, r #) → (# q - 1#, r + y + 1# #)
-    F → case 0# > x ∧ 0# < y of
-      T → case (x + 1# ) //%% y of (# q, r #) → (# q - 1#, r + y + 1# #)
-      F → x //%% y
+    B 1# → case (x - 1# ) //%% y of (# q, r #) → (# q - 1#, r + y + 1# #)
+    B 0# → case 0# > x ∧ 0# < y of
+      B 1# → case (x + 1# ) //%% y of (# q, r #) → (# q - 1#, r + y + 1# #)
+      B 0# → x //%% y
   addC a b = case addIntC# a b of (# x, b #) → (# x , b ≠ 0# #)
   subC a b = case subIntC# a b of (# x, b #) → (# x , b ≠ 0# #)
 instance ℤ I where
@@ -98,22 +93,22 @@ subC = coerce subIntC#
 
 -- * Conversions
 
-toU ∷ I → U
-toU = int2Word#
-fromU ∷ U → I
-fromU = word2Int#
+--toU ∷ I → U
+--toU = int2Word#
+--fromU ∷ U → I
+--fromU = word2Int#
 
-toF32 ∷ I → F32
-toF32 = int2Float#
-toF64 ∷ I → F64
-toF64 = int2Double#
+--toF32 ∷ I → F32
+--toF32 = int2Float#
+--toF64 ∷ I → F64
+--toF64 = int2Double#
 
---toI8# ∷ I → I8#
---toI8# = narrow8Int#
---toI16# ∷ I → I16#
---toI16# = narrow16Int#
---toI32# ∷ I → I32#
---toI32# = narrow32Int#
+--toI8 ∷ I → I8
+--toI8 = narrow8Int#
+--toI16 ∷ I → I16
+--toI16 = narrow16Int#
+--toI32 ∷ I → I32
+--toI32 = narrow32Int#
 --toI8 ∷ I → I8
 --toI8 = narrowInt8#
 --toI16 ∷ I → I16

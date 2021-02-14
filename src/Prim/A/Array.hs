@@ -66,10 +66,10 @@ instance (♯) a ⇒ a ∈ (A a) where
 -- | Primitive boxed unlifted types that fit natively into Unlifted Arrays
 class (♯) (a ∷ T_A) where
   indexAA# ∷ Refs → I → a
-  readAA# ∷ MRefs s → I → ST# s a
-  writeAA# ∷ MRefs s → I → a → ST_# s
-  readM# ∷ MRefs s → I → ST# s (M a s)
-  writeM# ∷ MRefs s → I → M a s → ST_# s
+  readAA# ∷ MRefs s → I → ST s a
+  writeAA# ∷ MRefs s → I → a → ST_ s
+  readM# ∷ MRefs s → I → ST s (M a s)
+  writeM# ∷ MRefs s → I → M a s → ST_ s
 instance (♯) Bytes where
   indexAA# = coerce indexByteArrayArray#
   readAA# = coerce readByteArrayArray#

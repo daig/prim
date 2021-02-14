@@ -16,7 +16,7 @@ new ∷ A U8 -- ^ instructions
     → Big.A a -- ^ pointers
     → I -- ^ arity
     → A U8 -- ^ static reference table usage bitmap
-    → ST# s BCO
+    → ST s BCO
 new (A# is) (A# ls) ps a (A# bmp) = newBCO# is ls ps a bmp
 
 getApStackVal ∷ ∀ a b. a → I {- ^ stack depth -} → Maybe# b {- ^ The AP_STACK, if found -}

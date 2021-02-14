@@ -8,6 +8,8 @@ import Prim.B hiding (not#)
 import qualified Prim.U as U
 #include "MachDeps.h"
 
+newtype U64 ∷ T_U where U64  ∷ U → U64
+
 deriving newtype instance (≡) U64
 deriving newtype instance (≤) U64
 deriving newtype instance ℕ U64

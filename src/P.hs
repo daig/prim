@@ -11,6 +11,8 @@ import Prim.I64 (I64(..))
 import Prim.I8 (I8(..))
 import qualified P.Stable as Stable
 
+-- | An arbitrary machine address assumed to point outside the garbage-collected heap
+type P# = Addr#
 
 -- | hack to expose nullAddr#
 pattern Null ∷ P#

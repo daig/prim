@@ -41,18 +41,18 @@ pattern CCS h p ← ((\p → (# head p , parent p #)) → (# h , p #))
 {-# complete Null, CCS #-}
 
 -- | Get the 'CCS' associated with a given value
-get ∷ a → ST# s CCS
+get ∷ a → ST s CCS
 get a = coerce do getCCSOf# a
 -- | Get the current 'CCS' (or 'Null' if not compiled with profiling).
 -- Takes a dummy argument to avoid being floated out by the simplifier,
 -- which would result in an uninformative stack ("CAF").
-getCurrent ∷ dummy → ST# s CCS
+getCurrent ∷ dummy → ST s CCS
 getCurrent a =  coerce do getCurrentCCS# a
 
 -- | Run a compuation with an empty cost-centre stack. For example, this is
 -- used by the interpreter to run an interpreted computation without the call
 -- stack showing that it was invoked from GHC.
-clear ∷ ST# s a → ST# s a
+clear ∷ ST s a → ST s a
 clear = clearCCS#
 
 {-

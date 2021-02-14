@@ -2,6 +2,11 @@
 module Prim.F32 (F32, module Prim.F32) where
 import Prim.I32 (I32(..))
 
+-- | Single-precision floating point numbers.
+-- It is desirable that this type be at least equal in range and precision
+-- to the IEEE single-precision type.
+type F32 = Float#
+
 instance (≡) F32 where (≡) = coerce eqFloat#; (≠) = coerce neFloat#
 instance (≤) F32 where (>) = coerce gtFloat#; (≥) = coerce geFloat#; (<) = coerce ltFloat#; (≤) = coerce leFloat#
 instance ℕ F32 where
