@@ -2,7 +2,10 @@
 -- | Description Utilities for working with linear functions on primitive types
 --------------------------------------------------------------------
 {-# language ScopedTypeVariables, UndecidableInstances #-}
+{-# language NoImplicitPrelude #-}
 module Linear where
+import Types
+import Unsafe.Coerce
 
 class Linear (a ∷ T ra) (b ∷ T rb) where
   -- | Unsafely coerce a function on primitive values to be linear
@@ -43,6 +46,9 @@ INSTS2_SUM_LINEAR(XX,F32); \
 INSTS2_SUM_LINEAR(XX,(F64))
 
 #define INSTS2_PROD_LINEAR(AA,BB) \
+INST2_LINEAR(AA, (# BB #)); \
+INST2_LINEAR(AA, (# (##) , (# I , BB #) #)); \
+INST2_LINEAR((# AA , BB #),(# AA, BB #)); \
 INST2_LINEAR(AA,(# BB , (##) #)); \
 INST2_LINEAR(AA,(# BB , () #)); \
 INST2_LINEAR(AA,(# BB , A# #)); \
@@ -54,8 +60,8 @@ INST2_LINEAR(AA,(# BB , F64 #))
 
 
 #define INSTS1_PROD_LINEAR(XX) \
-INST2_LINEAR((# XX , XX #),(# XX, XX #)); \
 INSTS2_PROD_LINEAR(XX,(##)); \
+INSTS2_PROD_LINEAR((##),(# (##) , (# XX, XX #) #)); \
 INSTS2_PROD_LINEAR(XX,()); \
 INSTS2_PROD_LINEAR(XX,I); \
 INSTS2_PROD_LINEAR(XX,A#); \

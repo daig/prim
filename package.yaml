@@ -58,12 +58,22 @@ internal-libraries:
     source-dirs: type
     other-modules: []
     dependencies: ghc-prim
+  linear-fun:
+    source-dirs: linear-fun
+    other-modules: Prelude
+    default-extensions: LinearTypes
+    dependencies:
+      - prim:type
+      - prim:linear
+      - ghc-prim
+      - microbase
   linear:
     source-dirs: linear
-    other-modules: Prelude
+    other-modules: []
     default-extensions:
       - CPP
       - LinearTypes
+      - NoImplicitPrelude
     dependencies:
       - prim:type
       - microbase

@@ -13,18 +13,18 @@ escape# = unsafeCoerce# \ s → (##)
 
 
 -- | Used for @QualifiedDo@
-return ∷ Pure (s ∷ T rs) (a ∷ T ra) ⇒ a ⊸ ST (M s) a
+return ∷ Pure (s ∷ T rs) (a ∷ T ra) ⇒ a ⊸ ST s a
 return = η
 -- | Used for @QualifiedDo@
 (>>=) ∷ Monad (s ∷ T rs) (a ∷ T ra) (b ∷ T rb)
-  ⇒ ST (M s) a ⊸ (a ⊸ ST (M s) b) ⊸ ST (M s) b
+  ⇒ ST s a ⊸ (a ⊸ ST s b) ⊸ ST s b
 (>>=) = (⇉)
 {-# inline (>>=) #-}
 {-# inline return #-}
 
-class Pure (s ∷ T rs) (a ∷ T ra) where η ∷ a ⊸ ST (M s) a
-class Lift2 (s ∷ T rs) (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
-  η2 ∷ (a ⊸ b ⊸ c) ⊸ ST (M s) a ⊸ ST (M s) b ⊸ ST (M s) c
+class Pure (s ∷ T rs) (a ∷ T ra) where η ∷ a ⊸ ST s a
+class (Monad s a c, Monad s b c) ⇒ Lift2 (s ∷ T rs) (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
+  η2 ∷ (a ⊸ b ⊸ c) ⊸ ST s a ⊸ ST s b ⊸ ST s c
 
 #define INST_LIFT2(S,A,B,C) \
 instance Lift2 (s ∷ K S) (a ∷ K A) (b ∷ K B) (c ∷ K C) where {\
@@ -44,18 +44,18 @@ instance Run (a ∷ K (A)) where {\
     go ∷ (# (☸) , a #) ⊸ a; \
     go (# s , a #) = (\(##) a → a) (escape# s) a}
 
-class Monad (s ∷ T rs) (a ∷ T ra) (b ∷ T rb) where
-  (⇉) ∷ ST (M s) a ⊸ (a ⊸ ST (M s) b) ⊸ ST (M s) b
-  η1 ∷ (a ⊸ b) ⊸ ST (M s) a ⊸ ST (M s) b
-  (*>) ∷ ST_ (M s) ⊸ ST (M s) a ⊸ ST (M s) a
-  (>>) ∷ ST (M s) (##) ⊸ ST (M s) a ⊸ ST (M s) a
+class Pure s b ⇒ Monad (s ∷ T rs) (a ∷ T ra) (b ∷ T rb) where
+  (⇉) ∷ ST s a ⊸ (a ⊸ ST s b) ⊸ ST s b
+  η1 ∷ (a ⊸ b) ⊸ ST s a ⊸ ST s b
+  (*>) ∷ ST_ s ⊸ ST s a ⊸ ST s a
+  (>>) ∷ ST s (##) ⊸ ST s a ⊸ ST s a
 #define INST_MONAD(S,A,B) \
 instance Monad (s ∷ K (S)) (a ∷ K (A)) (b ∷ K (B)) where {\
   η1 f st = st ⇉ \a → return (f a); \
   (st *> sta) s = sta (st s); \
   (st >> sta) s = (\ (# s , (##) #) → sta s) (st s); \
   (st ⇉ f) s = go (st s) f where \
-    go ∷ (# M s , a #) ⊸ (a ⊸ ST (M s) b) ⊸ (# M s , b #); \
+    go ∷ (# s , a #) ⊸ (a ⊸ ST s b) ⊸ (# s , b #); \
     go (# s' , a #) f = f a s'}
 
 

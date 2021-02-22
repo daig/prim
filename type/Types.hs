@@ -63,7 +63,7 @@ newtype A x ∷ K A# where SmallArray# ∷ SmallArray# x ⊸ A x
 newtype M_A x ∷ K A# where M_SmallArray# ∷ SmallMutableArray# RealWorld x ⊸ M_A x
 
 newtype Arr x ∷ K A# where Array# ∷ Array# x ⊸ Arr x
-newtype M_Arr x ∷ K A# where MutableArray# ∷ MutableArray# RealWorld x ⊸ M_Arr x
+newtype M_Arr x ∷ K A# where M_Array# ∷ MutableArray# RealWorld x ⊸ M_Arr x
 
 newtype A_ (x ∷ T r) ∷ K A# where A# ∷ ∀ {r} (x ∷ T r). A# ⊸ A_ x
 newtype M_A_ (x ∷ T r) ∷ K A# where
@@ -114,7 +114,47 @@ newtype P_ (x ∷ T r) ∷ K P# where P# ∷ ∀ r (x ∷ T r). P# ⊸ P_ x
 
 type P = MutVar# RealWorld
 type P_Async = TVar# RealWorld
+-- | A synchronising variable, used for communication between concurrent threads.
+-- It can be thought of as a box, which may be empty or full.
+--
+-- The RTS implementation is really an abstraction for
+-- connecting 'take' and 'write' calls between threads
 type P_Sync = MVar# RealWorld
+
+{-|
+A weak pointer expressing a relashionship between a /key/ and a /value/ of type @v@:
+if the value is alive to the GC if the key is.
+A reference from the value to the key does /not/ keep the key alive.
+A weak pointer may also have a finalizer of type @IO_@; if it does,
+then the finalizer will be run at most once, at a time after the key
+has become unreachable by the program (\"dead\").  The storage manager
+attempts to run the finalizer(s) for an object soon after the object
+dies, but promptness is not guaranteed.
+It is not guaranteed that a finalizer will eventually run, and no
+attempt is made to run outstanding finalizers when the program exits.
+Therefore finalizers should not be relied on to clean up resources -
+other methods (eg. exception handlers) should be employed, possibly in
+addition to finalizers.
+References from the finalizer to the key are treated in the same way
+as references from the value to the key: they do not keep the key
+alive.  A finalizer may therefore ressurrect the key, perhaps by
+storing it in the same data structure.
+The finalizer, and the relationship between the key and the value,
+exist regardless of whether the program keeps a reference to the
+'Weak' object or not.
+Finalizers for multiple @Weak.P@ on the same key are run in arbitrary order, or perhaps concurrently.
+You must ensure there's only one finalizer if the finalizer relies on that fact.
+If there are no other threads to run, the RTS will check
+for runnable finalizers before declaring the system to be deadlocked.
+WARNING: weak pointers to ordinary non-primitive Haskell types are
+particularly fragile, because the compiler is free to optimise away or
+duplicate the underlying data structure.  Therefore attempting to
+place a finalizer on an ordinary Haskell type may well result in the
+finalizer running earlier than you expected.  This is not a problem
+for caches and memo tables where early finalization is benign.
+Finalizers /can/ be used reliably for types that are created explicitly
+and have identity, such as @ST.P@ and @Sync.P@.
+-}
 type P_Weak = Weak#
 type P_Stable = StablePtr#
 
