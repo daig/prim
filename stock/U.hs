@@ -1,5 +1,4 @@
 module U (module U, module X) where
-import GHC.Word as X (Word)
 import B as X (B)
 
 newtype U = U Word

@@ -1,5 +1,5 @@
 module U8 (module U8, module X) where
-import GHC.Word as X (Word8)
+import GHC.Word
 import B as X (B)
 
 newtype U8 = U8# Word8

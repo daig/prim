@@ -1,5 +1,5 @@
 module I16 (module I16, module X) where
-import GHC.Int as X (Int16)
+import GHC.Int
 import B as X (B)
 
 newtype I16 = I16 Int16

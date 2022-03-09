@@ -1,5 +1,5 @@
 module I64 (module I64, module X) where
-import GHC.Int as X (Int64)
+import GHC.Int
 import B as X (B)
 
 newtype I64 = I64 Int64

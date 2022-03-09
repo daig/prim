@@ -1,5 +1,5 @@
 module I32 (module I32, module X) where
-import GHC.Int as X (Int32)
+import GHC.Int
 import B as X (B)
 
 newtype I32 = I32 Int32

@@ -1,5 +1,5 @@
 module U64 (module U64, module X) where
-import GHC.Word as X (Word64)
+import GHC.Word
 import B as X (B)
 
 newtype U64 = U64 Word64

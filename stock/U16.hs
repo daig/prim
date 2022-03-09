@@ -1,5 +1,5 @@
 module U16 (module U16, module X) where
-import GHC.Word as X (Word16)
+import GHC.Word
 import B as X (B)
 
 newtype U16 = U16# Word16

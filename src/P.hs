@@ -38,4 +38,3 @@ newtype P (x ∷ T_ r) ∷ T_P where P# ∷ ∀ r (x ∷ T_ r). P# → P x
 
 instance (≤) P# where (>) = coerce gtAddr# ; (≥) = coerce geAddr# ; (<) = coerce ltAddr# ; (≤) = coerce leAddr# ; 
 instance (≡) P# where (≡) = coerce eqAddr# ; (≠) = coerce neAddr#
-

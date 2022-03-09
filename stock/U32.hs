@@ -1,5 +1,5 @@
 module U32 (module U32, module X) where
-import GHC.Word as X (Word32)
+import GHC.Word
 import B as X (B)
 
 newtype U32 = U32# Word32

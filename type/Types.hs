@@ -2,7 +2,7 @@
 {-# language NoImplicitPrelude #-}
 module Types (module Types, module X) where
 import GHC.Prim as X
-import GHC.Types as X (TYPE,RuntimeRep(..),VecCount(..),VecElem(..),Constraint)
+import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint)
 
 type R# (i ∷ TYPE r) = r
 
@@ -70,7 +70,7 @@ newtype M_A_ (x ∷ T r) ∷ K A# where
   M_A# ∷ ∀ {r} (x ∷ T r). M_A# ⊸ M_A_ x
 
 -- Unpinned
-newtype A# ∷ T 'UnliftedRep where UnpinnedByteArray# ∷ ByteArray# ⊸ A#
+newtype A# ∷ T ('BoxedRep 'Unlifted) where UnpinnedByteArray# ∷ ByteArray# ⊸ A#
 newtype M_A# ∷ K A# where M_UnpinnedByteArray# ∷ MutableByteArray# RealWorld ⊸ M_A#
 
 newtype AA# ∷ K A# where ArrayArray# ∷ ArrayArray# ⊸ AA#

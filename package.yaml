@@ -103,10 +103,12 @@ internal-libraries:
     visibility: public
     dependencies:
       - microbase
+      - ghc-prim
   string:
     other-modules: Prelude
     source-dirs: string
     visibility: public
+    dependencies: ghc-prim
   ffi:
     other-modules: []
     source-dirs: ffi
