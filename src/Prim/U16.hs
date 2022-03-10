@@ -1,40 +1,40 @@
---------------------------------------------------------------------
--- | Description : 16-bit Unsigned Integer operations
---------------------------------------------------------------------
-module Prim.U16 (U16(U16#,U16), module Prim.U16) where
-import Prim.U ()
+module Prim.U16 where
+import Prim.B ()
 
-deriving newtype instance (≡) U16
-deriving newtype instance (≤) U16
+type U16 = Word16#
+
+pattern U16 ∷ U → U16
+pattern U16 i ← (word16ToWord# → i) where U16 = wordToWord16#
+
+instance (≤) U16 where (>) = coerce gtWord16#; (≥) = coerce geWord16#
+                       (<) = coerce ltWord16#; (≤) = coerce leWord16#
+instance (≡) U16 where (≡) = coerce eqWord16#; (≠) = coerce neWord16#
 instance ℕ U16 where
-  (U16 x) + (U16 y) = U16 (plusWord# x y)
-  (U16 x) × (U16 y) = U16 (timesWord# x y)
-  (U16 x) / (U16 y) = U16 (quotWord# x y)
-  (U16 x) % (U16 y) = U16 (remWord# x y)
-  (U16 x) /% (U16 y) = case quotRemWord# x y of (# d, m #) → (# U16 d, U16 m #)
-  addC (U16 a) (U16 b) = let c = a + b in (# U16 c , c > coerce Max #)
-  subC (U16 a) (U16 b) = case subC a b of (# x, b #) → (# U16 x , b #)
-instance 𝔹 U16 where
-  (∧) = coerce ((∧) @_ @U)
-  (∨) = coerce ((∨) @_ @U)
-  (⊕) = coerce ((⊕) @_ @U)
-  (¬) (U16 u) = U16 (u ¬)
-  shiftL# (U16 w) (word2Int# → i) = U16 (uncheckedShiftL# w i)
-  shiftL w i = case i ≥ 16## of {T → U16# 0##; F → shiftL# w i}
-  shiftR# (U16 w) (word2Int# → i) = U16 (uncheckedShiftRL# w i)
-  shiftR w i = case i ≥ 16## of {T → U16# 0##; F → shiftL# w i}
-  shift (U16 w) i = case i ≥ 0# of
-    T → case i ≥  16# of {T → U16# 0##; F → U16 (uncheckedShiftL# w i)}
-    F → case i ≤ -16# of {T → U16# 0##; F → U16 (uncheckedShiftRL# w (negateInt# i))}
-  popCnt = coerce popCnt16#; clz = coerce clz16#; ctz = coerce ctz16#
-  byteSwap = coerce byteSwap16#
-  bitReverse = coerce bitReverse16#
-  pdep = coerce pdep16#; pext = coerce pext16#
+  (+) = plusWord16#; (×) = timesWord16#
+  (/) = quotWord16#
+  (%) = remWord16#
+  (/%) = quotRemWord16#
+  addC a b = let c = a + b in (# c , c < a ∧ c < b #)
+  subC a b = let c = a - b in (# c , c > a ∧ c > b #)
 
 -- | Unsigned modular subtraction.
-(-) ∷ U → U → U
-(-) = minusWord#
+(-) ∷ U16 → U16 → U16
+(-) = subWord16#
+
+instance 𝔹 U16 where
+  (∧) = andWord16#; (∨) = orWord16#; (⊕) = xorWord16#; (¬) = notWord16#
+  shiftL# w (word2Int# → i) = uncheckedShiftLWord16# w i
+  shiftL w i = case i ≥ 16## of {T → 0##; F → shiftL# w i}
+  shiftR# w (word2Int# → i) = uncheckedShiftRLWord16# w i
+  shiftR w i = case i ≥ 16## of {T → 0##; F → shiftL# w i}
+  shift w i = case i ≥ 0# of
+    T → case i ≥  16# of {T → 0##; F → shiftL# w i}
+    F → case i ≤ -16# of {T → 0##; F → shiftR# w (negateInt# i)}
+  popCnt (U16 u) = popCnt16# u; clz (U16 u) = clz16# u; ctz (U16 u) = ctz16# u
+  byteSwap (U16 u) = U16 (byteSwap16# u)
+  bitReverse (U16 u) = U16 (bitReverse# u)
+  pdep (U16 s) (U16 m) = U16 (pdep# s m); pext (U16 s) (U16 m) = U16 (pext# s m)
 
 pattern Max, Min ∷ U16
-pattern Max = U16# 0xFFFF##
-pattern Min = U16# 0##
+pattern Max =  U16 0xFFFF##
+pattern Min = U16 0##

@@ -1,6 +1,5 @@
 {-# language LinearTypes #-}
 module Cmp where
-import {-# source #-} Bits
 
 infix 4 >, ≥, <, ≤, ≡, ≠, `cmp`
 class (≡) (a ∷ T r) where (≡), (≠) ∷ a ⊸ a ⊸ B
@@ -8,13 +7,6 @@ class (≡) a ⇒ (≤) (a ∷ T r) where
   (>),(≥),(<),(≤) ∷ a ⊸ a ⊸ B
   cmp ∷ a ⊸ a ⊸ Ordering
 
--- | A number less-than, equal-to, or greater-than @0#@
-newtype Ordering ∷ K I where Ordering# ∷ I ⊸ Ordering
-pattern LT ∷ Ordering
-pattern LT ← ((\ (Ordering# i) → i <#  0# ) → 1# ) where LT = Ordering# -1#
-pattern EQ ← ((\ (Ordering# i) → i ==# 0# ) → 1# ) where EQ = Ordering#  0#
-pattern GT ← ((\ (Ordering# i) → i >#  0# ) → 1# ) where GT = Ordering#  1#
-{-# complete LT, EQ, GT #-}
 
 deriving newtype instance (≡) B
 deriving newtype instance (≤) B
@@ -29,14 +21,6 @@ instance (≤) I where
   (≤) = coerce (λ\i → λ\j → i <=# j)
   cmp = λ\a → λ\b → Ordering# do
     (a ># b) +# (a >=# b) Prelude.-# 1#
-deriving newtype instance (≡) I8
-deriving newtype instance (≤) I8
-deriving newtype instance (≡) I16
-deriving newtype instance (≤) I16
-deriving newtype instance (≡) I32
-deriving newtype instance (≤) I32
-deriving newtype instance (≡) I64
-deriving newtype instance (≤) I64
 
 instance (≡) U where
   (≡) = coerce (λ\i → λ do eqWord# i)
@@ -46,14 +30,6 @@ instance (≤) U where
   (≥) = coerce (λ\i → λ do geWord# i)
   (<) = coerce (λ\i → λ do ltWord# i)
   (≤) = coerce (λ\i → λ do leWord# i)
-deriving newtype instance (≡) U8
-deriving newtype instance (≤) U8
-deriving newtype instance (≡) U16
-deriving newtype instance (≤) U16
-deriving newtype instance (≡) U32
-deriving newtype instance (≤) U32
-deriving newtype instance (≡) U64
-deriving newtype instance (≤) U64
 
 instance (≡) Char where
   (≡) = coerce (λ\i → λ do eqChar# i)

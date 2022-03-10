@@ -1,39 +1,42 @@
---------------------------------------------------------------------
--- | Description : 16-bit Signed Integer operations
---------------------------------------------------------------------
-module Prim.I16 (I16(I16,I16), module Prim.I16) where
-import Prim.I ()
+module Prim.I16 where
+import Prelude hiding (I16)
+import Prim.B
 
-newtype U16 ∷ T_U where U16# ∷ U → U16
--- | Narrow a machine 'U' to 16 bits
-pattern U16 ∷ U → U16
-pattern U16 i ← (coerce → i) where U16 = coerce narrow16Word#
-{-# complete U16 #-}
+type I16 = Int16#
 
-newtype I16  ∷ T_I where I16 ∷ I → I16
--- | Narrow a machine 'I' to 16 bits
 pattern I16 ∷ I → I16
-pattern I16 i ← (coerce → i) where I16 = coerce narrow16Int#
-{-# complete I16 #-}
+pattern I16 i ← (int16ToInt# → i) where I16 = intToInt16#
 
-deriving newtype instance (≡) I16
-deriving newtype instance (≤) I16
-
+instance (≤) I16 where
+  (>) = coerce gtInt16#
+  (≥) = coerce geInt16#
+  (<) = coerce ltInt16#
+  (≤) = coerce leInt16#
+instance (≡) I16 where
+  (≡) = coerce eqInt16#
+  (≠) = coerce neInt16#
 instance ℕ I16 where
-  (I16 x) + (I16 y) = I16 (x +# y)
-  (I16 x) × (I16 y) = I16 (x *# y)
-  (I16 x) / (I16 y) = I16 (divInt# x y)
-  (I16 x) % (I16 y) = I16 (modInt# x y)
-  (I16 x) /% (I16 y) = case x //%% y of (# d, m #) → (# I16 d, I16 m #)
-  addC (I16 a) (I16 b) = let c = a + b in (# I16 c , c > coerce Max #)
-  subC (I16 a) (I16 b) = let c = a - b in (# I16 c , c < coerce Min #)
+  (+) = plusInt16#; (×) = timesInt16#
+  x / y = case I16 0# < x ∧ I16 0# > y of
+    T → (x - I16 1# ) // y - I16 1#
+    F → case I16 0# > x ∧ I16 0# < y of
+      T → (x + I16 1# ) // y - I16 1#
+      F → x // y
+  x % y = case I16 0# < x ∧ I16 0# > y of
+    T → (x - I16 1# ) %% y + y + I16 1#
+    F → case I16 0# > x ∧ I16 0# < y of
+      T → (x + I16 1# ) %% y + y + I16 1#
+      F → x %% y
+  x /% y = case I16 0# < x ∧ I16 0# > y of
+    T → case (x - I16 1# ) //%% y of (# q, r #) → (# q - I16 1#, r + y + I16 1# #)
+    F → case I16 0# > x ∧ I16 0# < y of
+      T → case (x + I16 1# ) //%% y of (# q, r #) → (# q - I16 1#, r + y + I16 1# #)
+      F → x //%% y
+  addC a b = let c = a + b in (# c , c < a ∧ c < b #)
+  subC a b = let c = a - b in (# c , c > a ∧ c > b #)
 instance ℤ I16 where
-  negate (I16 x) = I16 (negateInt# x)
-  (I16 x) - (I16 y) = I16 (x -# y)
-  I16 x // I16 y = I16 (quotInt# x y)
-  I16 x %% I16 y = I16 (remInt# x y)
-  I16 x //%% I16 y = case quotRemInt# x y of (# q, r #) → (# I16 q, I16 r #)
-
-pattern Max, Min ∷ I16
-pattern Max =  I16 0x7FFF#
-pattern Min = I16 -0x800#
+  negate = negateInt16#
+  (-) = subInt16#
+  (//) = quotInt16#
+  (%%) = remInt16#
+  (//%%) = quotRemInt16#

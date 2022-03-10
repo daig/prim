@@ -1,33 +1,42 @@
---------------------------------------------------------------------
--- | Description : 32-bit Signed Integer operations
---------------------------------------------------------------------
-module Prim.I32 (I32(I32,I32), module Prim.I32) where
-import Prim.I ()
-import Prim.I8 (I8(..))
+module Prim.I32 where
+import Prelude hiding (I32)
+import Prim.B
 
-newtype I32  ∷ T_I where I32  ∷ I → I32
--- | Narrow a machine 'I' to 32 bits
+type I32 = Int32#
+
 pattern I32 ∷ I → I32
-pattern I32 i ← (coerce → i) where I32 = coerce narrow32Int#
-{-# complete I32 #-}
+pattern I32 i ← (int32ToInt# → i) where I32 = intToInt32#
 
-deriving newtype instance (≡) I32
-deriving newtype instance (≤) I32
+instance (≤) I32 where
+  (>) = coerce gtInt32#
+  (≥) = coerce geInt32#
+  (<) = coerce ltInt32#
+  (≤) = coerce leInt32#
+instance (≡) I32 where
+  (≡) = coerce eqInt32#
+  (≠) = coerce neInt32#
 instance ℕ I32 where
-  (I32 x) + (I32 y) = I32 (x +# y)
-  (I32 x) × (I32 y) = I32 (x *# y)
-  (I32 x) / (I32 y) = I32 (divInt# x y)
-  (I32 x) % (I32 y) = I32 (modInt# x y)
-  (I32 x) /% (I32 y) = case x //%% y of (# d, m #) → (# I32 d, I32 m #)
-  addC (I32 a) (I32 b) = let c = a + b in (# I32 c , c > coerce Max #)
-  subC (I32 a) (I32 b) = let c = a - b in (# I32 c , c < coerce Min #)
+  (+) = plusInt32#; (×) = timesInt32#
+  x / y = case I32 0# < x ∧ I32 0# > y of
+    T → (x - I32 1# ) // y - I32 1#
+    F → case I32 0# > x ∧ I32 0# < y of
+      T → (x + I32 1# ) // y - I32 1#
+      F → x // y
+  x % y = case I32 0# < x ∧ I32 0# > y of
+    T → (x - I32 1# ) %% y + y + I32 1#
+    F → case I32 0# > x ∧ I32 0# < y of
+      T → (x + I32 1# ) %% y + y + I32 1#
+      F → x %% y
+  x /% y = case I32 0# < x ∧ I32 0# > y of
+    T → case (x - I32 1# ) //%% y of (# q, r #) → (# q - I32 1#, r + y + I32 1# #)
+    F → case I32 0# > x ∧ I32 0# < y of
+      T → case (x + I32 1# ) //%% y of (# q, r #) → (# q - I32 1#, r + y + I32 1# #)
+      F → x //%% y
+  addC a b = let c = a + b in (# c , c < a ∧ c < b #)
+  subC a b = let c = a - b in (# c , c > a ∧ c > b #)
 instance ℤ I32 where
-  negate (I32 x) = I32 (negateInt# x)
-  (I32 x) - (I32 y) = I32 (x -# y)
-  I32 x // I32 y = I32 (quotInt# x y)
-  I32 x %% I32 y = I32 (remInt# x y)
-  I32 x //%% I32 y = case quotRemInt# x y of (# q, r #) → (# I32 q, I32 r #)
-
-pattern Max, Min ∷ I32
-pattern Max =  I32 0x7FFFFFFF#
-pattern Min = I32 -0x80000000#
+  negate = negateInt32#
+  (-) = subInt32#
+  (//) = quotInt32#
+  (%%) = remInt32#
+  (//%%) = quotRemInt32#

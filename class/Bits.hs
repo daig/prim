@@ -36,7 +36,7 @@ class 𝔹 (a ∷ T r) where
   byteSwap ∷ a ⊸ a
   -- | Reverse the order of the bits.
   bitReverse ∷ a ⊸ a
-  pdep, pext ∷ a ⊸ a ⊸ a
+  pdep, pext ∷ a {-^ source -} ⊸ a {-^ mask -} ⊸ a
 
 infixl 3 ∧
 infixl 2 ⊕

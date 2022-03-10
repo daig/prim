@@ -4,12 +4,12 @@ module Types (module Types, module X) where
 import GHC.Prim as X
 import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint)
 
-type R# (i ∷ TYPE r) = r
-
 -- | The kind constructor of types abstracted over 'RuntimeRep'
 type T = TYPE
 -- | The kind of a type
 type K (a ∷ k) = k
+-- | The 'RuntimeRep' of a type
+type R# (i ∷ T r) = r
 
 type C = Constraint
 
@@ -17,6 +17,15 @@ newtype B ∷ K I where B# ∷ {unB ∷ I} ⊸ B
 pattern F, T ∷ B
 pattern F = B# 0#
 pattern T = B# 1#
+{-# complete F, T #-}
+
+-- | A number less-than, equal-to, or greater-than @0#@
+newtype Ordering ∷ K I where Ordering# ∷ I ⊸ Ordering
+pattern LT ∷ Ordering
+pattern LT ← ((\ (Ordering# i) → i <#  0# ) → 1# ) where LT = Ordering# -1#
+pattern EQ ← ((\ (Ordering# i) → i ==# 0# ) → 1# ) where EQ = Ordering#  0#
+pattern GT ← ((\ (Ordering# i) → i >#  0# ) → 1# ) where GT = Ordering#  1#
+{-# complete LT, EQ, GT #-}
 
 
 -- | 31-bit Unicode code points
@@ -26,16 +35,14 @@ type Char = Char#
 newtype Char8 ∷ K U where Char8# ∷ Char ⊸ Char8
 
 type I = Int#
-newtype I8  ∷ K I where I8#  ∷ I ⊸ I8
-newtype I16 ∷ K I where I16# ∷ I ⊸ I16
-newtype I32 ∷ K I where I32# ∷ I ⊸ I32
-newtype I64 ∷ K I where I64  ∷ I ⊸ I64
+type I8 = Int8#
+type I16 = Int16#
+type I32 = Int32#
 
 type U = Word#
-newtype U8   ∷ K U where U8#  ∷ U ⊸ U8
-newtype U16  ∷ K U where U16# ∷ U ⊸ U16
-newtype U32  ∷ K U where U32# ∷ U ⊸ U32
-newtype U64  ∷ K U where U64  ∷ U ⊸ U64
+type U8 = Word8#
+type U16 = Word16#
+type U32 = Word32#
 
 type F32 = Float#
 type F64 = Double#
@@ -53,11 +60,6 @@ type (☸) = State# RealWorld
 type IO (a ∷ T r)  = ST (☸) a
 -- | A computation performing some I\/O
 type IO_ = ST_ RealWorld
-
--- | The Actually Uninhabited Type (unlike lifted @X@, which contains bottom).
--- GHC cannot currently recognize it as empty, so it must be handled in case
--- matches by 'absurd', rather than the empty pattern.
-newtype X ∷ T ('SumRep '[]) where X ∷ X ⊸ X
 
 newtype A x ∷ K A# where SmallArray# ∷ SmallArray# x ⊸ A x
 newtype M_A x ∷ K A# where M_SmallArray# ∷ SmallMutableArray# RealWorld x ⊸ M_A x

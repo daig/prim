@@ -1,38 +1,42 @@
---------------------------------------------------------------------
--- | Description : 8-bit Signed Integer operations
---------------------------------------------------------------------
-{-# language CPP #-}
-{-# language ForeignFunctionInterface, CApiFFI, UnliftedFFITypes, GHCForeignImportPrim #-}
-module Prim.I8 (I8(I8,I8), module Prim.I8) where
-import Prim.I ()
+module Prim.I8 where
+import Prelude hiding (I8)
+import Prim.B
 
-newtype I8  ∷ T_I where I8  ∷ I → I8
--- | Narrow a machine 'I' to 8 bits
+type I8 = Int8#
+
 pattern I8 ∷ I → I8
-pattern I8 i ← (coerce → i) where I8 = coerce narrow8Int#
-{-# complete I8 #-}
+pattern I8 i ← (int8ToInt# → i) where I8 = intToInt8#
 
-
-deriving newtype instance (≡) I8
-deriving newtype instance (≤) I8
+instance (≤) I8 where
+  (>) = coerce gtInt8#
+  (≥) = coerce geInt8#
+  (<) = coerce ltInt8#
+  (≤) = coerce leInt8#
+instance (≡) I8 where
+  (≡) = coerce eqInt8#
+  (≠) = coerce neInt8#
 instance ℕ I8 where
-  (I8 x) + (I8 y) = I8 (x +# y)
-  (I8 x) × (I8 y) = I8 (x *# y)
-  (I8 x) / (I8 y) = I8 (divInt# x y)
-  (I8 x) % (I8 y) = I8 (modInt# x y)
-  (I8 x) /% (I8 y) = case x //%% y of (# d, m #) → (# I8 d, I8 m #)
-  addC (I8 a) (I8 b) = let c = a + b in (# I8 c , c > coerce Max #)
-  subC (I8 a) (I8 b) = let c = a - b in (# I8 c , c < coerce Min #)
-
+  (+) = plusInt8#; (×) = timesInt8#
+  x / y = case I8 0# < x ∧ I8 0# > y of
+    T → (x - I8 1# ) // y - I8 1#
+    F → case I8 0# > x ∧ I8 0# < y of
+      T → (x + I8 1# ) // y - I8 1#
+      F → x // y
+  x % y = case I8 0# < x ∧ I8 0# > y of
+    T → (x - I8 1# ) %% y + y + I8 1#
+    F → case I8 0# > x ∧ I8 0# < y of
+      T → (x + I8 1# ) %% y + y + I8 1#
+      F → x %% y
+  x /% y = case I8 0# < x ∧ I8 0# > y of
+    T → case (x - I8 1# ) //%% y of (# q, r #) → (# q - I8 1#, r + y + I8 1# #)
+    F → case I8 0# > x ∧ I8 0# < y of
+      T → case (x + I8 1# ) //%% y of (# q, r #) → (# q - I8 1#, r + y + I8 1# #)
+      F → x //%% y
+  addC a b = let c = a + b in (# c , c < a ∧ c < b #)
+  subC a b = let c = a - b in (# c , c > a ∧ c > b #)
 instance ℤ I8 where
-  negate (I8 x) = I8 (negateInt# x)
-  (I8 x) - (I8 y) = I8 (x -# y)
-  I8 x // I8 y = I8 (quotInt# x y)
-  I8 x %% I8 y = I8 (remInt# x y)
-  I8 x //%% I8 y = case quotRemInt# x y of (# q, r #) → (# I8 q, I8 r #)
-
-pattern Max, Min ∷ I8
---pattern Max =  I8 INT_MAX#
-pattern Max =  I8 0x7F#
-pattern Min = I8 -0x80#
-
+  negate = negateInt8#
+  (-) = subInt8#
+  (//) = quotInt8#
+  (%%) = remInt8#
+  (//%%) = quotRemInt8#

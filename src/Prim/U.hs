@@ -78,4 +78,3 @@ instance 𝔹 U where
   byteSwap = byteSwap#
   bitReverse = bitReverse#
   pdep = pdep#; pext = pext#
-

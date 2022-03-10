@@ -15,7 +15,6 @@ module GHC.Coerce
  ) where
 import qualified GHC.Prim as GHC
 import qualified GHC.Types as GHC
-import qualified Stock.Word as Stock
 import GHC.Prim.Panic
 
 -- | @≑@ is a two-parameter class that has instances for types @a@ and @b@ if

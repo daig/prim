@@ -21,15 +21,13 @@ instance Cast I F64 where cast = (λ double2Int#)
 instance Cast F32 F64 where cast = (λ double2Float#)
 instance Cast F64 F32 where cast = (λ float2Double#)
 
-instance Cast I8 I where cast = coerce (λ narrow8Int#)
-instance Cast I16 I where cast = coerce (λ narrow16Int#)
-instance Cast I32 I where cast = coerce (λ narrow32Int#)
-instance Cast I64 I where cast = I64
+instance Cast I8 I where cast = λ intToInt8#
+instance Cast I16 I where cast = λ intToInt16#
+instance Cast I32 I where cast = λ intToInt32#
 
-instance Cast U8 U where cast = coerce (λ narrow8Word#)
-instance Cast U16 U where cast = coerce (λ narrow16Word#)
-instance Cast U32 U where cast = coerce (λ narrow32Word#)
-instance Cast U64 U where cast = U64
+instance Cast U8 U where cast = λ wordToWord8#
+instance Cast U16 U where cast = λ wordToWord16#
+instance Cast U32 U where cast = λ wordToWord32#
 
 -- Freezing and Thawing Arrays
 

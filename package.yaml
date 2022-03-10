@@ -52,21 +52,24 @@ library:
     - microbase
     - prim:ffi
     - prim:string
+    - prim:type
+    - prim:stock
+    - ghc-prim
 
 internal-libraries:
   type:
     source-dirs: type
     other-modules: []
     dependencies: ghc-prim
-  linear-fun:
-    source-dirs: linear-fun
-    other-modules: Prelude
-    default-extensions: LinearTypes
-    dependencies:
-      - prim:type
-      - prim:linear
-      - ghc-prim
-      - microbase
+  #linear-fun:
+  #  source-dirs: linear-fun
+  #  other-modules: Prelude
+  #  default-extensions: LinearTypes
+  #  dependencies:
+  #    - prim:type
+  #    - prim:linear
+  #    - ghc-prim
+  #    - microbase
   linear:
     source-dirs: linear
     other-modules: []
@@ -87,16 +90,16 @@ internal-libraries:
       - prim:type
       - ghc-prim
       - microbase
-  class:
-    source-dirs: class
-    other-modules: Prelude
-    dependencies:
-      - ghc-prim
-      - prim:type
-      - prim:ffi
-      - prim:linear
-      - prim:do
-      - microbase
+ # class:
+ #   source-dirs: class
+ #   other-modules: Prelude
+ #   dependencies:
+ #     - ghc-prim
+ #     - prim:type
+ #     - prim:ffi
+ #     - prim:linear
+ #     - prim:do
+ #     - microbase
   stock:
     source-dirs: stock
     other-modules: Prelude
