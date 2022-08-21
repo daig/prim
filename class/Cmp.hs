@@ -1,94 +1,89 @@
-{-# language LinearTypes #-}
 module Cmp where
+import {-# source #-} Bits
 
 infix 4 >, ≥, <, ≤, ≡, ≠, `cmp`
-class (≡) (a ∷ T r) where (≡), (≠) ∷ a ⊸ a ⊸ B
+class (≡) (a ∷ T r) where (≡), (≠) ∷ a → a → B
 class (≡) a ⇒ (≤) (a ∷ T r) where
-  (>),(≥),(<),(≤) ∷ a ⊸ a ⊸ B
-  cmp ∷ a ⊸ a ⊸ Ordering
+  (>),(≥),(<),(≤) ∷ a → a → B
+  cmp ∷ a → a → Ordering
 
 
 deriving newtype instance (≡) B
 deriving newtype instance (≤) B
 
 instance (≡) I where
-  (≡) = coerce (λ\i → λ\j → i ==# j)
-  (≠) = coerce (λ\i → λ\j → i /=# j)
+  (≡) = coerce (==#)
+  (≠) = coerce (/=#)
 instance (≤) I where
-  (>) = coerce (λ\i → λ\j → i ># j)
-  (≥) = coerce (λ\i → λ\j → i >=# j)
-  (<) = coerce (λ\i → λ\j → i <# j)
-  (≤) = coerce (λ\i → λ\j → i <=# j)
-  cmp = λ\a → λ\b → Ordering# do
-    (a ># b) +# (a >=# b) Prelude.-# 1#
+  (>) = coerce (>#)
+  (≥) = coerce (>=#)
+  (<) = coerce (<#)
+  (≤) = coerce (<=#)
+  cmp a b = Ordering# do (a ># b) +# (a >=# b) Prelude.-# 1#
 
 instance (≡) U where
-  (≡) = coerce (λ\i → λ do eqWord# i)
-  (≠) = coerce (λ\i → λ do neWord# i)
+  (≡) = coerce eqWord#
+  (≠) = coerce neWord#
 instance (≤) U where
-  (>) = coerce (λ\i → λ do gtWord# i)
-  (≥) = coerce (λ\i → λ do geWord# i)
-  (<) = coerce (λ\i → λ do ltWord# i)
-  (≤) = coerce (λ\i → λ do leWord# i)
+  (>) = coerce gtWord#
+  (≥) = coerce geWord#
+  (<) = coerce ltWord#
+  (≤) = coerce leWord#
 
 instance (≡) Char where
-  (≡) = coerce (λ\i → λ do eqChar# i)
-  (≠) = coerce (λ\i → λ do neChar# i)
+  (≡) = coerce eqChar#
+  (≠) = coerce neChar#
 instance (≤) Char where
-  (>) = coerce (λ\i → λ do gtChar# i)
-  (≥) = coerce (λ\i → λ do geChar# i)
-  (<) = coerce (λ\i → λ do ltChar# i)
-  (≤) = coerce (λ\i → λ do leChar# i)
+  (>) = coerce gtChar#
+  (≥) = coerce geChar#
+  (<) = coerce ltChar#
+  (≤) = coerce leChar#
 deriving newtype instance (≡) Char8
 deriving newtype instance (≤) Char8
 
 instance (≡) F32 where
-  (≡) = coerce (λ\i → λ do eqFloat# i)
-  (≠) = coerce (λ\i → λ do neFloat# i)
+  (≡) = coerce eqFloat#
+  (≠) = coerce neFloat#
 instance (≤) F32 where
-  (>) = coerce (λ\i → λ do gtFloat# i)
-  (≥) = coerce (λ\i → λ do geFloat# i)
-  (<) = coerce (λ\i → λ do ltFloat# i)
-  (≤) = coerce (λ\i → λ do leFloat# i)
+  (>) = coerce gtFloat#
+  (≥) = coerce geFloat#
+  (<) = coerce ltFloat#
+  (≤) = coerce leFloat#
 instance (≡) F64 where
-  (≡) = coerce (λ\i → λ\j → i ==## j)
-  (≠) = coerce (λ\i → λ\j → i /=## j)
+  (≡) = coerce (==##)
+  (≠) = coerce (/=##)
 instance (≤) F64 where
-  (>) = coerce (λ\i → λ\j → i >## j)
-  (≥) = coerce (λ\i → λ\j → i >=## j)
-  (<) = coerce (λ\i → λ\j → i <## j)
-  (≤) = coerce (λ\i → λ\j → i <=## j)
+  (>) = coerce (>##)
+  (≥) = coerce (>=##)
+  (<) = coerce (<##)
+  (≤) = coerce (<=##)
 
-instance (≡) M_A# where
-  (≡) = coerce (λ\a → λ\b → sameMutableByteArray# a b)
-  as ≠ bs = (¬) (as ≡ bs) where
-instance (≡) (M_A x) where
-  (≡) = coerce (λ\a → λ\b → sameSmallMutableArray# @_ @x a b)
-  as ≠ bs = (¬) (as ≡ bs) where
-instance (≡) (M_Arr x) where
-  (≡) = coerce (λ\a → λ\b → sameMutableArray# @_ @x a b)
-  as ≠ bs = (¬) (as ≡ bs) where
-instance (≡) M_AA#  where
-  (≡) = coerce (λ\a → λ\b → sameMutableArrayArray# a b)
-  as ≠ bs = (¬) (as ≡ bs) where
-deriving newtype instance (≡) (M_AA x)
+instance (≡) (M_A# s) where
+  (≡) = coerce sameMutableByteArray#
+  as ≠ bs = (¬) (as ≡ bs)
+instance (≡) (M_A x s) where
+  (≡) = coerce (sameSmallMutableArray# @_ @x)
+  as ≠ bs = (¬) (as ≡ bs)
+instance (≡) (M_Arr x s) where
+  (≡) = coerce (sameMutableArray# @_ @x)
+  as ≠ bs = (¬) (as ≡ bs)
 instance (≡) (P x) where
-  (≡) = coerce (λ\a → λ\b → sameMutVar# @_ @x a b)
-  as ≠ bs = (¬) (as ≡ bs) where
+  (≡) = coerce (sameMutVar# @_ @x)
+  as ≠ bs = (¬) (as ≡ bs)
 instance (≡) (P_Async x) where
-  (≡) = coerce (λ\a → λ\b → sameTVar# @_ @x a b)
-  as ≠ bs = (¬) (as ≡ bs) where
+  (≡) = coerce (sameTVar# @_ @x)
+  as ≠ bs = (¬) (as ≡ bs)
 instance (≡) (P_Sync x) where
-  (≡) = coerce (λ\a → λ\b → sameMVar# @_ @x a b)
-  as ≠ bs = (¬) (as ≡ bs) where
+  (≡) = coerce (sameMVar# @_ @x)
+  as ≠ bs = (¬) (as ≡ bs)
 instance (≡) (P_Stable x) where
-  (≡) = coerce (λ\a → λ\b → eqStablePtr# @x a b)
-  as ≠ bs = (¬) (as ≡ bs) where
+  (≡) = coerce (eqStablePtr# @x)
+  as ≠ bs = (¬) (as ≡ bs)
 instance (≡) (# A# ,I , I #) where
-  (≡) = λ\a → λ\b → case cmp a b of EQ → T; _ → F
+  a ≡ b = case cmp a b of EQ → T; _ → F
   
 instance (≤) (# A# ,I , I #) where
-  cmp = λ\(# UnpinnedByteArray# a, i, n #) → λ\(# UnpinnedByteArray# b , j, m #)
-    → case cmp m n of
+  (# UnpinnedByteArray# a, i, n #) `cmp` (# UnpinnedByteArray# b , j, m #)
+    = case cmp m n of
         EQ → Ordering# do compareByteArrays# a i b i m
         o → o

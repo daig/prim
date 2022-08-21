@@ -4,8 +4,8 @@
 {-# language NoImplicitPrelude #-}
 module Prim.B (B(B#,B,F,T), module X) where
 import Types as X (I,B(B#), pattern F,pattern T)
---import Class.Prim.Cmp
---import Class.Prim.Bits
+import Cmp
+--import Bits
 
 deriving newtype instance (≡) B
 deriving newtype instance (≤) B

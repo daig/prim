@@ -1,4 +1,3 @@
-{-# language LinearTypes #-}
 {-# language CPP #-}
 {-# OPTIONS_HADDOCK ignore-exports #-}
 module Bits where
@@ -9,34 +8,34 @@ import Cast
 
 -- | Bitwise algebriac operations on primitive values
 class 𝔹 (a ∷ T r) where
-  (∧), (∨), (⊕) ∷ a ⊸ a ⊸ a
-  (¬) ∷ a ⊸ a
+  (∧), (∨), (⊕) ∷ a → a → a
+  (¬) ∷ a → a
   -- | Shift left.  Result undefined if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.
-  shiftL# ∷ a ⊸ U ⊸ a
+  shiftL# ∷ a → U → a
   -- | Shift left.  Result 0 if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.
-  shiftL ∷ a ⊸ U ⊸ a
+  shiftL ∷ a → U → a
   -- |Shift right logical.  Result undefined if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.
-  shiftR# ∷ a ⊸ U ⊸ a
+  shiftR# ∷ a → U → a
   -- |Shift right logical.  Result 0 if shift amount is not
   --           in the range 0 to @size - 1@ inclusive.
-  shiftR ∷ a ⊸ U ⊸ a
+  shiftR ∷ a → U → a
   -- |Shift left logical.  Accepts negative offset for right shifts.
   -- Result 0 if shift amount is not in the range @1 - size@ to @size - 1@ inclusive.
-  shift ∷ a ⊸ I ⊸ a 
+  shift ∷ a → I → a 
   -- | Count the number of set bits
-  popCnt ∷ a ⊸ U
+  popCnt ∷ a → U
   -- | Count the number of leading zeroes
-  clz ∷ a ⊸ U
+  clz ∷ a → U
   -- | Count the number of trailing zeroes
-  ctz ∷ a ⊸ U
+  ctz ∷ a → U
   -- | Swap the byte order
-  byteSwap ∷ a ⊸ a
+  byteSwap ∷ a → a
   -- | Reverse the order of the bits.
-  bitReverse ∷ a ⊸ a
-  pdep, pext ∷ a {-^ source -} ⊸ a {-^ mask -} ⊸ a
+  bitReverse ∷ a → a
+  pdep, pext ∷ a {-^ source -} → a {-^ mask -} → a
 
 infixl 3 ∧
 infixl 2 ⊕
@@ -44,15 +43,15 @@ infixl 1 ∨
 
 -- | Boolean Operations
 instance 𝔹 B where
-  (∧) = coerce (λ\i → λ do andI# i)
-  (∨) = coerce (λ\i → λ do orI# i)
-  (⊕) = coerce (λ\i → λ do xorI# i)
+  (∧) = coerce andI#
+  (∨) = coerce orI#
+  (⊕) = coerce xorI#
   (¬) = (T ⊕)
-  shiftL# (B# x) i = T ∧ (B# do (λ\a → λ\b → uncheckedIShiftL# a b) x (cast i))
-  shiftL = λ\ x → λ\case {0## → x; _ → F}
-  shiftR# (B# x) i =  T ∧ (B# do (λ\a → λ\b → uncheckedIShiftRL# a b) x (cast i))
+  shiftL# (B# x) i = T ∧ (B# do uncheckedIShiftL# x (cast i))
+  shiftL x = \case {0## → x; _ → F}
+  shiftR# (B# x) i =  T ∧ (B# do uncheckedIShiftRL# x (cast i))
   shiftR = shiftL
-  shift = λ\ x → λ\case {0# → x; _ → F}
+  shift x = \case {0# → x; _ → F}
   popCnt (B# 0#) = 0##
   popCnt (B# 1#) = 1##
   clz (B# 0#) = 1##
@@ -64,25 +63,26 @@ instance 𝔹 B where
   pdep = (∧); pext = (∧)
 
 instance 𝔹 U where
-  (∧) = λ\i → λ do and# i
-  (∨) = λ\i → λ do or# i
-  (⊕) = λ\i → λ do xor# i
-  (¬) = λ not#
-  shiftL# = λ\w → λ\i → uncheckedShiftL# w (cast i)
-  shiftL = λ\w → λ\i → case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftL# w i}
-  shiftR# = λ\i → λ\w  → uncheckedShiftRL# w (cast i)
-  shiftR = λ\w → λ\i → case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftL# w i}
-  shift = λ\w → λ\i → case i ≥ 0# of
+  (∧) = and#
+  (∨) = or#
+  (⊕) = xor#
+  (¬) = not#
+  shiftL# w i = uncheckedShiftL# w (cast i)
+  shiftL w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftL# w i}
+  shiftR# i w = uncheckedShiftRL# w (cast i)
+  shiftR w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftL# w i}
+  shift w i = case i ≥ 0# of
     T → case i ≥ WORD_SIZE_IN_BITS# of {B# 1# → 0##; B# 0# → uncheckedShiftL# w i}
     F → case i ≤ WORD_SIZE_IN_BITS# of {B# 1# → 0##; B# 0# → uncheckedShiftRL# w (negateInt# i)}
-  popCnt = λ popCnt#
-  clz = λ clz#
-  ctz = λ ctz#
-  byteSwap = λ byteSwap#
-  bitReverse = λ bitReverse#
-  pdep = λ\i → λ do pdep# i
-  pext = λ\i → λ do pext# i
+  popCnt = popCnt#
+  clz = clz#
+  ctz = ctz#
+  byteSwap = byteSwap#
+  bitReverse = bitReverse#
+  pdep = pdep#
+  pext = pext#
 
+{-
 instance 𝔹 U8 where
   (∧) = coerce ((∧) @_ @U)
   (∨) = coerce ((∨) @_ @U)
@@ -128,19 +128,21 @@ instance 𝔹 U32 where
   (∨) = coerce ((∨) @_ @U)
   (⊕) = coerce ((⊕) @_ @U)
   (¬) (U32# u) = cast (u ¬)
-  shiftL# (U32# w) i = cast do (λ\x → λ\y → uncheckedShiftL# x y) w (cast i)
-  shiftL = λ\w → λ\i → case i ≥ 32## of {T → U32# 0##; F → shiftL# w i}
-  shiftR# (U32# w) i = cast ((λ\x → λ\y →  uncheckedShiftRL# x y) w (cast i))
-  shiftR = λ\w → λ\i → case i ≥ 32## of {T → U32# 0##; F → shiftL# w i}
-  shift = λ\(U32# w) → λ\i → case i ≥ 0# of
+  shiftL# (U32# w) i = (cast uncheckedShiftL#) w (cast i)
+  shiftL w i = case i ≥ 32## of {T → U32# 0##; F → shiftL# w i}
+  shiftR# (U32# w) i = cast (uncheckedShiftRL# w (cast i))
+  shiftR w i = case i ≥ 32## of {T → U32# 0##; F → shiftL# w i}
+  shift (U32# w) i = case i ≥ 0# of
     T → case i ≥  32# of {T → U32# 0##; F → cast (uncheckedShiftRL# w i)}
     F → case i ≤ -32# of {T → U32# 0##; F → cast (uncheckedShiftRL# w (negateInt# i))}
-  popCnt = coerce (λ popCnt32#)
-  clz = coerce (λ clz32#)
-  ctz = coerce (λ ctz32#)
-  byteSwap = coerce (λ byteSwap32#)
-  bitReverse = coerce (λ bitReverse32#)
-  pdep = coerce (λ\i → λ do pdep32# i)
-  pext = coerce (λ\i → λ do pext32# i)
+  popCnt = coerce popCnt32#
+  clz = coerce clz32#
+  ctz = coerce ctz32#
+  byteSwap = coerce byteSwap32#
+  bitReverse = coerce bitReverse32#
+  pdep = coerce pdep32#
+  pext = coerce pext32#
 
 deriving newtype instance 𝔹 U64
+-}
+
