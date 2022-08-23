@@ -1,4 +1,5 @@
 {-# OPTIONS_HADDOCK ignore-exports #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
 module Num where
 import Cmp
 import Bits
@@ -18,7 +19,9 @@ class (≤) a ⇒ ℕ (a ∷ T r) where
   addC ∷ a → a → (# a, B #) -- ^ The truncated sum and whether it overflowed
   -- |Subtract reporting overflow
   subC ∷ a → a → (# a, B #) -- ^ The truncated subtraction and whether it underflowed
+  -- | Minimum value. Mostly for consistency and documentation. For performance critical code, try 'HS_{INT,WORD}{,8,16,32,64}_MIN macro from HsFFI.h instead.
   min ∷ (##) → a
+  -- | Maximum value. Mostly for consistency and documentation. For performance critical code, try 'HS_{INT,WORD}{,8,16,32,64}_MIN macro from HsFFI.h instead.
   max ∷ (##) → a
 class ℕ a ⇒ ℤ (a ∷ T r) where
   -- |Satisfies @((((x // y) × y) + (x %% y) ≡ x@.
@@ -39,6 +42,23 @@ instance ℕ U where
   (/%) = quotRemWord#
   addC a b  = case addWordC# a b of (# x, p #) -> (# x , p ≠ 0# #)
   subC a b = case subWordC# a b of (# x, p #) -> (# x , p ≠ 0# #)
+  min (##) = 0##
+  max (##) = case word_max of W# w -> w
+
+instance ℕ U8 where
+  (+) = plusWord8#
+  (×) = timesWord8#
+  (/) = quotWord8#
+  (%) = remWord8#
+  (/%) = quotRemWord8#
+  addC x8@(cast @U -> x) y8@(U8 y) = (# x8 + y8 , (x + y) > 0xFF## #)
+{-
+  subC (U8# a) (U8# b) = go do subC a b where
+    go ∷ (# U , B #) → (# U8, B #)
+    go (# x, b #) = (# cast x , b #)
+-}
+  min (##) = U8 0##
+  max (##) = case word8_max of W# w → cast @U8 w
 
 {-
 instance ℕ U8 where
@@ -113,6 +133,8 @@ instance ℕ I where
         F → x //%% y
   addC = coerce addIntC#
   subC = coerce subIntC#
+  min (##) = case int_min of I# i -> i
+  max (##) = case int_max of I# i -> i
 instance ℤ I where
   negate = negateInt#
   (-) = (-#)

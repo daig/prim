@@ -13,126 +13,125 @@ escape# = unsafeCoerce# \ s → (##)
 
 
 -- | Used for @QualifiedDo@
-return ∷ Pure (s ∷ T rs) (a ∷ T ra) ⇒ a → ST s a
+return ∷ Pure (a ∷ T ra) ⇒ a → ST s a
 return = η
 -- | Used for @QualifiedDo@
-(>>=) ∷ Monad (s ∷ T rs) (a ∷ T ra) (b ∷ T rb)
+(>>=) ∷ Monad (a ∷ T ra) (b ∷ T rb)
   ⇒ ST s a → (a → ST s b) → ST s b
 (>>=) = (⇉)
 {-# inline (>>=) #-}
 {-# inline return #-}
 
-class Pure (s ∷ T rs) (a ∷ T ra) where η ∷ a → ST s a
-class (Monad s a c, Monad s b c) ⇒ Lift2 (s ∷ T rs) (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
+class Pure (a ∷ T ra) where η ∷ a → ST s a
+class (Monad a c, Monad b c) ⇒ Lift2 (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
   η2 ∷ (a → b → c) → ST s a → ST s b → ST s c
 
-#define INST_LIFT2(S,A,B,C) \
-instance Lift2 (s ∷ K S) (a ∷ K A) (b ∷ K B) (c ∷ K C) where {\
+#define INST_LIFT2(A,B,C) \
+instance Lift2 (a ∷ K A) (b ∷ K B) (c ∷ K C) where {\
   η2 f sta stb = sta ⇉ \a → stb ⇉ \b → η (f a b)}
 
-#define INST_PURE(S,A) \
-instance Pure (s ∷ K (S)) (a ∷ K (A)) where {\
+#define INST_PURE(A) \
+instance Pure (a ∷ K (A)) where {\
   η x = \s → (# s , x #)}
 
   --η2 f sta stb = sta ⇉ \a → stb ⇉ \b → η (f a b)}
 
 
-class Run (a ∷ T ra) where run ∷ IO a → a
+-- | Return the value computed by a state thread.
+-- The @forall@ ensures that the internal state used by the 'ST'
+-- computation is inaccessible to the rest of the program.
+class RunST (a ∷ T ra) where runST ∷ (forall s. ST s a) → a
+#define INST_RUNST(A) \
+instance RunST (a ∷ K (A)) where {\
+  runST st = case runRW# st of (# _, a #) -> a}
+
+
+{-
+class Run (a ∷ T ra) where run ∷ ST s a → a
 #define INST_RUN(A) \
 instance Run (a ∷ K (A)) where {\
   run io = go (io ☸) where \
     go ∷ (# (☸) , a #) → a; \
     go (# s , a #) = (\(##) a → a) (escape# s) a}
+-}
 
-class Pure s b ⇒ Monad (s ∷ T rs) (a ∷ T ra) (b ∷ T rb) where
+class Pure b ⇒ Monad (a ∷ T ra) (b ∷ T rb) where
   (⇉) ∷ ST s a → (a → ST s b) → ST s b
   η1 ∷ (a → b) → ST s a → ST s b
   (*>) ∷ ST_ s → ST s a → ST s a
   (>>) ∷ ST s (##) → ST s a → ST s a
-#define INST_MONAD(S,A,B) \
-instance Monad (s ∷ K (S)) (a ∷ K (A)) (b ∷ K (B)) where {\
+#define INST_MONAD(A,B) \
+instance Monad (a ∷ K (A)) (b ∷ K (B)) where {\
   η1 f st = st ⇉ \a → return (f a); \
   (st *> sta) s = sta (st s); \
   (st >> sta) s = (\ (# s , (##) #) → sta s) (st s); \
   (st ⇉ f) s = go (st s) f where \
-    go ∷ (# s , a #) → (a → ST s b) → (# s , b #); \
+    go ∷ (# State# s , a #) → (a → ST s b) → (# State# s , b #); \
     go (# s' , a #) f = f a s'}
 
 
-#define INSTS_PURE(S) \
-INST_PURE(S,(##)); \
-INST_PURE(S,()); \
-INST_PURE(S,A#); \
-INST_PURE(S,I); \
-INST_PURE(S,U); \
-INST_PURE(S,P#); \
-INST_PURE(S,F32); \
-INST_PURE(S,F64)
+INST_PURE((##))
+INST_PURE(())
+INST_PURE(A#)
+INST_PURE(I) 
+INST_PURE(U)
+INST_PURE(P#)
+INST_PURE(F32)
+INST_PURE(F64)
 
-#define INSTS2_MONAD(S,Y) \
-INST_MONAD(S,Y,(##)); \
-INST_MONAD(S,Y,()); \
-INST_MONAD(S,Y,A#); \
-INST_MONAD(S,Y,I); \
-INST_MONAD(S,Y,U); \
-INST_MONAD(S,Y,P#); \
-INST_MONAD(S,Y,F32); \
-INST_MONAD(S,Y,F64)
+#define INSTS2_MONAD(Y) \
+INST_MONAD(Y,(##)); \
+INST_MONAD(Y,()); \
+INST_MONAD(Y,A#); \
+INST_MONAD(Y,I); \
+INST_MONAD(Y,U); \
+INST_MONAD(Y,P#); \
+INST_MONAD(Y,F32); \
+INST_MONAD(Y,F64)
 
-#define INSTS_MONAD(S) \
-INSTS2_MONAD(S,(##)); \
-INSTS2_MONAD(S,()); \
-INSTS2_MONAD(S,A#); \
-INSTS2_MONAD(S,I); \
-INSTS2_MONAD(S,U); \
-INSTS2_MONAD(S,P#); \
-INSTS2_MONAD(S,F32); \
-INSTS2_MONAD(S,F64)
+INSTS2_MONAD((##))
+INSTS2_MONAD(())
+INSTS2_MONAD(A#)
+INSTS2_MONAD(I)
+INSTS2_MONAD(U)
+INSTS2_MONAD(P#)
+INSTS2_MONAD(F32)
+INSTS2_MONAD(F64)
 
-#define INSTS3_LIFT(S,Y,Z) \
-INST_LIFT2(S,Y,Z,(##)); \
-INST_LIFT2(S,Y,Z,()); \
-INST_LIFT2(S,Y,Z,A#); \
-INST_LIFT2(S,Y,Z,I); \
-INST_LIFT2(S,Y,Z,U); \
-INST_LIFT2(S,Y,Z,P#); \
-INST_LIFT2(S,Y,Z,F32); \
-INST_LIFT2(S,Y,Z,F64)
+#define INSTS3_LIFT(Y,Z) \
+INST_LIFT2(Y,Z,(##)); \
+INST_LIFT2(Y,Z,()); \
+INST_LIFT2(Y,Z,A#); \
+INST_LIFT2(Y,Z,I); \
+INST_LIFT2(Y,Z,U); \
+INST_LIFT2(Y,Z,P#); \
+INST_LIFT2(Y,Z,F32); \
+INST_LIFT2(Y,Z,F64)
 
-#define INSTS2_LIFT(S,Y) \
-INSTS3_LIFT(S,Y,(##)); \
-INSTS3_LIFT(S,Y,()); \
-INSTS3_LIFT(S,Y,A#); \
-INSTS3_LIFT(S,Y,I); \
-INSTS3_LIFT(S,Y,U); \
-INSTS3_LIFT(S,Y,P#); \
-INSTS3_LIFT(S,Y,F32); \
-INSTS3_LIFT(S,Y,F64)
+#define INSTS2_LIFT(Y) \
+INSTS3_LIFT(Y,(##)); \
+INSTS3_LIFT(Y,()); \
+INSTS3_LIFT(Y,A#); \
+INSTS3_LIFT(Y,I); \
+INSTS3_LIFT(Y,U); \
+INSTS3_LIFT(Y,P#); \
+INSTS3_LIFT(Y,F32); \
+INSTS3_LIFT(Y,F64)
 
-#define INSTS_LIFT(S) \
-INSTS2_LIFT(S,(##)); \
-INSTS2_LIFT(S,()); \
-INSTS2_LIFT(S,A#); \
-INSTS2_LIFT(S,I); \
-INSTS2_LIFT(S,U); \
-INSTS2_LIFT(S,P#); \
-INSTS2_LIFT(S,F32); \
-INSTS2_LIFT(S,F64)
+INSTS2_LIFT((##))
+INSTS2_LIFT(())
+INSTS2_LIFT(A#)
+INSTS2_LIFT(I)
+INSTS2_LIFT(U)
+INSTS2_LIFT(P#)
+INSTS2_LIFT(F32)
+INSTS2_LIFT(F64)
 
-#define INSTS_DO(S) \
-INSTS_PURE(S); \
-INSTS_MONAD(S); \
-INSTS_LIFT(S); \
-
-INSTS_DO(())
-INSTS_DO(P#)
-INSTS_DO(A#)
-
-INST_RUN((##))
-INST_RUN(())
-INST_RUN(A#)
-INST_RUN(I)
-INST_RUN(U)
-INST_RUN(P#)
-INST_RUN(F32)
-INST_RUN(F64)
+INST_RUNST((##))
+INST_RUNST(())
+INST_RUNST(A#)
+INST_RUNST(I)
+INST_RUNST(U)
+INST_RUNST(P#)
+INST_RUNST(F32)
+INST_RUNST(F64)

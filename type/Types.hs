@@ -7,6 +7,7 @@ import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),C
 -- | The kind constructor of types abstracted over 'RuntimeRep'
 type T = TYPE
 type T_ = TYPE (BoxedRep Unlifted)
+type T0 = TYPE (TupleRep '[])
 type T# l = TYPE (BoxedRep l)
 
 -- | The kind of a type
@@ -39,20 +40,61 @@ newtype Char8 ∷ K U where Char8# ∷ Char → Char8
 
 type I = Int#
 type I8 = Int8#
+-- | Narrow a machine 'I' to 8 bits
+pattern I8 ∷ I → I8
+pattern I8 u ← (int8ToInt# → u) where I8 = intToInt8#
+{-# complete I8 #-}
+
 type I16 = Int16#
+-- | Narrow a machine 'I' to 8 bits
+pattern I16 ∷ I → I16
+pattern I16 u ← (int16ToInt# → u) where I16 = intToInt16#
+{-# complete I16 #-}
+
 type I32 = Int32#
+-- | Narrow a machine 'I' to 32 bits
+pattern I32 ∷ I → I32
+pattern I32 u ← (int32ToInt# → u) where I32 = intToInt32#
+{-# complete I32 #-}
+
+type I64 = Int64#
+-- | Narrow a machine 'I' to 64 bits
+pattern I64 ∷ I → I64
+pattern I64 u ← (int64ToInt# → u) where I64 = intToInt64#
+{-# complete I64 #-}
 
 type U = Word#
+
 type U8 = Word8#
+-- | Narrow a machine 'U' to 8 bits
+pattern U8 ∷ U → U8
+pattern U8 u ← (word8ToWord# → u) where U8 = wordToWord8#
+{-# complete U8 #-}
+
 type U16 = Word16#
+
+-- | Narrow a machine 'U' to 16 bits
+pattern U16 ∷ U → U16
+pattern U16 u ← (word16ToWord# → u) where U16 = wordToWord16#
+{-# complete U16 #-}
+
 type U32 = Word32#
+-- | Narrow a machine 'U' to 32 bits
+pattern U32 ∷ U → U32
+pattern U32 u ← (word32ToWord# → u) where U32 = wordToWord32#
+{-# complete U32 #-}
+
 type U64 = Word64#
+-- | Narrow a machine 'U' to 64 bits
+pattern U64 ∷ U → U64
+pattern U64 u ← (word64ToWord# → u) where U64 = wordToWord64#
+{-# complete U64 #-}
 
 type F32 = Float#
 type F64 = Double#
 
-type ST (s ∷ T r) (a ∷ T ra) = s → (# s , a #)
-type ST_ (s ∷ T r) = s → s
+type ST s (a ∷ T ra) = State# s → (# State# s , a #)
+type ST_ s = State# s → State# s
 
 -- | @(☸)@ is the primitive, unlifted type of realworld state.
 -- It's only purpose is to sequence IO actions.
@@ -61,35 +103,44 @@ type (☸) = State# RealWorld
 
 
 -- | A computation performing some I\/O before returning a value of type @a@.
-type IO (a ∷ T r)  = ST (☸) a
+type IO (a ∷ T r)  = ST RealWorld a
 -- | A computation performing some I\/O
 type IO_ = ST_ RealWorld
 
+
+type Small :: forall {l :: Levity} {k}.
+              (T# l -> k) -> T# l -> k
+type family Small a = sa | sa -> a where
+  Small A = A_Small
+  Small M_A = M_A_Small
+
+type A_Small :: forall {l :: Levity}. T# l -> T_
+newtype A_Small x = SmallArray# (SmallArray# x)
+
+type M_A_Small :: forall {l :: Levity}. T# l -> * -> T_
+newtype M_A_Small x s = M_SmallArray# (SmallMutableArray# s x)
+
 type A :: forall {l :: Levity}. T# l -> T_
-newtype A x = SmallArray# (SmallArray# x)
+newtype A x = Array# (Array# x)
+
 
 type M_A :: forall {l :: Levity}. T# l -> * -> T_
-newtype M_A x s = M_SmallArray# (SmallMutableArray# s x)
-
-type Arr :: forall {l :: Levity}. T# l -> T_
-newtype Arr x = Array# (Array# x)
-
-
-type M_Arr :: forall {l :: Levity}. T# l -> * -> T_
-newtype M_Arr x s = M_Array# (MutableArray# s x)
+newtype M_A x s = M_Array# (MutableArray# s x)
 
 -- Unpinned
-type A# :: T_
 newtype A# = UnpinnedByteArray# ByteArray#
+
+-- | An unboxed vector with offset and length
+newtype V# = V# (# A# , I , I #)
 
 type M_A# :: * -> T_
 newtype M_A# s = M_UnpinnedByteArray# (MutableByteArray# s)
 
-type Pinned# :: T_
-newtype Pinned# = PinnedByteArray# ByteArray#
+type A_Pinned# :: T_
+newtype A_Pinned# = PinnedByteArray# ByteArray#
 
-type M_Pinned# :: * -> T_
-newtype M_Pinned# s = M_PinnedByteArray# (MutableByteArray# s)
+type M_A_Pinned# :: * -> T_
+newtype M_A_Pinned# s = M_PinnedByteArray# (MutableByteArray# s)
 
 type A_ :: forall (r :: RuntimeRep). T r -> T_
 newtype A_ x = A# A#
@@ -97,57 +148,44 @@ newtype A_ x = A# A#
 type M_A_ :: forall (r :: RuntimeRep). T r -> * -> T_
 newtype M_A_ x s = M_A# (M_A# s)
 
-type Pinned_ :: forall (r :: RuntimeRep). T r -> T_
-newtype Pinned_ x = Pinned# Pinned#
+type A_Pinned_ :: forall (r :: RuntimeRep). T r -> T_
+newtype A_Pinned_ x = A_Pinned# A_Pinned#
 
-type M_Pinned_:: forall (r :: RuntimeRep). T r -> * -> T_
-newtype M_Pinned_ x s = M_Pinned# (M_Pinned# s)
+type M_A_Pinned_ :: forall (r :: RuntimeRep). T r -> * -> T_
+newtype M_A_Pinned_ x s = M_A_Pinned# (M_A_Pinned# s)
 
 type M :: forall {r :: RuntimeRep} {t :: *}. TYPE r -> t
 type family M a = ma | ma → a where
   M A# = M_A#
   M (A_ x) = M_A_ x
-  M Pinned# = M_Pinned#
-  M (Pinned_ x) = (M_Pinned_ x)
+  M A_Pinned# = M_A_Pinned#
+  M (A_Pinned_ x) = (M_A_Pinned_ x)
+  M (A_Small x) = M_A_Small x
   M (A x) = M_A x
-  M (Arr x) = M_Arr x
   M (☸) = (☸)
   M P# = P#
   M (P_ (x ∷ T r)) = P_ x
-  M (P x) = P x
-  M (P_Async x) = P_Async x
-  M (P_Sync x) = P_Sync x
+  M (P s x) = P s x
+  M (P_Async s x) = P_Async s x
+  M (P_Sync s x) = P_Sync s x
   M (P_Weak x) = P_Weak x
   M (P_Stable x) = P_Stable x
-{-
-
-type family M (a ∷ k) = (ma ∷ k) | ma → a where
-  M (☸) = (☸)
-  M P# = P#
-  M (P_ (x ∷ T r)) = P_ x
-  M (P x) = P x
-  M (P_Async x) = P_Async x
-  M (P_Sync x) = P_Sync x
-  M (P_Weak x) = P_Weak x
-  M (P_Stable x) = P_Stable x
-
--}
-
 
 -- | A C-style null-terminated string
 newtype S# ∷ K P# where S# ∷ Addr# → S#
 
 type P# = Addr#
-newtype P_ (x ∷ T r) ∷ K P# where P# ∷ ∀ r (x ∷ T r). P# → P_ x
+type P_ :: forall {r :: RuntimeRep}. T r -> T AddrRep
+newtype P_ x = P# P#
 
-type P = MutVar# RealWorld
-type P_Async = TVar# RealWorld
+type P = MutVar#
+type P_Async = TVar#
 -- | A synchronising variable, used for communication between concurrent threads.
 -- It can be thought of as a box, which may be empty or full.
 --
 -- The RTS implementation is really an abstraction for
 -- connecting 'take' and 'write' calls between threads
-type P_Sync = MVar# RealWorld
+type P_Sync = MVar#
 
 {-|
 A weak pointer expressing a relashionship between a /key/ and a /value/ of type @v@:
