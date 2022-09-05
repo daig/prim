@@ -107,3 +107,10 @@ internal-libraries:
     includes: ffi/cbits/primitive-memops.h
     c-sources: ffi/cbits/primitive-memops.c
     dependencies: ghc-prim
+  thread:
+    other-modules: []
+    source-dirs: thread
+    visibility: public
+    dependencies:
+      - prim:type
+      - prim:class

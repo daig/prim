@@ -1,14 +1,12 @@
-module IO.Thread.Status (Status(Status#,Running,Finished,Died,Migrating,BlockedOn), blocked'
+module Thread.Status (Status(Status#,Running,Finished,Died,Migrating,BlockedOn), blocked'
                         ,Reason(Reason#,MVar,BlackHole,Read,Write,Delay,STM,DoProc
                         ,CCall,CCall_Interruptible,MsgThrowTo,MVarRead,IOCompletion)
                         ) where
-import {-# source #-} I as X (I)
-import Maybe as X
 
 -- * Constants for why_blocked field of a TSO from rts/Constants.h
-newtype Status ∷ T_I where Status# ∷ I → Status
+newtype Status where Status# ∷ I → Status
 
-newtype Reason ∷ T_I where Reason# ∷ I → Reason
+newtype Reason where Reason# ∷ I → Reason
 pattern BlockedOn ∷ Reason → Status
 pattern BlockedOn r ← (blocked' → (# T , r #)) where BlockedOn (Reason# r) = Status# r
 blocked' ∷ Status → Maybe# Reason
