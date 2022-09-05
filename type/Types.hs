@@ -1,5 +1,4 @@
 {-# language NoImplicitPrelude #-}
-{-# language StandaloneKindSignatures #-}
 module Types (module Types, module X) where
 import GHC.Prim as X
 import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint)
@@ -107,61 +106,83 @@ type IO (a ∷ T r)  = ST RealWorld a
 -- | A computation performing some I\/O
 type IO_ = ST_ RealWorld
 
-
 type Small :: forall {l :: Levity} {k}.
               (T# l -> k) -> T# l -> k
 type family Small a = sa | sa -> a where
-  Small A = A_Small
-  Small M_A = M_A_Small
+  Small A_Box = A_Box_Small
+  Small A_Box_M = A_Box_Small_M
 
-type A_Small :: forall {l :: Levity}. T# l -> T_
-newtype A_Small x = SmallArray# (SmallArray# x)
+type A_Box_Small :: forall {l :: Levity}. T# l -> T_
+newtype A_Box_Small x = SmallArray# (SmallArray# x)
 
-type M_A_Small :: forall {l :: Levity}. T# l -> * -> T_
-newtype M_A_Small x s = M_SmallArray# (SmallMutableArray# s x)
+type A_Box_Small_M :: forall {l :: Levity}. T# l -> * -> T_
+newtype A_Box_Small_M x s = SmallArray_M# (SmallMutableArray# s x)
 
-type A :: forall {l :: Levity}. T# l -> T_
-newtype A x = Array# (Array# x)
+type A_Box :: forall {l :: Levity}. T# l -> T_
+newtype A_Box x = Array# (Array# x)
 
 
-type M_A :: forall {l :: Levity}. T# l -> * -> T_
-newtype M_A x s = M_Array# (MutableArray# s x)
+type A_Box_M :: forall {l :: Levity}. T# l -> * -> T_
+newtype A_Box_M x s = MutableArray# (MutableArray# s x)
 
 -- Unpinned
-newtype A# = UnpinnedByteArray# ByteArray#
+newtype Bytes = UnpinnedByteArray# ByteArray#
 
 -- | An unboxed vector with offset and length
-newtype V# = V# (# A# , I , I #)
+newtype Buffer = Bytes_Off_Len# (# ByteArray# , I , I #)
+newtype Buffer_Pinned = PinnedBytes_Off_Len# (# ByteArray# , I , I #)
 
-type M_A# :: * -> T_
-newtype M_A# s = M_UnpinnedByteArray# (MutableByteArray# s)
+type Bytes_M :: * -> T_
+newtype Bytes_M s = M_UnpinnedByteArray# (MutableByteArray# s)
 
-type A_Pinned# :: T_
-newtype A_Pinned# = PinnedByteArray# ByteArray#
+type Bytes_Pinned :: T_
+newtype Bytes_Pinned = PinnedByteArray# ByteArray#
 
-type M_A_Pinned# :: * -> T_
-newtype M_A_Pinned# s = M_PinnedByteArray# (MutableByteArray# s)
+type Bytes_Pinned_M :: * -> T_
+newtype Bytes_Pinned_M s = M_PinnedByteArray# (MutableByteArray# s)
 
-type A_ :: forall (r :: RuntimeRep). T r -> T_
-newtype A_ x = A# A#
+type A_Unbox :: forall {r :: RuntimeRep}. T r -> T_
+newtype A_Unbox x = Bytes Bytes
 
-type M_A_ :: forall (r :: RuntimeRep). T r -> * -> T_
-newtype M_A_ x s = M_A# (M_A# s)
+type A_Unbox_M :: forall (r :: RuntimeRep). T r -> * -> T_
+newtype A_Unbox_M x s = Bytes_M (Bytes_M s)
 
-type A_Pinned_ :: forall (r :: RuntimeRep). T r -> T_
-newtype A_Pinned_ x = A_Pinned# A_Pinned#
+type A_Unbox_Pinned :: forall (r :: RuntimeRep). T r -> T_
+newtype A_Unbox_Pinned x = Bytes_Pinned Bytes_Pinned
 
-type M_A_Pinned_ :: forall (r :: RuntimeRep). T r -> * -> T_
-newtype M_A_Pinned_ x s = M_A_Pinned# (M_A_Pinned# s)
+type A_Unbox_Pinned_M :: forall (r :: RuntimeRep). T r -> * -> T_
+newtype A_Unbox_Pinned_M x s = Bytes_Pinned_M (Bytes_Pinned_M s)
 
-type M :: forall {r :: RuntimeRep} {t :: *}. TYPE r -> t
+type A :: forall {r :: RuntimeRep}. T r -> T_
+type family A x = a where
+  A (x :: *) = A_Box x
+  A (x :: T# Unlifted) = A_Box x
+  A (x :: T IntRep) = A_Unbox x
+  A (x :: T Int8Rep) = A_Unbox x
+  A (x :: T Int16Rep) = A_Unbox x
+  A (x :: T Int32Rep) = A_Unbox x
+  A (x :: T Int64Rep) = A_Unbox x
+  A (x :: T WordRep) = A_Unbox x
+  A (x :: T Word8Rep) = A_Unbox x
+  A (x :: T Word16Rep) = A_Unbox x
+  A (x :: T Word32Rep) = A_Unbox x
+  A (x :: T Word64Rep) = A_Unbox x
+  A (x :: T FloatRep) = A_Unbox x
+  A (x :: T DoubleRep) = A_Unbox x
+  A (x :: T AddrRep) = A_Unbox x
+
+type M :: forall {r :: RuntimeRep}. T r -> * -> T r
 type family M a = ma | ma → a where
-  M A# = M_A#
-  M (A_ x) = M_A_ x
-  M A_Pinned# = M_A_Pinned#
-  M (A_Pinned_ x) = (M_A_Pinned_ x)
-  M (A_Small x) = M_A_Small x
-  M (A x) = M_A x
+  M Bytes = Bytes_M
+  M (A_Unbox x) = A_Unbox_M x
+  M Bytes_Pinned = Bytes_Pinned_M
+  M (A_Unbox_Pinned x) = (A_Unbox_Pinned_M x)
+  M (A_Box_Small x) = A_Box_Small_M x
+  M (A_Box x) = A_Box_M x
+  M ByteArray# = MutableByteArray#
+  M P# = M#
+
+{-
   M (☸) = (☸)
   M P# = P#
   M (P_ (x ∷ T r)) = P_ x
@@ -170,15 +191,18 @@ type family M a = ma | ma → a where
   M (P_Sync s x) = P_Sync s x
   M (P_Weak x) = P_Weak x
   M (P_Stable x) = P_Stable x
+-}
 
 -- | A C-style null-terminated string
 newtype S# ∷ K P# where S# ∷ Addr# → S#
 
 type P# = Addr#
-type P_ :: forall {r :: RuntimeRep}. T r -> T AddrRep
-newtype P_ x = P# P#
+--type M# :: forall {r :: RuntimeRep}. T r -> * -> T r
+newtype M# s = Mutable P#
+type P_Unbox :: forall {r :: RuntimeRep}. T r -> T AddrRep
+newtype P_Unbox x = P# P#
 
-type P = MutVar#
+type P_Box = MutVar#
 type P_Async = TVar#
 -- | A synchronising variable, used for communication between concurrent threads.
 -- It can be thought of as a box, which may be empty or full.

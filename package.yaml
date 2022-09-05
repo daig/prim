@@ -44,6 +44,14 @@ default-extensions:
   - TypeApplications
   - FlexibleContexts
   - LambdaCase
+  - LexicalNegation
+  - TupleSections
+  - NumericUnderscores
+  - BinaryLiterals
+  - HexFloatLiterals
+  - StandaloneKindSignatures
+  - QualifiedDo
+  - DerivingVia
 
 library:
   source-dirs: src

@@ -141,16 +141,16 @@ instance (≤) F64 where
   (<) = coerce (<##)
   (≤) = coerce (<=##)
 
-instance (≡) (M_A# s) where
+instance (≡) (Bytes_M s) where
   (≡) = coerce sameMutableByteArray#
   as ≠ bs = (¬) (as ≡ bs)
-instance (≡) (M_A_Small x s) where
+instance (≡) (A_Box_Small_M x s) where
   (≡) = coerce (sameSmallMutableArray# @_ @x)
   as ≠ bs = (¬) (as ≡ bs)
-instance (≡) (M_A x s) where
+instance (≡) (A_Box_M x s) where
   (≡) = coerce (sameMutableArray# @_ @x)
   as ≠ bs = (¬) (as ≡ bs)
-instance (≡) (P s x) where
+instance (≡) (P_Box s x) where
   (≡) = coerce (sameMutVar# @s @x)
   as ≠ bs = (¬) (as ≡ bs)
 instance (≡) (P_Async s x) where
@@ -162,10 +162,12 @@ instance (≡) (P_Sync s x) where
 instance (≡) (P_Stable x) where
   (≡) = coerce (eqStablePtr# @x)
   as ≠ bs = (¬) (as ≡ bs)
-instance (≡) V# where
+instance (≡) Buffer where
   a ≡ b = case cmp a b of EQ → T; _ → F
+deriving via Buffer instance (≡) Buffer_Pinned
   
-instance (≤) V# where
-  V# (# UnpinnedByteArray# a, i, n #) `cmp` V# (# UnpinnedByteArray# b , j, m #)
+instance (≤) Buffer where
+  Bytes_Off_Len# (# a, i, n #) `cmp` Bytes_Off_Len# (# b , j, m #)
     = let mn = case n < m of {T → n; _ → m}
       in Ordering# do compareByteArrays# a i b j mn
+deriving via Buffer instance (≤) Buffer_Pinned 

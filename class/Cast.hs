@@ -3,6 +3,7 @@ module Cast where
 import Do as Prim
 import Unsafe.Coerce
 
+-- | Nontrivial conversions between types. Use with care!
 type Cast :: forall {r :: RuntimeRep} {r' :: RuntimeRep}. T r -> T r' -> C
 class Cast b a where cast ∷ a → b
 
@@ -43,14 +44,14 @@ instance Cast U64 U where cast = wordToWord64#
 -- Freezing and Thawing Arrays
 
 -- | Original array should not be used again
-instance Cast (M_A# s) A# where cast = unsafeCoerce#
+instance Cast (Bytes_M s) Bytes where cast = unsafeCoerce#
 -- | Original array should not be used again
-instance Cast A# (M_A# s) where
+instance Cast Bytes (Bytes_M s) where
   cast (M_UnpinnedByteArray# m) = UnpinnedByteArray# (runST (unsafeFreezeByteArray# (unsafeCoerce# m)))
 
 --
 -- | Original array should not be used again
-instance Cast (M_Pinned# s) Pinned# where cast = unsafeCoerce#
+instance Cast (Bytes_Pinned_M s) Bytes_Pinned where cast = unsafeCoerce#
 -- instance Cast Pinned# (M_Pinned# s) where cast m = run (coerce (unsafeFreezeByteArray# (coerce m)))
 
 -- | Original array should not be used again
@@ -74,12 +75,15 @@ instance Cast (M_Pinned# s) Pinned# where cast = unsafeCoerce#
 
 -- copyByteArray# src src_ofs dst dst_ofs n
 
-instance Cast A# V# where
-  cast (V# (# a@(UnpinnedByteArray# x), off, n #)) = runST Prim.do
+instance Cast Bytes Buffer where
+  cast (Bytes_Off_Len# (# x, off, n #)) = runST Prim.do
     mv <- newByteArray# n
     \s -> (# copyByteArray# x off mv 0# n s, (##) #)
     v <- unsafeFreezeByteArray# mv
     return (UnpinnedByteArray# v)
   
 
-instance Cast V# A# where cast a@(UnpinnedByteArray# x) = V# (# a, 0#, sizeofByteArray# x #)
+instance Cast Buffer Bytes where
+  cast (UnpinnedByteArray# x) = Bytes_Off_Len# (# x, 0#, sizeofByteArray# x #)
+
+instance Cast P# Bytes_Pinned where cast = coerce byteArrayContents#
