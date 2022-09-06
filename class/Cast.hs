@@ -1,4 +1,3 @@
-{-# LANGUAGE StandaloneKindSignatures, QualifiedDo #-}
 module Cast where
 import Do as Prim
 import Unsafe.Coerce
@@ -19,9 +18,10 @@ instance Cast F64 I where cast = int2Double#
 instance Cast B I where cast = coerce (0# >#)
 instance Cast B U where cast = coerce do gtWord# 0##
 
-instance Cast I F64 where cast = double2Int#
 instance Cast F32 F64 where cast = double2Float#
 instance Cast F64 F32 where cast = float2Double#
+instance Cast I F32 where cast = float2Int#
+instance Cast I F64 where cast = double2Int#
 
 instance Cast I I8 where cast = int8ToInt#
 instance Cast I I16 where cast = int16ToInt#
@@ -87,3 +87,11 @@ instance Cast Buffer Bytes where
   cast (UnpinnedByteArray# x) = Bytes_Off_Len# (# x, 0#, sizeofByteArray# x #)
 
 instance Cast P# Bytes_Pinned where cast = coerce byteArrayContents#
+
+instance Cast I Char where cast = ord#
+instance Cast Char I where cast = chr#
+
+-- | This pattern is strongly deprecated
+instance Cast P# I where cast = int2Addr#
+-- | This pattern is strongly deprecated
+instance Cast I P# where cast = addr2Int#

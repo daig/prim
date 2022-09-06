@@ -52,6 +52,7 @@ default-extensions:
   - StandaloneKindSignatures
   - QualifiedDo
   - DerivingVia
+  - ImportQualifiedPost
 
 library:
   source-dirs: src
@@ -108,9 +109,19 @@ internal-libraries:
     c-sources: ffi/cbits/primitive-memops.c
     dependencies: ghc-prim
   thread:
-    other-modules: []
+    other-modules: Prelude
     source-dirs: thread
     visibility: public
     dependencies:
       - prim:type
       - prim:class
+  data:
+    other-modules: Prelude
+    source-dirs: data
+    visibility: public
+    dependencies:
+      - prim:type
+      - prim:class
+      - prim:ffi
+      - prim:stock
+      - ghc-prim

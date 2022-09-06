@@ -6,7 +6,6 @@ import Cast as X
 import Num as X
 import Bits as X
 
-type U = Word#
 
 -- | Modular subtraction.
 (-#) ∷ U → U → U
@@ -17,7 +16,3 @@ type U = Word#
 --           component of the pair. See also 'addC'.
 add2 ∷ U → U → (# U, U #)
 add2 y x = plusWord2# x y
-
-pattern Max, Min ∷ U
-pattern Max = 0xFFFFFFFFFFFFFFFF##
-pattern Min = 0##

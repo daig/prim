@@ -171,3 +171,6 @@ instance (≤) Buffer where
     = let mn = case n < m of {T → n; _ → m}
       in Ordering# do compareByteArrays# a i b j mn
 deriving via Buffer instance (≤) Buffer_Pinned 
+
+instance (≤) P# where (>) = unsafeCoerce# gtAddr# ; (≥) = unsafeCoerce# geAddr# ; (<) = unsafeCoerce# ltAddr# ; (≤) = unsafeCoerce# leAddr# ;
+instance (≡) P# where (≡) = unsafeCoerce# eqAddr# ; (≠) = unsafeCoerce# neAddr#

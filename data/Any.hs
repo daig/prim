@@ -16,14 +16,11 @@ module Any
 -- Note we can't fiddle with tagToEnum# eg to rename
 -- because of ghc magic preventing it used at higher order
 
-
-import Prim.A.Prim
-import qualified Prim.A.Boxed.Big as Big
 import P
-import Stock.I
+import I qualified as Stock
 -- #include "ClosureTypes.h"
 
-foreign import capi "Rts.h value FUN" fun ∷ Int
+foreign import capi "Rts.h value FUN" fun ∷ Stock.I
 
 -- | Compare pointers, which may be moved by the GC.
 -- __/Warning:/__ this can fail with an unchecked exception.
@@ -46,8 +43,8 @@ fromP = addrToAny#
 --      bytes of the closure, and a pointer array for the pointers in the payload. 
 --
 -- see <https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/storage/heap-objects The Layout of Heap Objects>
-unpack ∷ a → (# P U, A U, Big.A b #)
-unpack a = case unpackClosure# a of (# p, raw , pl #) → (# P# p , A# raw , pl #)
+unpack ∷ forall a b. a → (# P#, Bytes, A b #)
+unpack = coerce (unpackClosure# @a @b)
 
 size# ∷ a → I {- ^ # machine words -}
 size# = closureSize#

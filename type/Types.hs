@@ -89,7 +89,13 @@ pattern U64 ∷ U → U64
 pattern U64 u ← (word64ToWord# → u) where U64 = wordToWord64#
 {-# complete U64 #-}
 
+-- | Single-precision floating point numbers.
+-- It is desirable that this type be at least equal in range and precision
+-- to the IEEE single-precision type.
 type F32 = Float#
+-- | Double-precision floating point numbers.
+-- It is desirable that this type be at least equal in range and precision
+-- to the IEEE double-precision type.
 type F64 = Double#
 
 type ST s (a ∷ T ra) = State# s → (# State# s , a #)
@@ -194,10 +200,10 @@ type family M a = ma | ma → a where
 -}
 
 -- | A C-style null-terminated string
-newtype S# ∷ K P# where S# ∷ Addr# → S#
+type S# = Addr#
 
+-- | An arbitrary machine address assumed to point outside the garbage-collected heap
 type P# = Addr#
---type M# :: forall {r :: RuntimeRep}. T r -> * -> T r
 newtype M# s = Mutable P#
 type P_Unbox :: forall {r :: RuntimeRep}. T r -> T AddrRep
 newtype P_Unbox x = P# P#
