@@ -1,8 +1,6 @@
 --------------------------------------------------------------------
 -- | Description : Operations on any lifted value
 --------------------------------------------------------------------
-{-# language CPP #-}
-{-# language ForeignFunctionInterface, CApiFFI, UnliftedFFITypes, GHCForeignImportPrim #-}
 {-# language BangPatterns #-}
 module Any
   (seq
@@ -11,16 +9,11 @@ module Any
   -- | @a@ must be an enum type (no payload)
   ,tagToEnum#
   ,toI
-  , module Any) where
+  ) where
 
 -- Note we can't fiddle with tagToEnum# eg to rename
 -- because of ghc magic preventing it used at higher order
 
-import P
-import I qualified as Stock
--- #include "ClosureTypes.h"
-
-foreign import capi "Rts.h value FUN" fun ∷ Stock.I
 
 -- | Compare pointers, which may be moved by the GC.
 -- __/Warning:/__ this can fail with an unchecked exception.
@@ -43,7 +36,7 @@ fromP = addrToAny#
 --      bytes of the closure, and a pointer array for the pointers in the payload. 
 --
 -- see <https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/storage/heap-objects The Layout of Heap Objects>
-unpack ∷ forall a b. a → (# P#, Bytes, A b #)
+unpack ∷ ∀ a b. a → (# P# , Bytes , A b #)
 unpack = coerce (unpackClosure# @a @b)
 
 size# ∷ a → I {- ^ # machine words -}

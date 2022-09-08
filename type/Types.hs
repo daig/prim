@@ -14,9 +14,11 @@ type K (a ∷ k) = k
 -- | The 'RuntimeRep' of a type
 type R# (i ∷ T r) = r
 
+type Rep = RuntimeRep
+
 type C = Constraint
 
-newtype B ∷ K I where B# ∷ {unB ∷ I} → B
+newtype B where B# ∷ {unB ∷ I} → B
 pattern F, T ∷ B
 pattern F = B# 0#
 pattern T = B# 1#
@@ -112,6 +114,10 @@ type IO (a ∷ T r)  = ST RealWorld a
 -- | A computation performing some I\/O
 type IO_ = ST_ RealWorld
 
+newtype Transaction = Transaction RealWorld
+type STM# (a ∷ T r)  = ST Transaction a
+type STM_# = ST_ Transaction
+
 type Small :: forall {l :: Levity} {k}.
               (T# l -> k) -> T# l -> k
 type family Small a = sa | sa -> a where
@@ -147,19 +153,19 @@ newtype Bytes_Pinned = PinnedByteArray# ByteArray#
 type Bytes_Pinned_M :: * -> T_
 newtype Bytes_Pinned_M s = M_PinnedByteArray# (MutableByteArray# s)
 
-type A_Unbox :: forall {r :: RuntimeRep}. T r -> T_
+type A_Unbox :: forall {r :: Rep}. T r -> T_
 newtype A_Unbox x = Bytes Bytes
 
-type A_Unbox_M :: forall (r :: RuntimeRep). T r -> * -> T_
+type A_Unbox_M :: forall (r :: Rep). T r -> * -> T_
 newtype A_Unbox_M x s = Bytes_M (Bytes_M s)
 
-type A_Unbox_Pinned :: forall (r :: RuntimeRep). T r -> T_
+type A_Unbox_Pinned :: forall (r :: Rep). T r -> T_
 newtype A_Unbox_Pinned x = Bytes_Pinned Bytes_Pinned
 
-type A_Unbox_Pinned_M :: forall (r :: RuntimeRep). T r -> * -> T_
+type A_Unbox_Pinned_M :: forall (r :: Rep). T r -> * -> T_
 newtype A_Unbox_Pinned_M x s = Bytes_Pinned_M (Bytes_Pinned_M s)
 
-type A :: forall {r :: RuntimeRep}. T r -> T_
+type A :: forall {r :: Rep}. T r -> T_
 type family A x = a where
   A (x :: *) = A_Box x
   A (x :: T# Unlifted) = A_Box x
@@ -177,7 +183,7 @@ type family A x = a where
   A (x :: T DoubleRep) = A_Unbox x
   A (x :: T AddrRep) = A_Unbox x
 
-type M :: forall {r :: RuntimeRep}. T r -> * -> T r
+type M :: forall {r :: Rep}. T r -> * -> T r
 type family M a = ma | ma → a where
   M Bytes = Bytes_M
   M (A_Unbox x) = A_Unbox_M x
@@ -205,7 +211,7 @@ type S# = Addr#
 -- | An arbitrary machine address assumed to point outside the garbage-collected heap
 type P# = Addr#
 newtype M# s = Mutable P#
-type P_Unbox :: forall {r :: RuntimeRep}. T r -> T AddrRep
+type P_Unbox :: forall {r :: Rep}. T r -> T AddrRep
 newtype P_Unbox x = P# P#
 
 type P_Box = MutVar#
@@ -254,7 +260,7 @@ and have identity, such as @ST.P@ and @Sync.P@.
 type P_Weak = Weak#
 type P_Stable = StablePtr#
 
-type Name = StableName#
+type P_Stable_Name = StableName#
 
 -- | Primitive maybe type represented by a tag and (possibly invalid) value.
 type Maybe# (a ∷ T r)  = (# B , a #)

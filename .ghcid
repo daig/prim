@@ -1,1 +1,0 @@
-cabal repl prim:data --repl-options=-XNoImplicitPrelude

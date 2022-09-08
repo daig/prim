@@ -1,0 +1,12 @@
+--------------------------------------------------------------------
+-- | Description : Unboxed Tuples
+-- [Unboxed Tuples](https://downloads.haskell.org/ghc/latest/docs/html/users_guide/glasgow_exts.html#unboxed-tuples), written @(# a , b , c #)@ etc. and their constructors
+-- @(# ,,, #)@ etc.
+--
+-- They implement multiple return, and represented merely by their elements (passed via register).
+-- In particular, the unit tuple written @(##)@ is erased at runtime.
+--
+-- Unboxed Tuples are wired into GHC.
+--
+--------------------------------------------------------------------
+module Data.Tuple where

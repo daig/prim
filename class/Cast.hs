@@ -41,6 +41,9 @@ instance Cast U16 U where cast = wordToWord16#
 instance Cast U32 U where cast = wordToWord32#
 instance Cast U64 U where cast = wordToWord64#
 
+
+instance Cast I (P_Stable_Name a) where cast = stableNameToInt#
+
 -- Freezing and Thawing Arrays
 
 -- | Original array should not be used again

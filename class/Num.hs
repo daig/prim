@@ -15,14 +15,6 @@ class (≤) a ⇒ ℕ (a ∷ T r) where
   (/), (%) ∷ a {- ^ dividend -}  → a {- ^ divisor -} → a
   -- | Satisfies @((x / y) + ((x % y) × y) ≡ x@.
   (/%) ∷ a → a → (# a , a #)
-  -- |Add reporting overflow.
-  addC ∷ a → a → (# a, B #) -- ^ The truncated sum and whether it overflowed
-  -- |Subtract reporting overflow
-  subC ∷ a → a → (# a, B #) -- ^ The truncated subtraction and whether it underflowed
-  -- | Minimum value. Mostly for consistency and documentation. For performance critical code, try 'HS_{INT,WORD}{,8,16,32,64}_MIN macro from HsFFI.h instead.
-  min ∷ (##) → a
-  -- | Maximum value. Mostly for consistency and documentation. For performance critical code, try 'HS_{INT,WORD}{,8,16,32,64}_MIN macro from HsFFI.h instead.
-  max ∷ (##) → a
 class ℕ a ⇒ ℤ (a ∷ T r) where
   -- |Satisfies @((((x // y) × y) + (x %% y) ≡ x@.
   (//),(%%) ∷ a → a → a
@@ -40,10 +32,6 @@ instance ℕ U where
   (/) = quotWord#
   (%) = remWord#
   (/%) = quotRemWord#
-  addC a b  = case addWordC# a b of (# x, p #) -> (# x , p ≠ 0# #)
-  subC a b = case subWordC# a b of (# x, p #) -> (# x , p ≠ 0# #)
-  min (##) = 0##
-  max (##) = case word_max of W# w -> w
 
 instance ℕ U8 where
   (+) = plusWord8#
@@ -51,72 +39,27 @@ instance ℕ U8 where
   (/) = quotWord8#
   (%) = remWord8#
   (/%) = quotRemWord8#
-  addC x8@(cast @U -> x) y8@(U8 y) = (# x8 + y8 , (x + y) > 0xFF## #)
-{-
-  subC (U8# a) (U8# b) = go do subC a b where
-    go ∷ (# U , B #) → (# U8, B #)
-    go (# x, b #) = (# cast x , b #)
--}
-  min (##) = U8 0##
-  max (##) = case word8_max of W# w → cast @U8 w
-
-{-
-instance ℕ U8 where
-  U8# x + U8# y = cast do x + y
-  U8# x × U8# y = cast do x × y
-  U8# x / U8# y = cast do x / y
-  U8# x % U8# y = cast do x % y
-  U8# x /% U8# y = λ coerce do x /% y
-  addC = λ\(U8# a) → λ\(U8# b) → let c = a + b
-                                        in (# cast c , U8# c > max (##) #)
-  subC (U8# a) (U8# b) = go do subC a b where
-    go ∷ (# U , B #) → (# U8, B #)
-    go (# x, b #) = (# cast x , b #)
-  max (##) = case word8_max of W# w → U8#  w
-  min (##) = U8# 0##
 
 instance ℕ U16 where
-  U16# x + U16# y = cast do x + y
-  U16# x × U16# y = cast do x × y
-  U16# x / U16# y = cast do x / y
-  U16# x % U16# y = cast do x % y
-  U16# x /% U16# y = λ coerce do x /% y
-  addC = λ\(U16# a) → λ\(U16# b) → let c = a + b
-                                        in (# cast c , U16# c > max (##) #)
-  subC (U16# a) (U16# b) = go do subC a b where
-    go ∷ (# U , B #) → (# U16, B #)
-    go (# x, b #) = (# cast x , b #)
-  max (##) = case word16_max of W# w → U16# w
-  min (##) = U16# 0##
+  (+) = plusWord16#
+  (×) = timesWord16#
+  (/) = quotWord16#
+  (%) = remWord16#
+  (/%) = quotRemWord16#
 
 instance ℕ U32 where
-  U32# x + U32# y = cast do x + y
-  U32# x × U32# y = cast do x × y
-  U32# x / U32# y = cast do x / y
-  U32# x % U32# y = cast do x % y
-  U32# x /% U32# y = λ coerce do x /% y
-  addC = λ\(U32# a) → λ\(U32# b) → let c = a + b
-                                        in (# cast c , U32# c > max (##) #)
-  subC (U32# a) (U32# b) = go do subC a b where
-    go ∷ (# U , B #) → (# U32, B #)
-    go (# x, b #) = (# cast x , b #)
-  max (##) = case word32_max of W# w → U32# w
-  min (##) = U32# 0##
+  (+) = plusWord32#
+  (×) = timesWord32#
+  (/) = quotWord32#
+  (%) = remWord32#
+  (/%) = quotRemWord32#
 
 instance ℕ U64 where
-  U64 x + U64 y = cast do x + y
-  U64 x × U64 y = cast do x × y
-  U64 x / U64 y = cast do x / y
-  U64 x % U64 y = cast do x % y
-  U64 x /% U64 y = λ coerce do x /% y
-  addC = λ\(U64 a) → λ\(U64 b) → let c = a + b
-                                      in (# cast c , U64 c > max (##) #)
-  subC (U64 a) (U64 b) = go do subC a b where
-    go ∷ (# U , B #) → (# U64, B #)
-    go (# x, b #) = (# cast x , b #)
-  max (##) = case word64_max of W# w → U64 w
-  min (##) = U64 0##
--}
+  (+) = plusWord64#
+  (×) = timesWord64#
+  (/) = quotWord64#
+  (%) = remWord64#
+  x /% y = (# x / y, x % y #)
 
 -- | Low word of signed integer multiply
 -- 
@@ -131,10 +74,6 @@ instance ℕ I where
       F → case 0# > x ∧ 0# < y of
         T → case (x + 1# ) //%% y of (# q, r #) → (# q - 1#, r + y + 1# #)
         F → x //%% y
-  addC = coerce addIntC#
-  subC = coerce subIntC#
-  min (##) = case int_min of I# i -> i
-  max (##) = case int_max of I# i -> i
 instance ℤ I where
   negate = negateInt#
   (-) = (-#)
@@ -142,83 +81,59 @@ instance ℤ I where
   (%%) = remInt#
   (//%%) = quotRemInt#
 
-{-
+
 instance ℕ I8 where
-  I8# x +  I8# y = cast (x + y)
-  I8# x ×  I8# y = cast (x × y)
-  I8# x /  I8# y = cast (x / y)
-  I8# x %  I8# y = cast (x % y)
-  I8# x /% I8# y = λ coerce do x /% y
-  addC = λ\(I8# a) → λ\(I8# b) → let c = a + b in (# cast c , I8# c > max (##) #)
-  subC = λ\(I8# a) → λ\(I8# b) → let c = a - b in (# cast c , I8# c < min (##) #)
-  max (##) = case int8_max of I# i → I8# i
-  min (##) = case int8_min of I# i → I8# i
-instance ℤ I8 where
-  negate (I8# x) = cast (negate x)
-  (I8# x) - (I8# y) = cast (x - y)
-  I8# x // I8# y = cast (x // y)
-  I8# x %% I8# y = cast (x %% y)
-  I8# x //%% I8# y = go (x //%% y) where
-    go ∷ (# I , I #) → (# I8 , I8 #)
-    go (# q, r #) = (# cast q, cast r #)
+  (+) = plusInt8#
+  (×) = timesInt8#
+  (/) = quotInt8#
+  (%) = remInt8#
+  x /% y = (# x / y, x % y #)
 
 instance ℕ I16 where
-  I16# x +  I16# y = cast (x + y)
-  I16# x ×  I16# y = cast (x × y)
-  I16# x /  I16# y = cast (x / y)
-  I16# x %  I16# y = cast (x % y)
-  I16# x /% I16# y = λ coerce do x /% y
-  addC = λ\(I16# a) → λ\(I16# b) → let c = a + b in (# cast c , I16# c > max (##) #)
-  subC = λ\(I16# a) → λ\(I16# b) → let c = a - b in (# cast c , I16# c < min (##) #)
-  max (##) = case int16_max of I# i → I16# i
-  min (##) = case int16_min of I# i → I16# i
-instance ℤ I16 where
-  negate (I16# x) = cast (negate x)
-  (I16# x) - (I16# y) = cast (x - y)
-  I16# x // I16# y = cast (x // y)
-  I16# x %% I16# y = cast (x %% y)
-  I16# x //%% I16# y = go (x //%% y) where
-    go ∷ (# I , I #) → (# I16 , I16 #)
-    go (# q, r #) = (# cast q, cast r #)
-
+  (+) = plusInt16#
+  (×) = timesInt16#
+  (/) = quotInt16#
+  (%) = remInt16#
+  x /% y = (# x / y, x % y #)
 instance ℕ I32 where
-  I32# x +  I32# y = cast (x + y)
-  I32# x ×  I32# y = cast (x × y)
-  I32# x /  I32# y = cast (x / y)
-  I32# x %  I32# y = cast (x % y)
-  I32# x /% I32# y = λ coerce do x /% y
-  addC = λ\(I32# a) → λ\(I32# b) → let c = a + b in (# cast c , I32# c > max (##) #)
-  subC = λ\(I32# a) → λ\(I32# b) → let c = a - b in (# cast c , I32# c < min (##) #)
-  max (##) = case int32_max of I# i → I32# i
-  min (##) = case int32_min of I# i → I32# i
-instance ℤ I32 where
-  negate (I32# x) = cast (negate x)
-  (I32# x) - (I32# y) = cast (x - y)
-  I32# x // I32# y = cast (x // y)
-  I32# x %% I32# y = cast (x %% y)
-  I32# x //%% I32# y = go (x //%% y) where
-    go ∷ (# I , I #) → (# I32 , I32 #)
-    go (# q, r #) = (# cast q, cast r #)
-
+  (+) = plusInt32#
+  (×) = timesInt32#
+  (/) = quotInt32#
+  (%) = remInt32#
+  x /% y = (# x / y, x % y #)
 instance ℕ I64 where
-  I64 x +  I64 y = cast (x + y)
-  I64 x ×  I64 y = cast (x × y)
-  I64 x /  I64 y = cast (x / y)
-  I64 x %  I64 y = cast (x % y)
-  I64 x /% I64 y = λ coerce do x /% y
-  addC = λ\(I64 a) → λ\(I64 b) → let c = a + b in (# cast c , I64 c > max (##) #)
-  subC = λ\(I64 a) → λ\(I64 b) → let c = a - b in (# cast c , I64 c < min (##) #)
-  max (##) = case int64_max of I# i → I64 i
-  min (##) = case int64_min of I# i → I64 i
+  (+) = plusInt64#
+  (×) = timesInt64#
+  (/) = quotInt64#
+  (%) = remInt64#
+  x /% y = (# x / y, x % y #)
+
+instance ℤ I8 where
+  negate = negateInt8#
+  (-) = subInt8# 
+  (//) = quotInt8#
+  (%%) = remInt8#
+  (//%%) = quotRemInt8#
+
+instance ℤ I16 where
+  negate = negateInt16#
+  (-) = subInt16# 
+  (//) = quotInt16#
+  (%%) = remInt16#
+  (//%%) = quotRemInt16#
+instance ℤ I32 where
+  negate = negateInt32#
+  (-) = subInt32# 
+  (//) = quotInt32#
+  (%%) = remInt32#
+  (//%%) = quotRemInt32#
 instance ℤ I64 where
-  negate (I64 x) = cast (negate x)
-  (I64 x) - (I64 y) = cast (x - y)
-  I64 x // I64 y = cast (x // y)
-  I64 x %% I64 y = cast (x %% y)
-  I64 x //%% I64 y = go (x //%% y) where
-    go ∷ (# I , I #) → (# I64 , I64 #)
-    go (# q, r #) = (# cast q, cast r #)
--}
+  negate = negateInt64#
+  (-) = subInt64# 
+  (//) = quotInt64#
+  (%%) = remInt64#
+  (cast -> a) //%% (cast -> b) =
+    case quotRemInt# a b of (# q, r #) -> (# cast q, cast r #)
 
 instance ℕ F32 where
   (+) = plusFloat#
@@ -226,8 +141,6 @@ instance ℕ F32 where
   (/) = divideFloat#
   _ % _ = 0.0#
   x /% y = (# x / y , 0.0# #)
-  addC a b = let c = a + b in (# c , c ≡ (1.0# / 0.0# ) #)
-  subC a b = let c = a - b in (# c , c ≡ (-1.0# / 0.0# ) #)
 instance ℤ F32 where
   negate = negateFloat#
   (-) = minusFloat#
@@ -255,8 +168,6 @@ instance ℕ F64 where
   (/) = (/##)
   _ % _ = 0.0##
   x /% y = (# x / y , 0.0## #)
-  addC a b = let c = a + b in (# c , c ≡ (1.0## / 0.0## ) #)
-  subC a b = let c = a - b in (# c , c ≡ (-1.0## / 0.0## ) #)
 instance ℤ F64 where
   negate = negateDouble#
   (-) = (-##)

@@ -16,3 +16,10 @@ import Bits as X
 --           component of the pair. See also 'addC'.
 add2 ∷ U → U → (# U, U #)
 add2 y x = plusWord2# x y
+
+-- |Add reporting overflow.
+addC ∷ U → U → (# U, B #) -- ^ The truncated sum and whether it overflowed
+addC = coerce addWordC#
+-- |Subtract reporting overflow
+subC ∷ U → U → (# U, B #) -- ^ The truncated subtraction and whether it underflowed
+subC = coerce subWordC

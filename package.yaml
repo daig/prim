@@ -124,4 +124,6 @@ internal-libraries:
       - prim:class
       - prim:ffi
       - prim:stock
+      - prim:do
       - ghc-prim
+      - base

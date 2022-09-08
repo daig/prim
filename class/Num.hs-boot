@@ -7,12 +7,6 @@ class (≤) a ⇒ ℕ (a ∷ T r) where
   -- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
   (/), (%) ∷ a {- ^ dividend -}  → a {- ^ divisor -} → a
   (/%) ∷ a → a → (# a , a #)
-  -- |Add reporting overflow.
-  addC ∷ a → a → (# a, B #) -- ^ The truncated sum and whether it overflowed
-  -- |Subtract reporting overflow
-  subC ∷ a → a → (# a, B #) -- ^ The truncated subtraction and whether it underflowed
-  min ∷ (##) → a
-  max ∷ (##) → a
 class ℕ a ⇒ ℤ (a ∷ T r) where
   -- |Satisfies @((((x // y) × y) + (x %% y) ≡ x@.
   (//),(%%) ∷ a → a → a
