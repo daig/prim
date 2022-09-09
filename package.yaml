@@ -102,10 +102,9 @@ internal-libraries:
     visibility: public
     dependencies: ghc-prim
   ffi:
-    other-modules: []
+    other-modules: Prelude
     source-dirs: ffi
     visibility: public
-    includes: ffi/cbits/primitive-memops.h
     c-sources: ffi/cbits/primitive-memops.c
     dependencies: ghc-prim
   thread:

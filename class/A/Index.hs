@@ -73,3 +73,6 @@ instance (♭) x ⇒ (x ∷ T r) ∈ P# where
   index# = indexP#
   read# = coerce (readP# @x)
   write# = coerce (writeP# @x)
+
+-- | Bit indexing (no @read#@ or @write#@)
+--instance B ∈ U where index# u i = B# (geWord# (and# u (uncheckedShiftL# 1## (word2Int# u))) 1## )

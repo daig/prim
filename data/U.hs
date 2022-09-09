@@ -1,10 +1,17 @@
 --------------------------------------------------------------------
--- | Description : Word-sized Natural numbers
+-- | Description : Machine-sized Unsigned Integers
 --------------------------------------------------------------------
-module U (module U, module X) where
+module U (U,Word#
+          -- * misc utilities
+          , module U
+          -- * Instance reexports
+          , module X
+          ) where
 import Cast as X
+import Cmp as X
 import Num as X
 import Bits as X
+import Prim as X
 
 
 -- | Modular subtraction.
@@ -22,4 +29,4 @@ addC ∷ U → U → (# U, B #) -- ^ The truncated sum and whether it overflowed
 addC = coerce addWordC#
 -- |Subtract reporting overflow
 subC ∷ U → U → (# U, B #) -- ^ The truncated subtraction and whether it underflowed
-subC = coerce subWordC
+subC = coerce subWordC#

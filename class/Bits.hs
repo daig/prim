@@ -69,11 +69,9 @@ instance 𝔹 U where
   (¬) = not#
   shiftL# w i = uncheckedShiftL# w (cast i)
   shiftL w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftL# w i}
-  shiftR# i w = uncheckedShiftRL# w (cast i)
-  shiftR w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftL# w i}
-  shift w i = case i ≥ 0# of
-    T → case i ≥ WORD_SIZE_IN_BITS# of {B# 1# → 0##; B# 0# → uncheckedShiftL# w i}
-    F → case i ≤ WORD_SIZE_IN_BITS# of {B# 1# → 0##; B# 0# → uncheckedShiftRL# w (negateInt# i)}
+  shiftR# w i = coerce uncheckedShiftRL# w (cast @I i)
+  shiftR w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftR# w i}
+  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
   popCnt = popCnt#
   clz = clz#
   ctz = ctz#
@@ -82,67 +80,74 @@ instance 𝔹 U where
   pdep = pdep#
   pext = pext#
 
-{-
 instance 𝔹 U8 where
-  (∧) = coerce ((∧) @_ @U)
-  (∨) = coerce ((∨) @_ @U)
-  (⊕) = coerce ((⊕) @_ @U)
-  (¬) (U8# u) = cast (u ¬)
-  shiftL# (U8# w) i = cast do (λ\x → λ\y → uncheckedShiftL# x y) w (cast i)
-  shiftL = λ\w → λ\i → case i ≥ 8## of {T → U8# 0##; F → shiftL# w i}
-  shiftR# (U8# w) i = cast do (λ\x → λ\y → uncheckedShiftRL# x y) w (cast i)
-  shiftR = λ\w → λ\i → case i ≥ 8## of {T → U8# 0##; F → shiftL# w i}
-  shift = λ\(U8# w) → λ\i → case i ≥ 0# of
-    T → case i ≥  8# of {T → U8# 0##; F → cast (uncheckedShiftRL# w i)}
-    F → case i ≤ -8# of {T → U8# 0##; F → cast (uncheckedShiftRL# w (negateInt# i))}
-  popCnt = coerce (λ popCnt8#)
-  clz = coerce (λ clz8#)
-  ctz = coerce (λ ctz8#)
+  (∧) = andWord8#
+  (∨) = orWord8#
+  (⊕) = xorWord8#
+  (¬) = notWord8#
+  shiftL# w i = uncheckedShiftLWord8# w (cast @I i)
+  shiftL w i = case i ≥ 8## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
+  shiftR# w i = uncheckedShiftRLWord8# w (cast @I i)
+  shiftR w i = case i ≥ 8## of {B# 1# → cast 0##; B# 0# → shiftR# w i}
+  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  popCnt w = popCnt8# (cast @U w)
+  clz w = clz8# (cast @U w)
+  ctz w = ctz8# (cast @U w)
   byteSwap x = x
-  bitReverse = coerce (λ bitReverse8#)
-  pdep = coerce do λ\i → λ do pdep8# i
-  pext = coerce do λ\i → λ do pext8# i
+  bitReverse w = cast @U8 (bitReverse8# (cast @U w))
+  pdep s m = cast @U8 (pdep8# (cast @U s) (cast @U m))
+  pext s m = cast @U8 (pext8# (cast @U s) (cast @U m))
 
 instance 𝔹 U16 where
-  (∧) = coerce ((∧) @_ @U)
-  (∨) = coerce ((∨) @_ @U)
-  (⊕) = coerce ((⊕) @_ @U)
-  (¬) (U16# u) = cast (u ¬)
-  shiftL# (U16# w) i = cast do (λ\x → λ\y → uncheckedShiftL# x y) w (cast i)
-  shiftL = λ\w → λ\i → case i ≥ 16## of {T → U16# 0##; F → shiftL# w i}
-  shiftR# (U16# w) i = cast do (λ\x → λ\y → uncheckedShiftRL# x y) w (cast i)
-  shiftR = λ\w → λ\i → case i ≥ 16## of {T → U16# 0##; F → shiftL# w i}
-  shift = λ\(U16# w) → λ\i → case i ≥ 0# of
-    T → case i ≥  16# of {T → U16# 0##; F → cast (uncheckedShiftRL# w i)}
-    F → case i ≤ -16# of {T → U16# 0##; F → cast (uncheckedShiftRL# w (negateInt# i))}
-  popCnt = coerce (λ popCnt16#)
-  clz = coerce (λ clz16#)
-  ctz = coerce (λ ctz16#)
-  byteSwap = coerce (λ byteSwap16#)
-  bitReverse = coerce (λ bitReverse16#)
-  pdep = coerce do λ\i → λ do pdep16# i
-  pext = coerce do λ\i → λ do pext16# i
+  (∧) = andWord16#
+  (∨) = orWord16#
+  (⊕) = xorWord16#
+  (¬) = notWord16#
+  shiftL# w i = uncheckedShiftLWord16# w (cast @I i)
+  shiftL w i = case i ≥ 16## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
+  shiftR# w i = uncheckedShiftRLWord16# w (cast @I i)
+  shiftR w i = case i ≥ 16## of {B# 1# → cast 0##; B# 0# → shiftR# w i}
+  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  popCnt w = popCnt16# (cast @U w)
+  clz w = clz16# (cast @U w)
+  ctz w = ctz16# (cast @U w)
+  byteSwap w = cast (byteSwap16# (cast w))
+  bitReverse w = cast @U16 (bitReverse16# (cast @U w))
+  pdep s m = cast @U16 (pdep16# (cast @U s) (cast @U m))
+  pext s m = cast @U16 (pext16# (cast @U s) (cast @U m))
 
 instance 𝔹 U32 where
-  (∧) = coerce ((∧) @_ @U)
-  (∨) = coerce ((∨) @_ @U)
-  (⊕) = coerce ((⊕) @_ @U)
-  (¬) (U32# u) = cast (u ¬)
-  shiftL# (U32# w) i = (cast uncheckedShiftL#) w (cast i)
-  shiftL w i = case i ≥ 32## of {T → U32# 0##; F → shiftL# w i}
-  shiftR# (U32# w) i = cast (uncheckedShiftRL# w (cast i))
-  shiftR w i = case i ≥ 32## of {T → U32# 0##; F → shiftL# w i}
-  shift (U32# w) i = case i ≥ 0# of
-    T → case i ≥  32# of {T → U32# 0##; F → cast (uncheckedShiftRL# w i)}
-    F → case i ≤ -32# of {T → U32# 0##; F → cast (uncheckedShiftRL# w (negateInt# i))}
-  popCnt = coerce popCnt32#
-  clz = coerce clz32#
-  ctz = coerce ctz32#
-  byteSwap = coerce byteSwap32#
-  bitReverse = coerce bitReverse32#
-  pdep = coerce pdep32#
-  pext = coerce pext32#
+  (∧) = andWord32#
+  (∨) = orWord32#
+  (⊕) = xorWord32#
+  (¬) = notWord32#
+  shiftL# w i = uncheckedShiftLWord32# w (cast @I i)
+  shiftL w i = case i ≥ 32## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
+  shiftR# w i = uncheckedShiftRLWord32# w (cast @I i)
+  shiftR w i = case i ≥ 32## of {B# 1# → cast 0##; B# 0# → shiftR# w i}
+  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  popCnt w = popCnt32# (cast @U w)
+  clz w = clz32# (cast @U w)
+  ctz w = ctz32# (cast @U w)
+  byteSwap w = cast (byteSwap32# (cast w))
+  bitReverse w = cast @U32 (bitReverse32# (cast @U w))
+  pdep s m = cast @U32 (pdep32# (cast @U s) (cast @U m))
+  pext s m = cast @U32 (pext32# (cast @U s) (cast @U m))
 
-deriving newtype instance 𝔹 U64
--}
-
+instance 𝔹 U64 where
+  (∧) = and64#
+  (∨) = or64#
+  (⊕) = xor64#
+  (¬) = not64#
+  shiftL# w i = uncheckedShiftL64# w (cast @I i)
+  shiftL w i = case i ≥ 64## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
+  shiftR# w i = uncheckedShiftRL64# w (cast @I i)
+  shiftR w i = case i ≥ 64## of {B# 1# → cast 0##; B# 0# → shiftR# w i}
+  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  popCnt = popCnt64#
+  clz = clz64#
+  ctz = ctz64#
+  byteSwap = byteSwap64#
+  bitReverse = bitReverse64#
+  pdep = pdep64#
+  pext = pext64#

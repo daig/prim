@@ -18,7 +18,7 @@ type Rep = RuntimeRep
 
 type C = Constraint
 
-newtype B where B# ∷ {unB ∷ I} → B
+newtype B = B# I
 pattern F, T ∷ B
 pattern F = B# 0#
 pattern T = B# 1#
@@ -37,7 +37,7 @@ pattern GT ← ((\ (Ordering# i) → i >#  0# ) → 1# ) where GT = Ordering#  1
 type Char = Char#
 
 -- | 8-bit Latin-1 code points
-newtype Char8 ∷ K U where Char8# ∷ Char → Char8
+newtype Char8 = Char8# Char
 
 type I = Int#
 type I8 = Int8#
@@ -114,10 +114,6 @@ type IO (a ∷ T r)  = ST RealWorld a
 -- | A computation performing some I\/O
 type IO_ = ST_ RealWorld
 
-newtype Transaction = Transaction RealWorld
-type STM# (a ∷ T r)  = ST Transaction a
-type STM_# = ST_ Transaction
-
 type Small :: forall {l :: Levity} {k}.
               (T# l -> k) -> T# l -> k
 type family Small a = sa | sa -> a where
@@ -167,23 +163,22 @@ newtype A_Unbox_Pinned_M x s = Bytes_Pinned_M (Bytes_Pinned_M s)
 
 type A :: forall {r :: Rep}. T r -> T_
 type family A x = a where
-  A (x :: *) = A_Box x
-  A (x :: T# Unlifted) = A_Box x
-  A (x :: T IntRep) = A_Unbox x
-  A (x :: T Int8Rep) = A_Unbox x
-  A (x :: T Int16Rep) = A_Unbox x
-  A (x :: T Int32Rep) = A_Unbox x
-  A (x :: T Int64Rep) = A_Unbox x
-  A (x :: T WordRep) = A_Unbox x
-  A (x :: T Word8Rep) = A_Unbox x
-  A (x :: T Word16Rep) = A_Unbox x
-  A (x :: T Word32Rep) = A_Unbox x
-  A (x :: T Word64Rep) = A_Unbox x
-  A (x :: T FloatRep) = A_Unbox x
-  A (x :: T DoubleRep) = A_Unbox x
-  A (x :: T AddrRep) = A_Unbox x
+  A (x :: T# _) = A_Box x
+  A (x :: K I) = A_Unbox x
+  A (x :: K I8) = A_Unbox x
+  A (x :: K I16) = A_Unbox x
+  A (x :: K I32) = A_Unbox x
+  A (x :: K I64) = A_Unbox x
+  A (x :: K U) = A_Unbox x
+  A (x :: K U8) = A_Unbox x
+  A (x :: K U16) = A_Unbox x
+  A (x :: K U32) = A_Unbox x
+  A (x :: K U64) = A_Unbox x
+  A (x :: K F32) = A_Unbox x
+  A (x :: K F64) = A_Unbox x
+  A (x :: K P#) = A_Unbox x
 
-type M :: forall {r :: Rep}. T r -> * -> T r
+type M :: forall {r ∷ Rep}. T r -> * -> T r
 type family M a = ma | ma → a where
   M Bytes = Bytes_M
   M (A_Unbox x) = A_Unbox_M x
@@ -193,17 +188,6 @@ type family M a = ma | ma → a where
   M (A_Box x) = A_Box_M x
   M ByteArray# = MutableByteArray#
   M P# = M#
-
-{-
-  M (☸) = (☸)
-  M P# = P#
-  M (P_ (x ∷ T r)) = P_ x
-  M (P s x) = P s x
-  M (P_Async s x) = P_Async s x
-  M (P_Sync s x) = P_Sync s x
-  M (P_Weak x) = P_Weak x
-  M (P_Stable x) = P_Stable x
--}
 
 -- | A C-style null-terminated string
 type S# = Addr#

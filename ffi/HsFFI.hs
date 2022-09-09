@@ -9,6 +9,8 @@
 -- #include "HsFFI.h"
 -- @
 --
+-- from @~/.ghcup/ghc/9.4.2/lib/ghc-9.4.2/lib/x86_64-linux-ghc-9.4.2/rts-1.0.2/include@
+--
 -- into a foreign c source file.
 -- 
 -- In haskell space, these imports are occasionally useful for sanity checks,
