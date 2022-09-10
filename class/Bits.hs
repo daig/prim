@@ -37,13 +37,6 @@ class Bits (a ∷ T r) where
   -- | Reverse the order of the bits.
   bitReverse ∷ a → a
   pdep, pext ∷ a {-^ source -} → a {-^ mask -} → a
-  casP ∷ P# → a {- ^ expected old value -}
-            → a {- ^ new value -}
-            → ST s a {- ^ the original value inside -}
-  casA ∷ Bytes_M s → I {- ^ offset in bytes -}
-                   → a {- ^ expected old value -}
-                   → a {- ^ new value -}
-                   → ST s a {- ^ the original value inside -}
 
 
 infixl 3 ∧
@@ -75,8 +68,6 @@ instance Bits U where
   bitReverse = bitReverse#
   pdep = pdep#
   pext = pext#
-  casP = atomicCasWordAddr#
-  casA m i x0 x1 s = case casA m i (cast @I x0) (cast @I x1) s of (# s', x #) -> (# s', cast @U x #)
 
 instance Logic U8 where
   (∧) = andWord8#
@@ -96,8 +87,6 @@ instance Bits U8 where
   bitReverse w = cast @U8 (bitReverse8# (cast @U w))
   pdep s m = cast @U8 (pdep8# (cast @U s) (cast @U m))
   pext s m = cast @U8 (pext8# (cast @U s) (cast @U m))
-  casP = atomicCasWord8Addr#
-  casA m i x0 x1 s = case casA m i (cast @I8 x0) (cast @I8 x1) s of (# s', x #) -> (# s', cast @U8 x #)
 
 instance Logic U16 where
   (∧) = andWord16#
@@ -117,8 +106,6 @@ instance Bits U16 where
   bitReverse w = cast @U16 (bitReverse16# (cast @U w))
   pdep s m = cast @U16 (pdep16# (cast @U s) (cast @U m))
   pext s m = cast @U16 (pext16# (cast @U s) (cast @U m))
-  casP = atomicCasWord16Addr#
-  casA m i x0 x1 s = case casA m i (cast @I16 x0) (cast @I16 x1) s of (# s', x #) -> (# s', cast @U16 x #)
 
 instance Logic U32 where
   (∧) = andWord32#
@@ -138,8 +125,6 @@ instance Bits U32 where
   bitReverse w = cast @U32 (bitReverse32# (cast @U w))
   pdep s m = cast @U32 (pdep32# (cast @U s) (cast @U m))
   pext s m = cast @U32 (pext32# (cast @U s) (cast @U m))
-  casP = atomicCasWord32Addr#
-  casA m i x0 x1 s = case casA m i (cast @I32 x0) (cast @I32 x1) s of (# s', x #) -> (# s', cast @U32 x #)
 
 instance Logic U64 where
   (∧) = and64#
@@ -159,8 +144,6 @@ instance Bits U64 where
   bitReverse = bitReverse64#
   pdep = pdep64#
   pext = pext64#
-  casP = atomicCasWord64Addr#
-  casA m i x0 x1 s = case casA m i (cast @I64 x0) (cast @I64 x1) s of (# s', x #) -> (# s', cast @U64 x #)
 
 instance Logic I where
   (∧) = andI#
@@ -180,8 +163,6 @@ instance Bits I where
   bitReverse i = cast (bitReverse# (cast i))
   pdep i j = cast (pdep# (cast i) (cast j))
   pext i j = cast (pext# (cast i) (cast j))
-  casP p x0 x1 s = case casP p (cast @U x0) (cast @U x1) s of (# s', x #) -> (# s', cast @I x #)
-  casA = coerce casIntArray#
 
 instance Logic I8 where
   a ∧ b = cast (andWord8# (cast a) (cast b))
@@ -201,8 +182,6 @@ instance Bits I8 where
   bitReverse i = cast (cast @U8 (bitReverse8# (cast i)))
   pdep i j = cast (cast @U8 (pdep8# (cast i) (cast j)))
   pext i j = cast (cast @U8 (pext8# (cast i) (cast j)))
-  casP p x0 x1 s = case casP p (cast @U8 x0) (cast @U8 x1) s of (# s', x #) -> (# s', cast @I8 x #)
-  casA = coerce casInt8Array#
 
 instance Logic I16 where
   a ∧ b = cast (andWord16# (cast a) (cast b))
@@ -222,8 +201,6 @@ instance Bits I16 where
   bitReverse i = cast (cast @U16 (bitReverse16# (cast i)))
   pdep i j = cast (cast @U16 (pdep16# (cast i) (cast j)))
   pext i j = cast (cast @U16 (pext16# (cast i) (cast j)))
-  casP p x0 x1 s = case casP p (cast @U16 x0) (cast @U16 x1) s of (# s', x #) -> (# s', cast @I16 x #)
-  casA = coerce casInt16Array#
 
 instance Logic I32 where
   a ∧ b = cast (andWord32# (cast a) (cast b))
@@ -243,8 +220,6 @@ instance Bits I32 where
   bitReverse i = cast (cast @U32 (bitReverse32# (cast i)))
   pdep i j = cast (cast @U32 (pdep32# (cast i) (cast j)))
   pext i j = cast (cast @U32 (pext32# (cast i) (cast j)))
-  casP p x0 x1 s = case casP p (cast @U32 x0) (cast @U32 x1) s of (# s', x #) -> (# s', cast @I32 x #)
-  casA = coerce casInt32Array#
 
 instance Logic I64 where
   a ∧ b = cast (and64# (cast a) (cast b))
@@ -264,5 +239,3 @@ instance Bits I64 where
   bitReverse i = cast (bitReverse64# (cast i))
   pdep i j = cast (pdep64# (cast i) (cast j))
   pext i j = cast (pext64# (cast i) (cast j))
-  casP p x0 x1 s = case casP p (cast @U64 x0) (cast @U64 x1) s of (# s', x #) -> (# s', cast @I64 x #)
-  casA = coerce casInt64Array#

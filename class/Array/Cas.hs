@@ -6,6 +6,95 @@ import Bits
 import Cmp
 import Coerce
 
+class PrimCas (x ∷ T r) where
+  -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided old value.
+  -- Implies a full memory barrier.
+  casP ∷ P# {-^ size-aligned pointer -}
+       → x {- ^ expected old value -}
+       → x {- ^ new value -}
+       → ST s x {- ^ the original value inside -}
+  -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided old value.
+  -- Implies a full memory barrier.
+  casA ∷ Bytes_M s
+       → I {- ^ offset in elements -}
+       → x {- ^ expected old value -}
+       → x {- ^ new value -}
+       → ST s x {- ^ the original value inside -}
+class AtomicOpsType (x ∷ T r) where
+  xor_atomicP, or_atomicP, and_atomicP, nand_atomicP, sub_atomicP, add_atomicP ∷ P# → x → ST s x
+  read_atomicP ∷ P# → ST s x
+  write_atomicP ∷ P# → x → ST_ s
+  xor_atomicB, or_atomicB, and_atomicB, nand_atomicB, sub_atomicB, add_atomicB ∷ Bytes_M s → I → x → ST s x
+  read_atomicB ∷ Bytes_M s → I →  ST s x
+  write_atomicB ∷ Bytes_M s → I → x → ST_ s
+instance PrimCas U where
+  casP = atomicCasWordAddr#
+  casA m i x0 x1 s = case casA m i (cast @I x0) (cast @I x1) s of (# s', x #) -> (# s', cast @U x #)
+instance AtomicOpsType U where
+  xor_atomicP = coerce fetchXorWordAddr#
+  or_atomicP = coerce fetchOrWordAddr#
+  and_atomicP = coerce fetchAndWordAddr#
+  nand_atomicP = coerce fetchNandWordAddr#
+  sub_atomicP = coerce fetchSubWordAddr#
+  add_atomicP = coerce fetchAddWordAddr#
+  read_atomicP = coerce atomicReadWordAddr#
+  write_atomicP = coerce atomicWriteWordAddr#
+  xor_atomicB (coerce → m) i (cast → x) s = case fetchXorIntArray# m i x s of (# s', cast → w #) → (# s', w #)
+  or_atomicB (coerce → m) i (cast → x) s = case fetchOrIntArray# m i x s of (# s', cast → w #) → (# s', w #)
+  and_atomicB (coerce → m) i (cast → x) s = case fetchAndIntArray# m i x s of (# s', cast → w #) → (# s', w #)
+  nand_atomicB (coerce → m) i (cast → x) s = case fetchNandIntArray# m i x s of (# s', cast → w #) → (# s', w #)
+  sub_atomicB (coerce → m) i (cast → x) s = case fetchSubIntArray# m i x s of (# s', cast → w #) → (# s', w #)
+  add_atomicB (coerce → m) i (cast → x) s = case fetchAddIntArray# m i x s of (# s', cast → w #) → (# s', w #)
+  read_atomicB (coerce → m) i s = case atomicReadIntArray# m i s of (# s', cast → w #) → (# s', w #)
+  write_atomicB (coerce → m) i (cast → x) = atomicWriteIntArray# m i x
+
+instance PrimCas U8 where
+  casP = atomicCasWord8Addr#
+  casA m i x0 x1 s = case casA m i (cast @I8 x0) (cast @I8 x1) s of (# s', x #) -> (# s', cast @U8 x #)
+instance PrimCas U16 where
+  casP = atomicCasWord16Addr#
+  casA m i x0 x1 s = case casA m i (cast @I16 x0) (cast @I16 x1) s of (# s', x #) -> (# s', cast @U16 x #)
+instance PrimCas U32 where
+  casP = atomicCasWord32Addr#
+  casA m i x0 x1 s = case casA m i (cast @I32 x0) (cast @I32 x1) s of (# s', x #) -> (# s', cast @U32 x #)
+instance PrimCas U64 where
+  casP = atomicCasWord64Addr#
+  casA m i x0 x1 s = case casA m i (cast @I64 x0) (cast @I64 x1) s of (# s', x #) -> (# s', cast @U64 x #)
+instance PrimCas I where
+  casA = coerce casIntArray#
+  casP p x0 x1 s = case casP p (cast @U x0) (cast @U x1) s of (# s', x #) -> (# s', cast @I x #)
+
+instance PrimCas I8 where
+  casP p x0 x1 s = case casP p (cast @U8 x0) (cast @U8 x1) s of (# s', x #) -> (# s', cast @I8 x #)
+  casA = coerce casInt8Array#
+instance PrimCas I16 where
+  casP p x0 x1 s = case casP p (cast @U16 x0) (cast @U16 x1) s of (# s', x #) -> (# s', cast @I16 x #)
+  casA = coerce casInt16Array#
+instance PrimCas I32 where
+  casP p x0 x1 s = case casP p (cast @U32 x0) (cast @U32 x1) s of (# s', x #) -> (# s', cast @I32 x #)
+  casA = coerce casInt32Array#
+instance PrimCas I64 where
+  casP p x0 x1 s = case casP p (cast @U64 x0) (cast @U64 x1) s of (# s', x #) -> (# s', cast @I64 x #)
+  casA = coerce casInt64Array#
+
+instance AtomicOpsType I where
+  xor_atomicB m i = coerce fetchXorIntArray# m i
+  or_atomicB m i = coerce fetchOrIntArray# m i
+  and_atomicB m i = coerce fetchAndIntArray# m i
+  nand_atomicB m i = coerce fetchNandIntArray# m i
+  sub_atomicB m i = coerce fetchSubIntArray# m i
+  add_atomicB m i = coerce fetchAddIntArray# m i
+  read_atomicB m i = coerce atomicReadIntArray# m i
+  write_atomicB m i = coerce atomicWriteIntArray# m i
+  xor_atomicP p (cast → x) s = case fetchXorWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
+  or_atomicP p (cast → x) s = case fetchOrWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
+  and_atomicP p (cast → x) s = case fetchAndWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
+  nand_atomicP p (cast → x) s = case fetchNandWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
+  sub_atomicP p (cast → x) s = case fetchSubWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
+  add_atomicP p (cast → x) s = case fetchAddWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
+  read_atomicP p s = case atomicReadWordAddr# p s of (# s', cast → x #) → (# s', x #)
+  write_atomicP p (cast → x) = atomicWriteWordAddr# p x
+
 -- | Atomic compare and swap
 type Cas ∷ ∀ {rx ∷ Rep} {ra ∷ Rep}. T rx → ★ → T ra → Constraint
 class Cas x s a | a → x where
