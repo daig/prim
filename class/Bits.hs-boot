@@ -15,6 +15,8 @@ class Bits (a ∷ T r) where
   byteSwap ∷ a → a
   bitReverse ∷ a → a
   pdep, pext ∷ a → a → a
+  casP ∷ P# → a → a → ST s a 
+  casA ∷ Bytes_M s → I → a → a → ST s a
 
 infixl 3 ∧
 infixl 2 ⊕
