@@ -3,7 +3,7 @@ module Bits where
 import Cmp
 import Cast
 
-#include "machdeps.h"
+#include "MachDeps.h"
 
 -- | (Bitwise) logical operations on primitive values
 type Logic ∷ ∀ {r ∷ Rep}. T r → Constraint

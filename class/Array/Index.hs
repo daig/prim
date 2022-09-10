@@ -13,9 +13,19 @@ class (x ∷ T r) ∈ (a ∷ T r') where
 class x ∈ a => MemSet (x ∷ T r)  (a ∷ T r') where
   set ∷ M a s → x → ST_ s
 
+-- | "A.Box".
+--
+-- @index#@ Forces the indexing but not the value. For more laziness use 'A.Box.indexLazy#'
+--
+-- @new@ uses sharing
+instance x ∈ (A_Box x) where
+  write# = coerce (writeArray# @_ @x)
+  read# = coerce (readArray# @_ @x)
+  index# a i = case coerce (indexArray# @x) a i of (# a #) -> a
+
 -- | "A.Boxed.Small".
 --
--- @index#@ Forces the indexing but not the value. For more laziness use 'indexLazy#'
+-- @index#@ Forces the indexing but not the value. For more laziness use 'A.Box.Small.indexLazy#'
 --
 -- @new@ uses sharing
 instance x ∈ (A_Box_Small x) where

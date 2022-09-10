@@ -26,4 +26,3 @@ pattern Null ← nullAddr# where Null = nullAddr#
 
 (.//) ∷ P# → I → I
 (.//) = remAddr#
-

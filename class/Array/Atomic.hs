@@ -75,7 +75,7 @@ instance Cas x s (# A_Box_Small_M x s, I #) where
 
 
 #define INST_A_CAS_(A)\
-instance ((≡) x, x ≑ A) ⇒ Cas' x s (# A_Unbox_M x s, I #) where {\
+instance Cas' A s (# A_Unbox_M A s, I #) where {\
   cas' (# Bytes_M m, i #) x0 x1 s = case coerce (casA @A) m i x0 x1 s of;\
     (# s', x #) → let failed' = x ≠ x0;\
                   in (# s', (# failed', case failed' of {F → x; T → x0} #) #)}

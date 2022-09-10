@@ -110,21 +110,3 @@ instance Array Bytes_Pinned where
     \s -> (# coerce copyMutableByteArray# a off ma 0# n s, (##) #)
     return ma
   clone# a off n = runST (Prim.do ma <- thaw# a off n; freeze## ma)
-
-
-
-
-
-------
--- | Read from the specified index of an immutable array.
--- The result is packaged into an unboxed unary tuple; the result itself is not yet evaluated.
--- Pattern matching on the tuple forces the indexing of the array to happen
--- but does not evaluate the element itself. Evaluating the thunk prevents
--- additional thunks from building up on the heap. Avoiding these thunks, in turn,
--- reduces references to the argument array, allowing it to be garbage collected more promptly.
--- Warning: this can fail with an unchecked exception.
-indexLazySmall# :: forall x. A_Box_Small x -> I -> (# x #)
-indexLazySmall# = coerce (indexSmallArray# @x)
-
-resize :: A_Unbox_M x s -> I -> ST s (A_Unbox_M x s)
-resize = coerce resizeMutableByteArray#
