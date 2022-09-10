@@ -162,8 +162,16 @@ instance (≡) (Bytes_Pinned_M s) where
   as ≠ bs = (¬) (as ≡ bs)
   
 -- | _Reference_ equality
+instance (≡) (A_Box_Small x) where
+  (≡) = coerce (sameSmallArray# @x)
+  as ≠ bs = (¬) (as ≡ bs)
+-- | _Reference_ equality
 instance (≡) (A_Box_Small_M x s) where
   (≡) = coerce (sameSmallMutableArray# @_ @x)
+  as ≠ bs = (¬) (as ≡ bs)
+-- | _Reference_ equality
+instance (≡) (A_Box x) where
+  (≡) = coerce (sameArray# @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
 instance (≡) (A_Box_M x s) where

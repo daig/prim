@@ -1,4 +1,4 @@
-module A.Copy where
+module Array.Copy where
 
 class Copy (src ∷ T r) (dst ∷ T r') s where
   -- | Copy the elements from the source to the destination.
@@ -12,6 +12,9 @@ class Copy (src ∷ T r) (dst ∷ T r') s where
        → I -- ^ Destination Offset (bytes)
        → I -- ^ Number of elements to copy
        → ST_ s
+
+instance Copy (A_Box x) (A_Box_M x s) s where copy = coerce (copyArray# @x)
+instance Copy (A_Box_M x s) (A_Box_M x s) s where copy = coerce (copyMutableArray# @_ @x)
 
 instance Copy Bytes (Bytes_M s) s where copy = coerce copyByteArray#
 instance Copy (Bytes_M s) (Bytes_M s) s where copy = coerce copyMutableByteArray#

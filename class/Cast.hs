@@ -54,6 +54,11 @@ instance Cast I16 I where cast = intToInt16#
 instance Cast I32 I where cast = intToInt32#
 instance Cast I64 I where cast = intToInt64#
 
+instance Cast I U8 where cast u = word2Int# (word8ToWord# u)
+instance Cast I U16 where cast u = word2Int# (word16ToWord# u)
+instance Cast I U32 where cast u = word2Int# (word32ToWord# u)
+instance Cast I U64 where cast u = word2Int# (word64ToWord# u)
+
 instance Cast I8 U8 where cast = word8ToInt8#
 instance Cast I16 U16 where cast = word16ToInt16#
 instance Cast I32 U32 where cast = word32ToInt32#
@@ -71,6 +76,11 @@ instance Cast U8 U where cast = wordToWord8#
 instance Cast U16 U where cast = wordToWord16#
 instance Cast U32 U where cast = wordToWord32#
 instance Cast U64 U where cast = wordToWord64#
+
+instance Cast U I8 where cast i = int2Word# (int8ToInt# i)
+instance Cast U I16 where cast i = int2Word# (int16ToInt# i)
+instance Cast U I32 where cast i = int2Word# (int32ToInt# i)
+instance Cast U I64 where cast i = int2Word# (int64ToInt# i)
 
 
 instance Cast I (P_Stable_Name a) where cast = stableNameToInt#

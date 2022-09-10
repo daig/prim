@@ -1,5 +1,5 @@
-module A.Shrink where
-import A
+module Array.Shrink where
+import Array
 
 class Array a ⇒ Shrink (a ∷ T_) where shrink ∷ M a s → I → ST_ s
 

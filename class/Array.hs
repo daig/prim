@@ -1,4 +1,4 @@
-module A where
+module Array where
 import Do as Prim
 
 class Array (a ∷ T_) where

@@ -1,52 +1,11 @@
 --------------------------------------------------------------------
--- | Description : Pointer for controlling GC aliveness and finalizers
+-- | Description : References for controlling GC aliveness and finalizers
 --------------------------------------------------------------------
-module P.Weak where
-
-
-{-|
-A weak pointer expressing a relashionship between a /key/ and a /value/ of type @v@:
-
-if the value is alive to the GC if the key is.
-A reference from the value to the key does /not/ keep the key alive.
-
-A weak pointer may also have a finalizer of type @IO_@; if it does,
-then the finalizer will be run at most once, at a time after the key
-has become unreachable by the program (\"dead\").  The storage manager
-attempts to run the finalizer(s) for an object soon after the object
-dies, but promptness is not guaranteed.
-
-It is not guaranteed that a finalizer will eventually run, and no
-attempt is made to run outstanding finalizers when the program exits.
-Therefore finalizers should not be relied on to clean up resources -
-other methods (eg. exception handlers) should be employed, possibly in
-addition to finalizers.
-
-References from the finalizer to the key are treated in the same way
-as references from the value to the key: they do not keep the key
-alive.  A finalizer may therefore ressurrect the key, perhaps by
-storing it in the same data structure.
-
-The finalizer, and the relationship between the key and the value,
-exist regardless of whether the program keeps a reference to the
-'Weak' object or not.
-
-Finalizers for multiple @Weak.P@ on the same key are run in arbitrary order, or perhaps concurrently.
-You must ensure there's only one finalizer if the finalizer relies on that fact.
-
-If there are no other threads to run, the RTS will check
-for runnable finalizers before declaring the system to be deadlocked.
-
-WARNING: weak pointers to ordinary non-primitive Haskell types are
-particularly fragile, because the compiler is free to optimise away or
-duplicate the underlying data structure.  Therefore attempting to
-place a finalizer on an ordinary Haskell type may well result in the
-finalizer running earlier than you expected.  This is not a problem
-for caches and memo tables where early finalization is benign.
-
-Finalizers /can/ be used reliably for types that are created explicitly
-and have identity, such as @ST.P@ and @Sync.P@.
--}
+module P.Weak (P_Weak,Weak#
+              -- * misc utilities
+              ,module P.Weak
+              -- * instance reexports
+              ) where
 
 new ∷ k → v → IO x → IO (P_Weak v)
 new = mkWeak# 

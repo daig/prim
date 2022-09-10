@@ -2,17 +2,14 @@
 -- | Description : Mutable References to boxed values
 --------------------------------------------------------------------
 module P.Boxed where
-import Prelude hiding (P)
 
-type P = MutVar#
-
-new ∷ a → ST s (P s a)
+new ∷ a → ST s (P_Box s a)
 new = newMutVar#
 
-read ∷ P s a → ST s a
+read ∷ P_Box s a → ST s a
 read = readMutVar#
 
-write ∷ P s a → a → ST_ s
+write ∷ P_Box s a → a → ST_ s
 write = writeMutVar#
 
 -- | Modify the contents of a @P.Boxed@, returning the previous contents and the result of applying the given function to the previous contents. Note that this isn't strictly speaking the correct type for this function; it should really be MutVar# s a → (a → (a,b)) → State# s → (# State# s, a, (a, b) #), but we don't know about pairs here.
@@ -37,22 +34,22 @@ write = writeMutVar#
 -- for "atomicModifyMutVar2"
 --
 -- Warning: this can fail with an unchecked exception.
-modify2 ∷ P s a
+modify2 ∷ P_Box s a
        → (a → c)
        → ST s (# a, c #) -- ^ Previous contents and the result of applying the function
 modify2 r f s0 = case atomicModifyMutVar2# r f s0 of
   (# s1, old, new #) → (# s1, (# old, new #) #)
 
-modify ∷ P s a
+modify ∷ P_Box s a
         → (a → a)
         → ST s (# a, a #) -- ^ Previous contents and the result of applying the function
 modify r f s0 = case atomicModifyMutVar_# r f s0 of
   (# s1, old, new #) → (# s1, (# old, new #) #)
 
 -- | Compare and swap if the old value matches expected.
-cas ∷ P s a
+cas' ∷ P_Box s a
     → a -- ^ expected old value
     → a -- ^ new value
-    → ST s (# B, a #) -- ^ Whether the swap failed, and the actual new value
-cas r old new s0 = case casMutVar# r old new s0 of
+    → ST s (Result# a a) -- ^ Whether the swap failed, and the actual new value
+cas' r old new s0 = case casMutVar# r old new s0 of
   (# s1, failed', a #) → (# s1, (# B# failed', a #) #)

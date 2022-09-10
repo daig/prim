@@ -14,6 +14,13 @@ class 𝔹 (a ∷ T r) where
   byteSwap ∷ a → a
   bitReverse ∷ a → a
   pdep, pext ∷ a → a → a
+  casP ∷ P# → a {- ^ expected old value -}
+            → a {- ^ new value -}
+            → ST s a {- ^ the original value inside -}
+  casA ∷ Bytes_M s → I {- ^ offset in bytes -}
+                   → a {- ^ expected old value -}
+                   → a {- ^ new value -}
+                   → ST s a {- ^ the original value inside -}
 
 infixl 3 ∧
 infixl 2 ⊕

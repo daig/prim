@@ -1,3 +1,6 @@
+--------------------------------------------------------------------
+-- | Description : Software Transactional Memory references
+--------------------------------------------------------------------
 module P.Async where
 
 --stm ∷ ∀ v. STM# v → IO v

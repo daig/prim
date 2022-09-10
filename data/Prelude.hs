@@ -1,8 +1,8 @@
 module Prelude (module X) where
-import A as X
-import A.Copy as X
-import A.Index as X
-import A.Shrink as X
+import Array as X
+import Array.Copy as X
+import Array.Index as X
+import Array.Shrink as X
 import Bits as X
 import Cast as X
 import Cmp as X

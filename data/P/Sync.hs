@@ -1,4 +1,3 @@
-{-# language ScopedTypeVariables, TypeApplications #-}
 --------------------------------------------------------------------
 -- | Description : Blocking concurrent references
 --------------------------------------------------------------------

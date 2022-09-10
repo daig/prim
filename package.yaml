@@ -70,7 +70,9 @@ internal-libraries:
   type:
     source-dirs: type
     other-modules: []
-    dependencies: ghc-prim
+    dependencies:
+      - ghc-prim
+      - microbase
   do:
     source-dirs: do
     other-modules: Prelude

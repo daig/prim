@@ -1,5 +1,5 @@
 {-# language CPP #-}
-module A.Index where
+module Array.Index where
 import Prim
 import Do as Prim
 

@@ -1,7 +1,9 @@
 {-# language NoImplicitPrelude #-}
 module Types (module Types, module X) where
 import GHC.Prim as X
-import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint)
+import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint,Any)
+import GHC.Prim.Panic as X
+import Unsafe.Coerce (unsafeCoerce#)
 
 -- | The kind constructor of types abstracted over 'RuntimeRep'
 type T = TYPE
@@ -162,6 +164,8 @@ type A_Unbox_Pinned_M :: forall (r :: Rep). T r -> * -> T_
 newtype A_Unbox_Pinned_M x s = Bytes_Pinned_M (Bytes_Pinned_M s)
 
 type A :: forall {r :: Rep}. T r -> T_
+-- | Primitive array type.
+-- The concrete representation can be determined by the kind of its contents
 type family A x = a where
   A (x :: T# _) = A_Box x
   A (x :: K I) = A_Unbox x
@@ -239,12 +243,27 @@ place a finalizer on an ordinary Haskell type may well result in the
 finalizer running earlier than you expected.  This is not a problem
 for caches and memo tables where early finalization is benign.
 Finalizers /can/ be used reliably for types that are created explicitly
-and have identity, such as @ST.P@ and @Sync.P@.
+and have identity, such as @P_Boxed@ and @P_Sync@.
 -}
 type P_Weak = Weak#
 type P_Stable = StablePtr#
 
+
+type P_Stable_Name ∷ T# l → T_
 type P_Stable_Name = StableName#
 
 -- | Primitive maybe type represented by a tag and (possibly invalid) value.
 type Maybe# (a ∷ T r)  = (# B , a #)
+pattern Some# ∷ a → Maybe# a
+pattern Some# a = (# B# 1# , a #)
+pattern None# ∷ Maybe# a
+pattern None# ← (# B# 0#, _ #) where None# = (# B# 0# , panicError "Used Empty None#"# #)
+{-# complete None#, Some# #-}
+-- | Primitive option type represented by a tag and two values of the same representation.
+type Result# (a ∷ T r) (b ∷ T r) = (# B , a #)
+
+pattern Ok ∷ a → Result# a b
+pattern Ok a ← (# B# 0#, (unsafeCoerce# → a) #) where Ok a = (# B# 0#, unsafeCoerce# a #)
+pattern Err ∷ b → Result# a b
+pattern Err b ← (# B# 1#, (unsafeCoerce# → b) #) where Err b = (# B# 1#, unsafeCoerce# b #)
+{-# complete Ok,Err #-}
