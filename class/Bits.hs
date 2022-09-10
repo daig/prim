@@ -3,7 +3,7 @@ module Bits where
 import Cmp
 import Cast
 
-#include "MachDeps.h"
+#include "machdeps.h"
 
 -- | (Bitwise) logical operations on primitive values
 type Logic ∷ ∀ {r ∷ Rep}. T r → Constraint
@@ -19,10 +19,10 @@ class Bits a where
   -- | Shift left.  Result 0 if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.
   shiftL ∷ a → U → a
-  -- |Shift right logical.  Result undefined if shift amount is not
+  -- |Shift right.  Result undefined if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.
   shiftR# ∷ a → U → a
-  -- |Shift right logical.  Result 0 if shift amount is not
+  -- |Shift right.  Result 0 if shift amount is not
   --           in the range 0 to @size - 1@ inclusive.
   shiftR ∷ a → U → a
   -- |Shift left logical.  Accepts negative offset for right shifts.
