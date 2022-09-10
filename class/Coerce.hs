@@ -1,3 +1,4 @@
+{-# language NoImplicitPrelude #-}
 --------------------------------------------------------------------
 -- | Description : Cast between identical representations
 --------------------------------------------------------------------
@@ -309,6 +310,7 @@ module Coerce
 import GHC.Prim qualified as GHC
 import GHC.Types qualified as GHC
 import Unsafe.Coerce qualified as GHC
+import GHC.Types
 import GHC.Prim.Panic
 
 
@@ -387,10 +389,10 @@ cast# = GHC.coerce; {-# INLINE cast# #-}
 --
 -- __/Warning:/__ this can fail with an unchecked exception.
 -- To cast (very unsafely) on unlifted types (ie with different 'RuntimeRep')- use 'unsafeCoerce#' instead
-cast## ∷ ∀ {r ∷ Rep} (b ∷ T r) (a ∷ T r). Coerce r ⇒ a → b
+cast## ∷ ∀ {r} (b ∷ TYPE r) (a ∷ TYPE r). Coerce r ⇒ a → b
 cast## = cast### @r @b @a;{-# INLINE cast## #-}
 
-class Coerce (r ∷ Rep) where cast### ∷ ∀ (b ∷ T r) (a ∷ T r). a → b
+class Coerce r where cast### ∷ ∀ (b ∷ TYPE r) (a ∷ TYPE r). a → b
 
 
 instance Coerce AddrRep where cast### = GHC.unsafeCoerceAddr

@@ -68,7 +68,7 @@ INST_UNBOX(U32)
 INST_UNBOX(U64)
 INST_UNBOX(Char)
 INST_UNBOX(Char8)
-INST_UNBOX(P#)
+INST_UNBOX(Addr#)
 -- INST_UNBOX((P_Stable s))
 
 instance (♭) a ⇒ (a ∷ T r) ∈ Bytes where
@@ -79,7 +79,7 @@ instance (♭) a ⇒ (a ∷ T r) ∈ Bytes where
 deriving via Bytes instance (♭) a ⇒ (a ∷ T r) ∈ Bytes_Pinned
 -- deriving via (A_Unbox (a :: T r)) instance (♭) a ⇒ (a ∷ T r) ∈ (A_Unbox_Pinned a)
 
-instance (♭) x ⇒ (x ∷ T r) ∈ P# where
+instance (♭) x ⇒ (x ∷ T r) ∈ Addr# where
   index# = indexP#
   read# = coerce (readP# @x)
   write# = coerce (writeP# @x)

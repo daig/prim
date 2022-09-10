@@ -1,7 +1,7 @@
 module Prelude (module X) where
 import GHC.Prim as X
 import GHC.Prim.PtrEq as X
-import Unsafe.Coerce as X
+import Coerce as X
 import Types as X
 import GHC.Classes as X (modInt#,divInt#,divModInt#
                         ,modInt8#,divInt8#,divModInt8#

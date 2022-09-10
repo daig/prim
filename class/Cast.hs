@@ -25,7 +25,7 @@ instance Cast B U8 where cast = coerce (gtWord8# (cast 0##))
 instance Cast B U16 where cast = coerce (gtWord16# (cast 0##))
 instance Cast B U32 where cast = coerce (gtWord32# (cast 0##))
 instance Cast B U64 where cast = coerce (gtWord64# (cast 0##))
-instance Cast B P# where cast = coerce neAddr# nullAddr#
+instance Cast B Addr# where cast = coerce neAddr# nullAddr#
 instance Cast B Char where cast = coerce neChar# '\NUL'#
 deriving via Char instance Cast B Char8
 
@@ -130,12 +130,15 @@ instance Cast Bytes Buffer where
 instance Cast Buffer Bytes where
   cast (UnpinnedByteArray# x) = Bytes_Off_Len# (# x, 0#, sizeofByteArray# x #)
 
-instance Cast P# Bytes_Pinned where cast = coerce byteArrayContents#
+instance Cast Addr# Bytes_Pinned where cast = coerce byteArrayContents#
+instance Cast (MutableAddr# s) (Bytes_Pinned_M s) where cast = coerce mutableByteArrayContents#
+instance Cast (P_Unbox x) (A_Unbox_Pinned x) where cast = coerce byteArrayContents#
+instance Cast (P_Unbox_M x s) (A_Unbox_Pinned_M x s) where cast = coerce mutableByteArrayContents#
 
 instance Cast I Char where cast = ord#
 instance Cast Char I where cast = chr#
 
 -- | This pattern is strongly deprecated
-instance Cast P# I where cast = int2Addr#
+instance Cast Addr# I where cast = int2Addr#
 -- | This pattern is strongly deprecated
-instance Cast I P# where cast = addr2Int#
+instance Cast I Addr# where cast = addr2Int#

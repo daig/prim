@@ -180,7 +180,7 @@ type family A x = a where
   A (x :: K U64) = A_Unbox x
   A (x :: K F32) = A_Unbox x
   A (x :: K F64) = A_Unbox x
-  A (x :: K P#) = A_Unbox x
+  A (x :: K Addr#) = A_Unbox x
 
 type M :: forall {r ∷ Rep}. T r -> * -> T r
 type family M a = ma | ma → a where
@@ -191,25 +191,28 @@ type family M a = ma | ma → a where
   M (A_Box_Small x) = A_Box_Small_M x
   M (A_Box x) = A_Box_M x
   M ByteArray# = MutableByteArray#
-  M P# = M#
+  M Addr# = MutableAddr#
+  M (P_Unbox x) = P_Unbox_M x
 
 -- | A C-style null-terminated string
 type S# = Addr#
 
--- | An arbitrary machine address assumed to point outside the garbage-collected heap
-type P# = Addr#
-newtype M# s = Mutable P#
-type P_Unbox :: forall {r :: Rep}. T r -> T AddrRep
-newtype P_Unbox x = P# P#
+newtype MutableAddr# s = Addr_M# Addr#
 
-type P_Box = MutVar#
-type P_Async = TVar#
+-- | An arbitrary machine address assumed to point outside the garbage-collected heap
+type P_Unbox :: forall {r :: Rep}. T r -> T AddrRep
+newtype P_Unbox x = Addr# Addr#
+type P_Unbox_M :: forall {r :: Rep}. T r -> ★ → T AddrRep
+newtype P_Unbox_M x s = MutableAddr# (MutableAddr# s)
+
+newtype P_Box x s = MutVar# (MutVar# s x)
+newtype P_Async x s = TVar# (TVar# s x)
 -- | A synchronising variable, used for communication between concurrent threads.
 -- It can be thought of as a box, which may be empty or full.
 --
 -- The RTS implementation is really an abstraction for
 -- connecting 'take' and 'write' calls between threads
-type P_Sync = MVar#
+newtype P_Sync x s = MVar# (MVar# s x)
 
 {-|
 A weak pointer expressing a relashionship between a /key/ and a /value/ of type @v@:

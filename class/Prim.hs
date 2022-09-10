@@ -16,15 +16,15 @@ class (♭) (x ∷ T r) where
   align ∷ I → I
   indexA# ∷ Bytes → I {- ^ index in # elements -} → x
   indexB# ∷ Bytes → I {- ^ index in bytes -} → x
-  indexP# ∷ P# → I {- ^ offset in bytes -} → x
+  indexP# ∷ Addr# → I {- ^ offset in bytes -} → x
   readA# ∷ Bytes_M s -> I {- ^ index in # elements -} → ST s x
   readB# ∷ Bytes_M s -> I {- ^ index in # Bytes -} → ST s x
-  readP# ∷ P# -> I {- ^ offset in # elements -} → ST s x
+  readP# ∷ MutableAddr# s -> I {- ^ offset in # elements -} → ST s x
   writeA# ∷ Bytes_M s -> I {- ^ index in # elements -} → x → ST_ s
   writeB# ∷ Bytes_M s -> I → x → ST_ s
-  writeP# ∷ M# s -> I → x → ST_ s
+  writeP# ∷ MutableAddr# s -> I → x → ST_ s
   setB# ∷ Bytes_M s -> I {- ^ offset -} → I {- ^ elements -} → x → ST_ s
-  setP# ∷ M# s -> I {- ^ offset -} → I {- ^ elements -} → x → ST_ s
+  setP# ∷ MutableAddr# s -> I {- ^ offset -} → I {- ^ elements -} → x → ST_ s
 
 #define INST_PRIM(TY,SI,AL,IA,IB,IP,RA,RB,RP,WA,WB,WP,SB,SP) \
 instance (♭) (TY) where {\
@@ -57,7 +57,7 @@ INST_PRIM(U64,SIZEOF_WORD64,ALIGNMENT_WORD64,indexWord64Array,indexWord64Array,i
 INST_PRIM(Char,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWideCharArray,indexWord8ArrayAsWideChar,indexWideCharOffAddr,readWideCharArray,readWord8ArrayAsWideChar,readWideCharOffAddr,writeWideCharArray,writeWord8ArrayAsWideChar,writeWideCharOffAddr,setWideCharArray,setWideCharOffAddr)
 INST_PRIM(Char8,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexCharArray,indexWord8ArrayAsChar,indexCharOffAddr,readCharArray,readWord8ArrayAsChar,readCharOffAddr,writeCharArray,writeWord8ArrayAsChar,writeCharOffAddr,setCharArray,setCharOffAddr)
 
-INST_PRIM(P#,SIZEOF_HSPTR,ALIGNMENT_HSPTR,indexAddrArray,indexWord8ArrayAsAddr,indexAddrOffAddr,readAddrArray,readWord8ArrayAsAddr,readAddrOffAddr,writeAddrArray,writeWord8ArrayAsAddr,writeAddrOffAddr,setAddrArray,setAddrOffAddr)
+INST_PRIM(Addr#,SIZEOF_HSPTR,ALIGNMENT_HSPTR,indexAddrArray,indexWord8ArrayAsAddr,indexAddrOffAddr,readAddrArray,readWord8ArrayAsAddr,readAddrOffAddr,writeAddrArray,writeWord8ArrayAsAddr,writeAddrOffAddr,setAddrArray,setAddrOffAddr)
 
 -- INST_PRIM((P_Stable s),SIZEOF_HSPTR,ALIGNMENT_HSPTR,indexAddrArray,indexWord8ArrayAsAddr,indexAddrOffAddr,readAddrArray,readWord8ArrayAsAddr,readAddrOffAddr,writeAddrArray,writeWord8ArrayAsAddr,writeAddrOffAddr,setAddrArray,setAddrOffAddr)
  

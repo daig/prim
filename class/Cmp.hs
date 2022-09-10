@@ -1,6 +1,7 @@
 {-# LANGUAGE StandaloneKindSignatures #-}
 {-# LANGUAGE UnliftedDatatypes #-}
 module Cmp where
+import Coerce
 import {-# source #-} Bits
 
 infix 4 >, ≥, <, ≤, ≡, ≠, `cmp`
@@ -178,15 +179,15 @@ instance (≡) (A_Box_M x s) where
   (≡) = coerce (sameMutableArray# @_ @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (P_Box s x) where
+instance (≡) (P_Box x s) where
   (≡) = coerce (sameMutVar# @s @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (P_Async s x) where
+instance (≡) (P_Async x s) where
   (≡) = coerce (sameTVar# @s @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (P_Sync s x) where
+instance (≡) (P_Sync x s) where
   (≡) = coerce (sameMVar# @s @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
@@ -207,8 +208,6 @@ instance (≡) Buffer_Pinned where
     = B# ((i ==# j) `andI#` (n ==# m) `andI#` sameByteArray# a b)
   as ≠ bs = (¬) (as ≡ bs)
   
-  
-  
 instance (≤) Buffer where
   Bytes_Off_Len# (# a, i, n #) `cmp` Bytes_Off_Len# (# b , j, m #)
     = case cmp n m of
@@ -220,11 +219,12 @@ instance (≤) Buffer where
   a ≥ b = cmp a b ≠ LT
   a ≤ b = cmp a b ≠ GT
 
-instance (≤) P# where
+instance (≡) Addr# where (≡) = coerce eqAddr# ; (≠) = coerce neAddr#
+instance (≤) Addr# where
   (>) = coerce gtAddr#
   (≥) = coerce geAddr#
   (<) = coerce ltAddr#
   (≤) = coerce leAddr#
   cmp a b = Ordering# do (gtAddr# a b) +# (geAddr# a b) -# 1#
-
-instance (≡) P# where (≡) = coerce eqAddr# ; (≠) = coerce neAddr#
+deriving via Addr# instance (≡) (P_Unbox x)
+deriving via Addr# instance (≤) (P_Unbox x)
