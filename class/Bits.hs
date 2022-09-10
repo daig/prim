@@ -5,10 +5,12 @@ import Cast
 
 #include "MachDeps.h"
 
--- | Bitwise algebriac operations on primitive values
-class 𝔹 (a ∷ T r) where
+-- | (Bitwise) logical operations on primitive values
+class Logic (a ∷ T r) where
   (∧), (∨), (⊕) ∷ a → a → a
   (¬) ∷ a → a
+-- | Bit shuffling operations
+class Bits (a ∷ T r) where
   -- | Shift left.  Result undefined if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.
   shiftL# ∷ a → U → a
@@ -43,38 +45,24 @@ class 𝔹 (a ∷ T r) where
                    → a {- ^ new value -}
                    → ST s a {- ^ the original value inside -}
 
+
 infixl 3 ∧
 infixl 2 ⊕
 infixl 1 ∨
 
 -- | Boolean Operations
-instance 𝔹 B where
+instance Logic B where
   (∧) = coerce andI#
   (∨) = coerce orI#
   (⊕) = coerce xorI#
   (¬) = (T ⊕)
-  shiftL# (B# x) i = T ∧ (B# do uncheckedIShiftL# x (cast i))
-  shiftL x = \case {0## → x; _ → F}
-  shiftR# (B# x) i =  T ∧ (B# do uncheckedIShiftRL# x (cast i))
-  shiftR = shiftL
-  shift x = \case {0# → x; _ → F}
-  popCnt (B# 0#) = 0##
-  popCnt (B# 1#) = 1##
-  clz (B# 0#) = 1##
-  clz (B# 1#) = 0##
-  ctz (B# 1#) = 0##
-  ctz (B# 0#) = 0##
-  byteSwap x = x
-  bitReverse x = x
-  pdep = (∧); pext = (∧)
-  casP = coerce (casP @_ @I)
-  casA = coerce (casA @_ @I)
 
-instance 𝔹 U where
+instance Logic U where
   (∧) = and#
   (∨) = or#
   (⊕) = xor#
   (¬) = not#
+instance Bits U where
   shiftL# w i = uncheckedShiftL# w (cast i)
   shiftL w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftL# w i}
   shiftR# w i = coerce uncheckedShiftRL# w (cast @I i)
@@ -90,11 +78,12 @@ instance 𝔹 U where
   casP = atomicCasWordAddr#
   casA m i x0 x1 s = case casA m i (cast @I x0) (cast @I x1) s of (# s', x #) -> (# s', cast @U x #)
 
-instance 𝔹 U8 where
+instance Logic U8 where
   (∧) = andWord8#
   (∨) = orWord8#
   (⊕) = xorWord8#
   (¬) = notWord8#
+instance Bits U8 where
   shiftL# w i = uncheckedShiftLWord8# w (cast @I i)
   shiftL w i = case i ≥ 8## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
   shiftR# w i = uncheckedShiftRLWord8# w (cast @I i)
@@ -110,11 +99,12 @@ instance 𝔹 U8 where
   casP = atomicCasWord8Addr#
   casA m i x0 x1 s = case casA m i (cast @I8 x0) (cast @I8 x1) s of (# s', x #) -> (# s', cast @U8 x #)
 
-instance 𝔹 U16 where
+instance Logic U16 where
   (∧) = andWord16#
   (∨) = orWord16#
   (⊕) = xorWord16#
   (¬) = notWord16#
+instance Bits U16 where
   shiftL# w i = uncheckedShiftLWord16# w (cast @I i)
   shiftL w i = case i ≥ 16## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
   shiftR# w i = uncheckedShiftRLWord16# w (cast @I i)
@@ -130,11 +120,12 @@ instance 𝔹 U16 where
   casP = atomicCasWord16Addr#
   casA m i x0 x1 s = case casA m i (cast @I16 x0) (cast @I16 x1) s of (# s', x #) -> (# s', cast @U16 x #)
 
-instance 𝔹 U32 where
+instance Logic U32 where
   (∧) = andWord32#
   (∨) = orWord32#
   (⊕) = xorWord32#
   (¬) = notWord32#
+instance Bits U32 where
   shiftL# w i = uncheckedShiftLWord32# w (cast @I i)
   shiftL w i = case i ≥ 32## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
   shiftR# w i = uncheckedShiftRLWord32# w (cast @I i)
@@ -150,11 +141,12 @@ instance 𝔹 U32 where
   casP = atomicCasWord32Addr#
   casA m i x0 x1 s = case casA m i (cast @I32 x0) (cast @I32 x1) s of (# s', x #) -> (# s', cast @U32 x #)
 
-instance 𝔹 U64 where
+instance Logic U64 where
   (∧) = and64#
   (∨) = or64#
   (⊕) = xor64#
   (¬) = not64#
+instance Bits U64 where
   shiftL# w i = uncheckedShiftL64# w (cast @I i)
   shiftL w i = case i ≥ 64## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
   shiftR# w i = uncheckedShiftRL64# w (cast @I i)
@@ -170,11 +162,12 @@ instance 𝔹 U64 where
   casP = atomicCasWord64Addr#
   casA m i x0 x1 s = case casA m i (cast @I64 x0) (cast @I64 x1) s of (# s', x #) -> (# s', cast @U64 x #)
 
-instance 𝔹 I where
+instance Logic I where
   (∧) = andI#
   (∨) = orI#
   (⊕) = xorI#
   (¬) = notI#
+instance Bits I where
   shiftL# w i = uncheckedIShiftL# w (cast @I i)
   shiftL w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
   shiftR# w i = uncheckedIShiftRA# w (cast @I i)
@@ -190,11 +183,12 @@ instance 𝔹 I where
   casP p x0 x1 s = case casP p (cast @U x0) (cast @U x1) s of (# s', x #) -> (# s', cast @I x #)
   casA = coerce casIntArray#
 
-instance 𝔹 I8 where
+instance Logic I8 where
   a ∧ b = cast (andWord8# (cast a) (cast b))
   a ∨ b = cast (orWord8# (cast a) (cast b))
   a ⊕ b = cast (xorWord8# (cast a) (cast b))
   (¬) a = cast (notWord8# (cast a))
+instance Bits I8 where
   shiftL# w i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   shiftL w i = case i ≥ 8## of {B# 1# → cast 0#; B# 0# → shiftL# w i}
   shiftR# w i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
@@ -210,11 +204,12 @@ instance 𝔹 I8 where
   casP p x0 x1 s = case casP p (cast @U8 x0) (cast @U8 x1) s of (# s', x #) -> (# s', cast @I8 x #)
   casA = coerce casInt8Array#
 
-instance 𝔹 I16 where
+instance Logic I16 where
   a ∧ b = cast (andWord16# (cast a) (cast b))
   a ∨ b = cast (orWord16# (cast a) (cast b))
   a ⊕ b = cast (xorWord16# (cast a) (cast b))
   (¬) a = cast (notWord16# (cast a))
+instance Bits I16 where
   shiftL# w i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   shiftL w i = case i ≥ 16## of {B# 1# → cast 0#; B# 0# → shiftL# w i}
   shiftR# w i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
@@ -230,11 +225,12 @@ instance 𝔹 I16 where
   casP p x0 x1 s = case casP p (cast @U16 x0) (cast @U16 x1) s of (# s', x #) -> (# s', cast @I16 x #)
   casA = coerce casInt16Array#
 
-instance 𝔹 I32 where
+instance Logic I32 where
   a ∧ b = cast (andWord32# (cast a) (cast b))
   a ∨ b = cast (orWord32# (cast a) (cast b))
   a ⊕ b = cast (xorWord32# (cast a) (cast b))
   (¬) a = cast (notWord32# (cast a))
+instance Bits I32 where
   shiftL# w i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   shiftL w i = case i ≥ 32## of {B# 1# → cast 0#; B# 0# → shiftL# w i}
   shiftR# w i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
@@ -250,11 +246,12 @@ instance 𝔹 I32 where
   casP p x0 x1 s = case casP p (cast @U32 x0) (cast @U32 x1) s of (# s', x #) -> (# s', cast @I32 x #)
   casA = coerce casInt32Array#
 
-instance 𝔹 I64 where
+instance Logic I64 where
   a ∧ b = cast (and64# (cast a) (cast b))
   a ∨ b = cast (or64# (cast a) (cast b))
   a ⊕ b = cast (xor64# (cast a) (cast b))
   (¬) a = cast (not64# (cast a))
+instance Bits I64 where
   shiftL# w i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   shiftL w i = case i ≥ 64## of {B# 1# → cast 0#; B# 0# → shiftL# w i}
   shiftR# w i = cast (uncheckedIShiftRA# (cast w) (cast @I i))

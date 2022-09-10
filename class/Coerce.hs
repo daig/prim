@@ -1,7 +1,7 @@
 --------------------------------------------------------------------
 -- | Description : Cast between identical representations
 --------------------------------------------------------------------
-module GHC.Coerce
+module Coerce
   (type (≑)
   ,cast#
   ,cast##

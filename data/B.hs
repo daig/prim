@@ -6,7 +6,7 @@ module B (I1,B
           , module X
           ) where
 import Cmp as X
-import Bits as X (𝔹(..))
+import Bits as X (Logic(..))
 import Cast as X (Cast(..))
 
 type I1 = B

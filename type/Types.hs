@@ -263,7 +263,7 @@ pattern None# ← (# B# 0#, _ #) where None# = (# B# 0# , panicError "Used Empty
 type Result# (a ∷ T r) (b ∷ T r) = (# B , a #)
 
 pattern Ok ∷ a → Result# a b
-pattern Ok a ← (# B# 0#, (unsafeCoerce# → a) #) where Ok a = (# B# 0#, unsafeCoerce# a #)
+pattern Ok a ← (# B# 0#, a #) where Ok a = (# B# 0#, a #)
 pattern Err ∷ b → Result# a b
 pattern Err b ← (# B# 1#, (unsafeCoerce# → b) #) where Err b = (# B# 1#, unsafeCoerce# b #)
 {-# complete Ok,Err #-}

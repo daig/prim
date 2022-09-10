@@ -1,8 +1,9 @@
 module Bits where
 
-class 𝔹 (a ∷ T r) where
+class Logic (a ∷ T r) where
   (∧), (∨), (⊕) ∷ a → a → a
   (¬) ∷ a → a
+class Bits (a ∷ T r) where
   shiftL# ∷ a → U → a
   shiftL ∷ a → U → a
   shiftR# ∷ a → U → a
@@ -26,4 +27,4 @@ infixl 3 ∧
 infixl 2 ⊕
 infixl 1 ∨
 
-instance 𝔹 B
+instance Logic B
