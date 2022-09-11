@@ -135,19 +135,24 @@ newtype A_Box x = Array# (Array# x)
 type A_Box_M :: forall {l :: Levity}. T# l -> * -> T_
 newtype A_Box_M x s = MutableArray# (MutableArray# s x)
 
--- Unpinned
+-- | (Possibly heterogeneous) contiguous bytes.
 newtype Bytes = UnpinnedByteArray# ByteArray#
 
--- | An unboxed vector with offset and length
+-- | An unboxed vector with offset and length.
 newtype Buffer = Bytes_Off_Len# (# ByteArray# , I , I #)
 newtype Buffer_Pinned = PinnedBytes_Off_Len# (# ByteArray# , I , I #)
 
+-- | Mutable (possibly heterogeneous) contiguous bytes
 type Bytes_M :: * -> T_
 newtype Bytes_M s = M_UnpinnedByteArray# (MutableByteArray# s)
 
+-- | (Possibly heterogeneous) contiguous bytes.
+-- Pinned to an address and gaurenteed not to be moved by GC.
 type Bytes_Pinned :: T_
 newtype Bytes_Pinned = PinnedByteArray# ByteArray#
 
+-- | Mutable (possibly heterogeneous) contiguous bytes.
+-- Pinned to an address and gaurenteed not to be moved by GC.
 type Bytes_Pinned_M :: * -> T_
 newtype Bytes_Pinned_M s = M_PinnedByteArray# (MutableByteArray# s)
 

@@ -22,6 +22,10 @@ return = η
 {-# inline (>>=) #-}
 {-# inline return #-}
 
+st ∷ ST_ s → ST s (##)
+st f = \s → case f s of s' → (# s', (##) #)
+{-# inline st #-}
+
 class Pure (a ∷ T ra) where η ∷ a → ST s a
 class (Monad a c, Monad b c) ⇒ Lift2 (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
   η2 ∷ (a → b → c) → ST s a → ST s b → ST s c
