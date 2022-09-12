@@ -6,12 +6,16 @@ import Memset
 import qualified GHC.Types as GHC
 
 
+-- | Operations for containers of contiguous primitive values.
 type (∈) ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
 class x ∈ a where
+  -- | Index an element. 
   (!) ∷ a x → I {- ^ Offset in elements -} → x
+  -- | Read an element.
   (!!) ∷ M (a x) s → I → ST s x
+  -- | Write an element. 
   write# ∷ M (a x) s → I → x → ST_ s
-  -- | Set all elements
+  -- | Set all elements.
   set# ∷ M (a x) s → I {- ^ offset -} → I {- ^ # elements to set -} → x → ST_ s
 
 -- | "A.Box".

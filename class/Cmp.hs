@@ -179,16 +179,16 @@ instance (≡) (A_Box_M x s) where
   (≡) = coerce (sameMutableArray# @_ @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (P_Box x s) where
+instance (≡) (P_Box s x) where
   (≡) = coerce (sameMutVar# @s @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (P_Async x s) where
-  (≡) = coerce (sameTVar# @s @x)
+instance (≡) (P_Async x) where
+  (≡) = coerce (sameTVar# @_ @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (P_Sync x s) where
-  (≡) = coerce (sameMVar# @s @x)
+instance (≡) (P_Sync x) where
+  (≡) = coerce (sameMVar# @_ @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
 instance (≡) (P_Stable x) where

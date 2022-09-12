@@ -69,51 +69,51 @@ instance Atomic I where
 -- | Bit shuffling operations
 type Eq_Atomic ∷ ∀ {r ∷ Rep}. T r → Constraint
 class Eq_Atomic x where
-  -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided old value.
+  -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided expected old value.
   -- Implies a full memory barrier.
-  cas ∷ P_Unbox x {-^ size-aligned pointer -}
+  casP ∷ P_Unbox x {-^ size-aligned pointer -}
        → x {- ^ expected old value -}
        → x {- ^ new value -}
        → ST s x {- ^ the original value inside -}
-  -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided old value.
+  -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided expected old value.
   -- Implies a full memory barrier.
   -- _Warning_: this can fail with an unchecked exception.
-  cas# ∷ A_Unbox_M x s
+  casA ∷ A_Unbox_M x s
        → I {- ^ offset in elements -}
        → x {- ^ expected old value -}
        → x {- ^ new value -}
        → ST s x {- ^ the original value inside -}
 
 instance Eq_Atomic U where
-  cas = coerce atomicCasWordAddr#
-  cas# (coerce → m) i x0 x1 s = case cas# m i (cast @I x0) (cast @I x1) s of (# s', x #) -> (# s', cast @U x #)
+  casP = coerce atomicCasWordAddr#
+  casA (coerce → m) i x0 x1 s = case casA m i (cast @I x0) (cast @I x1) s of (# s', x #) -> (# s', cast @U x #)
 instance Eq_Atomic U8 where
-  cas = coerce atomicCasWord8Addr#
-  cas# (coerce → m) i x0 x1 s = case cas# m i (cast @I8 x0) (cast @I8 x1) s of (# s', x #) -> (# s', cast @U8 x #)
+  casP = coerce atomicCasWord8Addr#
+  casA (coerce → m) i x0 x1 s = case casA m i (cast @I8 x0) (cast @I8 x1) s of (# s', x #) -> (# s', cast @U8 x #)
 instance Eq_Atomic U16 where
-  cas = coerce atomicCasWord16Addr#
-  cas# (coerce → m) i x0 x1 s = case cas# m i (cast @I16 x0) (cast @I16 x1) s of (# s', x #) -> (# s', cast @U16 x #)
+  casP = coerce atomicCasWord16Addr#
+  casA (coerce → m) i x0 x1 s = case casA m i (cast @I16 x0) (cast @I16 x1) s of (# s', x #) -> (# s', cast @U16 x #)
 instance Eq_Atomic U32 where
-  cas = coerce atomicCasWord32Addr#
-  cas# (coerce → m) i x0 x1 s = case cas# m i (cast @I32 x0) (cast @I32 x1) s of (# s', x #) -> (# s', cast @U32 x #)
+  casP = coerce atomicCasWord32Addr#
+  casA (coerce → m) i x0 x1 s = case casA m i (cast @I32 x0) (cast @I32 x1) s of (# s', x #) -> (# s', cast @U32 x #)
 instance Eq_Atomic U64 where
-  cas = coerce atomicCasWord64Addr#
-  cas# (coerce → m) i x0 x1 s = case cas# m i (cast @I64 x0) (cast @I64 x1) s of (# s', x #) -> (# s', cast @U64 x #)
+  casP = coerce atomicCasWord64Addr#
+  casA (coerce → m) i x0 x1 s = case casA m i (cast @I64 x0) (cast @I64 x1) s of (# s', x #) -> (# s', cast @U64 x #)
 instance Eq_Atomic I where
-  cas# = coerce casIntArray#
-  cas (coerce → p) x0 x1 s = case cas p (cast @U x0) (cast @U x1) s of (# s', x #) -> (# s', cast @I x #)
+  casA = coerce casIntArray#
+  casP (coerce → p) x0 x1 s = case casP p (cast @U x0) (cast @U x1) s of (# s', x #) -> (# s', cast @I x #)
 instance Eq_Atomic I8 where
-  cas (coerce → p) x0 x1 s = case cas p (cast @U8 x0) (cast @U8 x1) s of (# s', x #) -> (# s', cast @I8 x #)
-  cas# = coerce casInt8Array#
+  casP (coerce → p) x0 x1 s = case casP p (cast @U8 x0) (cast @U8 x1) s of (# s', x #) -> (# s', cast @I8 x #)
+  casA = coerce casInt8Array#
 instance Eq_Atomic I16 where
-  cas (coerce → p) x0 x1 s = case cas p (cast @U16 x0) (cast @U16 x1) s of (# s', x #) -> (# s', cast @I16 x #)
-  cas# = coerce casInt16Array#
+  casP (coerce → p) x0 x1 s = case casP p (cast @U16 x0) (cast @U16 x1) s of (# s', x #) -> (# s', cast @I16 x #)
+  casA = coerce casInt16Array#
 instance Eq_Atomic I32 where
-  cas (coerce → p) x0 x1 s = case cas p (cast @U32 x0) (cast @U32 x1) s of (# s', x #) -> (# s', cast @I32 x #)
-  cas# = coerce casInt32Array#
+  casP (coerce → p) x0 x1 s = case casP p (cast @U32 x0) (cast @U32 x1) s of (# s', x #) -> (# s', cast @I32 x #)
+  casA = coerce casInt32Array#
 instance Eq_Atomic I64 where
-  cas (coerce → p) x0 x1 s = case cas p (cast @U64 x0) (cast @U64 x1) s of (# s', x #) -> (# s', cast @I64 x #)
-  cas# = coerce casInt64Array#
+  casP (coerce → p) x0 x1 s = case casP p (cast @U64 x0) (cast @U64 x1) s of (# s', x #) -> (# s', cast @I64 x #)
+  casA = coerce casInt64Array#
 instance Eq_Atomic Addr# where
-  cas = coerce atomicCasAddrAddr#
-  cas# (coerce → m) i (cast → x0) (cast → x1) s = case casIntArray# m i x0 x1 s of (# s', (cast → x) #) → (# s', x #)
+  casP = coerce atomicCasAddrAddr#
+  casA (coerce → m) i (cast → x0) (cast → x1) s = case casIntArray# m i x0 x1 s of (# s', (cast → x) #) → (# s', x #)

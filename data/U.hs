@@ -11,7 +11,7 @@ import Cast as X
 import Cmp as X
 import Num as X
 import Bits as X (Logic(..),Bits(..))
-import Prim as X (type (♭)(..))
+import Prim as X (Prim(..))
 
 
 -- | Modular subtraction.

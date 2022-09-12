@@ -116,6 +116,14 @@ type IO (a ∷ T r)  = ST RealWorld a
 -- | A computation performing some I\/O
 type IO_ = ST_ RealWorld
 
+-- * Transactional Memory Operations
+data Transaction
+
+-- | A comp
+type STM (a ∷ T r) = ST Transaction a
+-- | Transactional Memory operations
+type STM_ = ST_ Transaction
+
 type Small :: forall {l :: Levity} {k}.
               (T# l -> k) -> T# l -> k
 type family Small a = sa | sa -> a where
@@ -202,22 +210,26 @@ type family M a = ma | ma → a where
 -- | A C-style null-terminated string
 type S# = Addr#
 
-newtype MutableAddr# s = Addr_M# Addr#
+-- | 
+type P# = Addr#
 
 -- | An arbitrary machine address assumed to point outside the garbage-collected heap
+newtype MutableAddr# s = Addr_M# Addr#
+
+-- | An machine address to valid data, assumed to point outside the garbage-collected heap
 type P_Unbox :: forall {r :: Rep}. T r -> T AddrRep
 newtype P_Unbox x = Addr# Addr#
 type P_Unbox_M :: forall {r :: Rep}. T r -> ★ → T AddrRep
 newtype P_Unbox_M x s = MutableAddr# (MutableAddr# s)
 
-newtype P_Box x s = MutVar# (MutVar# s x)
-newtype P_Async x s = TVar# (TVar# s x)
+type P_Box = MutVar#
+newtype P_Async x = TVar# (TVar# Transaction x)
 -- | A synchronising variable, used for communication between concurrent threads.
 -- It can be thought of as a box, which may be empty or full.
 --
 -- The RTS implementation is really an abstraction for
 -- connecting 'take' and 'write' calls between threads
-newtype P_Sync x s = MVar# (MVar# s x)
+type P_Sync = MVar# RealWorld
 
 {-|
 A weak pointer expressing a relashionship between a /key/ and a /value/ of type @v@:

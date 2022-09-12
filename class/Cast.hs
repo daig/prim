@@ -122,7 +122,7 @@ instance Cast (Bytes_Pinned_M s) Bytes_Pinned where cast = unsafeCoerce#
 instance Cast Bytes Buffer where
   cast (Bytes_Off_Len# (# x, off, n #)) = runST Prim.do
     mv <- newByteArray# n
-    \s -> (# copyByteArray# x off mv 0# n s, (##) #)
+    copyByteArray# x off mv 0# n
     v <- unsafeFreezeByteArray# mv
     return (UnpinnedByteArray# v)
   
@@ -142,3 +142,6 @@ instance Cast Char I where cast = chr#
 instance Cast Addr# I where cast = int2Addr#
 -- | This pattern is strongly deprecated
 instance Cast I Addr# where cast = addr2Int#
+
+-- | Atomically run a transaction
+instance Cast (IO a) (STM a) where cast = unsafeCoerce# (atomically# @a)

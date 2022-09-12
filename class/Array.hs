@@ -79,7 +79,7 @@ instance Array Bytes where
   thaw## a = return (unsafeCoerce# a)
   thaw# a off n = Prim.do
     ma <- new# n
-    \s -> (# coerce copyByteArray# a off ma 0# n s, (##) #)
+    coerce copyByteArray# a off ma 0# n
     return ma
   new# = coerce newByteArray#
   len = coerce sizeofByteArray#
@@ -87,7 +87,7 @@ instance Array Bytes where
   lenM  = coerce getSizeofMutableByteArray#
   cloneM# a off n = Prim.do
     ma <- new# n
-    \s -> (# coerce copyMutableByteArray# a off ma 0# n s, (##) #)
+    coerce copyMutableByteArray# a off ma 0# n
     return ma
   clone# a off n = runST (Prim.do ma <- thaw# a off n; freeze## ma)
 
@@ -99,7 +99,7 @@ instance Array Bytes_Pinned where
   thaw## a = return (unsafeCoerce# a)
   thaw# a off n = Prim.do
     ma <- new# n
-    \s -> (# coerce copyByteArray# a off ma 0# n s, (##) #)
+    coerce copyByteArray# a off ma 0# n
     return ma
   new# = coerce newPinnedByteArray#
   len = coerce sizeofByteArray#
@@ -107,6 +107,6 @@ instance Array Bytes_Pinned where
   lenM  = coerce getSizeofMutableByteArray#
   cloneM# a off n = Prim.do
     ma <- new# n
-    \s -> (# coerce copyMutableByteArray# a off ma 0# n s, (##) #)
+    coerce copyMutableByteArray# a off ma 0# n
     return ma
   clone# a off n = runST (Prim.do ma <- thaw# a off n; freeze## ma)
