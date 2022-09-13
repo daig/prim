@@ -1,5 +1,5 @@
-module Thread (module Thread, module Thread.Status) where
-import Thread.Status
+module RTS.Thread (module RTS.Thread, module X) where
+import RTS.Thread.Status as X
 
 type Thread = ThreadId#
 
