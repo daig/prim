@@ -15,19 +15,23 @@ type Bits ∷ ∀ {r ∷ Rep}. T r → Constraint
 class Bits a where
   -- | Shift left.  Result undefined if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.
-  shiftL# ∷ a → U → a
+  (<<#) ∷ a → U → a
   -- | Shift left.  Result 0 if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.
-  shiftL ∷ a → U → a
+  (<<) ∷ a → U → a
   -- |Shift right.  Result undefined if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.
-  shiftR# ∷ a → U → a
+  (>>#) ∷ a → U → a
   -- |Shift right.  Result 0 if shift amount is not
   --           in the range 0 to @size - 1@ inclusive.
-  shiftR ∷ a → U → a
+  (>>) ∷ a → U → a
   -- |Shift left logical.  Accepts negative offset for right shifts.
   -- Result 0 if shift amount is not in the range @1 - size@ to @size - 1@ inclusive.
   shift ∷ a → I → a 
+  -- | Set the nth bit
+  bit ∷ U → a
+  -- | Check if the nth bit is set
+  bit' ∷ a → U → B
   -- | Count the number of set bits
   popCnt ∷ a → U
   -- | Count the number of leading zeroes
@@ -57,11 +61,13 @@ instance Logic U where
   (⊕) = xor#
   (¬) = not#
 instance Bits U where
-  shiftL# w i = uncheckedShiftL# w (cast i)
-  shiftL w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftL# w i}
-  shiftR# w i = coerce uncheckedShiftRL# w (cast @I i)
-  shiftR w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  w <<# i = uncheckedShiftL# w (cast i)
+  w << i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → w <<# i}
+  w >># i = coerce uncheckedShiftRL# w (cast @I i)
+  w >> i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (1## <<#)
+  bit' x i = cast (bit i ∧ x)
   popCnt = popCnt#
   clz = clz#
   ctz = ctz#
@@ -76,18 +82,20 @@ instance Logic U8 where
   (⊕) = xorWord8#
   (¬) = notWord8#
 instance Bits U8 where
-  shiftL# w i = uncheckedShiftLWord8# w (cast @I i)
-  shiftL w i = case i ≥ 8## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
-  shiftR# w i = uncheckedShiftRLWord8# w (cast @I i)
-  shiftR w i = case i ≥ 8## of {B# 1# → cast 0##; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
-  popCnt w = popCnt8# (cast @U w)
-  clz w = clz8# (cast @U w)
-  ctz w = ctz8# (cast @U w)
+  w <<# i = uncheckedShiftLWord8# w (cast @I i)
+  w << i = case i ≥ 8## of {B# 1# → cast 0##; B# 0# → w <<# i}
+  w >># i = uncheckedShiftRLWord8# w (cast @I i)
+  w >> i = case i ≥ 8## of {B# 1# → cast 0##; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (cast 1## <<#)
+  bit' x i = cast (bit i ∧ x)
+  popCnt w = popCnt8# (cast w)
+  clz w = clz8# (cast w)
+  ctz w = ctz8# (cast w)
   byteSwap x = x
-  bitReverse w = cast @U8 (bitReverse8# (cast @U w))
-  pdep s m = cast @U8 (pdep8# (cast @U s) (cast @U m))
-  pext s m = cast @U8 (pext8# (cast @U s) (cast @U m))
+  bitReverse w = cast @U8 (bitReverse8# (cast w))
+  pdep s m = cast @U8 (pdep8# (cast s) (cast m))
+  pext s m = cast @U8 (pext8# (cast s) (cast m))
 
 instance Logic U16 where
   (∧) = andWord16#
@@ -95,18 +103,20 @@ instance Logic U16 where
   (⊕) = xorWord16#
   (¬) = notWord16#
 instance Bits U16 where
-  shiftL# w i = uncheckedShiftLWord16# w (cast @I i)
-  shiftL w i = case i ≥ 16## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
-  shiftR# w i = uncheckedShiftRLWord16# w (cast @I i)
-  shiftR w i = case i ≥ 16## of {B# 1# → cast 0##; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
-  popCnt w = popCnt16# (cast @U w)
-  clz w = clz16# (cast @U w)
-  ctz w = ctz16# (cast @U w)
+  w <<# i = uncheckedShiftLWord16# w (cast @I i)
+  w << i = case i ≥ 16## of {B# 1# → cast 0##; B# 0# → w <<# i}
+  w >># i = uncheckedShiftRLWord16# w (cast @I i)
+  w >> i = case i ≥ 16## of {B# 1# → cast 0##; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (cast 1## <<#)
+  bit' x i = cast (bit i ∧ x)
+  popCnt w = popCnt16# (cast w)
+  clz w = clz16# (cast w)
+  ctz w = ctz16# (cast w)
   byteSwap w = cast (byteSwap16# (cast w))
-  bitReverse w = cast @U16 (bitReverse16# (cast @U w))
-  pdep s m = cast @U16 (pdep16# (cast @U s) (cast @U m))
-  pext s m = cast @U16 (pext16# (cast @U s) (cast @U m))
+  bitReverse w = cast @U16 (bitReverse16# (cast w))
+  pdep s m = cast @U16 (pdep16# (cast s) (cast m))
+  pext s m = cast @U16 (pext16# (cast s) (cast m))
 
 instance Logic U32 where
   (∧) = andWord32#
@@ -114,18 +124,20 @@ instance Logic U32 where
   (⊕) = xorWord32#
   (¬) = notWord32#
 instance Bits U32 where
-  shiftL# w i = uncheckedShiftLWord32# w (cast @I i)
-  shiftL w i = case i ≥ 32## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
-  shiftR# w i = uncheckedShiftRLWord32# w (cast @I i)
-  shiftR w i = case i ≥ 32## of {B# 1# → cast 0##; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
-  popCnt w = popCnt32# (cast @U w)
-  clz w = clz32# (cast @U w)
-  ctz w = ctz32# (cast @U w)
+  w <<# i = uncheckedShiftLWord32# w (cast @I i)
+  w << i = case i ≥ 32## of {B# 1# → cast 0##; B# 0# → w <<# i}
+  w >># i = uncheckedShiftRLWord32# w (cast @I i)
+  w >> i = case i ≥ 32## of {B# 1# → cast 0##; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (cast 1## <<#)
+  bit' x i = cast (bit i ∧ x)
+  popCnt w = popCnt32# (cast w)
+  clz w = clz32# (cast w)
+  ctz w = ctz32# (cast w)
   byteSwap w = cast (byteSwap32# (cast w))
-  bitReverse w = cast @U32 (bitReverse32# (cast @U w))
-  pdep s m = cast @U32 (pdep32# (cast @U s) (cast @U m))
-  pext s m = cast @U32 (pext32# (cast @U s) (cast @U m))
+  bitReverse w = cast @U32 (bitReverse32# (cast w))
+  pdep s m = cast @U32 (pdep32# (cast s) (cast m))
+  pext s m = cast @U32 (pext32# (cast s) (cast m))
 
 instance Logic U64 where
   (∧) = and64#
@@ -133,11 +145,13 @@ instance Logic U64 where
   (⊕) = xor64#
   (¬) = not64#
 instance Bits U64 where
-  shiftL# w i = uncheckedShiftL64# w (cast @I i)
-  shiftL w i = case i ≥ 64## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
-  shiftR# w i = uncheckedShiftRL64# w (cast @I i)
-  shiftR w i = case i ≥ 64## of {B# 1# → cast 0##; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  w <<# i = uncheckedShiftL64# w (cast @I i)
+  w << i = case i ≥ 64## of {B# 1# → cast 0##; B# 0# → w <<# i}
+  w >># i = uncheckedShiftRL64# w (cast @I i)
+  w >> i = case i ≥ 64## of {B# 1# → cast 0##; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (cast 1## <<#)
+  bit' x i = cast (bit i ∧ x)
   popCnt = popCnt64#
   clz = clz64#
   ctz = ctz64#
@@ -152,11 +166,13 @@ instance Logic I where
   (⊕) = xorI#
   (¬) = notI#
 instance Bits I where
-  shiftL# w i = uncheckedIShiftL# w (cast @I i)
-  shiftL w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → cast 0##; B# 0# → shiftL# w i}
-  shiftR# w i = uncheckedIShiftRA# w (cast @I i)
-  shiftR w i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → cast 0##; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  w <<# i = uncheckedIShiftL# w (cast @I i)
+  w << i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → cast 0##; B# 0# → w <<# i}
+  w >># i = uncheckedIShiftRA# w (cast @I i)
+  w >> i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → cast 0##; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (1# <<#)
+  bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt# (cast i)
   clz i = clz# (cast i)
   ctz i = ctz# (cast i)
@@ -171,11 +187,13 @@ instance Logic I8 where
   a ⊕ b = cast (xorWord8# (cast a) (cast b))
   (¬) a = cast (notWord8# (cast a))
 instance Bits I8 where
-  shiftL# w i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
-  shiftL w i = case i ≥ 8## of {B# 1# → cast 0#; B# 0# → shiftL# w i}
-  shiftR# w i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
-  shiftR w i = case i ≥ 8## of {B# 1# → cast 0#; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
+  w << i = case i ≥ 8## of {B# 1# → cast 0#; B# 0# → w <<# i}
+  w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
+  w >> i = case i ≥ 8## of {B# 1# → cast 0#; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (cast 1# <<#)
+  bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt8# (cast i)
   clz i = clz8# (cast i)
   ctz i = ctz8# (cast i)
@@ -190,11 +208,13 @@ instance Logic I16 where
   a ⊕ b = cast (xorWord16# (cast a) (cast b))
   (¬) a = cast (notWord16# (cast a))
 instance Bits I16 where
-  shiftL# w i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
-  shiftL w i = case i ≥ 16## of {B# 1# → cast 0#; B# 0# → shiftL# w i}
-  shiftR# w i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
-  shiftR w i = case i ≥ 16## of {B# 1# → cast 0#; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
+  w << i = case i ≥ 16## of {B# 1# → cast 0#; B# 0# → w <<# i}
+  w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
+  w >> i = case i ≥ 16## of {B# 1# → cast 0#; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (cast 1# <<#)
+  bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt16# (cast i)
   clz i = clz16# (cast i)
   ctz i = ctz16# (cast i)
@@ -209,11 +229,13 @@ instance Logic I32 where
   a ⊕ b = cast (xorWord32# (cast a) (cast b))
   (¬) a = cast (notWord32# (cast a))
 instance Bits I32 where
-  shiftL# w i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
-  shiftL w i = case i ≥ 32## of {B# 1# → cast 0#; B# 0# → shiftL# w i}
-  shiftR# w i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
-  shiftR w i = case i ≥ 32## of {B# 1# → cast 0#; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
+  w << i = case i ≥ 32## of {B# 1# → cast 0#; B# 0# → w <<# i}
+  w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
+  w >> i = case i ≥ 32## of {B# 1# → cast 0#; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (cast 1# <<#)
+  bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt32# (cast i)
   clz i = clz32# (cast i)
   ctz i = ctz32# (cast i)
@@ -228,11 +250,13 @@ instance Logic I64 where
   a ⊕ b = cast (xor64# (cast a) (cast b))
   (¬) a = cast (not64# (cast a))
 instance Bits I64 where
-  shiftL# w i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
-  shiftL w i = case i ≥ 64## of {B# 1# → cast 0#; B# 0# → shiftL# w i}
-  shiftR# w i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
-  shiftR w i = case i ≥ 64## of {B# 1# → cast 0#; B# 0# → shiftR# w i}
-  shift w i = case i ≥ 0# of {T → shiftL w (cast @U i); F → shiftR w (cast @U (negateInt# i))}
+  w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
+  w << i = case i ≥ 64## of {B# 1# → cast 0#; B# 0# → w <<# i}
+  w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
+  w >> i = case i ≥ 64## of {B# 1# → cast 0#; B# 0# → w >># i}
+  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  bit = (cast 1# <<#)
+  bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt64# (cast i)
   clz i = clz64# (cast i)
   ctz i = ctz64# (cast i)

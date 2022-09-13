@@ -4,11 +4,13 @@ class Logic (a ∷ T r) where
   (∧), (∨), (⊕) ∷ a → a → a
   (¬) ∷ a → a
 class Bits (a ∷ T r) where
-  shiftL# ∷ a → U → a
-  shiftL ∷ a → U → a
-  shiftR# ∷ a → U → a
-  shiftR ∷ a → U → a
+  (<<#) ∷ a → U → a
+  (<<) ∷ a → U → a
+  (>>#) ∷ a → U → a
+  (>>) ∷ a → U → a
   shift ∷ a → I → a 
+  bit ∷ U → a
+  bit' ∷ a → U → B
   popCnt ∷ a → U
   clz ∷ a → U
   ctz ∷ a → U

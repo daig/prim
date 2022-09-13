@@ -1,4 +1,4 @@
-{-# LANGUAGE StandaloneKindSignatures #-}
+{-# LANGUAGE CPP  #-}
 module Num (module Num
 -- * Note: divInt# implementation
 -- | @divInt#@ (truncated toward zero, defined in "GHC.Classes") is implemented with quotInt# (truncated
@@ -76,6 +76,7 @@ import Cast
 import HsFFI
 import GHC.Word (Word(..))
 import GHC.Int (Int(..))
+#include "MachDeps.h"
 
 -- |Satisfies @((((x / y) × y) + (x % y) ≡ x@. The
 class (≤) a ⇒ ℕ (a ∷ T r) where
@@ -91,9 +92,20 @@ class ℕ a ⇒ ℤ (a ∷ T r) where
   (//%%) ∷ a → a → (# a , a #)
   (-) ∷ a → a → a
   negate ∷ a → a
+  -- | Absolute value
+  abs ∷ a → a
+  -- | Compare to zero
+  sgn ∷ a → Ordering
 class ℤ a ⇒ ℝ (a ∷ T r) where
-  abs,exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a
+  exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a
+  -- | @exp x - 1@ but with greater precision for small values of @x@.
+  -- Inverse of 'log1p'
+  expm1 ∷ a → a
+  -- | @log (x + 1)@ but with greater precision for small values of @x@ i.e. when @1 + x ≡ x@.
+  -- Inverse of 'expm1'
+  log1p ∷ a → a
   (**) ∷ a → a → a
+
 
 instance ℕ U where
   (+) = plusWord#
@@ -141,10 +153,13 @@ instance ℕ I where
   (/%) = divModInt#
 instance ℤ I where
   negate = negateInt#
+  abs i = (i ⊕ nsign) -# nsign where
+    nsign = i >># minusWord# WORD_SIZE_IN_BITS## 1##
   (-) = (-#)
   (//) = quotInt#
   (%%) = remInt#
   (//%%) = quotRemInt#
+  sgn a = Ordering# (coerce (a ># 0#) -# (a <# 0#))
 
 
 instance ℕ I8 where
@@ -179,6 +194,8 @@ instance ℤ I8 where
   (//) = quotInt8#
   (%%) = remInt8#
   (//%%) = quotRemInt8#
+  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+  abs i = (i ⊕ nsign) - nsign where nsign = i >># 7##
 
 instance ℤ I16 where
   negate = negateInt16#
@@ -186,12 +203,16 @@ instance ℤ I16 where
   (//) = quotInt16#
   (%%) = remInt16#
   (//%%) = quotRemInt16#
+  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+  abs i = (i ⊕ nsign) - nsign where nsign = i >># 15##
 instance ℤ I32 where
   negate = negateInt32#
   (-) = subInt32# 
   (//) = quotInt32#
   (%%) = remInt32#
   (//%%) = quotRemInt32#
+  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+  abs i = (i ⊕ nsign) - nsign where nsign = i >># 31##
 instance ℤ I64 where
   negate = negateInt64#
   (-) = subInt64# 
@@ -199,6 +220,8 @@ instance ℤ I64 where
   (%%) = remInt64#
   (cast -> a) //%% (cast -> b) =
     case quotRemInt# a b of (# q, r #) -> (# cast q, cast r #)
+  abs i = (i ⊕ nsign) - nsign where nsign = i >># 63##
+  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
 
 instance ℕ F32 where
   (+) = plusFloat#
@@ -212,10 +235,13 @@ instance ℤ F32 where
   (//) = divideFloat#
   _ %% _ = 0.0#
   x //%% y = (# x / y , 0.0# #)
-instance ℝ F32 where
   abs = fabsFloat#
+  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+instance ℝ F32 where
   exp = expFloat#
+  expm1 = expm1Float#
   log = logFloat#
+  log1p = log1pFloat#
   sqrt = sqrtFloat#
   sin = sinFloat#
   cos = cosFloat#
@@ -239,10 +265,13 @@ instance ℤ F64 where
   (//) = (/##)
   _ %% _ = 0.0##
   x //%% y = (# x / y , 0.0## #)
-instance ℝ F64 where
   abs = fabsDouble#
+  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+instance ℝ F64 where
   exp = expDouble#
+  expm1 = expm1Double#
   log = logDouble#
+  log1p = log1pDouble#
   sqrt = sqrtDouble#
   sin = sinDouble#
   cos = cosDouble#

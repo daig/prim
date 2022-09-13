@@ -13,9 +13,12 @@ class ℕ a ⇒ ℤ (a ∷ T r) where
   -- | Rounds towards 0. The behavior is undefined if the first argument is zero.
   (//%%) ∷ a → a → (# a , a #)
   (-) ∷ a → a → a
-  negate ∷ a → a
+  negate, abs ∷ a → a
+  sgn ∷ a → Ordering
 class ℤ a ⇒ ℝ (a ∷ T r) where
-  abs,exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a
+  exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a
+  expm1 ∷ a → a
+  log1p ∷ a → a
   (**) ∷ a → a → a
 
 instance ℕ U where
