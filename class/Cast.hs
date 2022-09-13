@@ -1,6 +1,7 @@
 module Cast where
 import Do as Prim
 import Unsafe.Coerce
+import GHC.Types (isTrue#,Bool)
 
 -- | Nontrivial conversions between types. Use with care!
 type Cast :: forall {r :: RuntimeRep} {r' :: RuntimeRep}. T r -> T r' -> C
@@ -145,3 +146,5 @@ instance Cast I Addr# where cast = addr2Int#
 
 -- | Atomically run a transaction
 instance Cast (IO a) (STM a) where cast = unsafeCoerce# (atomically# @a)
+
+instance Cast Bool B where cast = coerce isTrue#

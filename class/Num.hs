@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP  #-}
+{-# LANGUAGE BangPatterns, CPP  #-}
 module Num (module Num
 -- * Note: divInt# implementation
 -- | @divInt#@ (truncated toward zero, defined in "GHC.Classes") is implemented with quotInt# (truncated
@@ -76,6 +76,8 @@ import Cast
 import HsFFI
 import GHC.Word (Word(..))
 import GHC.Int (Int(..))
+import GHC.Types qualified as GHC (isTrue#)
+import GHC.Prim.Exception qualified as GHC
 #include "MachDeps.h"
 
 -- |Satisfies @((((x / y) × y) + (x % y) ≡ x@. The
@@ -96,6 +98,11 @@ class ℕ a ⇒ ℤ (a ∷ T r) where
   abs ∷ a → a
   -- | Compare to zero
   sgn ∷ a → Ordering
+class 𝕌 (a ∷ T r) where
+  -- | Log base 2
+  log2 ∷ a → a
+  -- | Log in an arbitrary base
+  log# ∷ a → a → a
 class ℤ a ⇒ ℝ (a ∷ T r) where
   exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a
   -- | @exp x - 1@ but with greater precision for small values of @x@.
@@ -105,7 +112,6 @@ class ℤ a ⇒ ℝ (a ∷ T r) where
   -- Inverse of 'expm1'
   log1p ∷ a → a
   (**) ∷ a → a → a
-
 
 instance ℕ U where
   (+) = plusWord#
@@ -283,3 +289,30 @@ instance ℝ F64 where
   cosh = coshDouble#
   tanh = tanhDouble#
   (**) = (**##)
+
+instance 𝕌 U where
+  log2 w = (minusWord# WORD_SIZE_IN_BITS## 1##) `minusWord#` clz w
+  -- | Logarithm for an arbitrary base
+  log# = \cases
+   b _ | cast (b ≤ 1##) → case GHC.raiseOverflow of !_ → 0##
+   2## a → log2 a
+   b a → case go b of (# _, e' #) → e'
+	   where
+	      goSqr pw = case timesWord2# pw pw of
+		 (# 0##, l #) -> go l
+		 (# _  , _ #) -> (# a, 0## #)
+	      go pw = if GHC.isTrue# (a `ltWord#` pw)
+		 then (# a, 0## #)
+		 else case goSqr pw of
+		    (# q, e #) -> if GHC.isTrue# (q `ltWord#` pw)
+		       then (# q, 2## `timesWord#` e #)
+		       else (# q `quotWord#` pw
+			    , 2## `timesWord#` e `plusWord#` 1## #)
+instance 𝕌 U8 where
+  log2 w = cast 7## `subWord8#` cast (clz w)
+instance 𝕌 U16 where
+  log2 w = cast 15## `subWord16#` cast (clz w)
+instance 𝕌 U32 where
+  log2 w = cast 31## `subWord32#` cast (clz w)
+instance 𝕌 U64 where
+  log2 w = cast 63## `subWord64#` cast (clz w)
