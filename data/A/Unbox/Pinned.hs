@@ -1,9 +1,9 @@
 --------------------------------------------------------------------
 -- | Description : Unboxed Arrays of Primitive Types
 --------------------------------------------------------------------
-module A.Unbox (A_Unbox,A_Unbox_M
+module A.Unbox.Pinned (A_Unbox_Pinned,A_Unbox_Pinned_M
                -- * misc utilities
-               ,module A.Unbox
+               ,module A.Unbox.Pinned
                -- * instance reexports
                ,module X
                ) where
@@ -14,5 +14,5 @@ import Array.Shrink as X (Shrink(..))
 import Array.Pinned' as X (Pinned'(..))
 import Prim.Atomic as X (Atomic(..),Eq_Atomic(..),Num_Atomic(..),Logic_Atomic(..))
 
-resize :: A_Unbox_M x s -> I -> ST s (A_Unbox_M x s)
-resize = coerce resizeMutableByteArray#
+aligned ∷ I {- ^ size in bytes -} → I {- ^ alignment in bytes (must be power of 2) -} → ST s (A_Unbox_Pinned_M x s)
+aligned = coerce newAlignedPinnedByteArray#

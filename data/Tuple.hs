@@ -9,4 +9,4 @@
 -- Unboxed Tuples are wired into GHC.
 --
 --------------------------------------------------------------------
-module Data.Tuple where
+module Tuple where

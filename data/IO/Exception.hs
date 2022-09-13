@@ -1,3 +1,4 @@
+{-# language GHCForeignImportPrim,UnliftedFFITypes #-}
 module IO.Exception where
 import Prelude
 
@@ -8,10 +9,10 @@ import Prelude
 catch# ∷ IO a → (e → IO a) → IO a
 catch# = Prelude.catch#
 
--- | Raising values other than type @SomeException@ leads to segfault
+-- | Raising values other than type @SomeException@ leads to segfault if uncaught by 'catch#'
 raise# ∷ ∀ {r} (a ∷ T r) e. e → a
 raise# = Prelude.raise#
--- | Raising values other than type @SomeException@ leads to segfault
+-- | Raising values other than type @SomeException@ leads to segfault if uncaught by 'catch#'
 raiseIO ∷ e → IO a
 raiseIO = raiseIO#
 
@@ -28,3 +29,7 @@ raiseIO = raiseIO#
 -- see https://gitlab.haskell.org/ghc/ghc/-/blob/fc644b1a643128041cfec25db84e417851e28bab/compiler/GHC/Core/Opt/ConstantFold.hs#L1198
 eval ∷ a → IO a
 eval = seq#
+
+
+-- | An unrecoverable error. Display the string and exit.
+foreign import prim "stg_paniczh" panic# ∷ S# → IO X#

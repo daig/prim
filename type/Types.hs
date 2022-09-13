@@ -287,3 +287,6 @@ pattern Ok a ← (# B# 0#, a #) where Ok a = (# B# 0#, a #)
 pattern Err ∷ b → Result# a b
 pattern Err b ← (# B# 1#, (unsafeCoerce# → b) #) where Err b = (# B# 1#, unsafeCoerce# b #)
 {-# complete Ok,Err #-}
+
+-- | The uninhabited ("Void") type
+newtype X# ∷ T (SumRep '[]) where X# ∷ X# → X#

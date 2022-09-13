@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
--- | Description : The class used for -XImplicitParams syntax
+-- | Description : Implicit Parameters
 --------------------------------------------------------------------
-module Class.IP (module X) where
+module IP (module X) where
 import GHC.Classes as X (IP(..))
