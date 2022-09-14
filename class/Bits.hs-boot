@@ -10,7 +10,7 @@ class Bits (a ∷ T r) where
   (>>) ∷ a → U → a
   shift ∷ a → I → a 
   bit ∷ U → a
-  bit' ∷ a → U → B
+  bit' ∷ a → U → B#
   popCnt ∷ a → U
   clz ∷ a → U
   ctz ∷ a → U
@@ -22,4 +22,4 @@ infixl 3 ∧
 infixl 2 ⊕
 infixl 1 ∨
 
-instance Logic B
+instance Logic B#

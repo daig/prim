@@ -20,11 +20,11 @@ type Rep = RuntimeRep
 
 type C = Constraint
 
-newtype B = B# I
-pattern F, T ∷ B
-pattern F = B# 0#
-pattern T = B# 1#
-{-# complete F, T #-}
+newtype B# = B# I
+pattern F#, T# ∷ B#
+pattern F# = B# 0#
+pattern T# = B# 1#
+{-# complete F#, T# #-}
 
 -- | A number less-than, equal-to, or greater-than @0#@
 newtype Ordering ∷ K I where Ordering# ∷ I → Ordering
@@ -273,14 +273,15 @@ type P_Stable_Name ∷ T# l → T_
 type P_Stable_Name = StableName#
 
 -- | Primitive maybe type represented by a tag and (possibly invalid) value.
-type Maybe# (a ∷ T r)  = (# B , a #)
+type Maybe# (a ∷ T r)  = (# B# , a #)
+type Maybe (a ∷ T r) = (# (##) | a #)
 pattern Some# ∷ a → Maybe# a
 pattern Some# a = (# B# 1# , a #)
 pattern None# ∷ Maybe# a
 pattern None# ← (# B# 0#, _ #) where None# = (# B# 0# , panicError "Used Empty None#"# #)
 {-# complete None#, Some# #-}
 -- | Primitive option type represented by a tag and two values of the same representation.
-type Result# (a ∷ T r) (b ∷ T r) = (# B , a #)
+type Result# (a ∷ T r) (b ∷ T r) = (# B# , a #)
 
 pattern Ok ∷ a → Result# a b
 pattern Ok a ← (# B# 0#, a #) where Ok a = (# B# 0#, a #)

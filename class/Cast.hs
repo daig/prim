@@ -16,30 +16,30 @@ instance Cast F32 I where cast = int2Float#
 instance Cast F64 I where cast = int2Double#
 
 -- | Truthiness
-instance Cast B I where cast = coerce (0# >#)
-instance Cast B I8 where cast = coerce (gtInt8# (cast 0#))
-instance Cast B I16 where cast = coerce (gtInt16# (cast 0#))
-instance Cast B I32 where cast = coerce (gtInt32# (cast 0#))
-instance Cast B I64 where cast = coerce (gtInt64# (cast 0#))
-instance Cast B U where cast = coerce do gtWord# 0##
-instance Cast B U8 where cast = coerce (gtWord8# (cast 0##))
-instance Cast B U16 where cast = coerce (gtWord16# (cast 0##))
-instance Cast B U32 where cast = coerce (gtWord32# (cast 0##))
-instance Cast B U64 where cast = coerce (gtWord64# (cast 0##))
-instance Cast B Addr# where cast = coerce neAddr# nullAddr#
-instance Cast B Char where cast = coerce neChar# '\NUL'#
-deriving via Char instance Cast B Char8
+instance Cast B# I where cast = coerce (0# >#)
+instance Cast B# I8 where cast = coerce (gtInt8# (cast 0#))
+instance Cast B# I16 where cast = coerce (gtInt16# (cast 0#))
+instance Cast B# I32 where cast = coerce (gtInt32# (cast 0#))
+instance Cast B# I64 where cast = coerce (gtInt64# (cast 0#))
+instance Cast B# U where cast = coerce do gtWord# 0##
+instance Cast B# U8 where cast = coerce (gtWord8# (cast 0##))
+instance Cast B# U16 where cast = coerce (gtWord16# (cast 0##))
+instance Cast B# U32 where cast = coerce (gtWord32# (cast 0##))
+instance Cast B# U64 where cast = coerce (gtWord64# (cast 0##))
+instance Cast B# Addr# where cast = coerce neAddr# nullAddr#
+instance Cast B# Char where cast = coerce neChar# '\NUL'#
+deriving via Char instance Cast B# Char8
 
-instance Cast I B where cast (B# i#) = i#
-instance Cast I8 B where cast (B# i#) = cast i#
-instance Cast I16 B where cast (B# i#) = cast i#
-instance Cast I32 B where cast (B# i#) = cast i#
-instance Cast I64 B where cast (B# i#) = cast i#
-instance Cast U B where cast (B# i#) = cast i#
-instance Cast U8 B where cast (B# i#) = cast (cast @U i#)
-instance Cast U16 B where cast (B# i#) = cast (cast @U i#)
-instance Cast U32 B where cast (B# i#) = cast (cast @U i#)
-instance Cast U64 B where cast (B# i#) = cast (cast @U i#)
+instance Cast I B# where cast (B# i#) = i#
+instance Cast I8 B# where cast (B# i#) = cast i#
+instance Cast I16 B# where cast (B# i#) = cast i#
+instance Cast I32 B# where cast (B# i#) = cast i#
+instance Cast I64 B# where cast (B# i#) = cast i#
+instance Cast U B# where cast (B# i#) = cast i#
+instance Cast U8 B# where cast (B# i#) = cast (cast @U i#)
+instance Cast U16 B# where cast (B# i#) = cast (cast @U i#)
+instance Cast U32 B# where cast (B# i#) = cast (cast @U i#)
+instance Cast U64 B# where cast (B# i#) = cast (cast @U i#)
 
 instance Cast F32 F64 where cast = double2Float#
 instance Cast F64 F32 where cast = float2Double#
@@ -147,4 +147,4 @@ instance Cast I Addr# where cast = addr2Int#
 -- | Atomically run a transaction
 instance Cast (IO a) (STM a) where cast = unsafeCoerce# (atomically# @a)
 
-instance Cast Bool B where cast = coerce isTrue#
+instance Cast Bool B# where cast = coerce isTrue#

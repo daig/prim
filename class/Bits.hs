@@ -31,7 +31,7 @@ class Bits a where
   -- | Set the nth bit
   bit ∷ U → a
   -- | Check if the nth bit is set
-  bit' ∷ a → U → B
+  bit' ∷ a → U → B#
   -- | Count the number of set bits
   popCnt ∷ a → U
   -- | Count the number of leading zeroes
@@ -49,11 +49,11 @@ infixl 2 ⊕
 infixl 1 ∨
 
 -- | Boolean Operations
-instance Logic B where
+instance Logic B# where
   (∧) = coerce andI#
   (∨) = coerce orI#
   (⊕) = coerce xorI#
-  (¬) = (T ⊕)
+  (¬) = (T# ⊕)
 
 instance Logic U where
   (∧) = and#
@@ -65,7 +65,7 @@ instance Bits U where
   w << i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → w <<# i}
   w >># i = coerce uncheckedShiftRL# w (cast @I i)
   w >> i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → 0##; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (1## <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt = popCnt#
@@ -86,7 +86,7 @@ instance Bits U8 where
   w << i = case i ≥ 8## of {B# 1# → cast 0##; B# 0# → w <<# i}
   w >># i = uncheckedShiftRLWord8# w (cast @I i)
   w >> i = case i ≥ 8## of {B# 1# → cast 0##; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1## <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt w = popCnt8# (cast w)
@@ -107,7 +107,7 @@ instance Bits U16 where
   w << i = case i ≥ 16## of {B# 1# → cast 0##; B# 0# → w <<# i}
   w >># i = uncheckedShiftRLWord16# w (cast @I i)
   w >> i = case i ≥ 16## of {B# 1# → cast 0##; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1## <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt w = popCnt16# (cast w)
@@ -128,7 +128,7 @@ instance Bits U32 where
   w << i = case i ≥ 32## of {B# 1# → cast 0##; B# 0# → w <<# i}
   w >># i = uncheckedShiftRLWord32# w (cast @I i)
   w >> i = case i ≥ 32## of {B# 1# → cast 0##; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1## <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt w = popCnt32# (cast w)
@@ -149,7 +149,7 @@ instance Bits U64 where
   w << i = case i ≥ 64## of {B# 1# → cast 0##; B# 0# → w <<# i}
   w >># i = uncheckedShiftRL64# w (cast @I i)
   w >> i = case i ≥ 64## of {B# 1# → cast 0##; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1## <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt = popCnt64#
@@ -170,7 +170,7 @@ instance Bits I where
   w << i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → cast 0##; B# 0# → w <<# i}
   w >># i = uncheckedIShiftRA# w (cast @I i)
   w >> i = case i ≥ WORD_SIZE_IN_BITS## of {B# 1# → cast 0##; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (1# <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt# (cast i)
@@ -191,7 +191,7 @@ instance Bits I8 where
   w << i = case i ≥ 8## of {B# 1# → cast 0#; B# 0# → w <<# i}
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
   w >> i = case i ≥ 8## of {B# 1# → cast 0#; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1# <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt8# (cast i)
@@ -212,7 +212,7 @@ instance Bits I16 where
   w << i = case i ≥ 16## of {B# 1# → cast 0#; B# 0# → w <<# i}
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
   w >> i = case i ≥ 16## of {B# 1# → cast 0#; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1# <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt16# (cast i)
@@ -230,10 +230,10 @@ instance Logic I32 where
   (¬) a = cast (notWord32# (cast a))
 instance Bits I32 where
   w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
-  w << i = case i ≥ 32## of {B# 1# → cast 0#; B# 0# → w <<# i}
+  w << i = if cast (i ≥ 32##) then cast 0# else w <<# i
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
   w >> i = case i ≥ 32## of {B# 1# → cast 0#; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1# <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt32# (cast i)
@@ -254,7 +254,7 @@ instance Bits I64 where
   w << i = case i ≥ 64## of {B# 1# → cast 0#; B# 0# → w <<# i}
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
   w >> i = case i ≥ 64## of {B# 1# → cast 0#; B# 0# → w >># i}
-  shift w i = case i ≥ 0# of {T → w << cast i; F → w >> cast (negateInt# i)}
+  shift w i = if cast (i ≥ 0#) then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1# <<#)
   bit' x i = cast (bit i ∧ x)
   popCnt i = popCnt64# (cast i)
