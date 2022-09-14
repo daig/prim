@@ -21,9 +21,9 @@ here = myThreadId#
 -- Used in debugging output if the RTS was compiled to support it.
 label# ∷ Thread → S# → IO_
 label# = labelThread#
-bound' ∷ IO B
+bound' ∷ IO B#
 bound' = coerce isCurrentThreadBound#
-status ∷ Thread → IO (# Status, Cap, B #)
+status ∷ Thread → IO (# Status, Cap, B# #)
 status n s = case threadStatus# n s of
   (# s', status, cap, bound' #) → (# s', (# Status# status, cap, B# bound' #) #)
 

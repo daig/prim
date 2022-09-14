@@ -4,8 +4,7 @@ import GHC.Num.BigNat
 import GHC.Types qualified as GHC
 import GHC.Types (Bool(..),Word)
 
-type N = Natural
-valid'# ∷ N → B
+valid'# ∷ N → B#
 valid'# = coerce naturalCheck#
 
 valid' ∷ N → Bool
@@ -18,8 +17,6 @@ one = naturalOne
 zero',one' ∷ N → Bool
 zero' = naturalIsZero
 one' = naturalIsOne
-
-
 
 pattern Z ← (naturalIsZero → True) where Z = naturalZero
 pattern One ← (naturalIsOne → True) where One = naturalOne
@@ -70,3 +67,6 @@ instance (≤) N where
   cmp (NB x) (NB y) = cast (bigNatCompare x y)
   cmp (NS _) (NB _) = LT
   cmp (NB _) (NS _) = GT
+  min x y = if cast (x ≤ y) then x else y
+  min x y = cast (x ≤ y) ? x $ y
+  max x y = if cast (x ≥ y) then x else y

@@ -73,6 +73,7 @@ internal-libraries:
     dependencies:
       - ghc-prim
       - microbase
+      - ghc-bignum
   do:
     source-dirs: do
     other-modules: Prelude

@@ -26,11 +26,11 @@ new = compactNew#
 resize ∷ Compact → U → IO_
 resize = compactResize#
 -- | Containment
-(∈) ∷ a → Compact → IO B
+(∈) ∷ a → Compact → IO B#
 a ∈ c = coerce do compactContains# c a
 
 -- | Is it contained in any live 'Compact'?
-inAny' ∷ a → IO B
+inAny' ∷ a → IO B#
 inAny' a = coerce do compactContainsAny# a
 
 -- | Get the first block

@@ -17,7 +17,7 @@ module Any
 
 -- | Compare pointers, which may be moved by the GC.
 -- __/Warning:/__ this can fail with an unchecked exception.
-eq# ∷ a → a → B
+eq# ∷ a → a → B#
 eq# x y = coerce do reallyUnsafePtrEquality# x y
 
 -- | Find the address of an evaluated value (not a thunk)

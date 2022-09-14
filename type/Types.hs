@@ -1,9 +1,17 @@
-{-# language NoImplicitPrelude #-}
+{-# language CPP,NoImplicitPrelude #-}
 module Types (module Types, module X) where
 import GHC.Prim as X
 import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint,Any)
 import GHC.Prim.Panic as X
 import Unsafe.Coerce (unsafeCoerce#)
+import GHC.Types qualified as GHC
+import GHC.Word  qualified as GHC
+import GHC.Int  qualified as GHC
+import GHC.Num.BigNat
+import GHC.Num.Natural
+
+type N = Natural
+type Nat = BigNat#
 
 -- | The kind constructor of types abstracted over 'RuntimeRep'
 type T = TYPE
@@ -14,7 +22,7 @@ type T# l = TYPE (BoxedRep l)
 -- | The kind of a type
 type K (a ∷ k) = k
 -- | The 'RuntimeRep' of a type
-type R# (i ∷ T r) = r
+type R (i ∷ T r) = r
 
 type Rep = RuntimeRep
 
@@ -291,3 +299,160 @@ pattern Err b ← (# B# 1#, (unsafeCoerce# → b) #) where Err b = (# B# 1#, uns
 
 -- | The uninhabited ("Void") type
 newtype X# ∷ T (SumRep '[]) where X# ∷ X# → X#
+
+type Box ∷ ∀ {r}. T r → ★
+type family Box x = b | b → x where
+  Box I = GHC.Int
+  Box I8 = GHC.Int8
+  Box I16 = GHC.Int16
+  Box I32 = GHC.Int32
+  Box I64 = GHC.Int64
+  Box U = GHC.Word
+  Box U8 = GHC.Word8
+  Box U16 = GHC.Word16
+  Box U32 = GHC.Word32
+  Box U64 = GHC.Word64
+  Box Ordering = GHC.Ordering
+  Box B# = GHC.Bool
+  Box Nat = BigNat
+
+
+type (?) ∷ ∀ {r}. T r → Constraint
+class (?) a where (?) ∷ B# → a → a → a
+
+#define INST_IF(A)\
+INST_IF0(A) ;\
+INST_IF1(A) ;\
+
+#define INST_IF0(A)\
+instance (?) (a ∷ K A) where {(?) p a b = case p of {T# → a; F# → b}}
+
+#define INST_IF1(A)\
+INST_IF0((# A #))
+
+
+INST_IF(())
+INST_IF(I8)
+INST_IF(I16)
+INST_IF(I32)
+INST_IF(I64)
+INST_IF(U)
+INST_IF(U8)
+INST_IF(U16)
+INST_IF(U32)
+INST_IF(U64)
+INST_IF(F32)
+INST_IF(F64)
+INST_IF(Bytes)
+INST_IF(P#)
+INST_IF((##))
+
+
+type VRep ∷ ∀ {r}. T r → Natural → Rep
+type family VRep v n = r | r → v n where
+  VRep I8 16 = R Int8X16#
+  VRep I16 8 = R Int16X8#
+  VRep I32 4 = R Int32X4#
+  VRep I64 2 = R Int64X2#
+
+  VRep I8 32 = R Int8X32#
+  VRep I16 16 = R Int16X16#
+  VRep I32 8 = R Int32X8#
+  VRep I64 4 = R Int64X4#
+
+  VRep I8 64 = R Int8X64#
+  VRep I16 32 = R Int16X32#
+  VRep I32 16 = R Int32X16#
+  VRep I64 8 = R Int64X8#
+
+
+  VRep U8 16 = R Word8X16#
+  VRep U16 8 = R Word16X8#
+  VRep U32 4 = R Word32X4#
+  VRep U64 2 = R Word64X2#
+
+  VRep U8 32 = R Word8X32#
+  VRep U16 16 = R Word16X16#
+  VRep U32 8 = R Word32X8#
+  VRep U64 4 = R Word64X4#
+
+  VRep U8 64 = R Word8X64#
+  VRep U16 32 = R Word16X32#
+  VRep U32 16 = R Word32X16#
+  VRep U64 8 = R Word64X8#
+
+
+  VRep F32 4 = R FloatX4#
+  VRep F64 2 = R DoubleX2#
+
+  VRep F32 8 = R FloatX8#
+  VRep F64 4 = R DoubleX4#
+
+  VRep F32 16 = R FloatX16#
+  VRep F64 8 = R DoubleX8#
+
+
+type VElem ∷ ∀ {r}. T r → VecElem
+type family VElem a = e | e → a where
+  VElem I8 = Int8ElemRep
+  VElem I16 = Int16ElemRep
+  VElem I32 = Int32ElemRep
+  VElem I64 = Int64ElemRep
+  VElem U8 = Word8ElemRep
+  VElem U16 = Word16ElemRep
+  VElem U32 = Word32ElemRep
+  VElem U64 = Word64ElemRep
+  VElem F32 = FloatElemRep
+  VElem F64 = DoubleElemRep
+type VCount ∷ Natural → VecCount
+type family VCount n = c | c → n where
+  VCount 2 = Vec2
+  VCount 4 = Vec4
+  VCount 8 = Vec8
+  VCount 16 = Vec16
+  VCount 32 = Vec32
+  VCount 64 = Vec64
+
+--type (×) ∷ ∀ {r} (a ∷ T r) (n ∷ Natural). T r → Natural → T (VRep a n)
+type (×) ∷ ∀ (a ∷ T r) → ∀ (n ∷ Natural) → T (VecRep (VCount n) (VElem a))
+type family a × n = t | t → a n where
+  I8  × 16 = Int8X16#
+  I16 ×  8 = Int16X8#
+  I32 ×  4 = Int32X4#
+  I64 ×  2 = Int64X2#
+
+  I8  × 32 = Int8X32#
+  I16 × 16 = Int16X16#
+  I32 ×  8 = Int32X8#
+  I64 ×  4 = Int64X4#
+
+  I8  × 64 = Int8X64#
+  I16 × 32 = Int16X32#
+  I32 × 16 = Int32X16#
+  I64 ×  8 = Int64X8#
+
+
+  U8  × 16 = Word8X16#
+  U16 ×  8 = Word16X8#
+  U32 ×  4 = Word32X4#
+  U64 ×  2 = Word64X2#
+
+  U8  × 32 = Word8X32#
+  U16 × 16 = Word16X16#
+  U32 ×  8 = Word32X8#
+  U64 ×  4 = Word64X4#
+
+  U8  × 64 = Word8X64#
+  U16 × 32 = Word16X32#
+  U32 × 16 = Word32X16#
+  U64 ×  8 = Word64X8#
+
+
+  F32 ×  4 = FloatX4#
+  F64 ×  2 = DoubleX2#
+
+  F32 ×  8 = FloatX8#
+  F64 ×  4 = DoubleX4#
+
+  F32 × 16 = FloatX16#
+  F64 ×  8 = DoubleX8#

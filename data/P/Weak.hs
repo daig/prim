@@ -14,7 +14,7 @@ newNoFinalizer ∷ k → v → IO (P_Weak v)
 newNoFinalizer = mkWeakNoFinalizer#
 
 -- | Add a C finalizer
-addCFinalizer ∷ P# {- ^ @fptr@: C function pointer to add -} → P# {- ^ @ptr@: main argument ptr passed to @fptr(ptr)@ -} → Maybe# P# {- ^ @env@: optional environment argument passed to @fptr(env,ptr)@ -} → P_Weak v → IO B {- ^ success -}
+addCFinalizer ∷ P# {- ^ @fptr@: C function pointer to add -} → P# {- ^ @ptr@: main argument ptr passed to @fptr(ptr)@ -} → Maybe# P# {- ^ @env@: optional environment argument passed to @fptr(env,ptr)@ -} → P_Weak v → IO B# {- ^ success -}
 addCFinalizer fptr x (# B# useEnv', env #) w = coerce do addCFinalizerToWeak# fptr x useEnv' env w
 
 -- | Retrieve the value associated with a @Weak.P@ if it (the key)

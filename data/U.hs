@@ -23,13 +23,13 @@ import Prim as X (Prim(..))
 --           component of the returned pair and the low part in the second
 --           component of the pair. See also 'addC'.
 add2 ∷ U → U → (# U, U #)
-add2 y x = plusWord2# x y
+add2 = plusWord2#
 
 -- |Add reporting overflow.
-addC ∷ U → U → (# U, B #) -- ^ The truncated sum and whether it overflowed
+addC ∷ U → U → (# U, B# #) -- ^ The truncated sum and whether it overflowed
 addC = coerce addWordC#
 -- |Subtract reporting overflow
-subC ∷ U → U → (# U, B #) -- ^ The truncated subtraction and whether it underflowed
+subC ∷ U → U → (# U, B# #) -- ^ The truncated subtraction and whether it underflowed
 subC = coerce subWordC#
 
 -- | (h,l) <- a + (hb,lb)

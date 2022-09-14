@@ -9,7 +9,7 @@ newtype Status = Status# I
 -- | Constants for why_blocked field of a TSO from rts/include/rts/Constants.h
 newtype Reason = Reason# I
 pattern BlockedOn ∷ Reason → Status
-pattern BlockedOn r ← (blocked' → (# T , r #)) where BlockedOn (Reason# r) = Status# r
+pattern BlockedOn r ← (blocked' → (# T# , r #)) where BlockedOn (Reason# r) = Status# r
 blocked' ∷ Status → Maybe# Reason
 blocked' (Status# i) = (# i ≥ 1# ∧ i ≤ 15# ∧ i ≠ 13# , Reason# i #)
 

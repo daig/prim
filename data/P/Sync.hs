@@ -3,7 +3,7 @@
 --------------------------------------------------------------------
 module P.Sync where
 
-empty' ∷ P_Sync a → IO B
+empty' ∷ P_Sync a → IO B#
 empty' p = coerce (isEmptyMVar# @RealWorld p)
 
 -- | A new empty @Sync.P@
@@ -41,5 +41,5 @@ put ∷ P_Sync a → a → IO_
 put = putMVar#
 
 -- | Without blocking, try to 'write' to the @Sync.P@ unless it's full, leaving it full.
-put' ∷ P_Sync a → a → IO B {- ^ whether the write succeeded -}
+put' ∷ P_Sync a → a → IO B# {- ^ whether the write succeeded -}
 put' p a = coerce (tryPutMVar# p a)

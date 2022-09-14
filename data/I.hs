@@ -17,10 +17,10 @@ import B as X
 
 
 -- |Add reporting overflow.
-addC ∷ I → I → (# I, B #) -- ^ The truncated sum and whether it overflowed
+addC ∷ I → I → (# I, B# #) -- ^ The truncated sum and whether it overflowed
 addC = coerce addIntC#
 -- |Subtract reporting overflow
-subC ∷ I → I → (# I, B #) -- ^ The truncated subtraction and whether it underflowed
+subC ∷ I → I → (# I, B# #) -- ^ The truncated subtraction and whether it underflowed
 subC = coerce subIntC#
 
 -- | Logical right shift. Prefer 'U' for this behavior.
