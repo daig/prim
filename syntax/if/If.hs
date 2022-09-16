@@ -1,0 +1,127 @@
+{-# language CPP, NoImplicitPrelude #-}
+module If where
+import Types
+import GHC.Prim
+
+type (?) ∷ ∀ {r}. T r → Constraint
+class (?) a where (?) ∷ B# → a → a → a
+
+#define INST_IF(A)\
+INST_IF0(A) ;\
+INST_IF1(A) ;\
+INST_IF2(A)
+
+#define INST_IF0(A)\
+instance (?) (a ∷ K (A)) where {(?) p a b = case p of {T# → a; F# → b}}
+
+#define INST_IF1(A)\
+INST_IF0((# A #))
+
+#define INST_IF_PROD_SUM2(A,B)\
+INST_IF0((# A, B #)) ;\
+INST_IF0((# A | B #)) ;\
+
+{-
+INST_IF_PROD_SUM3(A,B,()) ;\
+INST_IF_PROD_SUM3(A,B,I8) ;\
+INST_IF_PROD_SUM3(A,B,I16) ;\
+INST_IF_PROD_SUM3(A,B,I32) ;\
+INST_IF_PROD_SUM3(A,B,I64) ;\
+INST_IF_PROD_SUM3(A,B,U) ;\
+INST_IF_PROD_SUM3(A,B,U8) ;\
+INST_IF_PROD_SUM3(A,B,U16) ;\
+INST_IF_PROD_SUM3(A,B,U32) ;\
+INST_IF_PROD_SUM3(A,B,U64) ;\
+INST_IF_PROD_SUM3(A,B,F32) ;\
+INST_IF_PROD_SUM3(A,B,F64) ;\
+INST_IF_PROD_SUM3(A,B,Bytes) ;\
+INST_IF_PROD_SUM3(A,B,P#) ;\
+INST_IF_PROD_SUM3(A,B,(##)) ;\
+INST_IF_PROD_SUM3(A,B,I8 × 16) ;\
+INST_IF_PROD_SUM3(A,B,I8 × 32) ;\
+INST_IF_PROD_SUM3(A,B,I8 × 64) ;\
+INST_IF_PROD_SUM3(A,B,I16 × 8) ;\
+INST_IF_PROD_SUM3(A,B,I16 × 16) ;\
+INST_IF_PROD_SUM3(A,B,I16 × 32) ;\
+INST_IF_PROD_SUM3(A,B,I32 × 4) ;\
+INST_IF_PROD_SUM3(A,B,I32 × 8) ;\
+INST_IF_PROD_SUM3(A,B,I32 × 16) ;\
+INST_IF_PROD_SUM3(A,B,I64 × 2) ;\
+INST_IF_PROD_SUM3(A,B,I64 × 4) ;\
+INST_IF_PROD_SUM3(A,B,I64 × 8) ;\
+INST_IF_PROD_SUM3(A,B,U8 × 16) ;\
+INST_IF_PROD_SUM3(A,B,U8 × 32) ;\
+INST_IF_PROD_SUM3(A,B,U8 × 64) ;\
+INST_IF_PROD_SUM3(A,B,U16 × 8) ;\
+INST_IF_PROD_SUM3(A,B,U16 × 16) ;\
+INST_IF_PROD_SUM3(A,B,U16 × 32) ;\
+INST_IF_PROD_SUM3(A,B,U32 × 4) ;\
+INST_IF_PROD_SUM3(A,B,U32 × 8) ;\
+INST_IF_PROD_SUM3(A,B,U32 × 16) ;\
+INST_IF_PROD_SUM3(A,B,U64 × 2) ;\
+INST_IF_PROD_SUM3(A,B,U64 × 4) ;\
+INST_IF_PROD_SUM3(A,B,U64 × 8) ;\
+INST_IF_PROD_SUM3(A,B,F32 × 4) ;\
+INST_IF_PROD_SUM3(A,B,F32 × 8) ;\
+INST_IF_PROD_SUM3(A,B,F32 × 16) ;\
+INST_IF_PROD_SUM3(A,B,F64 × 2) ;\
+INST_IF_PROD_SUM3(A,B,F64 × 4) ;\
+INST_IF_PROD_SUM3(A,B,F64 × 8)
+
+#define INST_IF_PROD_SUM3(A,B,C)\
+INST_IF0((# A, B, C #)) ;\
+INST_IF0((# A | (# B, C #) #))
+-}
+
+{-
+INST_IF(())
+INST_IF(I8)
+INST_IF(I16)
+INST_IF(I32)
+INST_IF(I64)
+INST_IF(U)
+INST_IF(U8)
+INST_IF(U16)
+INST_IF(U32)
+INST_IF(U64)
+INST_IF(F32)
+INST_IF(F64)
+INST_IF(Bytes)
+INST_IF(P#)
+INST_IF((##))
+INST_IF(I8 × 16)
+INST_IF(I8 × 32)
+INST_IF(I8 × 64)
+INST_IF(I16 × 8)
+INST_IF(I16 × 16)
+INST_IF(I16 × 32)
+INST_IF(I32 × 4)
+INST_IF(I32 × 8)
+INST_IF(I32 × 16)
+INST_IF(I64 × 2)
+INST_IF(I64 × 4)
+INST_IF(I64 × 8)
+INST_IF(U8 × 16)
+INST_IF(U8 × 32)
+INST_IF(U8 × 64)
+INST_IF(U16 × 8)
+INST_IF(U16 × 16)
+INST_IF(U16 × 32)
+INST_IF(U32 × 4)
+INST_IF(U32 × 8)
+INST_IF(U32 × 16)
+INST_IF(U64 × 2)
+INST_IF(U64 × 4)
+INST_IF(U64 × 8)
+INST_IF(F32 × 4)
+INST_IF(F32 × 8)
+INST_IF(F32 × 16)
+INST_IF(F64 × 2)
+INST_IF(F64 × 4)
+INST_IF(F64 × 8)
+-}
+
+-- INST_IF0((# (F32 × 8) | () #))
+--instance (?) (# FloatX4# | () #) where {(?) p a b = case p of {T# → a; F# → b}}
+foo ∷ (# Int8X16# | Int16X8# #) → ()
+foo _ = ()
