@@ -2,6 +2,7 @@
 -- | Description : ByteCode operations for interpreters (GHCI)
 --------------------------------------------------------------------
 module RTS.ByteCode (type BCO, module RTS.ByteCode) where
+import Coerce
 
 -- | Wrap a @BCO@ in a @AP_UPD@ thunk which will be updated with the value of
 -- the @BCO@ when evaluated.
@@ -16,5 +17,5 @@ new ∷ ∀ a s. A U8 -- ^ instructions
     → ST s BCO
 new = coerce (newBCO# @a)
 
-getApStackVal ∷ ∀ a b. a → I {- ^ stack depth -} → Maybe# b {- ^ The AP_STACK, if found -}
-getApStackVal = coerce (getApStackVal# @a @b)
+getApStackVal ∷ ∀ a b. a → I {- ^ stack depth -} → (?) b {- ^ The AP_STACK, if found -}
+getApStackVal a i = case getApStackVal# a i of (# t, x #) → unsafeCoerce# (# t +# 1#, x #)

@@ -281,20 +281,13 @@ type P_Stable_Name ∷ T# l → T_
 type P_Stable_Name = StableName#
 
 -- | Primitive maybe type represented by a tag and (possibly invalid) value.
-type Maybe# (a ∷ T r)  = (# B# , a #)
-type Maybe (a ∷ T r) = (# (##) | a #)
-pattern Some# ∷ a → Maybe# a
-pattern Some# a = (# B# 1# , a #)
-pattern None# ∷ Maybe# a
-pattern None# ← (# B# 0#, _ #) where None# = (# B# 0# , panicError "Used Empty None#"# #)
-{-# complete None#, Some# #-}
+type (?) (a ∷ T r) = (# (##) | a #)
 -- | Primitive option type represented by a tag and two values of the same representation.
-type Result# (a ∷ T r) (b ∷ T r) = (# B# , a #)
+type Result# (a ∷ T r) = (# a | a #)
 
-pattern Ok ∷ a → Result# a b
-pattern Ok a ← (# B# 0#, a #) where Ok a = (# B# 0#, a #)
-pattern Err ∷ b → Result# a b
-pattern Err b ← (# B# 1#, (unsafeCoerce# → b) #) where Err b = (# B# 1#, unsafeCoerce# b #)
+pattern Ok, Err ∷ a → Result# a
+pattern Ok a = (# | a #); {-# inline Ok #-}
+pattern Err b = (# b | #); {-# inline Err #-}
 {-# complete Ok,Err #-}
 
 -- | The uninhabited ("Void") type
@@ -317,80 +310,48 @@ type family Box x = b | b → x where
   Box Nat = BigNat
 
 
-type (?) ∷ ∀ {r}. T r → Constraint
-class (?) a where (?) ∷ B# → a → a → a
-
-#define INST_IF(A)\
-INST_IF0(A) ;\
-INST_IF1(A) ;\
-
-#define INST_IF0(A)\
-instance (?) (a ∷ K A) where {(?) p a b = case p of {T# → a; F# → b}}
-
-#define INST_IF1(A)\
-INST_IF0((# A #))
-
-
-INST_IF(())
-INST_IF(I8)
-INST_IF(I16)
-INST_IF(I32)
-INST_IF(I64)
-INST_IF(U)
-INST_IF(U8)
-INST_IF(U16)
-INST_IF(U32)
-INST_IF(U64)
-INST_IF(F32)
-INST_IF(F64)
-INST_IF(Bytes)
-INST_IF(P#)
-INST_IF((##))
-
-
 type VRep ∷ ∀ {r}. T r → Natural → Rep
 type family VRep v n = r | r → v n where
-  VRep I8 16 = R Int8X16#
-  VRep I16 8 = R Int16X8#
-  VRep I32 4 = R Int32X4#
-  VRep I64 2 = R Int64X2#
+  VRep I8  16 = R Int8X16#
+  VRep I16 8  = R Int16X8#
+  VRep I32 4  = R Int32X4#
+  VRep I64 2  = R Int64X2#
 
-  VRep I8 32 = R Int8X32#
+  VRep I8  32 = R Int8X32#
   VRep I16 16 = R Int16X16#
-  VRep I32 8 = R Int32X8#
-  VRep I64 4 = R Int64X4#
+  VRep I32 8  = R Int32X8#
+  VRep I64 4  = R Int64X4#
 
-  VRep I8 64 = R Int8X64#
+  VRep I8 64  = R Int8X64#
   VRep I16 32 = R Int16X32#
   VRep I32 16 = R Int32X16#
-  VRep I64 8 = R Int64X8#
+  VRep I64 8  = R Int64X8#
 
 
-  VRep U8 16 = R Word8X16#
-  VRep U16 8 = R Word16X8#
-  VRep U32 4 = R Word32X4#
-  VRep U64 2 = R Word64X2#
+  VRep U8  16 = R Word8X16#
+  VRep U16 8  = R Word16X8#
+  VRep U32 4  = R Word32X4#
+  VRep U64 2  = R Word64X2#
 
-  VRep U8 32 = R Word8X32#
+  VRep U8  32 = R Word8X32#
   VRep U16 16 = R Word16X16#
-  VRep U32 8 = R Word32X8#
-  VRep U64 4 = R Word64X4#
+  VRep U32 8  = R Word32X8#
+  VRep U64 4  = R Word64X4#
 
-  VRep U8 64 = R Word8X64#
+  VRep U8  64 = R Word8X64#
   VRep U16 32 = R Word16X32#
   VRep U32 16 = R Word32X16#
-  VRep U64 8 = R Word64X8#
+  VRep U64 8  = R Word64X8#
 
 
-  VRep F32 4 = R FloatX4#
-  VRep F64 2 = R DoubleX2#
+  VRep F32 4  = R FloatX4#
+  VRep F64 2  = R DoubleX2#
 
-  VRep F32 8 = R FloatX8#
-  VRep F64 4 = R DoubleX4#
+  VRep F32 8  = R FloatX8#
+  VRep F64 4  = R DoubleX4#
 
   VRep F32 16 = R FloatX16#
-  VRep F64 8 = R DoubleX8#
-
+  VRep F64 8  = R DoubleX8#
 
 type VElem ∷ ∀ {r}. T r → VecElem
 type family VElem a = e | e → a where

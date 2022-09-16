@@ -68,5 +68,4 @@ instance (≤) N where
   cmp (NS _) (NB _) = LT
   cmp (NB _) (NS _) = GT
   min x y = if cast (x ≤ y) then x else y
-  min x y = cast (x ≤ y) ? x $ y
   max x y = if cast (x ≥ y) then x else y

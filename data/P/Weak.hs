@@ -14,20 +14,22 @@ newNoFinalizer ∷ k → v → IO (P_Weak v)
 newNoFinalizer = mkWeakNoFinalizer#
 
 -- | Add a C finalizer
-addCFinalizer ∷ P# {- ^ @fptr@: C function pointer to add -} → P# {- ^ @ptr@: main argument ptr passed to @fptr(ptr)@ -} → Maybe# P# {- ^ @env@: optional environment argument passed to @fptr(env,ptr)@ -} → P_Weak v → IO B# {- ^ success -}
-addCFinalizer fptr x (# B# useEnv', env #) w = coerce do addCFinalizerToWeak# fptr x useEnv' env w
+addCFinalizer ∷ P# {- ^ @fptr@: C function pointer to add -} → P# {- ^ @ptr@: main argument ptr passed to @fptr(ptr)@ -} → (?) P# {- ^ @env@: optional environment argument passed to @fptr(env,ptr)@ -} → P_Weak v → IO B# {- ^ success -}
+addCFinalizer fptr x (cast → (# B# useEnv', env #)) w = coerce do addCFinalizerToWeak# fptr x useEnv' env w
 
 -- | Retrieve the value associated with a @Weak.P@ if it (the key)
 -- is still alive to the GC.
-read' ∷ P_Weak v → IO (Maybe# v)
-read' w s0 = case deRefWeak# w s0 of
-  (# s1, alive', v #) → (# s1, (# B# alive', v #) #)
+read' ∷ P_Weak v → IO ((?) v)
+read' w = cast (deRefWeak# w)
 
 -- | Retrieve the finalizer associated with a @Weak.P@ if it (the key)
 -- is still alive to the GC.
-finalizer' ∷ P_Weak v → IO (Maybe# (IO x))
+finalizer' ∷ ∀ v x. P_Weak v → IO ((?) (IO x))
+finalizer' w = cast (finalizeWeak# @_ @x w)
+{-
 finalizer' w s0 = case finalizeWeak# w s0 of
   (# s1, alive', f #) → (# s1, (# B# alive', f #) #)
+  -}
 
 -- | Keep a value alive to the GC.
 -- It only makes sense to apply touch to lifted types on the heap.

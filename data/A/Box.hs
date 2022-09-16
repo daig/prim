@@ -34,6 +34,5 @@ cas' ∷ M (A_Box x) s
      → I {- ^ offset -}
      → x {- ^ expected old value -}
      → x {- ^ new value -}
-     → ST s (Result# x x) {- ^ @Ok newValue@ if successful, or @Err oldValue@ if not -} 
-cas' (coerce → m) i x0 x1 s = case casArray# m i x0 x1 s of
-  (# ss, failed', x #) → (# ss, (# B# failed', x #) #)
+     → ST s (Result# x) {- ^ @Ok newValue@ if successful, or @Err oldValue@ if not -} 
+cas' (coerce → m) i x0 x1 = cast (casArray# m i x0 x1)

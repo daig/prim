@@ -1,3 +1,4 @@
+{-# language CPP #-}
 module Cast where
 import Do as Prim
 import Unsafe.Coerce
@@ -26,7 +27,7 @@ instance Cast B# U8 where cast = coerce (gtWord8# (cast 0##))
 instance Cast B# U16 where cast = coerce (gtWord16# (cast 0##))
 instance Cast B# U32 where cast = coerce (gtWord32# (cast 0##))
 instance Cast B# U64 where cast = coerce (gtWord64# (cast 0##))
-instance Cast B# Addr# where cast = coerce neAddr# nullAddr#
+instance Cast B# P# where cast = coerce neAddr# nullAddr#
 instance Cast B# Char where cast = coerce neChar# '\NUL'#
 deriving via Char instance Cast B# Char8
 
@@ -120,6 +121,7 @@ instance Cast (Bytes_Pinned_M s) Bytes_Pinned where cast = unsafeCoerce#
 
 -- copyByteArray# src src_ofs dst dst_ofs n
 
+-- | Extract (copy) the live portion of a 'Buffer'
 instance Cast Bytes Buffer where
   cast (Bytes_Off_Len# (# x, off, n #)) = runST Prim.do
     mv <- newByteArray# n
@@ -128,10 +130,11 @@ instance Cast Bytes Buffer where
     return (UnpinnedByteArray# v)
   
 
+-- | Wrap (no copy) 'Bytes' in a full-size 'Buffer'
 instance Cast Buffer Bytes where
   cast (UnpinnedByteArray# x) = Bytes_Off_Len# (# x, 0#, sizeofByteArray# x #)
 
-instance Cast Addr# Bytes_Pinned where cast = coerce byteArrayContents#
+instance Cast P# Bytes_Pinned where cast = coerce byteArrayContents#
 instance Cast (MutableAddr# s) (Bytes_Pinned_M s) where cast = coerce mutableByteArrayContents#
 instance Cast (P_Unbox x) (A_Unbox_Pinned x) where cast = coerce byteArrayContents#
 instance Cast (P_Unbox_M x s) (A_Unbox_Pinned_M x s) where cast = coerce mutableByteArrayContents#
@@ -140,11 +143,98 @@ instance Cast I Char where cast = ord#
 instance Cast Char I where cast = chr#
 
 -- | This pattern is strongly deprecated
-instance Cast Addr# I where cast = int2Addr#
+instance Cast P# I where cast = int2Addr#
 -- | This pattern is strongly deprecated
-instance Cast I Addr# where cast = addr2Int#
+instance Cast I P# where cast = addr2Int#
 
 -- | Atomically run a transaction
 instance Cast (IO a) (STM a) where cast = unsafeCoerce# (atomically# @a)
 
 instance Cast Bool B# where cast = coerce isTrue#
+
+-- | Convert a tag and a (possibly invalid) value into an unboxed '(?)'
+-- | Convert a tag (_True_ if it's _Err_) and a value into an unboxed 'Result'.
+
+#define INST_CAST_SUM(A)\
+instance p ≑ B# ⇒ Cast ((?) (x ∷ K A)) (# p, x #) where {cast (# coerce → t, x #) = unsafeCoerce# (# t +# 1#, x #)} ;\
+instance Cast (ST s ((?) (x ∷ K A))) (State# s → (# State# s, I, x #)) where { ;\
+  cast st = \s → case st s of (# s', t, x #) → unsafeCoerce# (# t +# 1#, x #)} ;\
+instance p ≑ B# ⇒ Cast (Result# (x ∷ K A)) (# p, x #) where {cast (# coerce → t, x #) = unsafeCoerce# (# 0b11# `xorI#` (t +# 1#), x #)} ;\
+instance Cast (ST s (Result# (x ∷ K A))) (State# s → (# State# s, I, x #)) where { ;\
+  cast st = \s → case st s of (# s', t, x #) → unsafeCoerce# (# 0b11# `xorI#` (t +# 1#), x #)}
+
+INST_CAST_SUM(I)
+INST_CAST_SUM(I8)
+INST_CAST_SUM(I16)
+INST_CAST_SUM(I32)
+INST_CAST_SUM(I64)
+INST_CAST_SUM(U)
+INST_CAST_SUM(U8)
+INST_CAST_SUM(U16)
+INST_CAST_SUM(U32)
+INST_CAST_SUM(U64)
+INST_CAST_SUM(F32)
+INST_CAST_SUM(F64)
+INST_CAST_SUM(P#)
+INST_CAST_SUM(())
+INST_CAST_SUM((##))
+
+#define INST_CAST_BOOL_EITHER2(X,Y)\
+-- | Check if Right value\
+instance Cast B# (# X | Y #) where {cast (unsafeCoerce# → (# t #)) = B# (t -# 1#)}
+
+#define INST_CAST_UNMAYBE(A)\
+instance Cast (# B#, A #) ((?) A) where {cast (unsafeCoerce# → (# t, x #)) = (# B# (t -# 1#), x #) }
+
+INST_CAST_UNMAYBE(I)
+INST_CAST_UNMAYBE(I8)
+INST_CAST_UNMAYBE(I16)
+INST_CAST_UNMAYBE(I32)
+INST_CAST_UNMAYBE(I64)
+INST_CAST_UNMAYBE(U)
+INST_CAST_UNMAYBE(U8)
+INST_CAST_UNMAYBE(U16)
+INST_CAST_UNMAYBE(U32)
+INST_CAST_UNMAYBE(U64)
+INST_CAST_UNMAYBE(F32)
+INST_CAST_UNMAYBE(F64)
+INST_CAST_UNMAYBE(P#)
+INST_CAST_UNMAYBE(())
+INST_CAST_UNMAYBE((##))
+
+
+
+#define INST_CAST_BOOL_EITHER1(A)\
+INST_CAST_BOOL_EITHER2(A,I) ;\
+INST_CAST_BOOL_EITHER2(A,I8) ;\
+INST_CAST_BOOL_EITHER2(A,I16) ;\
+INST_CAST_BOOL_EITHER2(A,I32) ;\
+INST_CAST_BOOL_EITHER2(A,I64) ;\
+INST_CAST_BOOL_EITHER2(A,U) ;\
+INST_CAST_BOOL_EITHER2(A,U8) ;\
+INST_CAST_BOOL_EITHER2(A,U16) ;\
+INST_CAST_BOOL_EITHER2(A,U32) ;\
+INST_CAST_BOOL_EITHER2(A,U64) ;\
+INST_CAST_BOOL_EITHER2(A,F32) ;\
+INST_CAST_BOOL_EITHER2(A,F64) ;\
+INST_CAST_BOOL_EITHER2(A,P#) ;\
+INST_CAST_BOOL_EITHER2(A,()) ;\
+INST_CAST_BOOL_EITHER2(A,(##)) ;\
+INST_CAST_BOOL_EITHER2(A,Bytes)
+
+INST_CAST_BOOL_EITHER1(I)
+INST_CAST_BOOL_EITHER1(I8)
+INST_CAST_BOOL_EITHER1(I16)
+INST_CAST_BOOL_EITHER1(I32)
+INST_CAST_BOOL_EITHER1(I64)
+INST_CAST_BOOL_EITHER1(U)
+INST_CAST_BOOL_EITHER1(U8)
+INST_CAST_BOOL_EITHER1(U16)
+INST_CAST_BOOL_EITHER1(U32)
+INST_CAST_BOOL_EITHER1(U64)
+INST_CAST_BOOL_EITHER1(F32)
+INST_CAST_BOOL_EITHER1(F64)
+INST_CAST_BOOL_EITHER1(P#)
+INST_CAST_BOOL_EITHER1(())
+INST_CAST_BOOL_EITHER1((##))
+INST_CAST_BOOL_EITHER1(Bytes)

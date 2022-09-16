@@ -74,11 +74,18 @@ internal-libraries:
       - ghc-prim
       - microbase
       - ghc-bignum
+  if:
+    source-dirs: syntax/if
+    other-modules: []
+    default-extensions: CPP
+    dependencies:
+      - prim:type
+      - ghc-prim
+    ghc-options: -fllvm
   do:
-    source-dirs: do
+    source-dirs: syntax/do
     other-modules: Prelude
-    default-extensions:
-      - CPP
+    default-extensions: CPP
     dependencies:
       - prim:type
       - ghc-prim
