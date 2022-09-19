@@ -2,6 +2,7 @@
 module Types (module Types, module X) where
 import GHC.Prim as X
 import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint,Any)
+import GHC.Types (Bool(..))
 import GHC.Prim.Panic as X
 import Unsafe.Coerce (unsafeCoerce#)
 import GHC.Types qualified as GHC
@@ -19,6 +20,9 @@ type T_ = TYPE (BoxedRep Unlifted)
 type T0 = TYPE (TupleRep '[])
 type T# l = TYPE (BoxedRep l)
 
+type B = Bool
+type C = Constraint
+
 -- | The kind of a type
 type K (a ∷ k) = k
 -- | The 'RuntimeRep' of a type
@@ -26,13 +30,15 @@ type R (i ∷ T r) = r
 
 type Rep = RuntimeRep
 
-type C = Constraint
-
 newtype B# = B# I
 pattern F#, T# ∷ B#
 pattern F# = B# 0#
 pattern T# = B# 1#
 {-# complete F#, T# #-}
+
+pattern T,F ∷ Bool
+pattern T = True
+pattern F = False
 
 -- | A number less-than, equal-to, or greater-than @0#@
 newtype Ordering ∷ K I where Ordering# ∷ I → Ordering
@@ -283,12 +289,8 @@ type P_Stable_Name = StableName#
 -- | Primitive maybe type represented by a tag and (possibly invalid) value.
 type (?) (a ∷ T r) = (# (##) | a #)
 -- | Primitive option type represented by a tag and two values of the same representation.
-type Result# (a ∷ T r) = (# a | a #)
-
-pattern Ok, Err ∷ a → Result# a
-pattern Ok a = (# | a #); {-# inline Ok #-}
-pattern Err b = (# b | #); {-# inline Err #-}
-{-# complete Ok,Err #-}
+type Result ∷ ∀ {re} {ra}. T re → T ra → T (SumRep '[re,ra])
+type Result e a = (# e | a #)
 
 -- | The uninhabited ("Void") type
 newtype X# ∷ T (SumRep '[]) where X# ∷ X# → X#

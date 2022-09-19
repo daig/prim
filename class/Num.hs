@@ -84,6 +84,10 @@ import If
 -- |Satisfies @((((x / y) × y) + (x % y) ≡ x@. The
 class (≤) a ⇒ ℕ (a ∷ T r) where
   (+), (×) ∷ a → a → a
+  -- | Subtract without checking overflow
+  (-#) ∷ a → a → a
+  -- | Try to subtract if not overflow
+  (-?) ∷ a → a → (?) a
   -- | Division rounding towards -∞. The behavior is undefined if the first argument is zero.
   (/), (%) ∷ a {- ^ dividend -}  → a {- ^ divisor -} → a
   -- | Satisfies @((x / y) + ((x % y) × y) ≡ x@.
@@ -117,6 +121,8 @@ class ℤ a ⇒ ℝ (a ∷ T r) where
 instance ℕ U where
   (+) = plusWord#
   (×) = timesWord#
+  (-#) = minusWord#
+  a -? b = a ≥ b ? (# | a -# b #) $ (# (##) | #)
   (/) = quotWord#
   (%) = remWord#
   (/%) = quotRemWord#
@@ -124,6 +130,7 @@ instance ℕ U where
 instance ℕ U8 where
   (+) = plusWord8#
   (×) = timesWord8#
+  (-#) = subWord8#
   (/) = quotWord8#
   (%) = remWord8#
   (/%) = quotRemWord8#
@@ -131,6 +138,7 @@ instance ℕ U8 where
 instance ℕ U16 where
   (+) = plusWord16#
   (×) = timesWord16#
+  (-#) = subWord16#
   (/) = quotWord16#
   (%) = remWord16#
   (/%) = quotRemWord16#
@@ -138,6 +146,7 @@ instance ℕ U16 where
 instance ℕ U32 where
   (+) = plusWord32#
   (×) = timesWord32#
+  (-#) = subWord32#
   (/) = quotWord32#
   (%) = remWord32#
   (/%) = quotRemWord32#
@@ -145,6 +154,7 @@ instance ℕ U32 where
 instance ℕ U64 where
   (+) = plusWord64#
   (×) = timesWord64#
+  (-#) = subWord64#
   (/) = quotWord64#
   (%) = remWord64#
   x /% y = (# x / y, x % y #)

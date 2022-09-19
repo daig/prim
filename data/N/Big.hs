@@ -79,20 +79,14 @@ gtWord,leWord ∷ Nat → Word → Bool
 gtWord = bigNatGtWord
 leWord = bigNatLeWord
 
-eq,ne,lt,le,gt,ge ∷ Nat → Nat → Bool
-eq = bigNatEq
-ne = bigNatNe
-lt = bigNatLt
-le = bigNatLe
-gt = bigNatGt
-ge = bigNatGe
+instance Nat .=. U where
+  (.<.) = bigNatLtWord
+  (.≤.) = bigNatLeWord
+  (.>.) = bigNatGtWord
+  (.≥.) = bigNatGeWord
 
 cmpU ∷ Nat → U → GHC.Ordering
 cmpU = bigNatCompareWord#
-
-cmpWord ∷ Nat → Word → GHC.Ordering
-cmpWord = bigNatCompareWord
-
 
 instance (≡) Nat where
   (≡) = coerce bigNatEq#
@@ -106,3 +100,12 @@ instance (≤) Nat where
   cmp a b = Ordering# do bigNatGt# a b -# bigNatLt# a b
   min x y = if cast (x ≤ y) then x else y
   max x y = if cast (x ≥ y) then x else y
+
+
+{-
+addU,mulU ∷ Nat → U → Nat
+addU# = bigNatAddWord#
+mulU = bigNatAdd#
+
+
+-}

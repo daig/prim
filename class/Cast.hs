@@ -1,8 +1,9 @@
 {-# language CPP #-}
 module Cast where
-import Do as Prim
+import Do.ST as ST
 import Unsafe.Coerce
 import GHC.Types (isTrue#,Bool)
+import GHC.Prim qualified as GHC
 
 -- | Nontrivial conversions between types. Use with care!
 type Cast :: forall {r :: RuntimeRep} {r' :: RuntimeRep}. T r -> T r' -> C
@@ -123,7 +124,7 @@ instance Cast (Bytes_Pinned_M s) Bytes_Pinned where cast = unsafeCoerce#
 
 -- | Extract (copy) the live portion of a 'Buffer'
 instance Cast Bytes Buffer where
-  cast (Bytes_Off_Len# (# x, off, n #)) = runST Prim.do
+  cast (Bytes_Off_Len# (# x, off, n #)) = runST ST.do
     mv <- newByteArray# n
     copyByteArray# x off mv 0# n
     v <- unsafeFreezeByteArray# mv
@@ -159,8 +160,8 @@ instance Cast Bool B# where cast = coerce isTrue#
 instance p ≑ B# ⇒ Cast ((?) (x ∷ K A)) (# p, x #) where {cast (# coerce → t, x #) = unsafeCoerce# (# t +# 1#, x #)} ;\
 instance Cast (ST s ((?) (x ∷ K A))) (State# s → (# State# s, I, x #)) where { ;\
   cast st = \s → case st s of (# s', t, x #) → unsafeCoerce# (# t +# 1#, x #)} ;\
-instance p ≑ B# ⇒ Cast (Result# (x ∷ K A)) (# p, x #) where {cast (# coerce → t, x #) = unsafeCoerce# (# 0b11# `xorI#` (t +# 1#), x #)} ;\
-instance Cast (ST s (Result# (x ∷ K A))) (State# s → (# State# s, I, x #)) where { ;\
+instance p ≑ B# ⇒ Cast (Result (x ∷ K A) x) (# p, x #) where {cast (# coerce → t, x #) = unsafeCoerce# (# 0b11# `xorI#` (t +# 1#), x #)} ;\
+instance Cast (ST s (Result (x ∷ K A) x)) (State# s → (# State# s, I, x #)) where { ;\
   cast st = \s → case st s of (# s', t, x #) → unsafeCoerce# (# 0b11# `xorI#` (t +# 1#), x #)}
 
 INST_CAST_SUM(I)
@@ -181,10 +182,10 @@ INST_CAST_SUM((##))
 
 #define INST_CAST_BOOL_EITHER2(X,Y)\
 -- | Check if Right value\
-instance Cast B# (# X | Y #) where {cast (unsafeCoerce# → (# t #)) = B# (t -# 1#)}
+instance Cast B# (# X | Y #) where {cast (unsafeCoerce# → (# t #)) = B# (t GHC.-# 1#)}
 
 #define INST_CAST_UNMAYBE(A)\
-instance Cast (# B#, A #) ((?) A) where {cast (unsafeCoerce# → (# t, x #)) = (# B# (t -# 1#), x #) }
+instance Cast (# B#, A #) ((?) A) where {cast (unsafeCoerce# → (# t, x #)) = (# B# (t GHC.-# 1#), x #) }
 
 INST_CAST_UNMAYBE(I)
 INST_CAST_UNMAYBE(I8)

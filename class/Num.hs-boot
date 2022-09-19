@@ -1,16 +1,13 @@
 module Num where
 import {-# source #-} Cmp
 
--- |Satisfies @((((x / y) × y) + (x % y) ≡ x@. The
 class (≤) a ⇒ ℕ (a ∷ T r) where
-  (+), (×) ∷ a → a → a
-  -- | Rounds towards -∞. The behavior is undefined if the first argument is zero.
-  (/), (%) ∷ a {- ^ dividend -}  → a {- ^ divisor -} → a
+  (+), (×), (-#) ∷ a → a → a
+  (-?) ∷ a → a → (?) a
+  (/), (%) ∷ a → a → a
   (/%) ∷ a → a → (# a , a #)
 class ℕ a ⇒ ℤ (a ∷ T r) where
-  -- |Satisfies @((((x // y) × y) + (x %% y) ≡ x@.
   (//),(%%) ∷ a → a → a
-  -- | Rounds towards 0. The behavior is undefined if the first argument is zero.
   (//%%) ∷ a → a → (# a , a #)
   (-) ∷ a → a → a
   negate, abs ∷ a → a

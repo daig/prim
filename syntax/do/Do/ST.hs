@@ -1,7 +1,7 @@
 --------------------------------------------------------------------
--- | Description : Monad operations for the primitive ST monad
+-- | Description : Do operations for the primitive ST monad
 --------------------------------------------------------------------
-module Do where
+module Do.ST where
 import Unsafe.Coerce
 import qualified GHC.Types as GHC
 
@@ -16,7 +16,7 @@ escape# = unsafeCoerce# \ s → (##)
 return ∷ Pure (a ∷ T ra) ⇒ a → ST s a
 return = η
 -- | Used for @QualifiedDo@
-(>>=) ∷ Monad (a ∷ T ra) (b ∷ T rb)
+(>>=) ∷ Do (a ∷ T ra) (b ∷ T rb)
   ⇒ ST s a → (a → ST s b) → ST s b
 (>>=) = (⇉)
 {-# inline (>>=) #-}
@@ -27,7 +27,7 @@ st f = \s → case f s of s' → (# s', (##) #)
 {-# inline st #-}
 
 class Pure (a ∷ T ra) where η ∷ a → ST s a
-class (Monad a c, Monad b c) ⇒ Lift2 (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
+class (Do a c, Do b c) ⇒ Lift2 (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
   η2 ∷ (a → b → c) → ST s a → ST s b → ST s c
 
 #define INST_LIFT2(A,B,C) \
@@ -59,12 +59,12 @@ instance Run (a ∷ K (A)) where {\
     go (# s , a #) = (\(##) a → a) (escape# s) a}
 -}
 
-class Pure b ⇒ Monad (a ∷ T ra) (b ∷ T rb) where
+class Pure b ⇒ Do (a ∷ T ra) (b ∷ T rb) where
   (⇉) ∷ ST s a → (a → ST s b) → ST s b
   η1 ∷ (a → b) → ST s a → ST s b
   (>>) ∷ ST_ s → ST s a → ST s a
 #define INST_MONAD(A,B) \
-instance Monad (a ∷ K (A)) (b ∷ K (B)) where {\
+instance Do (a ∷ K (A)) (b ∷ K (B)) where {\
   η1 f st = st ⇉ \a → return (f a); \
   (st >> sta) s = sta (st s); \
   (st ⇉ f) s = go (st s) f where \

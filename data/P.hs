@@ -17,13 +17,5 @@ import Prim.Atomic as X (Atomic(..),Eq_Atomic(..),Logic_Atomic(..),Num_Atomic(..
 pattern Null ∷ P#
 pattern Null ← nullAddr# where Null = nullAddr#
 
--- |Advances the given address by the given offset (in bytes).
-(∔) ∷ P# -> I -> P#
-(∔) = plusAddr#
-
--- |Computes the offset (in bytes) required to get from the second to the first argument.
-(߸) ∷ P# → P# → I
-(߸) = minusAddr#
-
 (.//) ∷ P# → I → I
 (.//) = remAddr#
