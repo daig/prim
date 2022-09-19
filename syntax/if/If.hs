@@ -1,127 +1,79 @@
 {-# language CPP, NoImplicitPrelude #-}
-module If where
+module If (If(..)) where
 import Types
 import GHC.Prim
+import GHC.Types
 
-type (?) ∷ ∀ {r}. T r → Constraint
-class (?) a where (?) ∷ B# → a → a → a
+type If ∷ ∀ {r}. T r → Constraint
+class If a where
+  (?) ∷ B# → a → a → a
+  ($) ∷ (a → a) → a → a
+
+infixl 1 ?
+infixr 0 $
 
 #define INST_IF(A)\
-INST_IF0(A) ;\
-INST_IF1(A) ;\
-INST_IF2(A)
+instance If (a ∷ K (A)) where { \
+  (?) (B# p) a b = if isTrue# p then a else b ;\
+  ($) f b = f b }
 
-#define INST_IF0(A)\
-instance (?) (a ∷ K (A)) where {(?) p a b = case p of {T# → a; F# → b}}
+#define INST_IF2(A,B)\
+INST_IF((# A, B #)) ;\
+INST_IF((# A | B #)) ;\
+INST_IF3(A,B,I) ;\
+INST_IF3(A,B,I8) ;\
+INST_IF3(A,B,I16) ;\
+INST_IF3(A,B,I32) ;\
+INST_IF3(A,B,I64) ;\
+INST_IF3(A,B,U) ;\
+INST_IF3(A,B,U8) ;\
+INST_IF3(A,B,U16) ;\
+INST_IF3(A,B,U32) ;\
+INST_IF3(A,B,U64) ;\
+INST_IF3(A,B,F32) ;\
+INST_IF3(A,B,F64) ;\
+INST_IF3(A,B,P#) ;\
+INST_IF3(A,B,Bytes) ;\
+INST_IF3(A,B,()) ;\
+INST_IF3(A,B,(##))
+
+#define INST_IF3(A,B,C)\
+INST_IF((# A,B,C #))
+
+
 
 #define INST_IF1(A)\
-INST_IF0((# A #))
+INST_IF(A) ;\
+INST_IF2(A,I) ;\
+INST_IF2(A,I8) ;\
+INST_IF2(A,I16) ;\
+INST_IF2(A,I32) ;\
+INST_IF2(A,I64) ;\
+INST_IF2(A,U) ;\
+INST_IF2(A,U8) ;\
+INST_IF2(A,U16) ;\
+INST_IF2(A,U32) ;\
+INST_IF2(A,U64) ;\
+INST_IF2(A,F32) ;\
+INST_IF2(A,F64) ;\
+INST_IF2(A,P#) ;\
+INST_IF2(A,Bytes) ;\
+INST_IF2(A,()) ;\
+INST_IF2(A,(##))
 
-#define INST_IF_PROD_SUM2(A,B)\
-INST_IF0((# A, B #)) ;\
-INST_IF0((# A | B #)) ;\
-
-{-
-INST_IF_PROD_SUM3(A,B,()) ;\
-INST_IF_PROD_SUM3(A,B,I8) ;\
-INST_IF_PROD_SUM3(A,B,I16) ;\
-INST_IF_PROD_SUM3(A,B,I32) ;\
-INST_IF_PROD_SUM3(A,B,I64) ;\
-INST_IF_PROD_SUM3(A,B,U) ;\
-INST_IF_PROD_SUM3(A,B,U8) ;\
-INST_IF_PROD_SUM3(A,B,U16) ;\
-INST_IF_PROD_SUM3(A,B,U32) ;\
-INST_IF_PROD_SUM3(A,B,U64) ;\
-INST_IF_PROD_SUM3(A,B,F32) ;\
-INST_IF_PROD_SUM3(A,B,F64) ;\
-INST_IF_PROD_SUM3(A,B,Bytes) ;\
-INST_IF_PROD_SUM3(A,B,P#) ;\
-INST_IF_PROD_SUM3(A,B,(##)) ;\
-INST_IF_PROD_SUM3(A,B,I8 × 16) ;\
-INST_IF_PROD_SUM3(A,B,I8 × 32) ;\
-INST_IF_PROD_SUM3(A,B,I8 × 64) ;\
-INST_IF_PROD_SUM3(A,B,I16 × 8) ;\
-INST_IF_PROD_SUM3(A,B,I16 × 16) ;\
-INST_IF_PROD_SUM3(A,B,I16 × 32) ;\
-INST_IF_PROD_SUM3(A,B,I32 × 4) ;\
-INST_IF_PROD_SUM3(A,B,I32 × 8) ;\
-INST_IF_PROD_SUM3(A,B,I32 × 16) ;\
-INST_IF_PROD_SUM3(A,B,I64 × 2) ;\
-INST_IF_PROD_SUM3(A,B,I64 × 4) ;\
-INST_IF_PROD_SUM3(A,B,I64 × 8) ;\
-INST_IF_PROD_SUM3(A,B,U8 × 16) ;\
-INST_IF_PROD_SUM3(A,B,U8 × 32) ;\
-INST_IF_PROD_SUM3(A,B,U8 × 64) ;\
-INST_IF_PROD_SUM3(A,B,U16 × 8) ;\
-INST_IF_PROD_SUM3(A,B,U16 × 16) ;\
-INST_IF_PROD_SUM3(A,B,U16 × 32) ;\
-INST_IF_PROD_SUM3(A,B,U32 × 4) ;\
-INST_IF_PROD_SUM3(A,B,U32 × 8) ;\
-INST_IF_PROD_SUM3(A,B,U32 × 16) ;\
-INST_IF_PROD_SUM3(A,B,U64 × 2) ;\
-INST_IF_PROD_SUM3(A,B,U64 × 4) ;\
-INST_IF_PROD_SUM3(A,B,U64 × 8) ;\
-INST_IF_PROD_SUM3(A,B,F32 × 4) ;\
-INST_IF_PROD_SUM3(A,B,F32 × 8) ;\
-INST_IF_PROD_SUM3(A,B,F32 × 16) ;\
-INST_IF_PROD_SUM3(A,B,F64 × 2) ;\
-INST_IF_PROD_SUM3(A,B,F64 × 4) ;\
-INST_IF_PROD_SUM3(A,B,F64 × 8)
-
-#define INST_IF_PROD_SUM3(A,B,C)\
-INST_IF0((# A, B, C #)) ;\
-INST_IF0((# A | (# B, C #) #))
--}
-
-{-
-INST_IF(())
-INST_IF(I8)
-INST_IF(I16)
-INST_IF(I32)
-INST_IF(I64)
-INST_IF(U)
-INST_IF(U8)
-INST_IF(U16)
-INST_IF(U32)
-INST_IF(U64)
-INST_IF(F32)
-INST_IF(F64)
-INST_IF(Bytes)
-INST_IF(P#)
-INST_IF((##))
-INST_IF(I8 × 16)
-INST_IF(I8 × 32)
-INST_IF(I8 × 64)
-INST_IF(I16 × 8)
-INST_IF(I16 × 16)
-INST_IF(I16 × 32)
-INST_IF(I32 × 4)
-INST_IF(I32 × 8)
-INST_IF(I32 × 16)
-INST_IF(I64 × 2)
-INST_IF(I64 × 4)
-INST_IF(I64 × 8)
-INST_IF(U8 × 16)
-INST_IF(U8 × 32)
-INST_IF(U8 × 64)
-INST_IF(U16 × 8)
-INST_IF(U16 × 16)
-INST_IF(U16 × 32)
-INST_IF(U32 × 4)
-INST_IF(U32 × 8)
-INST_IF(U32 × 16)
-INST_IF(U64 × 2)
-INST_IF(U64 × 4)
-INST_IF(U64 × 8)
-INST_IF(F32 × 4)
-INST_IF(F32 × 8)
-INST_IF(F32 × 16)
-INST_IF(F64 × 2)
-INST_IF(F64 × 4)
-INST_IF(F64 × 8)
--}
-
--- INST_IF0((# (F32 × 8) | () #))
---instance (?) (# FloatX4# | () #) where {(?) p a b = case p of {T# → a; F# → b}}
-foo ∷ (# Int8X16# | Int16X8# #) → ()
-foo _ = ()
+INST_IF1(I)
+INST_IF1(I8)
+INST_IF1(I16)
+INST_IF1(I32)
+INST_IF1(I64)
+INST_IF1(U)
+INST_IF1(U8)
+INST_IF1(U16)
+INST_IF1(U32)
+INST_IF1(U64)
+INST_IF1(F32)
+INST_IF1(F64)
+INST_IF1(P#)
+INST_IF1(Bytes)
+INST_IF1(())
+INST_IF1((##))
