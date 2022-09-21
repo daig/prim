@@ -1,7 +1,7 @@
 {-# language CPP,NoImplicitPrelude #-}
-module Types (module Types, module X) where
+module Types (Bool(F,T), B#(F#,T#), module Types, module X) where
 import GHC.Prim as X
-import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint,Any)
+import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint,Any,Char(..),Int,Word,Float,Double)
 import GHC.Types (Bool(..))
 import GHC.Prim.Panic as X
 import Unsafe.Coerce (unsafeCoerce#)
@@ -28,11 +28,7 @@ type K (a ∷ k) = k
 -- | The 'RuntimeRep' of a type
 type R (i ∷ T r) = r
 
-type Rep = RuntimeRep
-
 newtype B# = B# I
-type Not ∷ ∀ {r}. T r → T r
-newtype Not x = Not# x
 pattern F#, T# ∷ B#
 pattern F# = B# 0#
 pattern T# = B# 1#
@@ -51,11 +47,8 @@ pattern GT ← ((\ (Ordering# i) → i >#  0# ) → 1# ) where GT = Ordering#  1
 {-# complete LT, EQ, GT #-}
 
 
--- | 31-bit Unicode code points
-type Char = Char#
-
 -- | 8-bit Latin-1 code points
-newtype Char8 = Char8# Char
+newtype Char8# = Char8# Char#
 
 type I = Int#
 type I8 = Int8#
@@ -119,6 +112,7 @@ type F32 = Float#
 type F64 = Double#
 
 type ST s (a ∷ T ra) = State# s → (# State# s , a #)
+type ST' s (a ∷ T ra) = State# s → (# State# s , B#, a #)
 type ST_ s = State# s → State# s
 
 -- | @(☸)@ is the primitive, unlifted type of realworld state.
@@ -129,6 +123,7 @@ type (☸) = State# RealWorld
 
 -- | A computation performing some I\/O before returning a value of type @a@.
 type IO (a ∷ T r)  = ST RealWorld a
+type IO' (a ∷ T ra) = State# RealWorld → (# State# RealWorld , B#, a #)
 -- | A computation performing some I\/O
 type IO_ = ST_ RealWorld
 
@@ -140,23 +135,23 @@ type STM (a ∷ T r) = ST Transaction a
 -- | Transactional Memory operations
 type STM_ = ST_ Transaction
 
-type Small :: forall {l :: Levity} {k}.
+type Small :: ∀ {l :: Levity} {k}.
               (T# l -> k) -> T# l -> k
 type family Small a = sa | sa -> a where
   Small A_Box = A_Box_Small
   Small A_Box_M = A_Box_Small_M
 
-type A_Box_Small :: forall {l :: Levity}. T# l -> T_
+type A_Box_Small :: ∀ {l :: Levity}. T# l -> T_
 newtype A_Box_Small x = SmallArray# (SmallArray# x)
 
-type A_Box_Small_M :: forall {l :: Levity}. T# l -> * -> T_
+type A_Box_Small_M :: ∀ {l :: Levity}. T# l -> * -> T_
 newtype A_Box_Small_M x s = SmallArray_M# (SmallMutableArray# s x)
 
-type A_Box :: forall {l :: Levity}. T# l -> T_
+type A_Box :: ∀ {l :: Levity}. T# l -> T_
 newtype A_Box x = Array# (Array# x)
 
 
-type A_Box_M :: forall {l :: Levity}. T# l -> * -> T_
+type A_Box_M :: ∀ {l :: Levity}. T# l -> * -> T_
 newtype A_Box_M x s = MutableArray# (MutableArray# s x)
 
 -- | (Possibly heterogeneous) contiguous bytes.
@@ -180,19 +175,19 @@ newtype Bytes_Pinned = PinnedByteArray# ByteArray#
 type Bytes_Pinned_M :: * -> T_
 newtype Bytes_Pinned_M s = M_PinnedByteArray# (MutableByteArray# s)
 
-type A_Unbox :: forall {r :: Rep}. T r -> T_
+type A_Unbox :: ∀ {r}. T r -> T_
 newtype A_Unbox x = Bytes Bytes
 
-type A_Unbox_M :: forall (r :: Rep). T r -> * -> T_
+type A_Unbox_M :: ∀ {r}. T r -> * -> T_
 newtype A_Unbox_M x s = Bytes_M (Bytes_M s)
 
-type A_Unbox_Pinned :: forall (r :: Rep). T r -> T_
+type A_Unbox_Pinned :: ∀ {r}. T r -> T_
 newtype A_Unbox_Pinned x = Bytes_Pinned Bytes_Pinned
 
-type A_Unbox_Pinned_M :: forall (r :: Rep). T r -> * -> T_
+type A_Unbox_Pinned_M :: ∀ {r}. T r -> * -> T_
 newtype A_Unbox_Pinned_M x s = Bytes_Pinned_M (Bytes_Pinned_M s)
 
-type A :: forall {r :: Rep}. T r -> T_
+type A :: ∀ {r}. T r -> T_
 -- | Primitive array type.
 -- The concrete representation can be determined by the kind of its contents
 type family A x = a where
@@ -211,7 +206,25 @@ type family A x = a where
   A (x :: K F64) = A_Unbox x
   A (x :: K Addr#) = A_Unbox x
 
-type M :: forall {r ∷ Rep}. T r -> * -> T r
+type P ∷ ∀ {ra} {r}. T ra → T r
+type family P x where
+  P (x ∷ K I) = P_Unbox x
+  P (x ∷ K I8) = P_Unbox x
+  P (x ∷ K I16) = P_Unbox x
+  P (x ∷ K I32) = P_Unbox x
+  P (x ∷ K I64) = P_Unbox x
+  P (x ∷ K U) = P_Unbox x
+  P (x ∷ K U8) = P_Unbox x
+  P (x ∷ K U16) = P_Unbox x
+  P (x ∷ K U32) = P_Unbox x
+  P (x ∷ K U64) = P_Unbox x
+  P (x ∷ K F32) = P_Unbox x
+  P (x ∷ K F64) = P_Unbox x
+--  P (x ∷ K ()) = P_Box x
+
+-- newtype P_Unlifted = 
+
+type M :: ∀ {r}. T r -> * -> T r
 type family M a = ma | ma → a where
   M Bytes = Bytes_M
   M (A_Unbox x) = A_Unbox_M x
@@ -220,23 +233,33 @@ type family M a = ma | ma → a where
   M (A_Box_Small x) = A_Box_Small_M x
   M (A_Box x) = A_Box_M x
   M ByteArray# = MutableByteArray#
-  M Addr# = MutableAddr#
+  M Addr# = P_M#
   M (P_Unbox x) = P_Unbox_M x
 
--- | A C-style null-terminated string
-type S# = Addr#
+type MM ∷ ∀ {ra} {r}. (T ra → T r) → ★ → T ra → T r
+type family MM a where
+  MM A_Unbox = AA_Unbox_M
+
+type AA_Unbox_M :: ∀ {r}. ★ → T r -> T_
+newtype AA_Unbox_M s x = Bytes_MM (Bytes_M s)
+
+-- | A C-style null-terminated string of Latin-1 @Char8#@ or UTF-8 @Char#@
+type S# ∷ Encoding → K P#
+newtype S# a = S# P#
+
+data Encoding = Latin1 | UTF8
 
 -- | 
 type P# = Addr#
 
 -- | An arbitrary machine address assumed to point outside the garbage-collected heap
-newtype MutableAddr# s = Addr_M# Addr#
+newtype P_M# s = Addr_M# Addr#
 
 -- | An machine address to valid data, assumed to point outside the garbage-collected heap
-type P_Unbox :: forall {r :: Rep}. T r -> T AddrRep
-newtype P_Unbox x = Addr# Addr#
-type P_Unbox_M :: forall {r :: Rep}. T r -> ★ → T AddrRep
-newtype P_Unbox_M x s = MutableAddr# (MutableAddr# s)
+type P_Unbox :: ∀ {r}. T r -> T AddrRep
+newtype P_Unbox x = P# P#
+type P_Unbox_M :: ∀ {r}. T r -> ★ → T AddrRep
+newtype P_Unbox_M x s = P_M# (P_M# s)
 
 type P_Box = MutVar#
 newtype P_Async x = TVar# (TVar# Transaction x)
@@ -288,9 +311,6 @@ type P_Stable = StablePtr#
 type P_Stable_Name ∷ T# l → T_
 type P_Stable_Name = StableName#
 
--- | Primitive maybe type represented by a tag and (possibly invalid) value.
-type (?) (a ∷ T r) = (# (##) | a #)
-
 -- | The uninhabited ("Void") type
 newtype X# ∷ T (SumRep '[]) where X# ∷ X# → X#
 
@@ -311,7 +331,7 @@ type family Box x = b | b → x where
   Box Nat = BigNat
 
 
-type VRep ∷ ∀ {r}. T r → Natural → Rep
+type VRep ∷ ∀ {r}. T r → Natural → RuntimeRep
 type family VRep v n = r | r → v n where
   VRep I8  16 = R Int8X16#
   VRep I16 8  = R Int16X8#

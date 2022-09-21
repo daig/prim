@@ -16,10 +16,10 @@ class (≡) a ⇒ (≤) (a ∷ T r) where
   -- | Maximum value
   max ∷ a → a → a
 
-
 deriving newtype instance (≡) B#
 deriving newtype instance (≤) B#
 deriving newtype instance (≡) Ordering
+
 
 instance (≡) I where
   (≡) = coerce (==#)
@@ -141,10 +141,10 @@ instance (≤) U64 where
   min x y = if cast (x ≤ y) then x else y
   max x y = if cast (x ≥ y) then x else y
 
-instance (≡) Char where
+instance (≡) Char# where
   (≡) = coerce eqChar#
   (≠) = coerce neChar#
-instance (≤) Char where
+instance (≤) Char# where
   (>) = coerce gtChar#
   (≥) = coerce geChar#
   (<) = coerce ltChar#
@@ -152,8 +152,8 @@ instance (≤) Char where
   cmp a b = Ordering# do gtChar# a b GHC.-# ltChar# a b
   min x y = if cast (x ≤ y) then x else y
   max x y = if cast (x ≥ y) then x else y
-deriving newtype instance (≡) Char8
-deriving newtype instance (≤) Char8
+deriving newtype instance (≡) Char8#
+deriving newtype instance (≤) Char8#
 
 instance (≡) F32 where
   (≡) = coerce eqFloat#

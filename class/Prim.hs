@@ -42,5 +42,5 @@ INST_PRIM(U64,SIZEOF_WORD64,ALIGNMENT_WORD64,indexWord8ArrayAsWord64,readWord8Ar
 INST_PRIM(Addr#,SIZEOF_HSPTR,ALIGNMENT_HSPTR,indexWord8ArrayAsAddr,readWord8ArrayAsAddr,writeWord8ArrayAsAddr)
 
 -- Override the word representation for chars
-INST_PRIM_SPEC(Char,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsWideChar,readWord8ArrayAsWideChar,writeWord8ArrayAsWideChar)
-INST_PRIM_SPEC(Char8,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsChar,readWord8ArrayAsChar,writeWord8ArrayAsChar)
+INST_PRIM_SPEC(Char#,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsWideChar,readWord8ArrayAsWideChar,writeWord8ArrayAsWideChar)
+INST_PRIM_SPEC(Char8#,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsChar,readWord8ArrayAsChar,writeWord8ArrayAsChar)

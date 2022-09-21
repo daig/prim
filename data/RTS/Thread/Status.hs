@@ -10,7 +10,7 @@ newtype Status = Status# I
 newtype Reason = Reason# I
 pattern BlockedOn ∷ Reason → Status
 pattern BlockedOn r ← (blocked' → (# | r #)) where BlockedOn (Reason# r) = Status# r
-blocked' ∷ Status → (?) Reason
+blocked' ∷ Status → (# (##) | Reason #)
 blocked' (Status# i) = cast (# i ≥ 1# ∧ i ≤ 15# ∧ i ≠ 13# , Reason# i #)
 
 

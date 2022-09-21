@@ -9,7 +9,7 @@ class Logic_Atomic (x ∷ T r) where
 class Num_Atomic (x ∷ T r) where
   sub_atomicP, add_atomicP ∷ P_Unbox_M x s → x → ST s x
   sub_atomicB, add_atomicB ∷ A_Unbox_M x s → I → x → ST s x
-type Atomic ∷ ∀ {r ∷ Rep}. T r → Constraint
+type Atomic ∷ ∀ {r}. T r → Constraint
 class Atomic (x ∷ T r) where
   read_atomicP ∷ P_Unbox_M x s → ST s x
   write_atomicP ∷ P_Unbox_M x s → x → ST_ s
@@ -67,7 +67,7 @@ instance Atomic I where
 
 
 -- | Bit shuffling operations
-type Eq_Atomic ∷ ∀ {r ∷ Rep}. T r → Constraint
+type Eq_Atomic ∷ ∀ {r}. T r → Constraint
 class Eq_Atomic x where
   -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided expected old value.
   -- Implies a full memory barrier.

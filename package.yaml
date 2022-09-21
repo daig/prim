@@ -110,7 +110,9 @@ internal-libraries:
     other-modules: Prelude
     source-dirs: string
     visibility: public
-    dependencies: ghc-prim
+    dependencies:
+      - ghc-prim
+      - prim:type
   ffi:
     other-modules: Prelude
     source-dirs: ffi

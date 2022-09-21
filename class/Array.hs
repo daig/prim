@@ -1,5 +1,6 @@
 module Array where
 import Do.ST as ST
+import Cast
 
 class Array (a ∷ T_) where
   -- | Uninitialized array.
@@ -79,7 +80,7 @@ instance Array Bytes where
   thaw## a = return (unsafeCoerce# a)
   thaw# a off n = ST.do
     ma <- new# n
-    coerce copyByteArray# a off ma 0# n
+    cast (copyByteArray# (coerce a) off (coerce ma) 0# n)
     return ma
   new# = coerce newByteArray#
   len = coerce sizeofByteArray#
@@ -87,7 +88,7 @@ instance Array Bytes where
   lenM  = coerce getSizeofMutableByteArray#
   cloneM# a off n = ST.do
     ma <- new# n
-    coerce copyMutableByteArray# a off ma 0# n
+    cast (copyMutableByteArray# (coerce a) off (coerce ma) 0# n)
     return ma
   clone# a off n = runST (ST.do ma <- thaw# a off n; freeze## ma)
 
@@ -99,7 +100,7 @@ instance Array Bytes_Pinned where
   thaw## a = return (unsafeCoerce# a)
   thaw# a off n = ST.do
     ma <- new# n
-    coerce copyByteArray# a off ma 0# n
+    cast (copyByteArray# (coerce a) off (coerce ma) 0# n)
     return ma
   new# = coerce newPinnedByteArray#
   len = coerce sizeofByteArray#
@@ -107,6 +108,6 @@ instance Array Bytes_Pinned where
   lenM  = coerce getSizeofMutableByteArray#
   cloneM# a off n = ST.do
     ma <- new# n
-    coerce copyMutableByteArray# a off ma 0# n
+    cast (copyMutableByteArray# (coerce a) off (coerce ma) 0# n)
     return ma
   clone# a off n = runST (ST.do ma <- thaw# a off n; freeze## ma)

@@ -48,6 +48,8 @@ infixl 3 ∧
 infixl 2 ⊕
 infixl 1 ∨
 
+infixl 8 <<#, <<, >>, >>#, `shift`
+
 -- | Boolean Operations
 instance Logic B# where
   (∧) = coerce andI#

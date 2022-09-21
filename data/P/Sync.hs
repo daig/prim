@@ -18,8 +18,8 @@ get ∷ P_Sync a → IO a
 get = takeMVar#
 
 -- | Without blocking, 'take' the current value if it exists, leaving it empty.
-get' ∷ P_Sync a → IO ((?) a) {- ^ The value if the @Sync.P@ was full -}
-get' r = cast (tryTakeMVar# r)
+get' ∷ ∀ a. P_Sync a → IO (# (##) | a #) {- ^ The value if the @Sync.P@ was full -}
+get' r = cast (coerce @_ @(IO' a) (tryTakeMVar# r))
 
 -- | Block until the @Sync.P@ is full and atomically read the next 'write' value
 -- without 'take'ing it, leaving it full.
@@ -28,8 +28,8 @@ peek = readMVar#
 
 -- | 'read' the current value if it exists but don't 'take' it
 -- ,leaving it in the same empty/full state.
-peek' ∷ P_Sync a → IO ((?) a) {- ^ The value if the @Sync.P@ was full/unlocked -}
-peek' r = cast (tryReadMVar# r)
+peek' ∷ ∀ a. P_Sync a → IO (# (##) | a #) {- ^ The value if the @Sync.P@ was full/unlocked -}
+peek' r = cast (coerce @_ @(IO' a) (tryReadMVar# r))
 
 -- | Block until the @Sync.P@ is empty, then write the value, leaving it full.
 --

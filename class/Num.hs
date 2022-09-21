@@ -81,6 +81,10 @@ import GHC.Types qualified as GHC (isTrue#)
 import GHC.Prim.Exception qualified as GHC
 #include "MachDeps.h"
 
+infixl 6 +, -, -?
+infixl 7 ×, /, //
+infixl 7 %, /%, %%, //%%
+
 -- |Satisfies @((((x / y) × y) + (x % y) ≡ x@. The
 class (≤) a ⇒ ℕ (a ∷ T r) where
   (+), (×) ∷ a → a → a

@@ -4,6 +4,15 @@ import Prim
 import Memset
 import qualified GHC.Types as GHC
 
+{-
+type Ref ∷ ∀ {ra} {r}. T ra → (T ra → T r) → C
+class Ref a p where
+  (.=) ∷ p a → a → ST_ s
+  (%=) ∷ p a → (a → b) → ST_ s
+  get ∷ p a → ST s a
+  -}
+
+
 
 -- | Operations for containers of contiguous primitive values.
 type (∈) ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
@@ -64,7 +73,7 @@ instance (x ≑ TY) ⇒ x ∈ (TA) where {\
   write# = coerce WR# ; \
   set# a i n x = unio (SET# (coerce a) i n (coerce x))}
 #define INST_IN_SPEC(TY,TA,IX,RD,WR,SET) \
-instance (TY) ∈ (TA) where {\
+instance {-# OVERLAPPING #-} (TY) ∈ (TA) where {\
   (!) = coerce IX#; \
   (!!) = coerce RD# ; \
   write# = coerce WR# ; \
@@ -90,10 +99,10 @@ INST_IN(U32,A_Unbox,indexWord32Array,readWord32Array,writeWord32Array,setWord32A
 INST_IN(U32,P_Unbox,indexWord32OffAddr,readWord32OffAddr,writeWord32OffAddr,setWord32OffAddr)
 INST_IN(U64,A_Unbox,indexWord64Array,readWord64Array,writeWord64Array,setWord64Array)
 INST_IN(U64,P_Unbox,indexWord64OffAddr,readWord64OffAddr,writeWord64OffAddr,setWord64OffAddr)
-INST_IN_SPEC(Char8,A_Unbox,indexCharArray,readCharArray,writeCharArray,setCharArray)
-INST_IN_SPEC(Char8,P_Unbox,indexCharOffAddr,readCharOffAddr,writeCharOffAddr,setCharOffAddr)
-INST_IN_SPEC(Char,A_Unbox,indexWideCharArray,readWideCharArray,writeWideCharArray,setWideCharArray)
-INST_IN_SPEC(Char,P_Unbox,indexWideCharOffAddr,readWideCharOffAddr,writeWideCharOffAddr,setWideCharOffAddr)
+INST_IN_SPEC(Char8#,A_Unbox,indexCharArray,readCharArray,writeCharArray,setCharArray)
+INST_IN_SPEC(Char8#,P_Unbox,indexCharOffAddr,readCharOffAddr,writeCharOffAddr,setCharOffAddr)
+INST_IN_SPEC(Char#,A_Unbox,indexWideCharArray,readWideCharArray,writeWideCharArray,setWideCharArray)
+INST_IN_SPEC(Char#,P_Unbox,indexWideCharOffAddr,readWideCharOffAddr,writeWideCharOffAddr,setWideCharOffAddr)
 INST_IN(Addr#,A_Unbox,indexAddrArray,readAddrArray,writeAddrArray,setAddrArray)
 INST_IN(Addr#,P_Unbox,indexAddrOffAddr,readAddrOffAddr,writeAddrOffAddr,setAddrOffAddr)
 

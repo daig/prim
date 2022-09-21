@@ -1,10 +1,18 @@
 --------------------------------------------------------------------
--- | Description : UTF-8 encoding
+-- | Description : Null-terminated C-like Strings
+--
+-- There's primitive syntax for these:
+--
+-- Latin1# @"foo"#@ will allocate a fresh c-string
+--
+-- They are not aliased, in general @"foo"\# ≠ "foo"\#@
+--
+-- UTF8 encoding
 --------------------------------------------------------------------
-module String.C.UTF8 (type S, unpack#) where
+module String.C.UTF8 (type UTF8#, foldr) where
 import GHC.CString
 
--- | Unpack UTF-8 encoded 'Char' string
-unpack# ∷ S → [Char]
-unpack# = unpackCStringUtf8#
-{-# inline conlike unpack# #-}
+-- | Unpack and fold 'Char's
+foldr ∷ ∀ a. UTF8# → (Char → a → a) → a → a
+foldr = coerce (unpackFoldrCStringUtf8# @a)
+{-# inline conlike foldr #-}

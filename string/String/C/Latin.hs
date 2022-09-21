@@ -1,25 +1,26 @@
 --------------------------------------------------------------------
--- | Description : Latin-1 (8-bit) encoding
+-- | Description : Null-terminated C-like Strings
+--
+-- There's primitive syntax for these:
+--
+-- Latin1# @"foo"#@ will allocate a fresh c-string
+--
+-- They are not aliased, in general @"foo"\# ≠ "foo"\#@
+--
+-- Latin-1 (8-bit) encoding
 --------------------------------------------------------------------
-module String.C.Latin (type S, module String.C.Latin) where
+module String.C.Latin (type Latin1#, module String.C.Latin) where
 import GHC.CString
 
--- | Unpack bytes until \null byte
-unpack# ∷ S → [Char]
-unpack# = unpackCString#
+-- | Ignore null-termination
+unpack# ∷ ∀ a. Latin1# → I {- ^ bytes to unpack -} → [Char]
+unpack# = coerce unpackNBytes#
 {-# inline conlike unpack# #-}
 
--- | Ignore null-termination
-unpackN# ∷ S → I → [Char]
-unpackN# = unpackNBytes#
-{-# inline conlike unpackN# #-}
-
--- | Unpack bytes and append
-(∔) ∷ S → [Char] → [Char]
-(∔) = unpackAppendCString#
-{-# inline conlike (∔) #-}
-
 -- | Unpack and fold bytes
-foldr ∷ S → (Char → a → a) → a → a
-foldr = unpackFoldrCString#
+foldr ∷ ∀ a. Latin1# → (Char → a → a) → a → a
+foldr = coerce (unpackFoldrCString# @a)
 {-# inline conlike foldr #-}
+
+len ∷ Latin1# → I; {-# inline conlike len #-}
+len = cstringLength#

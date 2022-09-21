@@ -9,5 +9,3 @@
 --------------------------------------------------------------------
 module String.C (type S, len#) where
 
-len# ∷ S → I; {-# inline len# #-}
-len# = cstringLength#

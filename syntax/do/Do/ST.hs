@@ -62,11 +62,11 @@ instance Run (a ∷ K (A)) where {\
 class Pure b ⇒ Do (a ∷ T ra) (b ∷ T rb) where
   (⇉) ∷ ST s a → (a → ST s b) → ST s b
   η1 ∷ (a → b) → ST s a → ST s b
-  (>>) ∷ ST_ s → ST s a → ST s a
+  (>>) ∷ ST s (##) → ST s a → ST s a
 #define INST_MONAD(A,B) \
 instance Do (a ∷ K (A)) (b ∷ K (B)) where {\
   η1 f st = st ⇉ \a → return (f a); \
-  (st >> sta) s = sta (st s); \
+  (st >> sta) s = case st s of {(# s', _ #) → sta s'} ;\
   (st ⇉ f) s = go (st s) f where \
     go ∷ (# State# s , a #) → (a → ST s b) → (# State# s , b #); \
     go (# s' , a #) f = f a s'}

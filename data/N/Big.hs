@@ -41,7 +41,7 @@ two'# = coerce bigNatIsTwo#
 pattern Z# ← (zero'# → T#) where Z# = bigNatZero# (##)
 pattern One# ← (one'# → T#) where One# = bigNatOne# (##)
 
-log2' ∷ Nat → (?) U
+log2' ∷ Nat → (# (##) | U #)
 log2' = bigNatIsPowerOf2#
 
 index# ∷ Nat → I → Word
@@ -61,7 +61,7 @@ fromWordList = bigNatFromWordListUnsafe
 instance Cast [Word] Nat where cast = bigNatToWordList
 instance Cast Nat (# U, U #) where cast (# hi, lo #) = bigNatFromWord2# hi lo
 instance Cast U Nat where cast = bigNatToWord#
-instance Cast ((?) U) Nat where cast = bigNatToWordMaybe#
+instance Cast (# (##) | U #) Nat where cast = bigNatToWordMaybe#
 instance Cast Word Nat where cast = bigNatToWord
 instance Cast I Nat where cast = bigNatToInt#
 instance Cast Int Nat where cast = bigNatToInt
@@ -79,12 +79,6 @@ gtWord,leWord ∷ Nat → Word → Bool
 gtWord = bigNatGtWord
 leWord = bigNatLeWord
 
-instance Nat .=. U where
-  (.<.) = bigNatLtWord
-  (.≤.) = bigNatLeWord
-  (.>.) = bigNatGtWord
-  (.≥.) = bigNatGeWord
-
 cmpU ∷ Nat → U → GHC.Ordering
 cmpU = bigNatCompareWord#
 
@@ -101,7 +95,7 @@ instance (≤) Nat where
   min x y = if cast (x ≤ y) then x else y
   max x y = if cast (x ≥ y) then x else y
 
-
+instance Nat ∔ U where
 {-
 addU,mulU ∷ Nat → U → Nat
 addU# = bigNatAddWord#

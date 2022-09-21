@@ -31,9 +31,9 @@ indexLazy# = coerce (indexSmallArray# @x)
 -- Implies a full memory barrier.
 --
 -- _Warning_: This can fail with an unchecked exception.
-cas' ∷ M (A_Box_Small x) s
+cas' ∷ ∀ x s. M (A_Box_Small x) s
      → I {- ^ offset -}
      → x {- ^ expected old value -}
      → x {- ^ new value -}
-     → ST s (Result# x) {- ^ @Ok newValue@ if successful, or @Err oldValue@ if not -} 
-cas' (coerce → m) i x0 x1 = cast (casSmallArray# m i x0 x1)
+     → ST s (# x | x #) {- ^ @(# newValue | #)@ if successful, or @(# | oldValue #)@ if not -} 
+cas' (coerce → m) i x0 x1 = cast (coerce @_ @(ST' s x) (casSmallArray# m i x0 x1))

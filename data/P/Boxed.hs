@@ -47,11 +47,11 @@ modify r f s0 = case atomicModifyMutVar_# r f s0 of
   (# s1, old, new #) → (# s1, (# old, new #) #)
 
 -- | Compare and swap if the old value matches expected.
-cas' ∷ P_Box s a
+cas' ∷ ∀ s a. P_Box s a
     → a -- ^ expected old value
     → a -- ^ new value
-    → ST s (Result# a) -- ^ Whether the swap failed, and the actual new value
-cas' r old new = cast (casMutVar# r old new)
+    → ST s (# a | a #) -- ^ Whether the swap failed, and the actual new value
+cas' r old new = cast (coerce @_ @(ST' s a) (casMutVar# r old new))
 {-
 cas' r old new s0 = case casMutVar# r old new s0 of
   (# s1, failed', a #) → (# s1, (# B# failed', a #) #)
