@@ -81,7 +81,6 @@ internal-libraries:
     dependencies:
       - prim:type
       - ghc-prim
-      - ghc-base
     ghc-options: -fllvm
   do:
     source-dirs: syntax/do
@@ -99,7 +98,6 @@ internal-libraries:
       - prim:type
       - prim:ffi
       - prim:do
-      - prim:if
       - microbase
   stock:
     source-dirs: stock

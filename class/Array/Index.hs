@@ -1,7 +1,6 @@
 {-# language CPP #-}
 module Array.Index where
 import Prim
-import Do as Prim
 import Memset
 import qualified GHC.Types as GHC
 

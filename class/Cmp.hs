@@ -30,8 +30,8 @@ instance (≤) I where
   (<) = coerce (<#)
   (≤) = coerce (<=#)
   cmp a b = Ordering# do (a ># b) +# (a >=# b) GHC.-# 1#
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) I8 where
   (≡) = coerce eqInt8#
@@ -42,8 +42,8 @@ instance (≤) I8 where
   (<) = coerce ltInt8#
   (≤) = coerce leInt8#
   cmp a b = Ordering# do gtInt8# a b GHC.-# ltInt8# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) I16 where
   (≡) = coerce eqInt16#
@@ -54,8 +54,8 @@ instance (≤) I16 where
   (<) = coerce ltInt16#
   (≤) = coerce leInt16#
   cmp a b = Ordering# do gtInt16# a b GHC.-# ltInt16# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) I32 where
   (≡) = coerce eqInt32#
@@ -66,8 +66,8 @@ instance (≤) I32 where
   (<) = coerce ltInt32#
   (≤) = coerce leInt32#
   cmp a b = Ordering# do gtInt32# a b GHC.-# ltInt32# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) I64 where
   (≡) = coerce eqInt64#
@@ -78,8 +78,8 @@ instance (≤) I64 where
   (<) = coerce ltInt64#
   (≤) = coerce leInt64#
   cmp a b = Ordering# do gtInt64# a b GHC.-# ltInt64# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) U where
   (≡) = coerce eqWord#
@@ -90,8 +90,8 @@ instance (≤) U where
   (<) = coerce ltWord#
   (≤) = coerce leWord#
   cmp a b = Ordering# do gtWord# a b GHC.-# ltWord# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) U8 where
   (≡) = coerce eqWord8#
@@ -102,8 +102,8 @@ instance (≤) U8 where
   (<) = coerce ltWord8#
   (≤) = coerce leWord8#
   cmp a b = Ordering# do gtWord8# a b GHC.-# ltWord8# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) U16 where
   (≡) = coerce eqWord16#
@@ -114,8 +114,8 @@ instance (≤) U16 where
   (<) = coerce ltWord16#
   (≤) = coerce leWord16#
   cmp a b = Ordering# do gtWord16# a b GHC.-# ltWord16# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) U32 where
   (≡) = coerce eqWord32#
@@ -126,8 +126,8 @@ instance (≤) U32 where
   (<) = coerce ltWord32#
   (≤) = coerce leWord32#
   cmp a b = Ordering# do gtWord32# a b GHC.-# ltWord32# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) U64 where
   (≡) = coerce eqWord64#
@@ -138,8 +138,8 @@ instance (≤) U64 where
   (<) = coerce ltWord64#
   (≤) = coerce leWord64#
   cmp a b = Ordering# do gtWord64# a b GHC.-# ltWord64# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) Char where
   (≡) = coerce eqChar#
@@ -150,8 +150,8 @@ instance (≤) Char where
   (<) = coerce ltChar#
   (≤) = coerce leChar#
   cmp a b = Ordering# do gtChar# a b GHC.-# ltChar# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 deriving newtype instance (≡) Char8
 deriving newtype instance (≤) Char8
 
@@ -164,8 +164,8 @@ instance (≤) F32 where
   (<) = coerce ltFloat#
   (≤) = coerce leFloat#
   cmp a b = Ordering# do gtFloat# a b GHC.-# ltFloat# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 instance (≡) F64 where
   (≡) = coerce (==##)
   (≠) = coerce (/=##)
@@ -175,8 +175,8 @@ instance (≤) F64 where
   (<) = coerce (<##)
   (≤) = coerce (<=##)
   cmp a b = Ordering# do (a >## b) +# (a >=## b) GHC.-# 1#
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 -- | _Value_ equality
 instance (≡) Bytes where
@@ -250,8 +250,8 @@ instance (≤) Buffer where
   a > b = cmp a b ≡ GT
   a ≥ b = cmp a b ≠ LT
   a ≤ b = cmp a b ≠ GT
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 
 instance (≡) Addr# where (≡) = coerce eqAddr# ; (≠) = coerce neAddr#
 instance (≤) Addr# where
@@ -260,7 +260,7 @@ instance (≤) Addr# where
   (<) = coerce ltAddr#
   (≤) = coerce leAddr#
   cmp a b = Ordering# do gtAddr# a b GHC.-# ltAddr# a b
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
 deriving via Addr# instance (≡) (P_Unbox x)
 deriving via Addr# instance (≤) (P_Unbox x)

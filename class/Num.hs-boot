@@ -1,15 +1,15 @@
 module Num where
 import {-# source #-} Cmp
 
+
 class (≤) a ⇒ ℕ (a ∷ T r) where
-  (+), (×), (-#) ∷ a → a → a
-  (-?) ∷ a → a → (?) a
+  (+), (×), (-) ∷ a → a → a
+  (-?) ∷ a → a → (# a | a #)
   (/), (%) ∷ a → a → a
   (/%) ∷ a → a → (# a , a #)
 class ℕ a ⇒ ℤ (a ∷ T r) where
   (//),(%%) ∷ a → a → a
   (//%%) ∷ a → a → (# a , a #)
-  (-) ∷ a → a → a
   negate, abs ∷ a → a
   sgn ∷ a → Ordering
 class 𝕌 (a ∷ T r) where

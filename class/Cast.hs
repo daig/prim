@@ -3,7 +3,10 @@ module Cast where
 import Do.ST as ST
 import Unsafe.Coerce
 import GHC.Types (isTrue#,Bool)
+import GHC.Int
+import GHC.Word
 import GHC.Prim qualified as GHC
+import {-# source #-} Bits
 
 -- | Nontrivial conversions between types. Use with care!
 type Cast :: forall {r :: RuntimeRep} {r' :: RuntimeRep}. T r -> T r' -> C
@@ -153,16 +156,43 @@ instance Cast (IO a) (STM a) where cast = unsafeCoerce# (atomically# @a)
 
 instance Cast Bool B# where cast = coerce isTrue#
 
+instance Cast (Not B#) B# where cast = coerce ((¬) @_ @B#)
+instance Cast B# (Not B#) where cast = coerce ((¬) @_ @B#)
+instance Cast (Not I) I where cast = coerce ((¬) @_ @I)
+instance Cast (Not I8) I8 where cast = coerce ((¬) @_ @I8)
+instance Cast I8 (Not I8) where cast = coerce ((¬) @_ @I8)
+instance Cast (Not I16) I16 where cast = coerce ((¬) @_ @I16)
+instance Cast I16 (Not I16) where cast = coerce ((¬) @_ @I16)
+instance Cast (Not I32) I32 where cast = coerce ((¬) @_ @I32)
+instance Cast I32 (Not I32) where cast = coerce ((¬) @_ @I32)
+instance Cast (Not I64) I64 where cast = coerce ((¬) @_ @I64)
+instance Cast I64 (Not I64) where cast = coerce ((¬) @_ @I64)
+instance Cast (Not U) U where cast = coerce ((¬) @_ @U)
+instance Cast (Not U8) U8 where cast = coerce ((¬) @_ @U8)
+instance Cast U8 (Not U8) where cast = coerce ((¬) @_ @U8)
+instance Cast (Not U16) U16 where cast = coerce ((¬) @_ @U16)
+instance Cast U16 (Not U16) where cast = coerce ((¬) @_ @U16)
+instance Cast (Not U32) U32 where cast = coerce ((¬) @_ @U32)
+instance Cast U32 (Not U32) where cast = coerce ((¬) @_ @U32)
+instance Cast (Not U64) U64 where cast = coerce ((¬) @_ @U64)
+instance Cast U64 (Not U64) where cast = coerce ((¬) @_ @U64)
+
 -- | Convert a tag and a (possibly invalid) value into an unboxed '(?)'
 -- | Convert a tag (_True_ if it's _Err_) and a value into an unboxed 'Result'.
 
-#define INST_CAST_SUM(A)\
-instance p ≑ B# ⇒ Cast ((?) (x ∷ K A)) (# p, x #) where {cast (# coerce → t, x #) = unsafeCoerce# (# t +# 1#, x #)} ;\
-instance Cast (ST s ((?) (x ∷ K A))) (State# s → (# State# s, I, x #)) where { ;\
-  cast st = \s → case st s of (# s', t, x #) → unsafeCoerce# (# t +# 1#, x #)} ;\
-instance p ≑ B# ⇒ Cast (Result (x ∷ K A) x) (# p, x #) where {cast (# coerce → t, x #) = unsafeCoerce# (# 0b11# `xorI#` (t +# 1#), x #)} ;\
-instance Cast (ST s (Result (x ∷ K A) x)) (State# s → (# State# s, I, x #)) where { ;\
-  cast st = \s → case st s of (# s', t, x #) → unsafeCoerce# (# 0b11# `xorI#` (t +# 1#), x #)}
+#define INST_CAST_SUM(X)\
+instance Cast (ST s (# (x ∷ K X) | (y ∷ K (##))  #)) (State# s → (# State# s, B#, x #)) where { ;\
+  cast st = \s → case st s of (# s', coerce → t, x #) → (# s', unsafeCoerce# (# t +# 1#, x #) #)} ;\
+instance Cast (ST s (# (y ∷ K (##)) | (x ∷ K X)  #)) (State# s → (# State# s, Not B#, x #)) where { ;\
+  cast st = \s → case st s of (# s', coerce → t, x #) → (# s', unsafeCoerce# (# t +# 1#, x #) #)} ;\
+instance Cast (ST s (# (x ∷ K X) | x  #)) (State# s → (# State# s, B#, x #)) where { ;\
+  cast st = \s → case st s of (# s', coerce → t, x #) → (# s', unsafeCoerce# (# t +# 1#, x #) #)} ;\
+instance Cast (# (x ∷ K X) | (y ∷ K (##)) #) (# B#, x #) where { ;\
+  cast (# coerce → t, x #) = unsafeCoerce# (# t +# 1#, x #) } ;\
+instance Cast (# (y ∷ K (##)) | (x ∷ K X) #) (# Not B#, x #) where { ;\
+  cast (# coerce → t, x #) = unsafeCoerce# (# t +# 1#, x #) } ;\
+instance Cast (# (x ∷ K X) | x #) (# B#, x #) where { ;\
+  cast (# coerce → t, x #) = unsafeCoerce# (# t +# 1#, x #) } ;\
 
 INST_CAST_SUM(I)
 INST_CAST_SUM(I8)
@@ -180,12 +210,14 @@ INST_CAST_SUM(P#)
 INST_CAST_SUM(())
 INST_CAST_SUM((##))
 
+-- Check if Right value
 #define INST_CAST_BOOL_EITHER2(X,Y)\
--- | Check if Right value\
 instance Cast B# (# X | Y #) where {cast (unsafeCoerce# → (# t #)) = B# (t GHC.-# 1#)}
 
-#define INST_CAST_UNMAYBE(A)\
-instance Cast (# B#, A #) ((?) A) where {cast (unsafeCoerce# → (# t, x #)) = (# B# (t GHC.-# 1#), x #) }
+#define INST_CAST_UNMAYBE(X)\
+instance Cast (# Not B#, X #) (# X | (##) #) where {cast (unsafeCoerce# → (# t, x #)) = (# Not# (B# (t GHC.-# 1#)), x #) } ;\
+instance Cast (# B#, X #) (# (##) | X #) where {cast (unsafeCoerce# → (# t, x #)) = (# B# (t GHC.-# 1#), x #) } ;\
+instance Cast (# B#, X #) (# X | X #) where {cast (unsafeCoerce# → (# t, x #)) = (# B# (t GHC.-# 1#), x #) }
 
 INST_CAST_UNMAYBE(I)
 INST_CAST_UNMAYBE(I8)
@@ -201,7 +233,6 @@ INST_CAST_UNMAYBE(F32)
 INST_CAST_UNMAYBE(F64)
 INST_CAST_UNMAYBE(P#)
 INST_CAST_UNMAYBE(())
-INST_CAST_UNMAYBE((##))
 
 
 
@@ -239,3 +270,15 @@ INST_CAST_BOOL_EITHER1(P#)
 INST_CAST_BOOL_EITHER1(())
 INST_CAST_BOOL_EITHER1((##))
 INST_CAST_BOOL_EITHER1(Bytes)
+
+
+instance Cast Int I where cast = I#
+instance Cast Int8 I8 where cast = I8#
+instance Cast Int16 I16 where cast = I16#
+instance Cast Int32 I32 where cast = I32#
+instance Cast Int64 I64 where cast = I64#
+instance Cast Word U where cast = W#
+instance Cast Word8 U8 where cast = W8#
+instance Cast Word16 U16 where cast = W16#
+instance Cast Word32 U32 where cast = W32#
+instance Cast Word64 U64 where cast = W64#

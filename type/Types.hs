@@ -31,6 +31,8 @@ type R (i ∷ T r) = r
 type Rep = RuntimeRep
 
 newtype B# = B# I
+type Not ∷ ∀ {r}. T r → T r
+newtype Not x = Not# x
 pattern F#, T# ∷ B#
 pattern F# = B# 0#
 pattern T# = B# 1#
@@ -288,9 +290,6 @@ type P_Stable_Name = StableName#
 
 -- | Primitive maybe type represented by a tag and (possibly invalid) value.
 type (?) (a ∷ T r) = (# (##) | a #)
--- | Primitive option type represented by a tag and two values of the same representation.
-type Result ∷ ∀ {re} {ra}. T re → T ra → T (SumRep '[re,ra])
-type Result e a = (# e | a #)
 
 -- | The uninhabited ("Void") type
 newtype X# ∷ T (SumRep '[]) where X# ∷ X# → X#

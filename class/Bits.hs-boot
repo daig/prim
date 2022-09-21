@@ -3,7 +3,8 @@ module Bits where
 class Logic (a ∷ T r) where
   (∧), (∨), (⊕) ∷ a → a → a
   (¬) ∷ a → a
-class Bits (a ∷ T r) where
+type Bits ∷ ∀ {r}. T r → Constraint
+class Bits a where
   (<<#) ∷ a → U → a
   (<<) ∷ a → U → a
   (>>#) ∷ a → U → a
@@ -23,3 +24,13 @@ infixl 2 ⊕
 infixl 1 ∨
 
 instance Logic B#
+instance Logic I
+instance Logic I8
+instance Logic I16
+instance Logic I32
+instance Logic I64
+instance Logic U
+instance Logic U8
+instance Logic U16
+instance Logic U32
+instance Logic U64

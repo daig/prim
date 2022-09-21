@@ -2,7 +2,7 @@ module Prelude (module X) where
 import GHC.Prim as X hiding ((-#))
 import GHC.Prim.PtrEq as X
 import Coerce as X
-import Types as X hiding ((-#))
+import Types as X
 import GHC.Classes as X (modInt#,divInt#,divModInt#
                         ,modInt8#,divInt8#,divModInt8#
                         ,modInt16#,divInt16#,divModInt16#

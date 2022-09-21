@@ -1,3 +1,4 @@
+{-# OPTIONS -Wno-missing-methods #-}
 {-# LANGUAGE BangPatterns, CPP  #-}
 module Num (module Num
 -- * Note: divInt# implementation
@@ -78,16 +79,16 @@ import GHC.Word (Word(..))
 import GHC.Int (Int(..))
 import GHC.Types qualified as GHC (isTrue#)
 import GHC.Prim.Exception qualified as GHC
-import If
 #include "MachDeps.h"
 
 -- |Satisfies @((((x / y) × y) + (x % y) ≡ x@. The
 class (≤) a ⇒ ℕ (a ∷ T r) where
   (+), (×) ∷ a → a → a
   -- | Subtract without checking overflow
-  (-#) ∷ a → a → a
-  -- | Try to subtract if not overflow
-  (-?) ∷ a → a → (?) a
+  (-) ∷ a → a → a
+  -- | Try to subtract if not overflow.
+  -- _Left_ if no overflow. _Right_ if overflow.
+  (-?) ∷ a → a → (# a | a #)
   -- | Division rounding towards -∞. The behavior is undefined if the first argument is zero.
   (/), (%) ∷ a {- ^ dividend -}  → a {- ^ divisor -} → a
   -- | Satisfies @((x / y) + ((x % y) × y) ≡ x@.
@@ -97,7 +98,6 @@ class ℕ a ⇒ ℤ (a ∷ T r) where
   (//),(%%) ∷ a → a → a
   -- | Rounds towards 0. The behavior is undefined if the first argument is zero.
   (//%%) ∷ a → a → (# a , a #)
-  (-) ∷ a → a → a
   negate ∷ a → a
   -- | Absolute value
   abs ∷ a → a
@@ -120,41 +120,45 @@ class ℤ a ⇒ ℝ (a ∷ T r) where
 
 instance ℕ U where
   (+) = plusWord#
+  (-) = minusWord#
   (×) = timesWord#
-  (-#) = minusWord#
-  a -? b = a ≥ b ? (# | a -# b #) $ (# (##) | #)
+  a -? b = case subWordC# a b of (# u, oflo #) → cast (# B# oflo, u #)
   (/) = quotWord#
   (%) = remWord#
   (/%) = quotRemWord#
 
 instance ℕ U8 where
   (+) = plusWord8#
+  (-) = subWord8#
+  a -? b = cast (# a > b, a - b #)
   (×) = timesWord8#
-  (-#) = subWord8#
   (/) = quotWord8#
   (%) = remWord8#
   (/%) = quotRemWord8#
 
 instance ℕ U16 where
   (+) = plusWord16#
+  (-) = subWord16#
+  a -? b = cast (# a > b, a - b #)
   (×) = timesWord16#
-  (-#) = subWord16#
   (/) = quotWord16#
   (%) = remWord16#
   (/%) = quotRemWord16#
 
 instance ℕ U32 where
   (+) = plusWord32#
+  (-) = subWord32#
+  a -? b = cast (# a > b, a - b #)
   (×) = timesWord32#
-  (-#) = subWord32#
   (/) = quotWord32#
   (%) = remWord32#
   (/%) = quotRemWord32#
 
 instance ℕ U64 where
   (+) = plusWord64#
+  (-) = subWord64#
+  a -? b = case subWordC# (cast a) (cast b) of (# u, oflo #) → cast (# B# oflo, cast @U64 u #)
   (×) = timesWord64#
-  (-#) = subWord64#
   (/) = quotWord64#
   (%) = remWord64#
   x /% y = (# x / y, x % y #)
@@ -164,6 +168,8 @@ instance ℕ U64 where
 -- Modular functions have built-in rules.
 instance ℕ I where
   (+) = (+#)
+  (-) = (-#)
+  a -? b = case subIntC# a b of (# i, oflo #) → cast (# B# oflo, i #)
   (×) = (*#)
   (%) = modInt#
   (/) = divInt#
@@ -172,7 +178,6 @@ instance ℤ I where
   negate = negateInt#
   abs i = (i ⊕ nsign) -# nsign where
     nsign = i >># minusWord# WORD_SIZE_IN_BITS## 1##
-  (-) = (-#)
   (//) = quotInt#
   (%%) = remInt#
   (//%%) = quotRemInt#
@@ -181,6 +186,7 @@ instance ℤ I where
 
 instance ℕ I8 where
   (+) = plusInt8#
+  (-) = subInt8#
   (×) = timesInt8#
   (/) = quotInt8#
   (%) = remInt8#
@@ -188,6 +194,7 @@ instance ℕ I8 where
 
 instance ℕ I16 where
   (+) = plusInt16#
+  (-) = subInt16#
   (×) = timesInt16#
   (/) = quotInt16#
   (%) = remInt16#
@@ -195,19 +202,21 @@ instance ℕ I16 where
 instance ℕ I32 where
   (+) = plusInt32#
   (×) = timesInt32#
+  (-) = subInt32#
   (/) = quotInt32#
   (%) = remInt32#
   x /% y = (# x / y, x % y #)
 instance ℕ I64 where
   (+) = plusInt64#
   (×) = timesInt64#
+  (-) = subInt64#
+  a -? b = case subIntC# (cast a) (cast b) of (# i, oflo #) → cast (# B# oflo, cast @I64 i #)
   (/) = quotInt64#
   (%) = remInt64#
   x /% y = (# x / y, x % y #)
 
 instance ℤ I8 where
   negate = negateInt8#
-  (-) = subInt8# 
   (//) = quotInt8#
   (%%) = remInt8#
   (//%%) = quotRemInt8#
@@ -216,7 +225,6 @@ instance ℤ I8 where
 
 instance ℤ I16 where
   negate = negateInt16#
-  (-) = subInt16# 
   (//) = quotInt16#
   (%%) = remInt16#
   (//%%) = quotRemInt16#
@@ -224,7 +232,6 @@ instance ℤ I16 where
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 15##
 instance ℤ I32 where
   negate = negateInt32#
-  (-) = subInt32# 
   (//) = quotInt32#
   (%%) = remInt32#
   (//%%) = quotRemInt32#
@@ -232,7 +239,6 @@ instance ℤ I32 where
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 31##
 instance ℤ I64 where
   negate = negateInt64#
-  (-) = subInt64# 
   (//) = quotInt64#
   (%%) = remInt64#
   (cast -> a) //%% (cast -> b) =
@@ -242,13 +248,13 @@ instance ℤ I64 where
 
 instance ℕ F32 where
   (+) = plusFloat#
+  (-) = minusFloat#
   (×) = timesFloat#
   (/) = divideFloat#
   _ % _ = 0.0#
   x /% y = (# x / y , 0.0# #)
 instance ℤ F32 where
   negate = negateFloat#
-  (-) = minusFloat#
   (//) = divideFloat#
   _ %% _ = 0.0#
   x //%% y = (# x / y , 0.0# #)
@@ -272,13 +278,13 @@ instance ℝ F32 where
   (**) = powerFloat#
 instance ℕ F64 where
   (+) = (+##)
+  (-) = (-##)
   (×) = (*##)
   (/) = (/##)
   _ % _ = 0.0##
   x /% y = (# x / y , 0.0## #)
 instance ℤ F64 where
   negate = negateDouble#
-  (-) = (-##)
   (//) = (/##)
   _ %% _ = 0.0##
   x //%% y = (# x / y , 0.0## #)
@@ -312,10 +318,11 @@ instance 𝕌 U where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) -> go l
               (# _  , _ #) -> (# a, 0## #)
-            go pw = a < pw ? (# a, 0## #)
-                  $ case goSqr pw of
-                     (# q, e #) -> q < pw ? (# q      , 2## × e       #)
-                                          $ (# q % pw , 2## × e + 1## #)
+            go pw = if cast (a < pw) then (# a, 0## #)
+                    else case goSqr pw of
+                     (# q, e #) -> if cast (q < pw)
+                           then (# q      , 2## × e       #)
+                                   else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U8 where
   log2 w = cast 7## `subWord8#` cast (clz w)
   log# = \cases
@@ -326,10 +333,11 @@ instance 𝕌 U8 where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) -> go l
               (# _  , _ #) -> (# a, 0## #)
-            go pw = a < pw ? (# a, 0## #)
-                  $ case goSqr pw of
-                     (# q, e #) -> q < pw ? (# q      , 2## × e       #)
-                                          $ (# q % pw , 2## × e + 1## #)
+            go pw = if cast (a < pw) then (# a, 0## #)
+                    else case goSqr pw of
+                     (# q, e #) -> if cast (q < pw)
+                           then (# q      , 2## × e       #)
+                                   else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U16 where
   log2 w = cast 15## `subWord16#` cast (clz w)
   log# = \cases
@@ -340,10 +348,11 @@ instance 𝕌 U16 where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) -> go l
               (# _  , _ #) -> (# a, 0## #)
-            go pw = a < pw ? (# a, 0## #)
-                  $ case goSqr pw of
-                     (# q, e #) -> q < pw ? (# q      , 2## × e       #)
-                                          $ (# q % pw , 2## × e + 1## #)
+            go pw = if cast (a < pw) then (# a, 0## #)
+                    else case goSqr pw of
+                     (# q, e #) -> if cast (q < pw)
+                                   then (# q      , 2## × e       #)
+                                   else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U32 where
   log2 w = cast 31## `subWord32#` cast (clz w)
   log# = \cases
@@ -354,10 +363,11 @@ instance 𝕌 U32 where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) -> go l
               (# _  , _ #) -> (# a, 0## #)
-            go pw = a < pw ? (# a, 0## #)
-                  $ case goSqr pw of
-                     (# q, e #) -> q < pw ? (# q      , 2## × e       #)
-                                          $ (# q % pw , 2## × e + 1## #)
+            go pw = if cast (a < pw) then (# a, 0## #)
+                    else case goSqr pw of
+                     (# q, e #) -> if cast (q < pw)
+                           then (# q      , 2## × e       #)
+                                   else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U64 where
   log2 w = cast 63## `subWord64#` cast (clz w)
   log# = \cases
@@ -368,7 +378,8 @@ instance 𝕌 U64 where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) -> go l
               (# _  , _ #) -> (# a, 0## #)
-            go pw = a < pw ? (# a, 0## #)
-                  $ case goSqr pw of
-                     (# q, e #) -> q < pw ? (# q      , 2## × e       #)
-                                          $ (# q % pw , 2## × e + 1## #)
+            go pw = if cast (a < pw) then (# a, 0## #)
+                    else case goSqr pw of
+                     (# q, e #) -> if cast (q < pw)
+                           then (# q      , 2## × e       #)
+                                   else (# q % pw , 2## × e + 1## #)

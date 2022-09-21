@@ -1,5 +1,5 @@
 module Array where
-import Do as Prim
+import Do.ST as ST
 
 class Array (a ∷ T_) where
   -- | Uninitialized array.
@@ -48,7 +48,7 @@ instance Array (A_Box x) where
   freeze# = coerce (freezeArray# @_ @x)
   thaw## = coerce (unsafeThawArray# @x)
   thaw# = coerce (thawArray# @x)
-  new# n = let e = raise# "A.Boxed.new#: unintialized index" in Prim.do
+  new# n = let e = raise# "A.Boxed.new#: unintialized index" in ST.do
                      na <- newArray# @x n e; return (MutableArray# na)
   len = coerce (sizeofArray# @x)
   lenM#  = coerce (sizeofMutableArray# @_ @x)
@@ -62,7 +62,7 @@ instance Array (A_Box_Small x) where
   freeze# = coerce (freezeSmallArray# @_ @x)
   thaw## = coerce (unsafeThawSmallArray# @x)
   thaw# = coerce (thawSmallArray# @x)
-  new# n = let e = raise# "A.Boxed.Small.new#: unintialized index" in Prim.do
+  new# n = let e = raise# "A.Boxed.Small.new#: unintialized index" in ST.do
                      na <- newSmallArray# @x n e; return (SmallArray_M# na)
   len = coerce (sizeofSmallArray# @x)
   lenM#  = coerce (sizeofSmallMutableArray# @_ @x)
@@ -75,9 +75,9 @@ instance Array (A_Box_Small x) where
 -- @new#@ unpinned w/ init size in bytes.
 instance Array Bytes where
   freeze## = coerce unsafeFreezeByteArray#
-  freeze# a off n = Prim.do ma <- cloneM# a off n; freeze## ma
+  freeze# a off n = ST.do ma <- cloneM# a off n; freeze## ma
   thaw## a = return (unsafeCoerce# a)
-  thaw# a off n = Prim.do
+  thaw# a off n = ST.do
     ma <- new# n
     coerce copyByteArray# a off ma 0# n
     return ma
@@ -85,19 +85,19 @@ instance Array Bytes where
   len = coerce sizeofByteArray#
   lenM# = coerce sizeofMutableByteArray#
   lenM  = coerce getSizeofMutableByteArray#
-  cloneM# a off n = Prim.do
+  cloneM# a off n = ST.do
     ma <- new# n
     coerce copyMutableByteArray# a off ma 0# n
     return ma
-  clone# a off n = runST (Prim.do ma <- thaw# a off n; freeze## ma)
+  clone# a off n = runST (ST.do ma <- thaw# a off n; freeze## ma)
 
 deriving via Bytes instance Array (A_Unbox x)
 
 instance Array Bytes_Pinned where
   freeze## = coerce unsafeFreezeByteArray#
-  freeze# a off n = Prim.do ma <- cloneM# a off n; freeze## ma
+  freeze# a off n = ST.do ma <- cloneM# a off n; freeze## ma
   thaw## a = return (unsafeCoerce# a)
-  thaw# a off n = Prim.do
+  thaw# a off n = ST.do
     ma <- new# n
     coerce copyByteArray# a off ma 0# n
     return ma
@@ -105,8 +105,8 @@ instance Array Bytes_Pinned where
   len = coerce sizeofByteArray#
   lenM# = coerce sizeofMutableByteArray#
   lenM  = coerce getSizeofMutableByteArray#
-  cloneM# a off n = Prim.do
+  cloneM# a off n = ST.do
     ma <- new# n
     coerce copyMutableByteArray# a off ma 0# n
     return ma
-  clone# a off n = runST (Prim.do ma <- thaw# a off n; freeze## ma)
+  clone# a off n = runST (ST.do ma <- thaw# a off n; freeze## ma)
