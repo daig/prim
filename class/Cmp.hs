@@ -179,39 +179,40 @@ instance (≤) F64 where
   max x y = if cast (x ≥ y) then x else y
 
 -- | _Value_ equality
-instance (≡) Bytes where
+instance (≡) ByteArray# where
   a ≡ b = let n = coerce sizeofByteArray# a in
           case n ==# coerce sizeofByteArray# b of
                  0# -> F#
                  1# -> coerce compareByteArrays# a 0# b 0# n ≡ 0#
   as ≠ bs = (¬) (as ≡ bs)
+-- | _Value_ equality
+deriving via ByteArray# instance (≡) (UnboxedArray# (x ∷ T r))
 -- | _Reference_ equality
-instance (≡) Bytes_Pinned where
-  (≡) = coerce sameByteArray#
-  as ≠ bs = (¬) (as ≡ bs)
--- | _Reference_ equality
-instance (≡) (Bytes_Pinned_M s) where
+instance (≡) (PinnedMutableArray# s x) where
   (≡) = coerce sameMutableByteArray#
+  as ≠ bs = (¬) (as ≡ bs)
+instance (≡) (PinnedArray# x) where
+  (≡) = coerce sameByteArray#
   as ≠ bs = (¬) (as ≡ bs)
   
 -- | _Reference_ equality
-instance (≡) (A_Box_Small x) where
+instance (≡) (SmallArray# x) where
   (≡) = coerce (sameSmallArray# @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (A_Box_Small_M x s) where
+instance (≡) (SmallMutableArray# s x) where
   (≡) = coerce (sameSmallMutableArray# @_ @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (A_Box x) where
+instance (≡) (Array# x) where
   (≡) = coerce (sameArray# @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (A_Box_M x s) where
+instance (≡) (MutableArray# s x) where
   (≡) = coerce (sameMutableArray# @_ @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (P_Box s x) where
+instance (≡) (MutVar# s x) where
   (≡) = coerce (sameMutVar# @s @x)
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
@@ -262,5 +263,7 @@ instance (≤) Addr# where
   cmp a b = Ordering# do gtAddr# a b GHC.-# ltAddr# a b
   min x y = if cast (x ≤ y) then x else y
   max x y = if cast (x ≥ y) then x else y
-deriving via Addr# instance (≡) (P_Unbox x)
-deriving via Addr# instance (≤) (P_Unbox x)
+deriving via Addr# instance (≡) (ForeignArray# x)
+deriving via Addr# instance (≤) (ForeignArray# x)
+deriving via Addr# instance (≡) (ForeignMutableArray# s x)
+deriving via Addr# instance (≤) (ForeignMutableArray# s x)

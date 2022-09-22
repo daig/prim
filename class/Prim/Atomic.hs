@@ -3,19 +3,19 @@ import Cast
 import Coerce
 
 class Logic_Atomic (x ∷ T r) where
-  xor_atomicP, or_atomicP, and_atomicP, nand_atomicP ∷ P_Unbox x → x → ST s x
-  xor_atomicB, or_atomicB, and_atomicB, nand_atomicB ∷ A_Unbox_M x s → I → x → ST s x
+  xor_atomicP, or_atomicP, and_atomicP, nand_atomicP ∷ P_Unbox s x → x → ST s x
+  xor_atomicB, or_atomicB, and_atomicB, nand_atomicB ∷ UnboxedMutableArray# s x → I → x → ST s x
 
 class Num_Atomic (x ∷ T r) where
-  sub_atomicP, add_atomicP ∷ P_Unbox_M x s → x → ST s x
-  sub_atomicB, add_atomicB ∷ A_Unbox_M x s → I → x → ST s x
+  sub_atomicP, add_atomicP ∷ P_Unbox s x → x → ST s x
+  sub_atomicB, add_atomicB ∷ UnboxedMutableArray# s x → I → x → ST s x
 type Atomic ∷ ∀ {r}. T r → Constraint
 class Atomic (x ∷ T r) where
-  read_atomicP ∷ P_Unbox_M x s → ST s x
-  write_atomicP ∷ P_Unbox_M x s → x → ST_ s
-  swap_atomic ∷ P_Unbox_M x s → x → ST s x
-  read_atomicB ∷ A_Unbox_M x s → I →  ST s x
-  write_atomicB ∷ A_Unbox_M x s → I → x → ST_ s
+  read_atomicP ∷ P_Unbox s x → ST s x
+  write_atomicP ∷ P_Unbox s x → x → ST_ s
+  swap_atomic ∷ P_Unbox s x → x → ST s x
+  read_atomicB ∷ UnboxedMutableArray# s x → I →  ST s x
+  write_atomicB ∷ UnboxedMutableArray# s x → I → x → ST_ s
 instance Logic_Atomic U where
   xor_atomicP = coerce fetchXorWordAddr#
   or_atomicP = coerce fetchOrWordAddr#
@@ -71,14 +71,14 @@ type Eq_Atomic ∷ ∀ {r}. T r → Constraint
 class Eq_Atomic x where
   -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided expected old value.
   -- Implies a full memory barrier.
-  casP ∷ P_Unbox x {-^ size-aligned pointer -}
+  casP ∷ P_Unbox s x {-^ size-aligned pointer -}
        → x {- ^ expected old value -}
        → x {- ^ new value -}
        → ST s x {- ^ the original value inside -}
   -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided expected old value.
   -- Implies a full memory barrier.
   -- _Warning_: this can fail with an unchecked exception.
-  casA ∷ A_Unbox_M x s
+  casA ∷ UnboxedMutableArray# s x
        → I {- ^ offset in elements -}
        → x {- ^ expected old value -}
        → x {- ^ new value -}

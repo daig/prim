@@ -13,58 +13,45 @@ class Copy (src ∷ T r) (dst ∷ T r') s where
        → I -- ^ Number of elements to copy
        → ST_ s
 
-instance Copy (A_Box x) (A_Box_M x s) s where
+instance Copy (Array# x) (MutableArray# s x) s where
  copy = coerce (copyArray# @x)
-instance Copy (A_Box_M x s) (A_Box_M x s) s where
+instance Copy (MutableArray# s x) (MutableArray# s x) s where
  copy = coerce (copyMutableArray# @_ @x)
 
-instance Copy Bytes (Bytes_M s) s where
+instance Copy ByteArray# (MutableByteArray# s) s where
  copy = coerce copyByteArray#
-instance Copy (Bytes_M s) (Bytes_M s) s where
+instance Copy (MutableByteArray# s) (MutableByteArray# s) s where
  copy = coerce copyMutableByteArray#
-instance Copy Bytes (P_M# s)  s where
+instance Copy ByteArray# Addr# s where
  copy (coerce → src) i (coerce → dst) j n = copyByteArrayToAddr# src i (plusAddr# dst j) n
-instance Copy (Bytes_M s) (P_M# s) s where
+instance Copy (MutableByteArray# s) Addr# s where
  copy (coerce → src) i (coerce → dst) j n = copyMutableByteArrayToAddr# src i (plusAddr# dst j) n
-instance Copy Addr# (Bytes_M s) s where
- copy src i dst j n = coerce copyAddrToByteArray# (plusAddr# src i) dst j n
-instance Copy (P_M# s) (Bytes_M s) s where
- copy (coerce → src) i (coerce → dst) j n = copyAddrToByteArray# (plusAddr# src i) dst j n
-
-instance Copy (A_Unbox x) (A_Unbox_M x s) s where
- copy = coerce copyByteArray#
-instance Copy (A_Unbox_M x s) (A_Unbox_M x s) s where
- copy = coerce copyMutableByteArray#
-instance Copy (A_Unbox x) (P_Unbox_M x s)  s where
- copy (coerce → src) i (coerce → dst) j n = copyByteArrayToAddr# src i (plusAddr# dst j) n
-instance Copy (A_Unbox_M x s) (P_Unbox_M x s) s where
- copy (coerce → src) i (coerce → dst) j n = copyMutableByteArrayToAddr# src i (plusAddr# dst j) n
-instance Copy (P_Unbox x) (A_Unbox_M x s) s where
- copy (P# src) i dst j n = coerce copyAddrToByteArray# (plusAddr# src i) dst j n
-
-instance Copy Bytes_Pinned (Bytes_Pinned_M s) s where
- copy = coerce copyByteArray#
-instance Copy (Bytes_Pinned_M s) (Bytes_Pinned_M s) s where
- copy = coerce copyMutableByteArray#
-instance Copy Bytes_Pinned (P_M# s) s where
- copy src i (coerce → dst) j n = coerce copyByteArrayToAddr# src i (plusAddr# dst j) n
-instance Copy (Bytes_Pinned_M s) (P_M# s) s where
- copy src i (coerce → dst) j n = coerce copyMutableByteArrayToAddr# src i (plusAddr# dst j) n
-instance Copy Addr# (Bytes_Pinned_M s) s where
+instance Copy Addr# (MutableByteArray# s) s where
  copy src i dst j n = coerce copyAddrToByteArray# (plusAddr# src i) dst j n
 
-instance Copy (A_Unbox_Pinned x) (A_Unbox_Pinned_M x s) s where
+instance Copy (UnboxedArray# x) (UnboxedMutableArray# s x) s where
  copy = coerce copyByteArray#
-instance Copy (A_Unbox_Pinned_M x s) (A_Unbox_Pinned_M x s) s where
+instance Copy (UnboxedMutableArray# s x) (UnboxedMutableArray# s x) s where
  copy = coerce copyMutableByteArray#
-instance Copy (A_Unbox_Pinned x) (P_Unbox_M x s) s where
+instance Copy (UnboxedArray# x) (ForeignMutableArray# s x)  s where
+ copy (coerce → src) i (coerce → dst) j n = copyByteArrayToAddr# src i (plusAddr# dst j) n
+instance Copy (UnboxedMutableArray# s x) (ForeignMutableArray# s x) s where
+ copy (coerce → src) i (coerce → dst) j n = copyMutableByteArrayToAddr# src i (plusAddr# dst j) n
+instance Copy (ForeignArray# x) (UnboxedMutableArray# s x) s where
+ copy (ConstAddr# src) i dst j n = coerce copyAddrToByteArray# (plusAddr# src i) dst j n
+
+instance Copy (PinnedArray# x) (PinnedMutableArray# s x) s where
+ copy = coerce copyByteArray#
+instance Copy (PinnedMutableArray# s x) (PinnedMutableArray# s x) s where
+ copy = coerce copyMutableByteArray#
+instance Copy (PinnedArray# x) (ForeignMutableArray# s x) s where
  copy src i (coerce → dst) j n = coerce copyByteArrayToAddr# src i (plusAddr# dst j) n
-instance Copy (A_Unbox_Pinned_M x s) (P_Unbox x) s where
- copy src i (P# dst) j n = coerce copyMutableByteArrayToAddr# src i (plusAddr# dst j) n
-instance Copy (P_Unbox x) (A_Unbox_Pinned_M x s) s where
- copy (P# src) i dst j n = coerce copyAddrToByteArray# (plusAddr# src i) dst j n
+instance Copy (PinnedMutableArray# s x) (ForeignArray# x) s where
+ copy src i (ConstAddr# dst) j n = coerce copyMutableByteArrayToAddr# src i (plusAddr# dst j) n
+instance Copy (ForeignArray# x) (PinnedMutableArray# s x) s where
+ copy (ConstAddr# src) i dst j n = coerce copyAddrToByteArray# (plusAddr# src i) dst j n
 
 -- | A.Small
-instance Copy (A_Box_Small a) (A_Box_Small_M a s) s where copy = coerce (copySmallArray# @a)
+instance Copy (SmallArray# a) (SmallMutableArray# s a) s where copy = coerce (copySmallArray# @a)
 -- | A.Small
-instance Copy (A_Box_Small_M a s) (A_Box_Small_M a s) s where copy = coerce (copySmallMutableArray# @_ @a)
+instance Copy (SmallMutableArray# s a) (SmallMutableArray# s a) s where copy = coerce (copySmallMutableArray# @_ @a)

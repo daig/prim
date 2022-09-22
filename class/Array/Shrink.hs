@@ -1,8 +1,9 @@
 module Array.Shrink where
 import Array
 
-class Array a ⇒ Shrink (a ∷ T_) where shrink ∷ M a s → I → ST_ s
+type Shrink ∷ ∀ {r}. (T r → T_) → C
+class Array a ⇒ Shrink a where shrink ∷ M a s x → I → ST_ s
 
-instance Shrink (A_Box_Small x) where shrink = coerce (shrinkSmallMutableArray# @_ @x)
-instance Shrink (A_Unbox x) where shrink = coerce shrinkMutableByteArray#
-instance Shrink Bytes_Pinned where shrink = coerce shrinkMutableByteArray#
+instance Shrink SmallArray# where shrink = shrinkSmallMutableArray#
+instance Shrink UnboxedArray# where shrink = coerce shrinkMutableByteArray#
+instance Shrink PinnedArray# where shrink = coerce shrinkMutableByteArray#

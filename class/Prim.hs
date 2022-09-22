@@ -10,24 +10,24 @@ type Prim :: forall {r}. T r -> Constraint
 class Prim (x ∷ T r) where
   size ∷ I {- ^ # elements -} → I {- ^ size in bytes -}
   align ∷ I → I
-  indexB# ∷ Bytes → I {- ^ index in bytes -} → x
-  readB# ∷ Bytes_M s -> I {- ^ index in # Bytes -} → ST s x
-  writeB# ∷ Bytes_M s -> I → x → ST_ s
+  (!#) ∷ A U8 → I {- ^ index in bytes -} → x
+  (!!#) ∷ A' s U8 -> I {- ^ index in # bytes -} → ST s x
+  write# ∷ A' s U8 -> I {- ^ index in # bytes -} → x → ST_ s
 
 #define INST_PRIM(TY,SI,AL,IB,RB,WB) \
 instance (x ≑ TY) ⇒ Prim (x) where {\
   size = (SI# ×); \
   align i = case i % AL# of {0# → i; off → i + (AL# - off)}; \
-  indexB# x = coerce IB# x; \
-  readB# = coerce RB# ; \
-  writeB# = coerce WB# }
+  (!#) x = coerce IB# x; \
+  (!!#) = coerce RB# ; \
+  write# = coerce WB# }
 #define INST_PRIM_SPEC(TY,SI,AL,IB,RB,WB) \
 instance Prim (TY) where {\
   size = (SI# ×); \
   align i = case i % AL# of {0# → i; off → i + (AL# - off)}; \
-  indexB# x = coerce IB# x; \
-  readB# = coerce RB# ; \
-  writeB# = coerce WB# }
+  (!#) x = coerce IB# x; \
+  (!!#) = coerce RB# ; \
+  write# = coerce WB# }
 
 INST_PRIM(I,SIZEOF_HSINT,ALIGNMENT_HSINT,indexWord8ArrayAsInt,readWord8ArrayAsInt,writeWord8ArrayAsInt)
 INST_PRIM(I8,SIZEOF_INT8,ALIGNMENT_INT8,indexInt8Array,readInt8Array,writeInt8Array)

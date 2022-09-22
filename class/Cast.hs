@@ -32,7 +32,7 @@ instance Cast B# U8 where cast = coerce (gtWord8# (cast 0##))
 instance Cast B# U16 where cast = coerce (gtWord16# (cast 0##))
 instance Cast B# U32 where cast = coerce (gtWord32# (cast 0##))
 instance Cast B# U64 where cast = coerce (gtWord64# (cast 0##))
-instance Cast B# P# where cast = coerce neAddr# nullAddr#
+instance Cast B# Addr# where cast = coerce neAddr# nullAddr#
 instance Cast B# Char# where cast = coerce neChar# '\NUL'#
 deriving via Char# instance Cast B# Char8#
 
@@ -94,20 +94,11 @@ instance Cast I (P_Stable_Name a) where cast = stableNameToInt#
 
 -- Freezing and Thawing Arrays
 
--- | Original array should not be used again
-instance Cast (Bytes_M s) Bytes where cast = unsafeCoerce#
--- | Original array should not be used again
-instance Cast Bytes (Bytes_M s) where
-  cast (M_UnpinnedByteArray# m) = UnpinnedByteArray# (runST (unsafeFreezeByteArray# (unsafeCoerce# m)))
-
---
--- | Original array should not be used again
-instance Cast (Bytes_Pinned_M s) Bytes_Pinned where cast = unsafeCoerce#
 -- instance Cast Pinned# (M_Pinned# s) where cast m = run (coerce (unsafeFreezeByteArray# (coerce m)))
 
 -- | Original array should not be used again
--- instance Cast (M_A x s) (A x) where cast (SmallArray# a) = M_SmallArray# (run (unsafeThawSmallArray# a))
--- instance Cast (A x) (M_A x s) where cast (M_SmallArray# m) = SmallArray# (run (unsafeFreezeSmallArray# m))
+-- instance Cast (M_A s x) (A x) where cast (SmallArray# a) = M_SmallArray# (run (unsafeThawSmallArray# a))
+-- instance Cast (A x) (M_A s x) where cast (M_SmallArray# m) = SmallArray# (run (unsafeFreezeSmallArray# m))
 
 -- | Original array should not be used again
 --instance Cast A# (M_A# s) where cast m = run (coerce (unsafeFreezeByteArray# (m ≑)))
@@ -121,37 +112,37 @@ instance Cast (Bytes_Pinned_M s) Bytes_Pinned where cast = unsafeCoerce#
 -- instance Cast (Pinned_ I) (M_Pinned_ I s) where cast (M_Pinned# m) = Pinned# (cast m)
 
 -- | Original array should not be used again
---instance Cast (M_Arr x s) (Arr x) where cast (Array# a) = M_Array# (run (unsafeThawArray# a))
---instance Cast (Arr x) (M_Arr x s) where cast (M_Array# m) = Array# (run (unsafeFreezeArray# m))
+--instance Cast (M_Arr s x) (Arr x) where cast (Array# a) = M_Array# (run (unsafeThawArray# a))
+--instance Cast (Arr x) (M_Arr s x) where cast (M_Array# m) = Array# (run (unsafeFreezeArray# m))
 
 -- copyByteArray# src src_ofs dst dst_ofs n
 
 -- | Extract (copy) the live portion of a 'Buffer'
-instance Cast Bytes Buffer where
+instance Cast ByteArray# Buffer where
   cast (Bytes_Off_Len# (# x, off, n #)) = runST ST.do
     mv <- newByteArray# n
     cast (copyByteArray# x off mv 0# n)
     v <- unsafeFreezeByteArray# mv
-    return (UnpinnedByteArray# v)
+    return v
   
 
--- | Wrap (no copy) 'Bytes' in a full-size 'Buffer'
-instance Cast Buffer Bytes where
-  cast (UnpinnedByteArray# x) = Bytes_Off_Len# (# x, 0#, sizeofByteArray# x #)
+-- | Wrap (no copy) 'ByteArray#' in a full-size 'Buffer'
+instance Cast Buffer ByteArray# where
+  cast x = Bytes_Off_Len# (# x, 0#, sizeofByteArray# x #)
 
-instance Cast P# Bytes_Pinned where cast = coerce byteArrayContents#
-instance Cast (P_M# s) (Bytes_Pinned_M s) where cast = coerce mutableByteArrayContents#
-instance Cast (P_Unbox x) (A_Unbox_Pinned x) where cast = coerce byteArrayContents#
-instance Cast (P_Unbox_M x s) (A_Unbox_Pinned_M x s) where cast = coerce mutableByteArrayContents#
+instance Cast Addr# ByteArray# where cast = byteArrayContents#
+instance Cast Addr# (MutableByteArray# s) where cast = mutableByteArrayContents#
+instance Cast (ForeignArray# x) (PinnedArray# x) where cast = coerce byteArrayContents#
+instance Cast (ForeignMutableArray# s x) (PinnedMutableArray# s x) where cast = coerce mutableByteArrayContents#
 
 instance Cast I Char# where cast = ord#
 instance Cast I Char8# where cast = coerce ord#
 instance Cast Char# I where cast = chr#
 
 -- | This pattern is strongly deprecated
-instance Cast P# I where cast = int2Addr#
+instance Cast Addr# I where cast = int2Addr#
 -- | This pattern is strongly deprecated
-instance Cast I P# where cast = addr2Int#
+instance Cast I Addr# where cast = addr2Int#
 
 -- | Atomically run a transaction
 instance Cast (IO a) (STM a) where cast = unsafeCoerce# (atomically# @a)
@@ -189,7 +180,7 @@ INST_CAST_SUM(U32)
 INST_CAST_SUM(U64)
 INST_CAST_SUM(F32)
 INST_CAST_SUM(F64)
-INST_CAST_SUM(P#)
+INST_CAST_SUM(Addr#)
 INST_CAST_SUM(())
 INST_CAST_SUM((##))
 
@@ -217,7 +208,7 @@ INST_CAST_UNMAYBE(U32)
 INST_CAST_UNMAYBE(U64)
 INST_CAST_UNMAYBE(F32)
 INST_CAST_UNMAYBE(F64)
-INST_CAST_UNMAYBE(P#)
+INST_CAST_UNMAYBE(Addr#)
 INST_CAST_UNMAYBE(())
 
 
@@ -235,10 +226,10 @@ INST_CAST_BOOL_EITHER2(A,U32) ;\
 INST_CAST_BOOL_EITHER2(A,U64) ;\
 INST_CAST_BOOL_EITHER2(A,F32) ;\
 INST_CAST_BOOL_EITHER2(A,F64) ;\
-INST_CAST_BOOL_EITHER2(A,P#) ;\
+INST_CAST_BOOL_EITHER2(A,Addr#) ;\
 INST_CAST_BOOL_EITHER2(A,()) ;\
 INST_CAST_BOOL_EITHER2(A,(##)) ;\
-INST_CAST_BOOL_EITHER2(A,Bytes)
+INST_CAST_BOOL_EITHER2(A,ByteArray#)
 
 INST_CAST_BOOL_EITHER1(I)
 INST_CAST_BOOL_EITHER1(I8)
@@ -252,10 +243,10 @@ INST_CAST_BOOL_EITHER1(U32)
 INST_CAST_BOOL_EITHER1(U64)
 INST_CAST_BOOL_EITHER1(F32)
 INST_CAST_BOOL_EITHER1(F64)
-INST_CAST_BOOL_EITHER1(P#)
+INST_CAST_BOOL_EITHER1(Addr#)
 INST_CAST_BOOL_EITHER1(())
 INST_CAST_BOOL_EITHER1((##))
-INST_CAST_BOOL_EITHER1(Bytes)
+INST_CAST_BOOL_EITHER1(ByteArray#)
 
 
 instance Cast Int I where cast = I#

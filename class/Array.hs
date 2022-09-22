@@ -2,79 +2,79 @@ module Array where
 import Do.ST as ST
 import Cast
 
-class Array (a ∷ T_) where
+type Array ∷ ∀ {rx}. (T rx → T_) → C
+class Array a where
   -- | Uninitialized array.
-  new# ∷ I {-^ size in elements -} → ST s (M a s)
+  new# ∷ I {-^ size in elements -} → ST s (M a s x)
   -- | Make a mutable array immutable, without copying.
-  freeze## ∷ M a s → ST s a
+  freeze## ∷ M a s x → ST s (a x)
   -- | Make an immutable array mutable, without copying.
-  thaw## ∷ a → ST s (M a s)
+  thaw## ∷ a x → ST s (M a s x)
   -- | Copy an immutable array into a new mutable one.
-  thaw# ∷  a
+  thaw# ∷  a x
           → I -- ^ Source offset
           → I -- ^ number of elements to copy
-          → ST s (M a s)
+          → ST s (M a s x)
   -- | Create a new immutable array from a mutable by copying
-  freeze# ∷ M a s
+  freeze# ∷ M a s x
           → I -- ^ Source offset
           → I -- ^ number of elements to copy
-          → ST s a
+          → ST s (a x)
   -- | Number of elements
-  len ∷ a → I
+  len ∷ a x → I
   -- | Like 'len' for mutable arrays. Only safe in the absence of resizes
-  lenM# ∷ M a s → I
+  lenM# ∷ M a s x → I
   -- | Like 'len' for mutable arrays.
-  lenM ∷ M a s → ST s I
+  lenM ∷ M a s x → ST s I
   -- | Create a new array with the elements from the source array.
   -- The provided array must fully contain the specified range, but this is not checked.
   --
   -- Warning: this can fail with an unchecked exception.
-  clone# ∷ a
+  clone# ∷ a x
          → I -- ^ Source offset
          → I -- ^ number of elements to copy
-         → a
+         → a x
   -- | Create a new array with the elements from the source array.
   -- The provided array must fully contain the specified range, but this is not checked.
   --
   -- Warning: this can fail with an unchecked exception.
-  cloneM# ∷ M a s
+  cloneM# ∷ M a s x
           → I -- ^ Source offset
           → I -- ^ number of elements to copy
-          → ST s (M a s)
+          → ST s (M a s x)
 
 
 -- | "A.Boxed.Big" - @new#@ initializes undefined. @lenM#@ is safe.
-instance Array (A_Box x) where
-  freeze## = coerce (unsafeFreezeArray# @_ @x)
-  freeze# = coerce (freezeArray# @_ @x)
-  thaw## = coerce (unsafeThawArray# @x)
-  thaw# = coerce (thawArray# @x)
+instance Array Array# where
+  freeze## = unsafeFreezeArray#
+  freeze# = freezeArray#
+  thaw## = unsafeThawArray#
+  thaw# = thawArray#
   new# n = let e = raise# "A.Boxed.new#: unintialized index" in ST.do
-                     na <- newArray# @x n e; return (MutableArray# na)
-  len = coerce (sizeofArray# @x)
-  lenM#  = coerce (sizeofMutableArray# @_ @x)
+                     na <- newArray# n e; return na
+  len = sizeofArray#
+  lenM#  = sizeofMutableArray#
   lenM ma = return (lenM# ma)
-  clone# = coerce (cloneArray# @x)
-  cloneM# = coerce (cloneMutableArray# @_ @x)
+  clone# = cloneArray#
+  cloneM# = cloneMutableArray#
 
 -- | "A.Boxed.Small" - @new#@ initializes undefined. @lenM#@ is safe.
-instance Array (A_Box_Small x) where
-  freeze## = coerce (unsafeFreezeSmallArray# @_ @x)
-  freeze# = coerce (freezeSmallArray# @_ @x)
-  thaw## = coerce (unsafeThawSmallArray# @x)
-  thaw# = coerce (thawSmallArray# @x)
-  new# n = let e = raise# "A.Boxed.Small.new#: unintialized index" in ST.do
-                     na <- newSmallArray# @x n e; return (SmallArray_M# na)
-  len = coerce (sizeofSmallArray# @x)
-  lenM#  = coerce (sizeofSmallMutableArray# @_ @x)
+instance Array SmallArray# where
+  freeze## = unsafeFreezeSmallArray#
+  freeze# = freezeSmallArray#
+  thaw## = unsafeThawSmallArray#
+  thaw# = thawSmallArray#
+  new# n = let ~e = raise# "A.Boxed.Small.new#: unintialized index" in newSmallArray# n e
+  len = sizeofSmallArray#
+  lenM#  = sizeofSmallMutableArray#
   lenM ma = return (lenM# ma)
-  clone# = coerce (cloneSmallArray# @x)
-  cloneM# = coerce (cloneSmallMutableArray# @_ @x)
+  clone# = cloneSmallArray#
+  cloneM# = cloneSmallMutableArray#
 
 -- | "A.Prim" -
 -- 'thaw##' is just a cast.
 -- @new#@ unpinned w/ init size in bytes.
-instance Array Bytes where
+instance Array UnboxedArray# where
   freeze## = coerce unsafeFreezeByteArray#
   freeze# a off n = ST.do ma <- cloneM# a off n; freeze## ma
   thaw## a = return (unsafeCoerce# a)
@@ -92,9 +92,9 @@ instance Array Bytes where
     return ma
   clone# a off n = runST (ST.do ma <- thaw# a off n; freeze## ma)
 
-deriving via Bytes instance Array (A_Unbox x)
+-- deriving via Bytes instance Array (UnboxedArray# x)
 
-instance Array Bytes_Pinned where
+instance Array PinnedArray# where
   freeze## = coerce unsafeFreezeByteArray#
   freeze# a off n = ST.do ma <- cloneM# a off n; freeze## ma
   thaw## a = return (unsafeCoerce# a)

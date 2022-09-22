@@ -138,130 +138,96 @@ type STM_ = ST_ Transaction
 type Small :: ∀ {l :: Levity} {k}.
               (T# l -> k) -> T# l -> k
 type family Small a = sa | sa -> a where
-  Small A_Box = A_Box_Small
-  Small A_Box_M = A_Box_Small_M
+  Small Array# = SmallArray#
+  Small MutableArray# = SmallMutableArray#
 
-type A_Box_Small :: ∀ {l :: Levity}. T# l -> T_
-newtype A_Box_Small x = SmallArray# (SmallArray# x)
-
-type A_Box_Small_M :: ∀ {l :: Levity}. T# l -> * -> T_
-newtype A_Box_Small_M x s = SmallArray_M# (SmallMutableArray# s x)
-
-type A_Box :: ∀ {l :: Levity}. T# l -> T_
-newtype A_Box x = Array# (Array# x)
-
-
-type A_Box_M :: ∀ {l :: Levity}. T# l -> * -> T_
-newtype A_Box_M x s = MutableArray# (MutableArray# s x)
-
--- | (Possibly heterogeneous) contiguous bytes.
-newtype Bytes = UnpinnedByteArray# ByteArray#
 
 -- | An unboxed vector with offset and length.
 newtype Buffer = Bytes_Off_Len# (# ByteArray# , I , I #)
 newtype Buffer_Pinned = PinnedBytes_Off_Len# (# ByteArray# , I , I #)
 
--- | Mutable (possibly heterogeneous) contiguous bytes
-type Bytes_M :: * -> T_
-newtype Bytes_M s = M_UnpinnedByteArray# (MutableByteArray# s)
+-- Pinned to an address and gaurenteed not to be moved by GC.
+type UnboxedArray# :: ∀ {r}. T r -> T_
+newtype UnboxedArray# x = ByteArray# ByteArray#
+
+type UnboxedMutableArray# :: ∀ {r}. ★ → T r → T_
+newtype UnboxedMutableArray# s x = MutableByteArray# (MutableByteArray# s)
 
 -- | (Possibly heterogeneous) contiguous bytes.
 -- Pinned to an address and gaurenteed not to be moved by GC.
-type Bytes_Pinned :: T_
-newtype Bytes_Pinned = PinnedByteArray# ByteArray#
+type PinnedArray# :: ∀ {r}. T r → T_
+newtype PinnedArray# x = PinnedByteArray# ByteArray#
 
--- | Mutable (possibly heterogeneous) contiguous bytes.
--- Pinned to an address and gaurenteed not to be moved by GC.
-type Bytes_Pinned_M :: * -> T_
-newtype Bytes_Pinned_M s = M_PinnedByteArray# (MutableByteArray# s)
-
-type A_Unbox :: ∀ {r}. T r -> T_
-newtype A_Unbox x = Bytes Bytes
-
-type A_Unbox_M :: ∀ {r}. T r -> * -> T_
-newtype A_Unbox_M x s = Bytes_M (Bytes_M s)
-
-type A_Unbox_Pinned :: ∀ {r}. T r -> T_
-newtype A_Unbox_Pinned x = Bytes_Pinned Bytes_Pinned
-
-type A_Unbox_Pinned_M :: ∀ {r}. T r -> * -> T_
-newtype A_Unbox_Pinned_M x s = Bytes_Pinned_M (Bytes_Pinned_M s)
+type PinnedMutableArray# :: ∀ {r}. ★ → T r → T_
+newtype PinnedMutableArray# s x = PinnedMutableByteArray# (MutableByteArray# s)
 
 type A :: ∀ {r}. T r -> T_
 -- | Primitive array type.
 -- The concrete representation can be determined by the kind of its contents
-type family A x = a where
-  A (x :: T# _) = A_Box x
-  A (x :: K I) = A_Unbox x
-  A (x :: K I8) = A_Unbox x
-  A (x :: K I16) = A_Unbox x
-  A (x :: K I32) = A_Unbox x
-  A (x :: K I64) = A_Unbox x
-  A (x :: K U) = A_Unbox x
-  A (x :: K U8) = A_Unbox x
-  A (x :: K U16) = A_Unbox x
-  A (x :: K U32) = A_Unbox x
-  A (x :: K U64) = A_Unbox x
-  A (x :: K F32) = A_Unbox x
-  A (x :: K F64) = A_Unbox x
-  A (x :: K Addr#) = A_Unbox x
+type family A (x ∷ T r) = a | a → r where
+  A (x :: T# _) = Array# x
+  A (x :: K I) = UnboxedArray# x
+  A (x :: K I8) = UnboxedArray# x
+  A (x :: K I16) = UnboxedArray# x
+  A (x :: K I32) = UnboxedArray# x
+  A (x :: K I64) = UnboxedArray# x
+  A (x :: K U) = UnboxedArray# x
+  A (x :: K U8) = UnboxedArray# x
+  A (x :: K U16) = UnboxedArray# x
+  A (x :: K U32) = UnboxedArray# x
+  A (x :: K U64) = UnboxedArray# x
+  A (x :: K F32) = UnboxedArray# x
+  A (x :: K F64) = UnboxedArray# x
+  A (x :: K Addr#) = UnboxedArray# x
 
-type P ∷ ∀ {ra} {r}. T ra → T r
-type family P x where
-  P (x ∷ K I) = P_Unbox x
-  P (x ∷ K I8) = P_Unbox x
-  P (x ∷ K I16) = P_Unbox x
-  P (x ∷ K I32) = P_Unbox x
-  P (x ∷ K I64) = P_Unbox x
-  P (x ∷ K U) = P_Unbox x
-  P (x ∷ K U8) = P_Unbox x
-  P (x ∷ K U16) = P_Unbox x
-  P (x ∷ K U32) = P_Unbox x
-  P (x ∷ K U64) = P_Unbox x
-  P (x ∷ K F32) = P_Unbox x
-  P (x ∷ K F64) = P_Unbox x
---  P (x ∷ K ()) = P_Box x
+type A' :: ∀ {r}. ★ → T r -> T_
+-- | Primitive array type.
+-- The concrete representation can be determined by the kind of its contents
+type family A' s x where
+  A' s (x :: T# _) = MutableArray# s x
+  A' s (x :: K I) = UnboxedMutableArray# s x
+  A' s (x :: K I8) = UnboxedMutableArray# s x
+  A' s (x :: K I16) = UnboxedMutableArray# s x
+  A' s (x :: K I32) = UnboxedMutableArray# s x
+  A' s (x :: K I64) = UnboxedMutableArray# s x
+  A' s (x :: K U) = UnboxedMutableArray# s x
+  A' s (x :: K U8) = UnboxedMutableArray# s x
+  A' s (x :: K U16) = UnboxedMutableArray# s x
+  A' s (x :: K U32) = UnboxedMutableArray# s x
+  A' s (x :: K U64) = UnboxedMutableArray# s x
+  A' s (x :: K F32) = UnboxedMutableArray# s x
+  A' s (x :: K F64) = UnboxedMutableArray# s x
+  A' s (x :: K Addr#) = UnboxedMutableArray# s x
 
 -- newtype P_Unlifted = 
 
-type M :: ∀ {r}. T r -> * -> T r
+type M :: ∀ {ra} {r}. (T ra → T r) → ★ → T ra → T r
 type family M a = ma | ma → a where
-  M Bytes = Bytes_M
-  M (A_Unbox x) = A_Unbox_M x
-  M Bytes_Pinned = Bytes_Pinned_M
-  M (A_Unbox_Pinned x) = (A_Unbox_Pinned_M x)
-  M (A_Box_Small x) = A_Box_Small_M x
-  M (A_Box x) = A_Box_M x
-  M ByteArray# = MutableByteArray#
-  M Addr# = P_M#
-  M (P_Unbox x) = P_Unbox_M x
-
-type MM ∷ ∀ {ra} {r}. (T ra → T r) → ★ → T ra → T r
-type family MM a where
-  MM A_Unbox = AA_Unbox_M
-
-type AA_Unbox_M :: ∀ {r}. ★ → T r -> T_
-newtype AA_Unbox_M s x = Bytes_MM (Bytes_M s)
+  M UnboxedArray# = UnboxedMutableArray#
+  M PinnedArray# = PinnedMutableArray#
+  M SmallArray# = SmallMutableArray#
+  M Array# = MutableArray#
+  M ForeignArray# = ForeignMutableArray#
 
 -- | A C-style null-terminated string of Latin-1 @Char8#@ or UTF-8 @Char#@
-type S# ∷ Encoding → K P#
-newtype S# a = S# P#
+type S# ∷ Encoding → K Addr#
+newtype S# a = S# Addr#
 
 data Encoding = Latin1 | UTF8
 
--- | 
-type P# = Addr#
-
--- | An arbitrary machine address assumed to point outside the garbage-collected heap
-newtype P_M# s = Addr_M# Addr#
-
 -- | An machine address to valid data, assumed to point outside the garbage-collected heap
-type P_Unbox :: ∀ {r}. T r -> T AddrRep
-newtype P_Unbox x = P# P#
-type P_Unbox_M :: ∀ {r}. T r -> ★ → T AddrRep
-newtype P_Unbox_M x s = P_M# (P_M# s)
+type ForeignArray# :: ∀ {r}. T r -> K Addr#
+newtype ForeignArray# x = ConstAddr# Addr#
+type ForeignMutableArray# :: ∀ {r}. ★ → T r → K Addr#
+newtype ForeignMutableArray# s x = Addr# Addr#
 
-type P_Box = MutVar#
+newtype P_Unbox s x = P# Addr#
+type Const ∷ ∀ {ra} {r}. (★ → T ra → T r) → T ra → T r
+newtype Const p x = Const# (p X x)
+
+-- | The empty "void" type
+data X
+
 newtype P_Async x = TVar# (TVar# Transaction x)
 -- | A synchronising variable, used for communication between concurrent threads.
 -- It can be thought of as a box, which may be empty or full.
