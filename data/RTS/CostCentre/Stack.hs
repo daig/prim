@@ -35,7 +35,7 @@ clear = clearCCS#
 
 {-
 -- | Format a 'CCS' as a list of lines.
-toStrings :: Stack -> [[Char]]
+toStrings ∷ Stack → [[Char]]
 toStrings ccs0 = go ccs0 []
   where
     go ∷ Stack → [[Char]] → [[Char]]

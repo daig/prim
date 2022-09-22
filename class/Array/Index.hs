@@ -57,14 +57,14 @@ class x ∈ a where
 instance x ∈ Array# where
   write = writeArray#
   (!!) = readArray#
-  (!) a i = case indexArray# a i of (# a #) -> a
+  (!) a i = case indexArray# a i of (# a #) → a
   set# a off n x = go 0# where
     go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
                            1# → \s→s
 instance (x ∷ T_) ∈ Array# where
   write = writeArray#
   (!!) = readArray#
-  (!) a i = case indexArray# a i of (# a #) -> a
+  (!) a i = case indexArray# a i of (# a #) → a
   set# a off n x = go 0# where
     go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
                            1# → \s→s
@@ -77,14 +77,14 @@ instance (x ∷ T_) ∈ Array# where
 instance x ∈ SmallArray# where
   write = writeSmallArray#
   (!!) = readSmallArray# 
-  (!) a i = case indexSmallArray# a i of (# a #) -> a
+  (!) a i = case indexSmallArray# a i of (# a #) → a
   set# a off n x = go 0# where
     go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
                            1# → \s→s
 instance (x ∷ T_) ∈ SmallArray# where
   write = writeSmallArray# 
   (!!) = readSmallArray# 
-  (!) a i = case indexSmallArray# a i of (# a #) -> a
+  (!) a i = case indexSmallArray# a i of (# a #) → a
   set# a off n x = go 0# where
     go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
                            1# → \s→s
@@ -152,6 +152,6 @@ INST_UNBOX(Addr#)
 -- | Bit indexing (no @read#@ or @write@)
 --instance B ∈ U where index# u i = B# (geWord# (and# u (uncheckedShiftL# 1## (word2Int# u))) 1## )
 
-unio :: GHC.IO () -> ST_ s
-unio (GHC.IO io) s = case unsafeCoerce# io s of (# s' , _ #) -> s'
+unio ∷ GHC.IO () → ST_ s
+unio (GHC.IO io) s = case unsafeCoerce# io s of (# s' , _ #) → s'
 {-# INLINE unio #-}

@@ -20,8 +20,8 @@ module Coerce
  --
  -- @
  --    case sameTypeRep t1 t2 of
- --       False -> blah2
- --       True  -> ...(case (x |> UnsafeCo @t1 @t2) of { K -> blah })...
+ --       False → blah2
+ --       True  → ...(case (x |> UnsafeCo @t1 @t2) of { K → blah })...
  -- @
  -- 
  -- The programmer thinks that the unsafeCoerce from 't1' to 't2' is safe,
@@ -33,9 +33,9 @@ module Coerce
  --
  -- @
  --    case (x |> UnsafeCo @t1 @t2) of
- --      K -> case sameTypeRep t1 t2 of
- --              False -> blah2
- --              True  -> ...blah...
+ --      K → case sameTypeRep t1 t2 of
+ --              False → blah2
+ --              True  → ...blah...
  -- @
  -- 
  -- and this is utterly wrong, because the unsafeCoerce is being performed
@@ -46,23 +46,23 @@ module Coerce
  --   * In the library Unsafe.Coerce we define:
  --
  -- @ 
- --      unsafeEqualityProof :: forall k (a :: k) (b :: k).
+ --      unsafeEqualityProof ∷ forall k (a ∷ k) (b ∷ k).
  --                             UnsafeEquality a b
  -- @ 
  --
  --   * It uses a GADT, Unsafe.Coerce.UnsafeEquality, that is exactly like :~:
  --
  -- @ 
- --     data UnsafeEquality (a :: k) (b :: k) where
- --       UnsafeRefl :: UnsafeEquality a a
+ --     data UnsafeEquality (a ∷ k) (b ∷ k) where
+ --       UnsafeRefl ∷ UnsafeEquality a a
  -- @ 
  --
  --   * We can now define Unsafe.Coerce.unsafeCoerce very simply:
  --
  -- @ 
- --    unsafeCoerce :: forall (a :: Type) (b :: Type) . a -> b
+ --    unsafeCoerce ∷ forall (a ∷ Type) (b ∷ Type) . a → b
  --    unsafeCoerce x = case unsafeEqualityProof @a @b of
- --                       UnsafeRefl -> x
+ --                       UnsafeRefl → x
  -- @ 
  --
  --   There is nothing special about unsafeCoerce; it is an
@@ -72,7 +72,7 @@ module Coerce
  --
  -- @
  --      case unsafeEqualityProof @t1 @t2 of
- --         UnsafeRefl (co :: t1 ~ t2) -> ....(x |> co)....
+ --         UnsafeRefl (co ∷ t1 ~ t2) → ....(x |> co)....
  -- @ 
  --
  -- and the (x |> co) mentions the evidence 'co', which prevents it
@@ -92,7 +92,7 @@ module Coerce
  -- (U1) unsafeEqualityProof is /never/ inlined.
  -- 
  -- (U2) In CoreToStg.Prep, we transform
- --        case unsafeEqualityProof of UnsafeRefl g -> blah
+ --        case unsafeEqualityProof of UnsafeRefl g → blah
  --       ==>
  --        blah[unsafe-co/g]
  -- 
@@ -103,8 +103,8 @@ module Coerce
  --      For example you could write
  --
  --      @
- --          f :: UnsafeEquality a b -> blah
- --          f eq_proof = case eq_proof of UnsafeRefl -> ...
+ --          f ∷ UnsafeEquality a b → blah
+ --          f eq_proof = case eq_proof of UnsafeRefl → ...
  --      @
  --
  --     (Nothing special about that.)  In a call, you might write
@@ -120,7 +120,7 @@ module Coerce
  --     NB: Don't discard the case if the case-binder is used
  --
  --     @
- --            case unsafeEqualityProof of wild_xx { UnsafeRefl ->
+ --            case unsafeEqualityProof of wild_xx { UnsafeRefl →
  --            ...wild_xx...
  --     @
  --
@@ -130,7 +130,7 @@ module Coerce
  --
  --  @
  --        let x = case unsafeEqualityProof ... of
- --                  UnsafeRefl -> K e
+ --                  UnsafeRefl → K e
  --        in ...
  --  @
  -- 
@@ -138,7 +138,7 @@ module Coerce
  --
  --      @
  --         let x = case unsafeEqualityProof ... of
- --                   UnsafeRefl -> let a = e in K a
+ --                   UnsafeRefl → let a = e in K a
  --         in ...
  --       @
  -- 
@@ -146,7 +146,7 @@ module Coerce
  --      So instead we float out the case to give
  --
  --      @
- --         case unsafeEqualityProof ... of { UnsafeRefl ->
+ --         case unsafeEqualityProof ... of { UnsafeRefl →
  --         let a = e
  --             x = K a
  --         in ...  }
@@ -164,7 +164,7 @@ module Coerce
  --
  --      @
  --         unsafeEqualityProof = case unsafeEqualityProof @a @b of
- --                                  UnsafeRefl -> UnsafeRefl
+ --                                  UnsafeRefl → UnsafeRefl
  --      @
  -- 
  --      It looks recursive!  But the above-mentioned CoreToStg
@@ -191,12 +191,12 @@ module Coerce
  --
  --      @
  --         case unsafeEqualityProof @Int @Bool of
- --            UnsafeRefl (g :: Int ~# Bool) -> ...g...
+ --            UnsafeRefl (g ∷ Int ~# Bool) → ...g...
  --      @
  -- 
  --      The simplifier normally eliminates case alternatives with
  --      contradicatory GADT data constructors; here we bring into
- --      scope evidence (g :: Int~Bool).  But we do not want to
+ --      scope evidence (g ∷ Int~Bool).  But we do not want to
  --      eliminate this particular alternative!  So we put a special
  --      case into DataCon.dataConCannotMatch to account for this.
  -- 
@@ -231,12 +231,12 @@ module Coerce
  --      But what about other types?  In Unsafe.Coerce we also define
  -- 
  --       @
- --       unsafeCoerceUnlifted :: forall (a :: T UnliftedRep)
- --                                      (b :: T UnliftedRep).
- --                               a -> b
+ --       unsafeCoerceUnlifted ∷ forall (a ∷ T UnliftedRep)
+ --                                      (b ∷ T UnliftedRep).
+ --                               a → b
  --       unsafeCoerceUnlifted x
  --         = case unsafeEqualityProof @a @b of
- --               UnsafeRefl -> x
+ --               UnsafeRefl → x
  --       @
  -- 
  --      and similarly for @unsafeCoerceAddr@, @unsafeCoerceInt@, etc.
@@ -244,9 +244,9 @@ module Coerce
  -- (U10) We also want a representation-polymorphic unsafeCoerce#:
  -- 
  --        @
- --        unsafeCoerce# :: forall (r1 :: Rep) (r2 :: Rep)
- --                         (a :: T r1) (b :: T r2).
- --                         a -> b
+ --        unsafeCoerce# ∷ forall (r1 ∷ Rep) (r2 ∷ Rep)
+ --                         (a ∷ T r1) (b ∷ T r2).
+ --                         a → b
  --        @
  -- 
  --       This is even more dangerous, because it converts between two types
@@ -258,8 +258,8 @@ module Coerce
  --       in Desugar.  Here's the code for it
  --
  --       @
- --         unsafeCoerce# x = case unsafeEqualityProof @r1 @r2 of UnsafeRefl ->
- --                           case unsafeEqualityProof @a  @b  of UnsafeRefl ->
+ --         unsafeCoerce# x = case unsafeEqualityProof @r1 @r2 of UnsafeRefl →
+ --                           case unsafeEqualityProof @a  @b  of UnsafeRefl →
  --                           x
  --       @
  --
@@ -275,26 +275,26 @@ module Coerce
  -- We want (Haskell)
  --
  -- @
- --   unsafeCoerce# :: forall (r1 :: RuntimeRep) (r2 :: RuntimeRep)
- --                           (a :: TYPE r1) (b :: TYPE r2).
- --                    a -> b
+ --   unsafeCoerce# ∷ forall (r1 ∷ RuntimeRep) (r2 ∷ RuntimeRep)
+ --                           (a ∷ TYPE r1) (b ∷ TYPE r2).
+ --                    a → b
  --   unsafeCoerce# x = case unsafeEqualityProof @r1 @r2 of
- --     UnsafeRefl -> case unsafeEqualityProof @a @b of
- --       UnsafeRefl -> x
+ --     UnsafeRefl → case unsafeEqualityProof @a @b of
+ --       UnsafeRefl → x
  -- @
  -- 
  -- or (Core)
  -- 
  -- @
- --   unsafeCoerce# :: forall (r1 :: RuntimeRep) (r2 :: RuntimeRep)
- --                           (a :: TYPE r1) (b :: TYPE r2).
- --                    a -> b
- --   unsafeCoerce# = \ @r1 @r2 @a @b (x :: a).
+ --   unsafeCoerce# ∷ forall (r1 ∷ RuntimeRep) (r2 ∷ RuntimeRep)
+ --                           (a ∷ TYPE r1) (b ∷ TYPE r2).
+ --                    a → b
+ --   unsafeCoerce# = \ @r1 @r2 @a @b (x ∷ a).
  --     case unsafeEqualityProof @RuntimeRep @r1 @r2 of
- --       UnsafeRefl (co1 :: r1 ~# r2) ->
+ --       UnsafeRefl (co1 ∷ r1 ~# r2) →
  --         case unsafeEqualityProof @(TYPE r2) @(a |> TYPE co1) @b of
- --           UnsafeRefl (co2 :: (a |> TYPE co1) ~# b) ->
- --             (x |> (GRefl :: a ~# (a |> TYPE co1)) ; co2)
+ --           UnsafeRefl (co2 ∷ (a |> TYPE co1) ~# b) →
+ --             (x |> (GRefl ∷ a ~# (a |> TYPE co1)) ; co2)
  -- @
  -- 
  -- It looks like we can write this in Haskell directly, but we can't:
@@ -403,18 +403,18 @@ instance Coerce (BoxedRep Lifted) where cast### = GHC.unsafeCoerce
 {-
 
 -- | This type is treated magically within GHC. Any pattern match of the
--- form @case unsafeEqualityProof of UnsafeRefl -> body@ gets transformed just into @body@.
+-- form @case unsafeEqualityProof of UnsafeRefl → body@ gets transformed just into @body@.
 -- This is ill-typed, but the transformation takes place after type-checking is
 -- complete. It is used to implement 'unsafeCoerce'. You probably don't want to
 -- use 'UnsafeRefl' in an expression, but you might conceivably want to pattern-match
 -- on it. Use 'unsafeEqualityProof' to create one of these.
 data UnsafeEquality a b where
-  UnsafeRefl :: UnsafeEquality a a
+  UnsafeRefl ∷ UnsafeEquality a a
 
 {-# NOINLINE unsafeEqualityProof #-}
-unsafeEqualityProof :: forall a b . UnsafeEquality a b
+unsafeEqualityProof ∷ forall a b . UnsafeEquality a b
 -- See (U5) of Note [Implementing unsafeCoerce]
-unsafeEqualityProof = case unsafeEqualityProof @a @b of UnsafeRefl -> UnsafeRefl
+unsafeEqualityProof = case unsafeEqualityProof @a @b of UnsafeRefl → UnsafeRefl
 
 {-# INLINE [1] unsafeCoerce #-}
 -- The INLINE will almost certainly happen automatically, but it's almost
@@ -424,7 +424,7 @@ unsafeEqualityProof = case unsafeEqualityProof @a @b of UnsafeRefl -> UnsafeRefl
 --
 -- will turn into
 --
---   case unsafeEqualityProof of UnsafeRefl -> case blah of ...
+--   case unsafeEqualityProof of UnsafeRefl → case blah of ...
 --
 -- which is definitely better.
 --
@@ -445,8 +445,8 @@ unsafeEqualityProof = case unsafeEqualityProof @a @b of UnsafeRefl -> UnsafeRefl
 --   3. In @Data.Typeable@ we have
 --
 --      @
---        eqTypeRep :: forall k1 k2 (a :: k1) (b :: k2).
---                     TypeRep a -> TypeRep b -> Maybe (a :~~: b)
+--        eqTypeRep ∷ forall k1 k2 (a ∷ k1) (b ∷ k2).
+--                     TypeRep a → TypeRep b → Maybe (a :~~: b)
 --        eqTypeRep a b
 --          | sameTypeRep a b = Just (unsafeCoerce HRefl)
 --          | otherwise       = Nothing
@@ -457,7 +457,7 @@ unsafeEqualityProof = case unsafeEqualityProof @a @b of UnsafeRefl -> UnsafeRefl
 --      implementation of @Typeable@.
 --
 --   4. The "reflection trick", which takes advantage of the fact that in
---      @class C a where { op :: ty }@, we can safely coerce between @C a@ and @ty@
+--      @class C a where { op ∷ ty }@, we can safely coerce between @C a@ and @ty@
 --      (which have different kinds!) because it's really just a newtype.
 --      Note: there is /no guarantee, at all/ that this behavior will be supported
 --      into perpetuity.
@@ -465,16 +465,16 @@ unsafeEqualityProof = case unsafeEqualityProof @a @b of UnsafeRefl -> UnsafeRefl
 --
 --   For safe zero-cost coercions you can instead use the 'Data.Coerce.coerce' function from
 --   "Data.Coerce".
-unsafeCoerce :: forall a b. a -> b
-unsafeCoerce x = case unsafeEqualityProof @a @b of UnsafeRefl -> x
+unsafeCoerce ∷ forall a b. a → b
+unsafeCoerce x = case unsafeEqualityProof @a @b of UnsafeRefl → x
 
-unsafeCoerceUnlifted :: forall (a :: T_) (b :: T_) . a -> b
+unsafeCoerceUnlifted ∷ forall (a ∷ T_) (b ∷ T_) . a → b
 -- Kind-homogeneous, but representation-monomorphic (T UnliftedRep)
-unsafeCoerceUnlifted x = case unsafeEqualityProof @a @b of UnsafeRefl -> x
+unsafeCoerceUnlifted x = case unsafeEqualityProof @a @b of UnsafeRefl → x
 
-unsafeCoerceAddr :: forall (a :: T AddrRep) (b :: T AddrRep) . a -> b
+unsafeCoerceAddr ∷ forall (a ∷ T AddrRep) (b ∷ T AddrRep) . a → b
 -- Kind-homogeneous, but representation-monomorphic (T AddrRep)
-unsafeCoerceAddr x = case unsafeEqualityProof @a @b of UnsafeRefl -> x
+unsafeCoerceAddr x = case unsafeEqualityProof @a @b of UnsafeRefl → x
 
 -- The RHS is updated by Desugar.patchMagicDefns
 -- See Desugar Note [Wiring in unsafeCoerce#]

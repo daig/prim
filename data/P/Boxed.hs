@@ -18,7 +18,7 @@ write = writeMutVar#
 
 
 -- | Note that this isn't strictly speaking the correct type for this function;
--- it should really be @P s a -> (a -> (a,...)) -> ST s (# a, (a,...) #)@,
+-- it should really be @P s a → (a → (a,...)) → ST s (# a, (a,...) #)@,
 -- where (a,...) is any record type with a first field of @a@ (eg any sized tuple).
 -- That the first field has the right type is not checked, and will be unsafely
 -- coerced.

@@ -135,9 +135,9 @@ type STM (a ∷ T r) = ST Transaction a
 -- | Transactional Memory operations
 type STM_ = ST_ Transaction
 
-type Small :: ∀ {l :: Levity} {k}.
-              (T# l -> k) -> T# l -> k
-type family Small a = sa | sa -> a where
+type Small ∷ ∀ {l ∷ Levity} {k}.
+              (T# l → k) → T# l → k
+type family Small a = sa | sa → a where
   Small Array# = SmallArray#
   Small MutableArray# = SmallMutableArray#
 
@@ -147,61 +147,61 @@ newtype Buffer = Bytes_Off_Len# (# ByteArray# , I , I #)
 newtype Buffer_Pinned = PinnedBytes_Off_Len# (# ByteArray# , I , I #)
 
 -- Pinned to an address and gaurenteed not to be moved by GC.
-type UnboxedArray# :: ∀ {r}. T r -> T_
+type UnboxedArray# ∷ ∀ {r}. T r → T_
 newtype UnboxedArray# x = ByteArray# ByteArray#
 
-type UnboxedMutableArray# :: ∀ {r}. ★ → T r → T_
+type UnboxedMutableArray# ∷ ∀ {r}. ★ → T r → T_
 newtype UnboxedMutableArray# s x = MutableByteArray# (MutableByteArray# s)
 
 -- | (Possibly heterogeneous) contiguous bytes.
 -- Pinned to an address and gaurenteed not to be moved by GC.
-type PinnedArray# :: ∀ {r}. T r → T_
+type PinnedArray# ∷ ∀ {r}. T r → T_
 newtype PinnedArray# x = PinnedByteArray# ByteArray#
 
-type PinnedMutableArray# :: ∀ {r}. ★ → T r → T_
+type PinnedMutableArray# ∷ ∀ {r}. ★ → T r → T_
 newtype PinnedMutableArray# s x = PinnedMutableByteArray# (MutableByteArray# s)
 
-type A :: ∀ {r}. T r -> T_
+type A ∷ ∀ {r}. T r → T_
 -- | Primitive array type.
 -- The concrete representation can be determined by the kind of its contents
 type family A (x ∷ T r) = a | a → r where
-  A (x :: T# _) = Array# x
-  A (x :: K I) = UnboxedArray# x
-  A (x :: K I8) = UnboxedArray# x
-  A (x :: K I16) = UnboxedArray# x
-  A (x :: K I32) = UnboxedArray# x
-  A (x :: K I64) = UnboxedArray# x
-  A (x :: K U) = UnboxedArray# x
-  A (x :: K U8) = UnboxedArray# x
-  A (x :: K U16) = UnboxedArray# x
-  A (x :: K U32) = UnboxedArray# x
-  A (x :: K U64) = UnboxedArray# x
-  A (x :: K F32) = UnboxedArray# x
-  A (x :: K F64) = UnboxedArray# x
-  A (x :: K Addr#) = UnboxedArray# x
+  A (x ∷ T# _) = Array# x
+  A (x ∷ K I) = UnboxedArray# x
+  A (x ∷ K I8) = UnboxedArray# x
+  A (x ∷ K I16) = UnboxedArray# x
+  A (x ∷ K I32) = UnboxedArray# x
+  A (x ∷ K I64) = UnboxedArray# x
+  A (x ∷ K U) = UnboxedArray# x
+  A (x ∷ K U8) = UnboxedArray# x
+  A (x ∷ K U16) = UnboxedArray# x
+  A (x ∷ K U32) = UnboxedArray# x
+  A (x ∷ K U64) = UnboxedArray# x
+  A (x ∷ K F32) = UnboxedArray# x
+  A (x ∷ K F64) = UnboxedArray# x
+  A (x ∷ K Addr#) = UnboxedArray# x
 
-type A' :: ∀ {r}. ★ → T r -> T_
+type A' ∷ ∀ {r}. ★ → T r → T_
 -- | Primitive array type.
 -- The concrete representation can be determined by the kind of its contents
 type family A' s x where
-  A' s (x :: T# _) = MutableArray# s x
-  A' s (x :: K I) = UnboxedMutableArray# s x
-  A' s (x :: K I8) = UnboxedMutableArray# s x
-  A' s (x :: K I16) = UnboxedMutableArray# s x
-  A' s (x :: K I32) = UnboxedMutableArray# s x
-  A' s (x :: K I64) = UnboxedMutableArray# s x
-  A' s (x :: K U) = UnboxedMutableArray# s x
-  A' s (x :: K U8) = UnboxedMutableArray# s x
-  A' s (x :: K U16) = UnboxedMutableArray# s x
-  A' s (x :: K U32) = UnboxedMutableArray# s x
-  A' s (x :: K U64) = UnboxedMutableArray# s x
-  A' s (x :: K F32) = UnboxedMutableArray# s x
-  A' s (x :: K F64) = UnboxedMutableArray# s x
-  A' s (x :: K Addr#) = UnboxedMutableArray# s x
+  A' s (x ∷ T# _) = MutableArray# s x
+  A' s (x ∷ K I) = UnboxedMutableArray# s x
+  A' s (x ∷ K I8) = UnboxedMutableArray# s x
+  A' s (x ∷ K I16) = UnboxedMutableArray# s x
+  A' s (x ∷ K I32) = UnboxedMutableArray# s x
+  A' s (x ∷ K I64) = UnboxedMutableArray# s x
+  A' s (x ∷ K U) = UnboxedMutableArray# s x
+  A' s (x ∷ K U8) = UnboxedMutableArray# s x
+  A' s (x ∷ K U16) = UnboxedMutableArray# s x
+  A' s (x ∷ K U32) = UnboxedMutableArray# s x
+  A' s (x ∷ K U64) = UnboxedMutableArray# s x
+  A' s (x ∷ K F32) = UnboxedMutableArray# s x
+  A' s (x ∷ K F64) = UnboxedMutableArray# s x
+  A' s (x ∷ K Addr#) = UnboxedMutableArray# s x
 
 -- newtype P_Unlifted = 
 
-type M :: ∀ {ra} {r}. (T ra → T r) → ★ → T ra → T r
+type M ∷ ∀ {ra} {r}. (T ra → T r) → ★ → T ra → T r
 type family M a = ma | ma → a where
   M UnboxedArray# = UnboxedMutableArray#
   M PinnedArray# = PinnedMutableArray#
@@ -216,9 +216,9 @@ newtype S# a = S# Addr#
 data Encoding = Latin1 | UTF8
 
 -- | An machine address to valid data, assumed to point outside the garbage-collected heap
-type ForeignArray# :: ∀ {r}. T r -> K Addr#
+type ForeignArray# ∷ ∀ {r}. T r → K Addr#
 newtype ForeignArray# x = ConstAddr# Addr#
-type ForeignMutableArray# :: ∀ {r}. ★ → T r → K Addr#
+type ForeignMutableArray# ∷ ∀ {r}. ★ → T r → K Addr#
 newtype ForeignMutableArray# s x = Addr# Addr#
 
 newtype P_Unbox s x = P# Addr#

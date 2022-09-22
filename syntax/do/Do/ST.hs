@@ -47,7 +47,7 @@ instance Pure (a ∷ K (A)) where {\
 class RunST (a ∷ T ra) where runST ∷ (forall s. ST s a) → a
 #define INST_RUNST(A) \
 instance RunST (a ∷ K (A)) where {\
-  runST st = case runRW# st of (# _, a #) -> a}
+  runST st = case runRW# st of (# _, a #) → a}
 
 
 {-

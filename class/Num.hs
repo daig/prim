@@ -245,8 +245,8 @@ instance ℤ I64 where
   negate = negateInt64#
   (//) = quotInt64#
   (%%) = remInt64#
-  (cast -> a) //%% (cast -> b) =
-    case quotRemInt# a b of (# q, r #) -> (# cast q, cast r #)
+  (cast → a) //%% (cast → b) =
+    case quotRemInt# a b of (# q, r #) → (# cast q, cast r #)
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 63##
   sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
 
@@ -320,11 +320,11 @@ instance 𝕌 U where
    b a → case go b of (# _, e' #) → e'
           where
             goSqr pw = case timesWord2# pw pw of
-              (# 0##, l #) -> go l
-              (# _  , _ #) -> (# a, 0## #)
+              (# 0##, l #) → go l
+              (# _  , _ #) → (# a, 0## #)
             go pw = if cast (a < pw) then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) -> if cast (q < pw)
+                     (# q, e #) → if cast (q < pw)
                            then (# q      , 2## × e       #)
                                    else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U8 where
@@ -335,11 +335,11 @@ instance 𝕌 U8 where
    (cast → b) (cast → a) → case go b of (# _, e' #) → cast e'
           where
             goSqr pw = case timesWord2# pw pw of
-              (# 0##, l #) -> go l
-              (# _  , _ #) -> (# a, 0## #)
+              (# 0##, l #) → go l
+              (# _  , _ #) → (# a, 0## #)
             go pw = if cast (a < pw) then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) -> if cast (q < pw)
+                     (# q, e #) → if cast (q < pw)
                            then (# q      , 2## × e       #)
                                    else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U16 where
@@ -350,11 +350,11 @@ instance 𝕌 U16 where
    (cast → b) (cast → a) → case go b of (# _, e' #) → cast e'
           where
             goSqr pw = case timesWord2# pw pw of
-              (# 0##, l #) -> go l
-              (# _  , _ #) -> (# a, 0## #)
+              (# 0##, l #) → go l
+              (# _  , _ #) → (# a, 0## #)
             go pw = if cast (a < pw) then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) -> if cast (q < pw)
+                     (# q, e #) → if cast (q < pw)
                                    then (# q      , 2## × e       #)
                                    else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U32 where
@@ -365,11 +365,11 @@ instance 𝕌 U32 where
    (cast → b) (cast → a) → case go b of (# _, e' #) → cast e'
           where
             goSqr pw = case timesWord2# pw pw of
-              (# 0##, l #) -> go l
-              (# _  , _ #) -> (# a, 0## #)
+              (# 0##, l #) → go l
+              (# _  , _ #) → (# a, 0## #)
             go pw = if cast (a < pw) then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) -> if cast (q < pw)
+                     (# q, e #) → if cast (q < pw)
                            then (# q      , 2## × e       #)
                                    else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U64 where
@@ -380,10 +380,10 @@ instance 𝕌 U64 where
    (cast → b) (cast → a) → case go b of (# _, e' #) → cast e'
           where
             goSqr pw = case timesWord2# pw pw of
-              (# 0##, l #) -> go l
-              (# _  , _ #) -> (# a, 0## #)
+              (# 0##, l #) → go l
+              (# _  , _ #) → (# a, 0## #)
             go pw = if cast (a < pw) then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) -> if cast (q < pw)
+                     (# q, e #) → if cast (q < pw)
                            then (# q      , 2## × e       #)
                                    else (# q % pw , 2## × e + 1## #)

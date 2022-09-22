@@ -48,7 +48,7 @@ pattern CC l m s ← (\p → (# label p, module_ p, srcSpan p #) → (# l,m,s #)
 --label p = index# 
 {-
 -- | Format a 'CCStack' as a list of lines.
-ccsToStrings :: Stack -> IO [[Char]]
+ccsToStrings ∷ Stack → IO [[Char]]
 ccsToStrings ccs0 = go ccs0 []
   where
     go ccs acc = case css of

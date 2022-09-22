@@ -57,7 +57,7 @@ unpackFoldrCStringUtf9# (S# p0) f r0 = go (Const# (P# p0)) r0
 
 data ByteCount = One | Two | Three | Four
 {-# INLINE byteCount #-}
-byteCount :: Char# -> ByteCount
+byteCount ∷ Char# → ByteCount
 byteCount ch
     | cast (ch ≡ '\x7F'#) = One
     | cast (ch ≡ '\xDF'#) = Two
@@ -65,10 +65,10 @@ byteCount ch
     | T                   = Four
 
 instance Const P_Unbox Char8# +. ByteCount where
-  (+.) p = \case One   -> p +. 1#
-                 Two   -> p +. 2#
-                 Three -> p +. 3#
-                 Four  -> p +. 4#
+  (+.) p = \case One   → p +. 1#
+                 Two   → p +. 2#
+                 Three → p +. 3#
+                 Four  → p +. 4#
 
 -- | Take the current address, read unicode char of the given size.
 -- We obviously want the number of bytes, but we have to read one
@@ -80,7 +80,7 @@ instance Const P_Unbox Char8# +. ByteCount where
 -- For this reason we really have to check the width first and only
 -- decode after.
 {-# INLINE unpackUtf8Char# #-}
-unpackUtf8Char# :: ByteCount -> Char# -> Const P_Unbox Char8# -> Char#
+unpackUtf8Char# ∷ ByteCount → Char# → Const P_Unbox Char8# → Char#
 unpackUtf8Char# bytes ch (coerce @_ @(ForeignArray# Char8#) → p) =
   case bytes of
     One   → ch
@@ -96,16 +96,16 @@ unpackUtf8Char# bytes ch (coerce @_ @(ForeignArray# Char8#) → p) =
 
 {-
 {-# INLINE unpackUtf8Char# #-}
-unpackUtf8Char# :: ByteCount -> Char# -> P# -> Char#
+unpackUtf8Char# ∷ ByteCount → Char# → P# → Char#
 unpackUtf8Char# bytes ch (addr =
   case bytes of
-    One -> ch
-    Two ->   (cast @Char# (((cast ch                                           - 0xC0#) <<#  6##) +
+    One → ch
+    Two →   (cast @Char# (((cast ch                                           - 0xC0#) <<#  6##) +
                      (cast (indexCharOffAddr# (addr `plusAddr#` 1#) 0#) - 0x80#)))
-    Three -> (cast @Char# (((cast ch                                           - 0xE0#) <<# 12##) +
+    Three → (cast @Char# (((cast ch                                           - 0xE0#) <<# 12##) +
                     ((cast (indexCharOffAddr# (addr `plusAddr#` 1#) 0#) - 0x80#) <<#  6##) +
                      (cast (indexCharOffAddr# (addr `plusAddr#` 2#) 0#) - 0x80#)))
-    Four ->  (cast @Char# (((cast ch                                           - 0xF0#) <<# 18##) +
+    Four →  (cast @Char# (((cast ch                                           - 0xF0#) <<# 18##) +
                     ((cast (indexCharOffAddr# (addr `plusAddr#` 1#) 0#) - 0x80#) <<# 12##) +
                     ((cast (indexCharOffAddr# (addr `plusAddr#` 2#) 0#) - 0x80#) <<#  6##) +
                      (cast (indexCharOffAddr# (addr `plusAddr#` 3#) 0#) - 0x80#)))

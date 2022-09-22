@@ -18,5 +18,5 @@ binaryEvent = traceBinaryEvent#
 -- | Emits a marker event via the RTS tracing framework with the argument as contents.
 --      The event will be emitted either to the @.eventlog@ file,
 --      or to stderr, depending on the runtime RTS flags. 
-marker# :: S# -> ST_ s
+marker# ∷ S# → ST_ s
 marker# = traceMarker#

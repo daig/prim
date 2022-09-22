@@ -66,9 +66,9 @@ instance (♭) T where \
   setP# a i j x = unio (SP a i j x)
 
 foreign import ccall unsafe "primitive-memops.h hsprimitive_memset_Word8"
-  setWord8OffP# :: P# -> I {- ^ diff -} -> I {- ^ size -} -> U -> IO ()
+  setWord8OffP# ∷ P# → I {- ^ diff -} → I {- ^ size -} → U → IO ()
 foreign import ccall unsafe "primitive-memops.h hsprimitive_memset_Word8"
-  setWord8Array# :: MutableByteArray# s -> I {- ^ diff -} -> I {- ^ size -} -> U -> IO ()
+  setWord8Array# ∷ MutableByteArray# s → I {- ^ diff -} → I {- ^ size -} → U → IO ()
 
 INST_PRIM(I, SIZEOF_HSINT, ALIGNMENT_HSINT, indexIntArray, readIntArray, writeIntArray, indexIntOffAddr, readIntOffAddr, writeIntOffAddr, indexWord8ArrayAsInt, readWord8ArrayAsInt, writeWord8ArrayAsInt, undefined#, undefined#)
 INST_PRIM(I8, SIZEOF_INT8, ALIGNMENT_INT8, indexInt8Array, readInt8Array, writeInt8Array, indexInt8OffAddr, readInt8OffAddr, writeInt8OffAddr, indexInt8Array, readInt8Array, writeInt8Array, undefined#, undefined#)

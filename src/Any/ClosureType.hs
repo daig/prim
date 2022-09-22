@@ -98,36 +98,36 @@ pattern NClosure_Types = ClosureType# N_CLOSURE_TYPES##
   Small_Mut_Arr_Ptrs_Frozen_Dirty, Small_Mut_Arr_Ptrs_Frozen_Clean , Compact_NFData, NClosure_Types #-}
 
 {-
-pokeItbl :: Ptr StgInfoTable -> StgInfoTable -> IO ()
+pokeItbl ∷ Ptr StgInfoTable → StgInfoTable → IO ()
 pokeItbl a0 itbl = do
-  ((\hsc_ptr -> pokeByteOff hsc_ptr 16)) a0 (ptrs itbl)
-  ((\hsc_ptr -> pokeByteOff hsc_ptr 20)) a0 (nptrs itbl)
-  ((\hsc_ptr -> pokeByteOff hsc_ptr 24)) a0 (fromEnum (tipe itbl))
-  ((\hsc_ptr -> pokeByteOff hsc_ptr 28)) a0 (srtlen itbl)
+  ((\hsc_ptr → pokeByteOff hsc_ptr 16)) a0 (ptrs itbl)
+  ((\hsc_ptr → pokeByteOff hsc_ptr 20)) a0 (nptrs itbl)
+  ((\hsc_ptr → pokeByteOff hsc_ptr 24)) a0 (fromEnum (tipe itbl))
+  ((\hsc_ptr → pokeByteOff hsc_ptr 28)) a0 (srtlen itbl)
   let code_offset = a0 `plusPtr` ((32))
   case code itbl of
-    Nothing -> return ()
-    Just (Left xs) -> pokeArray code_offset xs
-    Just (Right xs) -> pokeArray code_offset xs
+    Nothing → return ()
+    Just (Left xs) → pokeArray code_offset xs
+    Just (Right xs) → pokeArray code_offset xs
 
 
 -- | Read an InfoTable from the heap into a haskell type.
 -- WARNING: This code assumes it is passed a pointer to a "standard" info
 -- table. If tables_next_to_code is enabled, it will look 1 byte before the
 -- start for the entry field.
-peekItbl :: Ptr StgInfoTable -> IO StgInfoTable
+peekItbl ∷ Ptr StgInfoTable → IO StgInfoTable
 peekItbl a0 = do
   let ptr = a0
       entry' = Nothing
-  ptrs'   <- ((\hsc_ptr -> peekByteOff hsc_ptr 16)) ptr
-  nptrs'  <- ((\hsc_ptr -> peekByteOff hsc_ptr 20)) ptr
-  tipe'   <- ((\hsc_ptr -> peekByteOff hsc_ptr 24)) ptr
-  srtlen' <- ((\hsc_ptr -> peekByteOff hsc_ptr 28)) a0
+  ptrs'   <- ((\hsc_ptr → peekByteOff hsc_ptr 16)) ptr
+  nptrs'  <- ((\hsc_ptr → peekByteOff hsc_ptr 20)) ptr
+  tipe'   <- ((\hsc_ptr → peekByteOff hsc_ptr 24)) ptr
+  srtlen' <- ((\hsc_ptr → peekByteOff hsc_ptr 28)) a0
   return StgInfoTable
     { entry  = entry'
     , ptrs   = ptrs'
     , nptrs  = nptrs'
-    , tipe   = toEnum (fromIntegral (tipe' :: HalfWord))
+    , tipe   = toEnum (fromIntegral (tipe' ∷ HalfWord))
     , srtlen = srtlen'
     , code   = Nothing
     }

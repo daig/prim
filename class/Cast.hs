@@ -10,7 +10,7 @@ import GHC.CString
 import {-# source #-} Bits
 
 -- | Nontrivial conversions between types. Use with care!
-type Cast :: forall {r :: RuntimeRep} {r' :: RuntimeRep}. T r -> T r' -> C
+type Cast ∷ forall {r ∷ RuntimeRep} {r' ∷ RuntimeRep}. T r → T r' → C
 class Cast b a where cast ∷ a → b
 
 instance Cast I U where cast = word2Int#

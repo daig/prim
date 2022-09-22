@@ -17,4 +17,4 @@ type B = Bool
 --pattern T = True
 --[># complete F , T #<]
 --pattern B ∷ Ξ B → B
---pattern B t ← ((\b -> B (dataToTag# b)) -> t) where B (B b) = tagToEnum# b
+--pattern B t ← ((\b → B (dataToTag# b)) → t) where B (B b) = tagToEnum# b

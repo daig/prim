@@ -23,7 +23,7 @@ import Array.Shrink as X (Shrink(..))
 -- For strict indexing, use '(!)'
 --
 -- Warning: this can fail with an unchecked exception.
-indexLazy# :: forall x. A_Box_Small x -> I -> (# x #)
+indexLazy# ∷ forall x. A_Box_Small x → I → (# x #)
 indexLazy# = coerce (indexSmallArray# @x)
 {-# inline indexLazy# #-}
 

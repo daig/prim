@@ -98,7 +98,7 @@ the = GHC.coerce
 coerce# ∷ ∀ b a. a → b
 coerce# x = local_id (unsafeCoerce# x)
 
-unsafeCoerce# :: forall (r1 :: GHC.RuntimeRep) (r2 :: GHC.RuntimeRep) (a :: GHC.TYPE r1) (b :: GHC.TYPE r2) . a -> b
+unsafeCoerce# ∷ forall (r1 ∷ GHC.RuntimeRep) (r2 ∷ GHC.RuntimeRep) (a ∷ GHC.TYPE r1) (b ∷ GHC.TYPE r2) . a → b
 -- The unsafeCoerce# primop is not exportable but instead magically replaced at compile-time.
 unsafeCoerce# = panicError "GHC internal error: unsafeCoerce# not unfolded"#
 

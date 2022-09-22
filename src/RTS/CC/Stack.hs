@@ -57,7 +57,7 @@ clear = clearCCS#
 
 {-
 -- | Format a 'CSS' as a list of lines.
-toStrings :: CCS -> [[Char]]
+toStrings ∷ CCS → [[Char]]
 toStrings ccs0 = go ccs0 []
   where
     go ∷ CCS → [[Char]] → [[Char]]

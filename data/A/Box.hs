@@ -22,7 +22,7 @@ import Array.Copy as X (Copy(..))
 -- For strict indexing, use '(!)'
 --
 -- Warning: this can fail with an unchecked exception.
-indexLazy# ∷ ∀ x. A_Box x -> I -> (# x #)
+indexLazy# ∷ ∀ x. A_Box x → I → (# x #)
 indexLazy# = coerce (indexArray# @x)
 {-# inline indexLazy# #-}
 

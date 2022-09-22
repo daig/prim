@@ -182,8 +182,8 @@ instance (≤) F64 where
 instance (≡) ByteArray# where
   a ≡ b = let n = coerce sizeofByteArray# a in
           case n ==# coerce sizeofByteArray# b of
-                 0# -> F#
-                 1# -> coerce compareByteArrays# a 0# b 0# n ≡ 0#
+                 0# → F#
+                 1# → coerce compareByteArrays# a 0# b 0# n ≡ 0#
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Value_ equality
 deriving via ByteArray# instance (≡) (UnboxedArray# (x ∷ T r))

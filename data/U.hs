@@ -42,7 +42,7 @@ add12 a0 (# b1,b0 #) = (# m1, m0 #)
 
 
 -- | Add 3 values together
-add3# :: U -> U -> U -> (# U, U #)
+add3# ∷ U → U → U → (# U, U #)
 {-# INLINABLE add3# #-}
 add3# a b c = (# r1, r0 #)
    where
@@ -61,7 +61,7 @@ divMod2# = quotRemWord2#
 -- Requires:
 --    b0 /= 0
 --    a1 >= b0 (not required, but if not q1=0)
-divMod3# :: (# U,U #) -> U -> (# (# U,U #),U #)
+divMod3# ∷ (# U,U #) → U → (# (# U,U #),U #)
 divMod3# (# a1,a0 #) b0 = (# (# q1, q0 #), r0 #)
    where
       !(# q1, r' #) = a1 /% b0
