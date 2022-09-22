@@ -40,7 +40,7 @@ instance (x ≑ TY) ⇒ Prim (x) where {\
   (!!#) = coerce RB# ; \
   write# = coerce WB# }
 #define INST_PRIM_SPEC(TY,SI,AL,IB,RB,WB) \
-instance Prim (TY) where {\
+instance {-# OVERLAPPING #-} Prim (TY) where {\
   size = (SI# ×); \
   align i = case i % AL# of {0# → i; off → i + (AL# - off)}; \
   (!#) x = coerce IB# x; \
@@ -61,4 +61,4 @@ INST_PRIM(Addr#,SIZEOF_HSPTR,ALIGNMENT_HSPTR,indexWord8ArrayAsAddr,readWord8Arra
 
 -- Override the word representation for chars
 INST_PRIM_SPEC(Char#,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsWideChar,readWord8ArrayAsWideChar,writeWord8ArrayAsWideChar)
-INST_PRIM_SPEC(Char8#,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsChar,readWord8ArrayAsChar,writeWord8ArrayAsChar)
+INST_PRIM_SPEC(Char8#,1,ALIGNMENT_HSCHAR,indexWord8ArrayAsChar,readWord8ArrayAsChar,writeWord8ArrayAsChar)

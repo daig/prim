@@ -2,6 +2,7 @@
 module Action where
 import GHC.CString
 import Num
+import Prim
 #include "MachDeps.h"
 
 type (+.) ∷ ∀ {rp} {rx}. T rp → T rx → Constraint
@@ -15,31 +16,25 @@ instance Addr# +. I where (+.) = plusAddr#
 -- |Computes the offset (in bytes) required to get from the second to the first argument.
 instance Addr# -. I where (-.) = coerce minusAddr#
 
-#define INST_OFF(TYPE,SIZE) \
-instance (ForeignArray# TYPE) +. I where {p +. i = coerce (`plusAddr#` (i *# SIZE#)) p} ;\
-instance (ForeignMutableArray# s TYPE) +. I where {p +. i = coerce (`plusAddr#` (i *# SIZE#)) p} ;\
-instance (ForeignMutableArray# s TYPE) -. I where {p -. q = coerce minusAddr# p q / SIZE#} ;\
-instance (ForeignArray# TYPE) -. I where {p -. q = coerce minusAddr# p q / SIZE#}
+#define INST_OFF(TYPE) \
+instance (ForeignArray# TYPE) +. I where {p +. i = coerce (`plusAddr#` (size @TYPE i)) p} ;\
+instance (ForeignMutableArray# s TYPE) +. I where {p +. i = coerce (`plusAddr#` (size @TYPE i)) p} ;\
+instance (ForeignArray# TYPE) -. I where {p -. q = coerce minusAddr# p q / size @TYPE 1#} ;\
+instance (ForeignMutableArray# s TYPE) -. I where {p -. q = coerce minusAddr# p q / size @TYPE 1#} ;\
 
-#define INST_OFF0(TYPE) \
-instance (ForeignArray# TYPE) +. I where {(+.) = coerce plusAddr#} ;\
-instance (ForeignMutableArray# s TYPE) +. I where {(+.) = coerce plusAddr#} ;\
-instance (ForeignArray# TYPE) -. I where {(-.) = coerce minusAddr#} ;\
-instance (ForeignMutableArray# s TYPE) -. I where {(-.) = coerce minusAddr#}
-
-INST_OFF(I,SIZEOF_HSINT)
-INST_OFF0(I8)
-INST_OFF(I16,SIZEOF_INT16)
-INST_OFF(I32,SIZEOF_INT32)
-INST_OFF(I64,SIZEOF_INT64)
-INST_OFF(U,SIZEOF_HSWORD)
-INST_OFF0(U8)
-INST_OFF(U16,SIZEOF_WORD16)
-INST_OFF(U32,SIZEOF_WORD32)
-INST_OFF(U64,SIZEOF_WORD64)
-INST_OFF(Addr#,SIZEOF_HSPTR)
-INST_OFF(Char,4)
-INST_OFF0(Char8#)
+INST_OFF(I)
+INST_OFF(I8)
+INST_OFF(I16)
+INST_OFF(I32)
+INST_OFF(I64)
+INST_OFF(U)
+INST_OFF(U8)
+INST_OFF(U16)
+INST_OFF(U32)
+INST_OFF(U64)
+INST_OFF(Addr#)
+INST_OFF(Char#)
+INST_OFF(Char8#)
 
 type (.+) ∷ ∀ {rp} {rx}. T rp → T rx → Constraint
 class x .+ p | x → p where (.+) ∷ x → p → p
