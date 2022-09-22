@@ -64,7 +64,7 @@ byteCount ch
     | cast (ch ≡ '\xEF'#) = Three
     | T                   = Four
 
-instance Const P_Unbox Char8# +. ByteCount where
+instance Const AddrVar# Char8# +. ByteCount where
   (+.) p = \case One   → p +. 1#
                  Two   → p +. 2#
                  Three → p +. 3#
@@ -80,7 +80,7 @@ instance Const P_Unbox Char8# +. ByteCount where
 -- For this reason we really have to check the width first and only
 -- decode after.
 {-# INLINE unpackUtf8Char# #-}
-unpackUtf8Char# ∷ ByteCount → Char# → Const P_Unbox Char8# → Char#
+unpackUtf8Char# ∷ ByteCount → Char# → Const AddrVar# Char8# → Char#
 unpackUtf8Char# bytes ch (coerce @_ @(ForeignArray# Char8#) → p) =
   case bytes of
     One   → ch

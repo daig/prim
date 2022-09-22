@@ -183,7 +183,7 @@ type family A (x ∷ T r) = a | a → r where
 type A' ∷ ∀ {r}. ★ → T r → T_
 -- | Primitive array type.
 -- The concrete representation can be determined by the kind of its contents
-type family A' s x where
+type family A' s (x ∷ T r) = a | a → r where
   A' s (x ∷ T# _) = MutableArray# s x
   A' s (x ∷ K I) = UnboxedMutableArray# s x
   A' s (x ∷ K I8) = UnboxedMutableArray# s x
@@ -198,6 +198,26 @@ type family A' s x where
   A' s (x ∷ K F32) = UnboxedMutableArray# s x
   A' s (x ∷ K F64) = UnboxedMutableArray# s x
   A' s (x ∷ K Addr#) = UnboxedMutableArray# s x
+
+type P ∷ ∀ {r} {ra}. ★ → T r → T ra
+-- | Primitive array type.
+-- The concrete representation can be determined by the kind of its contents
+type family P s (x ∷ T r) = a | a → r where
+  P s (x ∷ T# _) = MutVar# s x
+  P s (x ∷ K I) = AddrVar# s x
+  P s (x ∷ K I8) = AddrVar# s x
+  P s (x ∷ K I16) = AddrVar# s x
+  P s (x ∷ K I32) = AddrVar# s x
+  P s (x ∷ K I64) = AddrVar# s x
+  P s (x ∷ K U) = AddrVar# s x
+  P s (x ∷ K U8) = AddrVar# s x
+  P s (x ∷ K U16) = AddrVar# s x
+  P s (x ∷ K U32) = AddrVar# s x
+  P s (x ∷ K U64) = AddrVar# s x
+  P s (x ∷ K F32) = AddrVar# s x
+  P s (x ∷ K F64) = AddrVar# s x
+  P s (x ∷ K Addr#) = AddrVar# s x
+
 
 -- newtype P_Unlifted = 
 
@@ -221,7 +241,7 @@ newtype ForeignArray# x = ConstAddr# Addr#
 type ForeignMutableArray# ∷ ∀ {r}. ★ → T r → K Addr#
 newtype ForeignMutableArray# s x = Addr# Addr#
 
-newtype P_Unbox s x = P# Addr#
+newtype AddrVar# s x = P# Addr#
 type Const ∷ ∀ {ra} {r}. (★ → T ra → T r) → T ra → T r
 newtype Const p x = Const# (p X x)
 

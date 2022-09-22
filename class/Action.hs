@@ -16,16 +16,16 @@ instance Addr# +. I where (+.) = plusAddr#
 instance Addr# -. I where (-.) = coerce minusAddr#
 
 #define INST_OFF(TYPE,SIZE) \
-instance (Const P_Unbox TYPE) +. I where {p +. i = coerce (`plusAddr#` (i *# SIZE#)) p} ;\
-instance (P_Unbox s TYPE) +. I where {p +. i = coerce (`plusAddr#` (i *# SIZE#)) p} ;\
-instance (P_Unbox s TYPE) -. I where {p -. q = coerce minusAddr# p q / SIZE#} ;\
-instance (Const P_Unbox TYPE) -. I where {p -. q = coerce minusAddr# p q / SIZE#}
+instance (Const AddrVar# TYPE) +. I where {p +. i = coerce (`plusAddr#` (i *# SIZE#)) p} ;\
+instance (AddrVar# s TYPE) +. I where {p +. i = coerce (`plusAddr#` (i *# SIZE#)) p} ;\
+instance (AddrVar# s TYPE) -. I where {p -. q = coerce minusAddr# p q / SIZE#} ;\
+instance (Const AddrVar# TYPE) -. I where {p -. q = coerce minusAddr# p q / SIZE#}
 
 #define INST_OFF0(TYPE) \
-instance (Const P_Unbox TYPE) +. I where {(+.) = coerce plusAddr#} ;\
-instance (P_Unbox s TYPE) +. I where {(+.) = coerce plusAddr#} ;\
-instance (Const P_Unbox TYPE) -. I where {(-.) = coerce minusAddr#} ;\
-instance (P_Unbox s TYPE) -. I where {(-.) = coerce minusAddr#}
+instance (Const AddrVar# TYPE) +. I where {(+.) = coerce plusAddr#} ;\
+instance (AddrVar# s TYPE) +. I where {(+.) = coerce plusAddr#} ;\
+instance (Const AddrVar# TYPE) -. I where {(-.) = coerce minusAddr#} ;\
+instance (AddrVar# s TYPE) -. I where {(-.) = coerce minusAddr#}
 
 INST_OFF(I,SIZEOF_HSINT)
 INST_OFF0(I8)
