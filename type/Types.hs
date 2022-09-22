@@ -421,3 +421,8 @@ type family a × n = t | t → a n where
 
   F32 × 16 = FloatX16#
   F64 ×  8 = DoubleX8#
+
+-- | A trivially satisfied 'Constraint'
+type OK ∷ ∀ {r}. T r → Constraint
+class OK a
+instance OK a

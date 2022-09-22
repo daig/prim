@@ -5,6 +5,24 @@ import {-# source #-} Num
 #include "MachDeps.h"
 #include "HsBaseConfig.h"
 
+type (∋) ∷ ∀ {rx} {r}. (T rx → T r) → T rx → Constraint
+type family (∋) a where
+  (∋) Array# = OK
+  (∋) (MutableArray# s) = OK
+  (∋) SmallArray# = OK
+  (∋) (SmallMutableArray# s) = OK
+  (∋) UnboxedArray# = Prim
+  (∋) PinnedArray# = Prim
+  (∋) (UnboxedMutableArray# s) = Prim
+  (∋) (PinnedMutableArray# s) = Prim
+  (∋) ForeignArray# = Prim
+  (∋) (ForeignMutableArray# s) = Prim
+  (∋) (MutVar# s) = OK
+  (∋) (TVar# s) = OK
+  (∋) (MVar# s) = OK
+  (∋) (IOPort# s) = OK
+  
+
 -- | Primitive unboxed, unlifted types that fit natively into raw memory
 type Prim ∷ forall {r}. T r → Constraint
 class Prim (x ∷ T r) where
