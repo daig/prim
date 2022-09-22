@@ -199,6 +199,7 @@ type family A' s (x ∷ T r) = a | a → r where
   A' s (x ∷ K F64) = UnboxedMutableArray# s x
   A' s (x ∷ K Addr#) = UnboxedMutableArray# s x
 
+{-
 type P ∷ ∀ {r} {ra}. ★ → T r → T ra
 -- | Primitive array type.
 -- The concrete representation can be determined by the kind of its contents
@@ -217,7 +218,7 @@ type family P s (x ∷ T r) = a | a → r where
   P s (x ∷ K F32) = AddrVar# s x
   P s (x ∷ K F64) = AddrVar# s x
   P s (x ∷ K Addr#) = AddrVar# s x
-
+-}
 
 -- newtype P_Unlifted = 
 
@@ -240,10 +241,6 @@ type ForeignArray# ∷ ∀ {r}. T r → K Addr#
 newtype ForeignArray# x = ConstAddr# Addr#
 type ForeignMutableArray# ∷ ∀ {r}. ★ → T r → K Addr#
 newtype ForeignMutableArray# s x = Addr# Addr#
-
-newtype AddrVar# s x = P# Addr#
-type Const ∷ ∀ {ra} {r}. (★ → T ra → T r) → T ra → T r
-newtype Const p x = Const# (p X x)
 
 -- | The empty "void" type
 data X

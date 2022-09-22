@@ -14,18 +14,22 @@ newNoFinalizer ∷ k → v → IO (P_Weak v)
 newNoFinalizer = mkWeakNoFinalizer#
 
 -- | Add a C finalizer
-addCFinalizer ∷ P# {- ^ @fptr@: C function pointer to add -} → P# {- ^ @ptr@: main argument ptr passed to @fptr(ptr)@ -} → (?) P# {- ^ @env@: optional environment argument passed to @fptr(env,ptr)@ -} → P_Weak v → IO B# {- ^ success -}
+addCFinalizer ∷ Addr# {- ^ @fptr@: C function pointer to add -}
+              → Addr# {- ^ @ptr@: main argument ptr passed to @fptr(ptr)@ -}
+              → (# (##) | Addr# #) {- ^ @env@: optional environment ptr argument passed to @fptr(env,ptr)@ -}
+              → P_Weak v
+              → IO B# {- ^ success -}
 addCFinalizer fptr x (cast → (# B# useEnv', env #)) w = coerce do addCFinalizerToWeak# fptr x useEnv' env w
 
 -- | Retrieve the value associated with a @Weak.P@ if it (the key)
 -- is still alive to the GC.
-read' ∷ P_Weak v → IO ((?) v)
-read' w = cast (deRefWeak# w)
+read' ∷ ∀ v. P_Weak v → IO (# (##) | v #)
+read' w = cast (coerce @_ @(IO' v) (deRefWeak# w))
 
 -- | Retrieve the finalizer associated with a @Weak.P@ if it (the key)
 -- is still alive to the GC.
-finalizer' ∷ ∀ v x. P_Weak v → IO ((?) (IO x))
-finalizer' w = cast (finalizeWeak# @_ @x w)
+finalizer' ∷ ∀ v x. P_Weak v → IO (# (##) | IO x #)
+finalizer' w = cast (coerce @_ @(IO' (IO x)) (finalizeWeak# @_ @x w))
 {-
 finalizer' w s0 = case finalizeWeak# w s0 of
   (# s1, alive', f #) → (# s1, (# B# alive', f #) #)

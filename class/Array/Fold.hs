@@ -7,6 +7,7 @@ import Action
 import Array.Index
 import Bits
 import Num
+import Var
 
 type Fold ∷ ∀ {ra} {re} {rr}. T ra → T re → T rr → C
 class Fold a e r where fold ∷ a → (e → r) → r
@@ -15,8 +16,8 @@ instance Fold (S# Latin1) Char (a → a) where fold = coerce (unpackFoldrCString
 instance Fold (S# UTF8) Char (a → a) where fold = coerce (unpackFoldrCStringUtf8# @a)
 #define INST_FOLD_LATIN(A)\
 instance Fold (S# Latin1) Char ((a ∷ K A) → a) where {\
-    fold (S# s) f r0 = go (Const# (P# s)) r0 \
-      where go p@(get → Char8# ch) r = if cast (ch ≡ '\0'#) then r else cast ch `f` go (p +. 1#) r}
+    fold (S# s) f r0 = go (ConstAddr# s) r0 \
+      where go p r = let !(Char8# ch) = p!0# in if cast (ch ≡ '\0'#) then r else cast ch `f` go (p +. 1#) r}
 
 INST_FOLD_LATIN(I)
 INST_FOLD_LATIN(I8)
@@ -34,9 +35,9 @@ INST_FOLD_LATIN((##))
 INST_FOLD_LATIN(ByteArray#)
 
 unpackFoldrCStringUtf9# ∷ S# UTF8 → (Char# → t → t) → t → t
-unpackFoldrCStringUtf9# (S# p0) f r0 = go (Const# (P# p0)) r0
+unpackFoldrCStringUtf9# (S# p0) f r0 = go (ConstAddr# @Char8# p0) r0
   where
-    go p r = let !(Char8# ch) = get p
+    go p r = let !(Char8# ch) = p!0#
                 in if cast (ch ≡ '\0'#) then r else
           let !n = byteCount ch
           in unpackUtf8Char# n ch p `f` go (p +. n) r
@@ -64,7 +65,7 @@ byteCount ch
     | cast (ch ≡ '\xEF'#) = Three
     | T                   = Four
 
-instance Const AddrVar# Char8# +. ByteCount where
+instance ForeignArray# Char8# +. ByteCount where
   (+.) p = \case One   → p +. 1#
                  Two   → p +. 2#
                  Three → p +. 3#
@@ -80,7 +81,7 @@ instance Const AddrVar# Char8# +. ByteCount where
 -- For this reason we really have to check the width first and only
 -- decode after.
 {-# INLINE unpackUtf8Char# #-}
-unpackUtf8Char# ∷ ByteCount → Char# → Const AddrVar# Char8# → Char#
+unpackUtf8Char# ∷ ByteCount → Char# → ForeignArray# Char8# → Char#
 unpackUtf8Char# bytes ch (coerce @_ @(ForeignArray# Char8#) → p) =
   case bytes of
     One   → ch

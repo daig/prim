@@ -267,3 +267,5 @@ instance Cast [Char] (S# UTF8) where cast = coerce unpackCStringUtf8#
 -- | Unpack bytes until \null byte
 instance Cast [Char] (S# Latin1) where cast = coerce unpackCString#
 
+
+instance Cast (State# y) (State# x) where cast = unsafeCoerce#
