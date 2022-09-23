@@ -141,14 +141,22 @@ type family Small a = sa | sa → a where
   Small Array# = SmallArray#
   Small MutableArray# = SmallMutableArray#
 
+type Slice ∷ ∀ {l}. T# l → K (# ByteArray#, I, I #)
 newtype Slice x = Array_Off_Len# (# Array# x, I, I #)
+type MutableSlice ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I, I #)
 newtype MutableSlice s x = MutableArray_Off_Len# (# MutableArray# s x, I, I #)
+type SmallSlice ∷ ∀ {l}. T# l → K (# ByteArray#, I, I #)
 newtype SmallSlice x = SmallArray_Off_Len# (# SmallArray# x, I, I #)
+type SmallMutableSlice ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I, I #)
 newtype SmallMutableSlice s x = SmallMutableArray_Off_Len# (# SmallMutableArray# s x, I, I #)
 
+type ConstRef ∷ ∀ {l}. T# l → K (# ByteArray#, I #)
 newtype ConstRef x = Array_Off# (# Array# x, I #)
+type SmallConstRef ∷ ∀ {l}. T# l → K (# ByteArray#, I #)
 newtype SmallConstRef x = SmallArray_Off# (# SmallArray# x, I #)
+type Ref ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I #)
 newtype Ref s x = MutableArray_Off# (# MutableArray# s x, I #)
+type SmallRef ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I #)
 newtype SmallRef s x = SmallMutableArray_Off# (# SmallMutableArray# s x, I #)
 
 -- | An unboxed vector with offset and length.
