@@ -1,5 +1,5 @@
 {-# LANGUAGE StandaloneKindSignatures #-}
-{-# LANGUAGE UnliftedDatatypes #-}
+{-# LANGUAGE CPP, UnliftedDatatypes #-}
 module Cmp where
 import Coerce
 import {-# source #-} Bits
@@ -204,6 +204,13 @@ instance (≡) (SmallArray# x) where
 instance (≡) (SmallMutableArray# s x) where
   (≡) = coerce (sameSmallMutableArray# @_ @x)
   as ≠ bs = (¬) (as ≡ bs)
+deriving newtype instance (≡) (ConstRef x)
+deriving newtype instance (≡) (SmallConstRef x)
+deriving newtype instance (≡) (Ref s x)
+deriving newtype instance (≡) (SmallRef s x)
+deriving via (# PinnedArray# x, I #) instance (≡) (PinnedConstRef x)
+deriving via (# PinnedMutableArray# s x, I #) instance (≡) (PinnedRef s x)
+
 -- | _Reference_ equality
 instance (≡) (Array# x) where
   (≡) = coerce (sameArray# @x)
@@ -237,10 +244,7 @@ instance (≡) (UnboxedSlice x) where
   a ≡ b = case cmp a b of EQ → T#; _ → F#
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) (PinnedSlice x) where
-  PinnedBytes_Off_Len# (# a, i, n #) ≡ PinnedBytes_Off_Len# (# b , j, m #)
-    = B# ((i ==# j) `andI#` (n ==# m) `andI#` sameByteArray# a b)
-  as ≠ bs = (¬) (as ≡ bs)
+deriving via (# PinnedArray# x, I, I #) instance (≡) (PinnedSlice x)
 
 instance (≤) (PinnedSlice x) where
   cmp x y = if cast (x ≡ y) then EQ else coerce (cmp @(UnboxedSlice x)) x y
@@ -253,10 +257,7 @@ instance (≤) (PinnedSlice x) where
   
 instance (≤) (UnboxedSlice x) where
   Bytes_Off_Len# (# a, i, n #) `cmp` Bytes_Off_Len# (# b , j, m #)
-    = case cmp n m of
-        EQ → Ordering# (compareByteArrays# a i b j n)
-        LT → case Ordering# (compareByteArrays# a i b j n) of {EQ → LT; o → o}
-        GT → case Ordering# (compareByteArrays# a i b j m) of {EQ → GT; o → o}
+    = case Ordering# (compareByteArrays# a i b j (n `min` m)) of {EQ → cmp n m; x → x}
   a < b = cmp a b ≡ LT
   a > b = cmp a b ≡ GT
   a ≥ b = cmp a b ≠ LT
@@ -277,3 +278,89 @@ deriving via Addr# instance (≡) (ForeignArray# x)
 deriving via Addr# instance (≤) (ForeignArray# x)
 deriving via Addr# instance (≡) (ForeignMutableArray# s x)
 deriving via Addr# instance (≤) (ForeignMutableArray# s x)
+deriving newtype instance (≡) (ForeignSlice x)
+deriving newtype instance (≡) (ForeignMutableSlice s x)
+instance (≤) (ForeignSlice x) where
+  Addr_Len# (# p, n #) `cmp` Addr_Len# (# q, m #) = case cmp p q of
+    EQ → cmp n m
+    x → x
+  a < b = cmp a b ≡ LT
+  a > b = cmp a b ≡ GT
+  a ≥ b = cmp a b ≠ LT
+  a ≤ b = cmp a b ≠ GT
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
+instance (≤) (ForeignMutableSlice s x) where
+  MAddr_Len# (# p, n #) `cmp` MAddr_Len# (# q, m #) = case cmp p q of
+    EQ → cmp n m
+    x → x
+  a < b = cmp a b ≡ LT
+  a > b = cmp a b ≡ GT
+  a ≥ b = cmp a b ≠ LT
+  a ≤ b = cmp a b ≠ GT
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
+
+#define INST_EQ3(X,Y,Z)\
+instance ((≡) x, (≡) y, (≡) z) ⇒ (≡) (# (x ∷ K X), (y ∷ K Y) , (z ∷ K Z) #) where { ;\
+  (# x1, x2, x3 #) ≡ (# y1, y2, y3 #) = x1 ≡ y1 ∧ x2 ≡ y2 ∧ x3 ≡ y3 ;\
+  as ≠ bs = (¬) (as ≡ bs) }
+
+#define INST_EQ2(X,Y)\
+instance ((≡) x,(≡) y) ⇒ (≡) (# (x ∷ K X), (y ∷ K Y) #) where { ;\
+  (# x1, x2 #) ≡ (# y1, y2 #) = x1 ≡ y1 ∧ x2 ≡ y2 ;\
+  as ≠ bs = (¬) (as ≡ bs) } ;\
+INST_EQ3(X,Y,I);\
+INST_EQ3(X,Y,I8);\
+INST_EQ3(X,Y,I16);\
+INST_EQ3(X,Y,I32);\
+INST_EQ3(X,Y,I64);\
+INST_EQ3(X,Y,U);\
+INST_EQ3(X,Y,U8);\
+INST_EQ3(X,Y,U16);\
+INST_EQ3(X,Y,U32);\
+INST_EQ3(X,Y,U64);\
+INST_EQ3(X,Y,F32);\
+INST_EQ3(X,Y,F64);\
+INST_EQ3(X,Y,(##));\
+INST_EQ3(X,Y,Addr#);\
+INST_EQ3(X,Y,());\
+INST_EQ3(X,Y,ByteArray#)
+
+#define INST_EQ(X)\
+INST_EQ2(X,I);\
+INST_EQ2(X,I8);\
+INST_EQ2(X,I16);\
+INST_EQ2(X,I32);\
+INST_EQ2(X,I64);\
+INST_EQ2(X,U);\
+INST_EQ2(X,U8);\
+INST_EQ2(X,U16);\
+INST_EQ2(X,U32);\
+INST_EQ2(X,U64);\
+INST_EQ2(X,F32);\
+INST_EQ2(X,F64);\
+INST_EQ2(X,(##));\
+INST_EQ2(X,Addr#);\
+INST_EQ2(X,());\
+INST_EQ2(X,ByteArray#)
+
+
+instance (≡) (x ∷ K (##)) where {_ ≡ _ = T#; _ ≠ _ = F#}
+
+INST_EQ(I)
+INST_EQ(I8)
+INST_EQ(I16)
+INST_EQ(I32)
+INST_EQ(I64)
+INST_EQ(U)
+INST_EQ(U8)
+INST_EQ(U16)
+INST_EQ(U32)
+INST_EQ(U64)
+INST_EQ(F32)
+INST_EQ(F64)
+INST_EQ((##))
+INST_EQ(Addr#)
+INST_EQ(())
+INST_EQ(ByteArray#)

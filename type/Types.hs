@@ -141,6 +141,15 @@ type family Small a = sa | sa → a where
   Small Array# = SmallArray#
   Small MutableArray# = SmallMutableArray#
 
+newtype Slice x = Array_Off_Len# (# Array# x, I, I #)
+newtype MutableSlice s x = MutableArray_Off_Len# (# MutableArray# s x, I, I #)
+newtype SmallSlice x = SmallArray_Off_Len# (# SmallArray# x, I, I #)
+newtype SmallMutableSlice s x = SmallMutableArray_Off_Len# (# SmallMutableArray# s x, I, I #)
+
+newtype ConstRef x = Array_Off# (# Array# x, I #)
+newtype SmallConstRef x = SmallArray_Off# (# SmallArray# x, I #)
+newtype Ref s x = MutableArray_Off# (# MutableArray# s x, I #)
+newtype SmallRef s x = SmallMutableArray_Off# (# SmallMutableArray# s x, I #)
 
 -- | An unboxed vector with offset and length.
 type UnboxedSlice ∷ ∀ {r}. T r → K (# ByteArray#, I , I #)

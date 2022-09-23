@@ -10,12 +10,9 @@ class Copy src dst s where
   -- but this is not checked.
   --
   -- Warning: this can fail with an unchecked exception.
-  copy ∷ ∀ x. dst ∋ x ⇒ src x
-       → I -- ^ Source Offset (bytes)
-       → dst x
-       → I -- ^ Destination Offset (bytes)
-       → I -- ^ Number of elements to copy
-       → ST_ s
+  copy ∷ ∀ x. dst ∋ x ⇒ src x → dst x → ST_ s
+
+{-
 
 instance Copy Array# (MutableArray# s) s where copy = copyArray# @_ @s
 instance Copy (MutableArray# s) (MutableArray# s) s where copy = copyMutableArray#
@@ -49,3 +46,4 @@ instance Copy ForeignArray# (PinnedMutableArray# s) s where
 instance Copy (ForeignMutableArray# s) (PinnedMutableArray# s) s where
   copy ∷ ∀ x. PinnedMutableArray# s ∋ x ⇒ ForeignMutableArray# s x → I → PinnedMutableArray# s x → I → I → ST_ s
   copy (coerce @_ @Addr# → src) (size @x → i) dst (size @x → j) (size @x → l) = coerce copyAddrToByteArray# (src +. i) dst j l
+  -}
