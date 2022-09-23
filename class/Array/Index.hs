@@ -5,10 +5,9 @@ import Memset
 import qualified GHC.Types as GHC
 import Action
 
-
 -- | Operations for containers of contiguous primitive values.
-type (∈) ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
-class x ∈ a where
+type (∈#) ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
+class x ∈# a where
   -- | Index an element. 
   (!) ∷ a x → I {- ^ Offset in elements -} → x
   -- | Read an element.
@@ -23,14 +22,14 @@ class x ∈ a where
 -- @index#@ Forces the indexing but not the value. For more laziness use 'A.Box.indexLazy#'
 --
 -- @new@ uses sharing
-instance x ∈ Array# where
+instance x ∈# Array# where
   write = writeArray#
   (!!) = readArray#
   (!) a i = case indexArray# a i of (# a #) → a
   set# a off n x = go 0# where
     go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
                            1# → \s→s
-instance (x ∷ T_) ∈ Array# where
+instance (x ∷ T_) ∈# Array# where
   write = writeArray#
   (!!) = readArray#
   (!) a i = case indexArray# a i of (# a #) → a
@@ -43,14 +42,14 @@ instance (x ∷ T_) ∈ Array# where
 -- @index#@ Forces the indexing but not the value. For more laziness use 'A.Box.Small.indexLazy#'
 --
 -- @new@ uses sharing
-instance x ∈ SmallArray# where
+instance x ∈# SmallArray# where
   write = writeSmallArray#
   (!!) = readSmallArray# 
   (!) a i = case indexSmallArray# a i of (# a #) → a
   set# a off n x = go 0# where
     go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
                            1# → \s→s
-instance (x ∷ T_) ∈ SmallArray# where
+instance (x ∷ T_) ∈# SmallArray# where
   write = writeSmallArray# 
   (!!) = readSmallArray# 
   (!) a i = case indexSmallArray# a i of (# a #) → a
@@ -59,13 +58,13 @@ instance (x ∷ T_) ∈ SmallArray# where
                            1# → \s→s
 
 #define INST_IN(TY,TA,IX,RD,WR,SET) \
-instance (x ≑ TY) ⇒ x ∈ (TA) where {\
+instance (x ≑ TY) ⇒ x ∈# (TA) where {\
   (!) = coerce IX#; \
   (!!) = coerce RD# ; \
   write = coerce WR# ; \
   set# a i n x = unio (SET# (coerce a) i n (coerce x))}
 #define INST_IN_SPEC(TY,TA,IX,RD,WR,SET) \
-instance {-# OVERLAPPING #-} (TY) ∈ (TA) where {\
+instance {-# OVERLAPPING #-} (TY) ∈# (TA) where {\
   (!) = coerce IX#; \
   (!!) = coerce RD# ; \
   write = coerce WR# ; \
@@ -98,28 +97,8 @@ INST_IN_SPEC(Char#,ForeignArray#,indexWideCharOffAddr,readWideCharOffAddr,writeW
 INST_IN(Addr#,UnboxedArray#,indexAddrArray,readAddrArray,writeAddrArray,setAddrArray)
 INST_IN(Addr#,ForeignArray#,indexAddrOffAddr,readAddrOffAddr,writeAddrOffAddr,setAddrOffAddr)
 
-
-
-
-{-
-INST_UNBOX(I)
-INST_UNBOX(I8)
-INST_UNBOX(I16)
-INST_UNBOX(I32)
-INST_UNBOX(I64)
-INST_UNBOX(U)
-INST_UNBOX(U8)
-INST_UNBOX(U16)
-INST_UNBOX(U32)
-INST_UNBOX(U64)
-INST_UNBOX(Char)
-INST_UNBOX(Char8)
-INST_UNBOX(Addr#)
--- INST_UNBOX((P_Stable s))
--}
-
 -- | Bit indexing (no @read#@ or @write@)
---instance B ∈ U where index# u i = B# (geWord# (and# u (uncheckedShiftL# 1## (word2Int# u))) 1## )
+--instance B ∈# U where index# u i = B# (geWord# (and# u (uncheckedShiftL# 1## (word2Int# u))) 1## )
 
 unio ∷ GHC.IO () → ST_ s
 unio (GHC.IO io) s = case unsafeCoerce# io s of (# s' , _ #) → s'

@@ -143,8 +143,29 @@ type family Small a = sa | sa → a where
 
 
 -- | An unboxed vector with offset and length.
-newtype Buffer = Bytes_Off_Len# (# ByteArray# , I , I #)
-newtype Buffer_Pinned = PinnedBytes_Off_Len# (# ByteArray# , I , I #)
+type UnboxedSlice ∷ ∀ {r}. T r → K (# ByteArray#, I , I #)
+newtype UnboxedSlice x = Bytes_Off_Len# (# ByteArray# , I , I #)
+type UnboxedMutableSlice ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I , I #)
+newtype UnboxedMutableSlice s x = MBytes_Off_Len# (# MutableByteArray# s, I , I #)
+type PinnedSlice ∷ ∀ {r}. T r → K (# ByteArray#, I , I #)
+newtype PinnedSlice x = PinnedBytes_Off_Len# (# ByteArray# , I , I #)
+type PinnedMutableSlice ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I , I #)
+newtype PinnedMutableSlice s x = PinnedMBytes_Off_Len# (# MutableByteArray# s, I , I #)
+
+type UnboxedConstRef ∷ ∀ {r}. T r → K (# ByteArray#, I #)
+newtype UnboxedConstRef x = Bytes_Off# (# ByteArray#, I #)
+type UnboxedRef ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I #)
+newtype UnboxedRef s x = MBytes_Off# (# MutableByteArray# s, I #)
+
+type PinnedConstRef ∷ ∀ {r}. T r → K (# ByteArray#, I #)
+newtype PinnedConstRef x = PinnedBytes_Off# (# ByteArray#, I #)
+type PinnedRef ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I #)
+newtype PinnedRef s x = MPinnedBytes_Off# (# MutableByteArray# s, I #)
+
+type ForeignSlice ∷ ∀ {r}. T r → K (# Addr#, I #)
+newtype ForeignSlice x = Addr_Len# (# Addr#, I #)
+type ForeignMutableSlice ∷ ∀ {r}. ★ → T r → K (# Addr#, I #)
+newtype ForeignMutableSlice s x = MAddr_Len# (# Addr#, I #)
 
 -- Pinned to an address and gaurenteed not to be moved by GC.
 type UnboxedArray# ∷ ∀ {r}. T r → T_

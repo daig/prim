@@ -117,18 +117,38 @@ instance Cast I (P_Stable_Name a) where cast = stableNameToInt#
 
 -- copyByteArray# src src_ofs dst dst_ofs n
 
--- | Extract (copy) the live portion of a 'Buffer'
-instance Cast ByteArray# Buffer where
+-- | Extract (copy) the live portion of a 'UnboxedSlice'
+instance Cast (UnboxedArray# x) (UnboxedSlice x) where
   cast (Bytes_Off_Len# (# x, off, n #)) = runST ST.do
     mv <- newByteArray# n
     cast (copyByteArray# x off mv 0# n)
     v <- unsafeFreezeByteArray# mv
-    return v
+    return (coerce v)
+
+-- | Extract (copy) the live portion of a 'UnboxedRef'
+instance Cast (UnboxedArray# x) (UnboxedConstRef x) where
+  cast (Bytes_Off# (# x, off #)) = runST ST.do
+    let n = sizeofByteArray# x -# off
+    mv <- newByteArray# n
+    cast (copyByteArray# x off mv 0# n)
+    v <- unsafeFreezeByteArray# mv
+    return (coerce v)
+
+-- | Extract (copy) the live portion of a 'UnboxedRef'
+instance Cast (PinnedArray# x) (PinnedConstRef x) where
+  cast (PinnedBytes_Off# (# x, off #)) = runST ST.do
+    let n = sizeofByteArray# x -# off
+    mv <- newByteArray# n
+    cast (copyByteArray# x off mv 0# n)
+    v <- unsafeFreezeByteArray# mv
+    return (coerce v)
+
+-- TODO: fix size logic
   
 
 -- | Wrap (no copy) 'ByteArray#' in a full-size 'Buffer'
-instance Cast Buffer ByteArray# where
-  cast x = Bytes_Off_Len# (# x, 0#, sizeofByteArray# x #)
+instance Cast (UnboxedSlice x) (UnboxedArray# x) where
+  cast x = Bytes_Off_Len# (# coerce x, 0#, sizeofByteArray# (coerce x) #)
 
 instance Cast Addr# ByteArray# where cast = byteArrayContents#
 instance Cast Addr# (MutableByteArray# s) where cast = mutableByteArrayContents#

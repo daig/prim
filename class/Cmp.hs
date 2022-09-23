@@ -8,7 +8,8 @@ import GHC.Prim qualified as GHC
 
 infix 4 >, ≥, <, ≤, ≡, ≠, `cmp`
 class (≡) (a ∷ T r) where (≡), (≠) ∷ a → a → B#
-class (≡) a ⇒ (≤) (a ∷ T r) where
+type (≤) ∷ ∀ {r}. T r → C
+class (≡) a ⇒ (≤) a where
   (>),(≥),(<),(≤) ∷ a → a → B#
   cmp ∷ a → a → Ordering
   -- | Minimum value
@@ -232,16 +233,25 @@ instance (≡) (P_Stable_Name a) where
   (≡) = coerce eqStableName#
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Value_ equality
-instance (≡) Buffer where
+instance (≡) (UnboxedSlice x) where
   a ≡ b = case cmp a b of EQ → T#; _ → F#
   as ≠ bs = (¬) (as ≡ bs)
 -- | _Reference_ equality
-instance (≡) Buffer_Pinned where
+instance (≡) (PinnedSlice x) where
   PinnedBytes_Off_Len# (# a, i, n #) ≡ PinnedBytes_Off_Len# (# b , j, m #)
     = B# ((i ==# j) `andI#` (n ==# m) `andI#` sameByteArray# a b)
   as ≠ bs = (¬) (as ≡ bs)
+
+instance (≤) (PinnedSlice x) where
+  cmp x y = if cast (x ≡ y) then EQ else coerce (cmp @(UnboxedSlice x)) x y
+  a < b = cmp a b ≡ LT
+  a > b = cmp a b ≡ GT
+  a ≥ b = cmp a b ≠ LT
+  a ≤ b = cmp a b ≠ GT
+  min x y = if cast (x ≤ y) then x else y
+  max x y = if cast (x ≥ y) then x else y
   
-instance (≤) Buffer where
+instance (≤) (UnboxedSlice x) where
   Bytes_Off_Len# (# a, i, n #) `cmp` Bytes_Off_Len# (# b , j, m #)
     = case cmp n m of
         EQ → Ordering# (compareByteArrays# a i b j n)
