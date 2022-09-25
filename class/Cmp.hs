@@ -1,5 +1,5 @@
 {-# LANGUAGE StandaloneKindSignatures #-}
-{-# LANGUAGE CPP, UnliftedDatatypes #-}
+{-# LANGUAGE CPP #-}
 module Cmp where
 import Coerce
 import {-# source #-} Bits
@@ -301,6 +301,25 @@ instance (≤) (ForeignMutableSlice s x) where
   min x y = if cast (x ≤ y) then x else y
   max x y = if cast (x ≥ y) then x else y
 
+
+
+#ifndef TUPLE_INSTS
+instance ((≡) x, (≡) y, (≡) z) ⇒ (≡) (# (x ∷ K ByteArray#), (y ∷ K I) , (z ∷ K I) #) where
+  (# x1, x2, x3 #) ≡ (# y1, y2, y3 #) = x1 ≡ y1 ∧ x2 ≡ y2 ∧ x3 ≡ y3
+  as ≠ bs = (¬) (as ≡ bs)
+
+instance ((≡) x,(≡) y) ⇒ (≡) (# (x ∷ K Addr#), (y ∷ K I) #) where
+  (# x1, x2 #) ≡ (# y1, y2 #) = x1 ≡ y1 ∧ x2 ≡ y2
+  as ≠ bs = (¬) (as ≡ bs)
+
+instance ((≡) x,(≡) y) ⇒ (≡) (# (x ∷ K ByteArray#), (y ∷ K I) #) where
+  (# x1, x2 #) ≡ (# y1, y2 #) = x1 ≡ y1 ∧ x2 ≡ y2
+  as ≠ bs = (¬) (as ≡ bs)
+#endif
+
+-- Define equality for all tuples up to size 3
+#ifdef TUPLE_INSTS
+
 #define INST_EQ3(X,Y,Z)\
 instance ((≡) x, (≡) y, (≡) z) ⇒ (≡) (# (x ∷ K X), (y ∷ K Y) , (z ∷ K Z) #) where { ;\
   (# x1, x2, x3 #) ≡ (# y1, y2, y3 #) = x1 ≡ y1 ∧ x2 ≡ y2 ∧ x3 ≡ y3 ;\
@@ -364,3 +383,5 @@ INST_EQ((##))
 INST_EQ(Addr#)
 INST_EQ(())
 INST_EQ(ByteArray#)
+
+#endif

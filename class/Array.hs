@@ -8,6 +8,7 @@ import Num
 -- | Create new uninitialized arrays.
 type New# ∷ ∀ {rx}. (T rx → T_) → Constraint
 class New# a where
+  -- | Create a new _uninitizlized_ array
   new# ∷ a ∋ x ⇒ I {-^ size in elements -} → ST s (M a s x)
 
 type Array ∷ ∀ {rx}. (T rx → T_) → Constraint

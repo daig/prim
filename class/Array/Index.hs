@@ -1,13 +1,18 @@
-{-# language CPP #-}
+{-# language UndecidableSuperClasses, InstanceSigs, CPP #-}
 module Array.Index where
 import Prim
 import Memset
 import qualified GHC.Types as GHC
 import Action
+import Do.ST as ST
+import Array
+import Cast
+
+
 
 -- | Operations for containers of contiguous primitive values.
 type (∈#) ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
-class x ∈# a where
+class a ∋ x ⇒ x ∈# a where
   -- | Index an element. 
   (!) ∷ a x → I {- ^ Offset in elements -} → x
   -- | Read an element.
@@ -16,6 +21,22 @@ class x ∈# a where
   write ∷ M a s x → I → x → ST_ s
   -- | Set all elements.
   set# ∷ M a s x → I {- ^ offset -} → I {- ^ # elements to set -} → x → ST_ s
+
+-- | Create new uninitialized arrays.
+type New ∷ ∀ {rx} {r}. (T rx → T r) → Constraint
+class New a where
+  -- | Create a new array with all elements initialized to the same value.
+  new ∷ x ∈# a ⇒ I {-^ size in elements -} → x → ST s (M a s x)
+
+instance New Array# where new = newArray#
+instance New SmallArray# where new = newSmallArray#
+
+instance New UnboxedArray# where
+  new ∷ ∀ x s. x ∈# UnboxedArray# ⇒ I → x → ST s (M UnboxedArray# s x)
+  new n e = ST.do
+    ma ← new# n
+    cast (set# ma 0# n e)
+    return ma
 
 -- | "A.Box".
 --

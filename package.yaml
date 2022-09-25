@@ -14,6 +14,16 @@ license: MIT
 verbatim:
   cabal-version: 3.4
 
+flags:
+  tuple-insts:
+    description: Generate lots of instances for tuples and sums
+    manual: true
+    default: false
+
+when:
+  - condition: flag(tuple-insts)
+    cpp-options: -DTUPLE_INSTS
+
 default-extensions:
   - MagicHash
   - FunctionalDependencies

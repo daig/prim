@@ -463,4 +463,4 @@ type family a × n = t | t → a n where
 -- | A trivially satisfied 'Constraint'
 type OK ∷ ∀ {r}. T r → Constraint
 class OK a
-instance OK a
+instance OK (a ∷ T r)
