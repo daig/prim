@@ -8,6 +8,8 @@ import GHC.Word
 import GHC.Prim qualified as GHC
 import GHC.CString
 import {-# source #-} Bits
+import {-# source #-} Num
+import Prim
 
 -- | Nontrivial but conceptually-unique conversions between types. Use with care!
 type Cast ∷ forall {r ∷ RuntimeRep} {r' ∷ RuntimeRep}. T r → T r' → C
@@ -148,16 +150,16 @@ instance Cast U I64 where cast i = int2Word# (int64ToInt# i)
 instance Cast I (P_Stable_Name a) where cast = stableNameToInt#
 
 -- | Extract (copy) the live portion of a 'UnboxedSlice'
-instance Cast (UnboxedArray# x) (UnboxedSlice x) where
-  cast (Bytes_Off_Len# (# x, off, n #)) = runST ST.do
+instance Prim x ⇒ Cast (UnboxedArray# x) (UnboxedSlice x) where
+  cast (Bytes_Off_Len# (# x, size @x → off, size @x → n #)) = runST ST.do
     mv <- newByteArray# n
     cast (copyByteArray# x off mv 0# n)
     v <- unsafeFreezeByteArray# mv
     return (coerce v)
 
 -- | Extract (copy) the live portion of a 'UnboxedConstRef'
-instance Cast (UnboxedArray# x) (UnboxedConstRef x) where
-  cast (Bytes_Off# (# x, off #)) = runST ST.do
+instance Prim x ⇒ Cast (UnboxedArray# x) (UnboxedConstRef x) where
+  cast (Bytes_Off# (# x, size @x → off #)) = runST ST.do
     let n = sizeofByteArray# x -# off
     mv <- newByteArray# n
     cast (copyByteArray# x off mv 0# n)
@@ -165,20 +167,17 @@ instance Cast (UnboxedArray# x) (UnboxedConstRef x) where
     return (coerce v)
 
 -- | Extract (copy) the live portion of a 'UnboxedRef'
-instance Cast (PinnedArray# x) (PinnedConstRef x) where
-  cast (PinnedBytes_Off# (# x, off #)) = runST ST.do
+instance Prim x ⇒ Cast (PinnedArray# x) (PinnedConstRef x) where
+  cast (PinnedBytes_Off# (# x, size @x → off #)) = runST ST.do
     let n = sizeofByteArray# x -# off
     mv <- newByteArray# n
     cast (copyByteArray# x off mv 0# n)
     v <- unsafeFreezeByteArray# mv
     return (coerce v)
 
--- TODO: fix size logic
-  
-
 -- | Wrap (no copy) 'ByteArray#' in a full-size 'Buffer'
-instance Cast (UnboxedSlice x) (UnboxedArray# x) where
-  cast x = Bytes_Off_Len# (# coerce x, 0#, sizeofByteArray# (coerce x) #)
+instance Prim x ⇒ Cast (UnboxedSlice x) (UnboxedArray# x) where
+  cast x = Bytes_Off_Len# (# coerce x, 0#, sizeofByteArray# (coerce x) / size @x 1# #)
 
 instance Cast Addr# ByteArray# where cast = byteArrayContents#
 instance Cast Addr# (MutableByteArray# s) where cast = mutableByteArrayContents#
@@ -198,6 +197,7 @@ instance Cast I Addr# where cast = addr2Int#
 instance Cast (IO a) (STM a) where cast = unsafeCoerce# (atomically# @a)
 
 instance Cast Bool B# where cast = coerce isTrue#
+instance Cast B# Bool where cast p = B# if p then 1# else 0#
 
 -- | Convert a tag and a (possibly invalid) value into an unboxed '(?)'
 -- | Convert a tag (_True_ if it's _Err_) and a value into an unboxed 'Result'.
