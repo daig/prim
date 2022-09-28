@@ -184,6 +184,7 @@ newtype ForeignSlice x = Addr_Len# (# Addr#, I #)
 type ForeignMutableSlice ∷ ∀ {r}. ★ → T r → K (# Addr#, I #)
 newtype ForeignMutableSlice s x = MAddr_Len# (# Addr#, I #)
 
+
 -- Pinned to an address and gaurenteed not to be moved by GC.
 type UnboxedArray# ∷ ∀ {r}. T r → T_
 newtype UnboxedArray# x = ByteArray# ByteArray#
@@ -199,43 +200,39 @@ newtype PinnedArray# x = PinnedByteArray# ByteArray#
 type PinnedMutableArray# ∷ ∀ {r}. ★ → T r → T_
 newtype PinnedMutableArray# s x = PinnedMutableByteArray# (MutableByteArray# s)
 
-type A ∷ ∀ {r}. T r → T_
+type A ∷ ∀ {rs} {r}. T rs → T r → T_
 -- | Primitive array type.
 -- The concrete representation can be determined by the kind of its contents
-type family A (x ∷ T r) = a | a → r where
-  A (x ∷ T# _) = Array# x
-  A (x ∷ K I) = UnboxedArray# x
-  A (x ∷ K I8) = UnboxedArray# x
-  A (x ∷ K I16) = UnboxedArray# x
-  A (x ∷ K I32) = UnboxedArray# x
-  A (x ∷ K I64) = UnboxedArray# x
-  A (x ∷ K U) = UnboxedArray# x
-  A (x ∷ K U8) = UnboxedArray# x
-  A (x ∷ K U16) = UnboxedArray# x
-  A (x ∷ K U32) = UnboxedArray# x
-  A (x ∷ K U64) = UnboxedArray# x
-  A (x ∷ K F32) = UnboxedArray# x
-  A (x ∷ K F64) = UnboxedArray# x
-  A (x ∷ K Addr#) = UnboxedArray# x
+type family A (s ∷ T rs) (x ∷ T r) = a | a → rs r where
+  A X (x ∷ T# _) = Array# x
+  A X (x ∷ K I) = UnboxedArray# x
+  A X (x ∷ K I8) = UnboxedArray# x
+  A X (x ∷ K I16) = UnboxedArray# x
+  A X (x ∷ K I32) = UnboxedArray# x
+  A X (x ∷ K I64) = UnboxedArray# x
+  A X (x ∷ K U) = UnboxedArray# x
+  A X (x ∷ K U8) = UnboxedArray# x
+  A X (x ∷ K U16) = UnboxedArray# x
+  A X (x ∷ K U32) = UnboxedArray# x
+  A X (x ∷ K U64) = UnboxedArray# x
+  A X (x ∷ K F32) = UnboxedArray# x
+  A X (x ∷ K F64) = UnboxedArray# x
+  A X (x ∷ K Addr#) = UnboxedArray# x
+  A s (x ∷ T# _) = MutableArray# s x
+  A s (x ∷ K I) = UnboxedMutableArray# s x
+  A s (x ∷ K I8) = UnboxedMutableArray# s x
+  A s (x ∷ K I16) = UnboxedMutableArray# s x
+  A s (x ∷ K I32) = UnboxedMutableArray# s x
+  A s (x ∷ K I64) = UnboxedMutableArray# s x
+  A s (x ∷ K U) = UnboxedMutableArray# s x
+  A s (x ∷ K U8) = UnboxedMutableArray# s x
+  A s (x ∷ K U16) = UnboxedMutableArray# s x
+  A s (x ∷ K U32) = UnboxedMutableArray# s x
+  A s (x ∷ K U64) = UnboxedMutableArray# s x
+  A s (x ∷ K F32) = UnboxedMutableArray# s x
+  A s (x ∷ K F64) = UnboxedMutableArray# s x
+  A s (x ∷ K Addr#) = UnboxedMutableArray# s x
 
-type A' ∷ ∀ {r}. ★ → T r → T_
--- | Primitive array type.
--- The concrete representation can be determined by the kind of its contents
-type family A' s (x ∷ T r) = a | a → r where
-  A' s (x ∷ T# _) = MutableArray# s x
-  A' s (x ∷ K I) = UnboxedMutableArray# s x
-  A' s (x ∷ K I8) = UnboxedMutableArray# s x
-  A' s (x ∷ K I16) = UnboxedMutableArray# s x
-  A' s (x ∷ K I32) = UnboxedMutableArray# s x
-  A' s (x ∷ K I64) = UnboxedMutableArray# s x
-  A' s (x ∷ K U) = UnboxedMutableArray# s x
-  A' s (x ∷ K U8) = UnboxedMutableArray# s x
-  A' s (x ∷ K U16) = UnboxedMutableArray# s x
-  A' s (x ∷ K U32) = UnboxedMutableArray# s x
-  A' s (x ∷ K U64) = UnboxedMutableArray# s x
-  A' s (x ∷ K F32) = UnboxedMutableArray# s x
-  A' s (x ∷ K F64) = UnboxedMutableArray# s x
-  A' s (x ∷ K Addr#) = UnboxedMutableArray# s x
 
 {-
 type P ∷ ∀ {r} {ra}. ★ → T r → T ra
@@ -280,8 +277,6 @@ newtype ForeignArray# x = ConstAddr# Addr#
 type ForeignMutableArray# ∷ ∀ {r}. ★ → T r → K Addr#
 newtype ForeignMutableArray# s x = Addr# Addr#
 
--- | The empty "void" type
-data X
 
 newtype P_Async x = TVar# (TVar# Transaction x)
 -- | A synchronising variable, used for communication between concurrent threads.
@@ -333,7 +328,7 @@ type P_Stable_Name ∷ T# l → T_
 type P_Stable_Name = StableName#
 
 -- | The uninhabited ("Void") type
-newtype X# ∷ T (SumRep '[]) where X# ∷ X# → X#
+newtype X ∷ T (SumRep '[]) where X ∷ X → X
 
 type Box ∷ ∀ {r}. T r → ★
 type family Box x = b | b → x where

@@ -10,6 +10,7 @@ import Cast
 
 
 
+
 -- | Operations for containers of contiguous primitive values.
 type (∈#) ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
 class a ∋ x ⇒ x ∈# a where

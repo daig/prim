@@ -7,5 +7,5 @@
 --
 -- They are not aliased, in general @"foo"\# ≠ "foo"\#@
 --------------------------------------------------------------------
-module String.C (type S, len#) where
+module String.C (type S#) where
 

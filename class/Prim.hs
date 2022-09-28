@@ -28,9 +28,9 @@ type Prim ∷ forall {r}. T r → Constraint
 class Prim (x ∷ T r) where
   size ∷ I {- ^ # elements -} → I {- ^ size in bytes -}
   align ∷ I → I
-  (!#) ∷ A U8 → I {- ^ index in bytes -} → x
-  (!!#) ∷ A' s U8 → I {- ^ index in # bytes -} → ST s x
-  write# ∷ A' s U8 → I {- ^ index in # bytes -} → x → ST_ s
+  (!#) ∷ A X U8 → I {- ^ index in bytes -} → x
+  (!!#) ∷ A s U8 → I {- ^ index in # bytes -} → ST s x
+  write# ∷ A s U8 → I {- ^ index in # bytes -} → x → ST_ s
 
 #define INST_PRIM(TY,SI,AL,IB,RB,WB) \
 instance (x ≑ TY) ⇒ Prim (x) where {\
