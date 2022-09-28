@@ -17,7 +17,7 @@ instance Fold (S# UTF8) Char (a → a) where fold = coerce (unpackFoldrCStringUt
 #define INST_FOLD_LATIN(A)\
 instance Fold (S# Latin1) Char ((a ∷ K A) → a) where {\
     fold (S# s) f r0 = go (ConstAddr# s) r0 \
-      where go p r = let !(Char8# ch) = p!0# in if cast (ch ≡ '\0'#) then r else cast ch `f` go (p +. 1#) r}
+      where go p r = let !(Char8# ch) = p!0# in if ch ≡ '\0'# then r else cast ch `f` go (p +. 1#) r}
 
 INST_FOLD_LATIN(I)
 INST_FOLD_LATIN(I8)
@@ -38,7 +38,7 @@ unpackFoldrCStringUtf9# ∷ S# UTF8 → (Char# → t → t) → t → t
 unpackFoldrCStringUtf9# (S# p0) f r0 = go (ConstAddr# @Char8# p0) r0
   where
     go p r = let !(Char8# ch) = p!0#
-                in if cast (ch ≡ '\0'#) then r else
+                in if ch ≡ '\0'# then r else
           let !n = byteCount ch
           in unpackUtf8Char# n ch p `f` go (p +. n) r
 
@@ -60,9 +60,9 @@ data ByteCount = One | Two | Three | Four
 {-# INLINE byteCount #-}
 byteCount ∷ Char# → ByteCount
 byteCount ch
-    | cast (ch ≡ '\x7F'#) = One
-    | cast (ch ≡ '\xDF'#) = Two
-    | cast (ch ≡ '\xEF'#) = Three
+    | ch ≡ '\x7F'# = One
+    | ch ≡ '\xDF'# = Two
+    | ch ≡ '\xEF'# = Three
     | T                   = Four
 
 instance ForeignArray# Char8# +. ByteCount where

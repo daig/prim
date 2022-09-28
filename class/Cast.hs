@@ -12,7 +12,7 @@ import {-# source #-} Num
 import Prim
 
 -- | Nontrivial but conceptually-unique conversions between types. Use with care!
-type Cast ∷ forall {r ∷ RuntimeRep} {r' ∷ RuntimeRep}. T r → T r' → C
+type Cast ∷ forall {r} {r'}. T r → T r' → C
 class Cast b a where cast ∷ a → b
 
 -- | Numeric conversion
@@ -198,6 +198,28 @@ instance Cast (IO a) (STM a) where cast = unsafeCoerce# (atomically# @a)
 
 instance Cast Bool B# where cast = coerce isTrue#
 instance Cast B# Bool where cast p = B# if p then 1# else 0#
+
+#define INST_CAST_CMP(X)\
+instance Cast ((x ∷ K X) → x → Bool) (x → x → B#) where {cast f = \a b → cast (f a b)}
+
+INST_CAST_CMP(I)
+INST_CAST_CMP(I8)
+INST_CAST_CMP(I16)
+INST_CAST_CMP(I32)
+INST_CAST_CMP(I64)
+INST_CAST_CMP(U)
+INST_CAST_CMP(U8)
+INST_CAST_CMP(U16)
+INST_CAST_CMP(U32)
+INST_CAST_CMP(U64)
+INST_CAST_CMP(F32)
+INST_CAST_CMP(F64)
+INST_CAST_CMP((##))
+INST_CAST_CMP(())
+INST_CAST_CMP(Addr#)
+INST_CAST_CMP(ByteArray#)
+INST_CAST_CMP((# ByteArray#, I #))
+INST_CAST_CMP((# ByteArray#, I, I #))
 
 -- | Convert a tag and a (possibly invalid) value into an unboxed '(?)'
 -- | Convert a tag (_True_ if it's _Err_) and a value into an unboxed 'Result'.

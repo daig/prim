@@ -79,6 +79,8 @@ import GHC.Word (Word(..))
 import GHC.Int (Int(..))
 import GHC.Types qualified as GHC (isTrue#)
 import GHC.Prim.Exception qualified as GHC
+import GHC.Prim qualified as GHC
+import Prelude hiding ((<#),(>#))
 #include "MachDeps.h"
 
 infixl 6 +, -, -?
@@ -134,7 +136,7 @@ instance ℕ U where
 instance ℕ U8 where
   (+) = plusWord8#
   (-) = subWord8#
-  a -? b = cast (# a > b, a - b #)
+  a -? b = cast (# a ># b, a - b #)
   (×) = timesWord8#
   (/) = quotWord8#
   (%) = remWord8#
@@ -143,7 +145,7 @@ instance ℕ U8 where
 instance ℕ U16 where
   (+) = plusWord16#
   (-) = subWord16#
-  a -? b = cast (# a > b, a - b #)
+  a -? b = cast (# a ># b, a - b #)
   (×) = timesWord16#
   (/) = quotWord16#
   (%) = remWord16#
@@ -152,7 +154,7 @@ instance ℕ U16 where
 instance ℕ U32 where
   (+) = plusWord32#
   (-) = subWord32#
-  a -? b = cast (# a > b, a - b #)
+  a -? b = cast (# a ># b, a - b #)
   (×) = timesWord32#
   (/) = quotWord32#
   (%) = remWord32#
@@ -185,7 +187,7 @@ instance ℤ I where
   (//) = quotInt#
   (%%) = remInt#
   (//%%) = quotRemInt#
-  sgn a = Ordering# (coerce (a ># 0#) -# (a <# 0#))
+  sgn a = Ordering# (coerce (a GHC.># 0#) -# (a GHC.<# 0#))
 
 
 instance ℕ I8 where
@@ -224,7 +226,7 @@ instance ℤ I8 where
   (//) = quotInt8#
   (%%) = remInt8#
   (//%%) = quotRemInt8#
-  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+  sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 7##
 
 instance ℤ I16 where
@@ -232,14 +234,14 @@ instance ℤ I16 where
   (//) = quotInt16#
   (%%) = remInt16#
   (//%%) = quotRemInt16#
-  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+  sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 15##
 instance ℤ I32 where
   negate = negateInt32#
   (//) = quotInt32#
   (%%) = remInt32#
   (//%%) = quotRemInt32#
-  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+  sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 31##
 instance ℤ I64 where
   negate = negateInt64#
@@ -248,7 +250,7 @@ instance ℤ I64 where
   (cast → a) //%% (cast → b) =
     case quotRemInt# a b of (# q, r #) → (# cast q, cast r #)
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 63##
-  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+  sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
 
 instance ℕ F32 where
   (+) = plusFloat#
@@ -263,7 +265,7 @@ instance ℤ F32 where
   _ %% _ = 0.0#
   x //%% y = (# x / y , 0.0# #)
   abs = fabsFloat#
-  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+  sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
 instance ℝ F32 where
   exp = expFloat#
   expm1 = expm1Float#
@@ -293,7 +295,7 @@ instance ℤ F64 where
   _ %% _ = 0.0##
   x //%% y = (# x / y , 0.0## #)
   abs = fabsDouble#
-  sgn a = Ordering# (coerce (a > cast 0#) -# coerce (a < cast 0#))
+  sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
 instance ℝ F64 where
   exp = expDouble#
   expm1 = expm1Double#
@@ -315,75 +317,75 @@ instance 𝕌 U where
   log2 w = (minusWord# WORD_SIZE_IN_BITS## 1##) `minusWord#` clz w
   -- | Logarithm for an arbitrary base
   log# = \cases
-   b _ | cast (b ≤ 1##) → case GHC.raiseOverflow of !_ → 0##
+   b _ | b ≤ 1## → case GHC.raiseOverflow of !_ → 0##
    2## a → log2 a
    b a → case go b of (# _, e' #) → e'
           where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) → go l
               (# _  , _ #) → (# a, 0## #)
-            go pw = if cast (a < pw) then (# a, 0## #)
+            go pw = if a < pw then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) → if cast (q < pw)
+                     (# q, e #) → if q < pw
                            then (# q      , 2## × e       #)
-                                   else (# q % pw , 2## × e + 1## #)
+                           else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U8 where
   log2 w = cast 7## `subWord8#` cast (clz w)
   log# = \cases
-   b _ | cast (b ≤ cast 1##) → case GHC.raiseOverflow of !_ → cast 0##
+   b _ | b ≤ cast 1## → case GHC.raiseOverflow of !_ → cast 0##
    (cast → 2##) a → log2 a
    (cast → b) (cast → a) → case go b of (# _, e' #) → cast e'
           where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) → go l
               (# _  , _ #) → (# a, 0## #)
-            go pw = if cast (a < pw) then (# a, 0## #)
+            go pw = if a < pw then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) → if cast (q < pw)
+                     (# q, e #) → if q < pw
                            then (# q      , 2## × e       #)
-                                   else (# q % pw , 2## × e + 1## #)
+                           else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U16 where
   log2 w = cast 15## `subWord16#` cast (clz w)
   log# = \cases
-   b _ | cast (b ≤ cast 1##) → case GHC.raiseOverflow of !_ → cast 0##
+   b _ | b ≤ cast 1## → case GHC.raiseOverflow of !_ → cast 0##
    (cast → 2##) a → log2 a
    (cast → b) (cast → a) → case go b of (# _, e' #) → cast e'
           where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) → go l
               (# _  , _ #) → (# a, 0## #)
-            go pw = if cast (a < pw) then (# a, 0## #)
+            go pw = if a < pw then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) → if cast (q < pw)
+                     (# q, e #) → if q < pw
                                    then (# q      , 2## × e       #)
                                    else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U32 where
   log2 w = cast 31## `subWord32#` cast (clz w)
   log# = \cases
-   b _ | cast (b ≤ cast 1##) → case GHC.raiseOverflow of !_ → cast 0##
+   b _ | b ≤ cast 1## → case GHC.raiseOverflow of !_ → cast 0##
    (cast → 2##) a → log2 a
    (cast → b) (cast → a) → case go b of (# _, e' #) → cast e'
           where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) → go l
               (# _  , _ #) → (# a, 0## #)
-            go pw = if cast (a < pw) then (# a, 0## #)
+            go pw = if a < pw then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) → if cast (q < pw)
+                     (# q, e #) → if q < pw
                            then (# q      , 2## × e       #)
-                                   else (# q % pw , 2## × e + 1## #)
+                           else (# q % pw , 2## × e + 1## #)
 instance 𝕌 U64 where
   log2 w = cast 63## `subWord64#` cast (clz w)
   log# = \cases
-   b _ | cast (b ≤ cast 1##) → case GHC.raiseOverflow of !_ → cast 0##
+   b _ | b ≤ cast 1## → case GHC.raiseOverflow of !_ → cast 0##
    (cast → 2##) a → log2 a
    (cast → b) (cast → a) → case go b of (# _, e' #) → cast e'
           where
             goSqr pw = case timesWord2# pw pw of
               (# 0##, l #) → go l
               (# _  , _ #) → (# a, 0## #)
-            go pw = if cast (a < pw) then (# a, 0## #)
+            go pw = if a < pw then (# a, 0## #)
                     else case goSqr pw of
-                     (# q, e #) → if cast (q < pw)
+                     (# q, e #) → if q < pw
                            then (# q      , 2## × e       #)
-                                   else (# q % pw , 2## × e + 1## #)
+                           else (# q % pw , 2## × e + 1## #)

@@ -34,8 +34,8 @@ INST_OFF_BOX_REF(SmallRef s,SmallMutableArray_Off)
 #define INST_OFF_BOX_SLICE(A,CON)\
 instance (A x       ) +. I where { CON# (# a, i, n #) +. j = CON# (# a, i + j, n - j #) } ;\
 instance (A (x ∷ T_)) +. I where { CON# (# a, i, n #) +. j = CON# (# a, i + j, n - j #) } ;\
-instance (A x       ) +? I where {x@(CON# (# a, i, n #)) +? j = if cast (j ≤ n) then (# | x +. j #) else  (# (##) | #) } ;\
-instance (A (x ∷ T_)) +? I where {x@(CON# (# a, i, n #)) +? j = if cast (j ≤ n) then (# | x +. j #) else  (# (##) | #) } ;\
+instance (A x       ) +? I where {x@(CON# (# a, i, n #)) +? j = if j ≤ n then (# | x +. j #) else  (# (##) | #) } ;\
+instance (A (x ∷ T_)) +? I where {x@(CON# (# a, i, n #)) +? j = if j ≤ n then (# | x +. j #) else  (# (##) | #) } ;\
 
 INST_OFF_BOX_SLICE(Slice,Array_Off_Len)
 INST_OFF_BOX_SLICE(SmallSlice,SmallArray_Off_Len)
@@ -54,21 +54,21 @@ instance (UnboxedSlice TY) +. I where { ;\
 instance (UnboxedMutableSlice s TY) +. I where { ;\
   MBytes_Off_Len# (# a, i, n #) +. j = MBytes_Off_Len# (# a, i + j, n - j #) } ;\
 instance (UnboxedSlice TY) +? I where { ;\
-  x@(Bytes_Off_Len# (# a, i, n #)) +? j = if cast (j ≤ n) then (# | x +. j #) else  (# (##) | #) } ;\
+  x@(Bytes_Off_Len# (# a, i, n #)) +? j = if j ≤ n then (# | x +. j #) else  (# (##) | #) } ;\
 instance (UnboxedMutableSlice s TY) +? I where { ;\
-  x@(MBytes_Off_Len# (# a, i, n #)) +? j = if cast (j ≤ n) then (# | x +. j #) else  (# (##) | #) } ;\
+  x@(MBytes_Off_Len# (# a, i, n #)) +? j = if j ≤ n then (# | x +. j #) else  (# (##) | #) } ;\
 instance (ForeignSlice TY) +. I where { ;\
   Addr_Len# (# a, n #) +. i = let j = size @TY i in Addr_Len# (# a +. j, n - j #) } ;\
 instance (ForeignMutableSlice s TY) +. I where { ;\
   MAddr_Len# (# a, n #) +. i = let j = size @TY i in MAddr_Len# (# a +. j, n - j #) } ;\
 instance (ForeignSlice TY) +? I where { ;\
   Addr_Len# x@(# a, n #) +? i = let j = size @TY i ;\
-                                in if cast (j ≤ n) ;\
+                                in if j ≤ n ;\
                                    then (# | Addr_Len# (# a +. j, n - j #) #) ;\
                                    else (# (##) | #) } ;\
 instance (ForeignMutableSlice s TY) +? I where { ;\
   MAddr_Len# x@(# a, n #) +? i = let j = size @TY i ;\
-                                 in if cast (j ≤ n) ;\
+                                 in if j ≤ n ;\
                                     then (# | MAddr_Len# (# a +. j, n - j #) #) ;\
                                     else (# (##) | #) }
 
