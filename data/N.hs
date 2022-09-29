@@ -3,6 +3,9 @@ import GHC.Num.Natural
 import GHC.Num.BigNat
 import GHC.Types qualified as GHC
 import GHC.Types (Bool(..),Word)
+import Coerce
+import Swap 
+import N.Big
 
 valid'# ∷ N → B#
 valid'# = coerce naturalCheck#
@@ -21,11 +24,42 @@ one' = naturalIsOne
 pattern Z ← (naturalIsZero → True) where Z = naturalZero
 pattern One ← (naturalIsOne → True) where One = naturalOne
 
+-- Logarithms
 log2' ∷ N → (# (##) | U #)
 log2' = naturalIsPowerOf2#
 
-instance Cast N BigNat# where cast = naturalFromBigNat#
-instance Cast BigNat# N where cast = naturalToBigNat#
+log2 ∷ N → U
+log2 = naturalLog2#
+
+logU ∷ U → N → U
+logU = naturalLogBaseWord#
+
+log ∷ N → N → U
+log = naturalLogBase#
+
+powMod ∷ N {- ^ base -} → N {- ^ exponent -} → N {- ^ modulo -} → N
+powMod = naturalPowMod
+{-# inline powMod #-}
+
+baseDigits ∷ U {- ^ base -} → N → U {- ^ # of digits in base representation -}
+baseDigits = naturalSizeInBase#
+{-# inline baseDigits #-}
+
+-- Serialization
+
+-- | Write in base-256 representation and return the
+-- number of bytes written.
+write256 ∷ N → M ForeignArray# s U8 → B# {- ^ big endian? -} → ST s U {- ^ number of bytes written -}
+write256 = coerce naturalToAddr#
+
+-- | Read a Natural in base-256 representation from an Addr#.
+--
+-- Null higher limbs are automatically trimed.
+read256 ∷ ForeignMutableSlice s U8 → B# {- ^ big endian? -} → ST s N
+read256 (MAddr_Len# (# p, cast → n #)) = coerce (naturalFromAddr# n p)
+
+instance Cast N Nat where cast = coerce naturalFromBigNat#
+instance Cast Nat N where cast = coerce naturalToBigNat#
 
 instance Cast N U where cast = naturalFromWord#
 -- | Convert the lower bits
@@ -47,25 +81,76 @@ toWord# ∷ N → U
 toWord# = naturalToWordClamp#
 
 -- | Clamp to @maxBound@
-toWord ∷ N → Word 
-toWord = naturalToWordClamp
+clamp ∷ N → Word 
+clamp = naturalToWordClamp
+
+-- | Clamp to @maxBound@
+clamp# ∷ N → U
+clamp# = naturalToWordClamp#
 
 instance (≡) N where
-  (≡) = coerce naturalEq#
-  (≠) = coerce naturalNe#
+  (=#) = coerce naturalEq#
+  (≠#) = coerce naturalNe#
+  (≡) = coerce naturalEq
+  (≠) = coerce naturalNe
 
 instance Cast Ordering GHC.Ordering where
   cast = \case {GHC.LT → LT; GHC.GT → GT; GHC.EQ → EQ}
 
 instance (≤) N where
-  (≤) = coerce naturalLe#
-  (<) = coerce naturalLt#
-  (>) = coerce naturalGt#
-  (≥) = coerce naturalGe#
+  (≤#) = coerce naturalLe#
+  (<#) = coerce naturalLt#
+  (>#) = coerce naturalGt#
+  (≥#) = coerce naturalGe#
+  (≤) = coerce naturalLe
+  (<) = coerce naturalLt
+  (>) = coerce naturalGt
+  (≥) = coerce naturalGe
 --  cmp n m = cast (naturalCompare n m)
   cmp (NS x) (NS y) = cmp x y
   cmp (NB x) (NB y) = cast (bigNatCompare x y)
   cmp (NS _) (NB _) = LT
   cmp (NB _) (NS _) = GT
-  min x y = if cast (x ≤ y) then x else y
-  max x y = if cast (x ≥ y) then x else y
+  min x y = if x ≤ y then x else y
+  max x y = if x ≥ y then x else y
+
+instance Bits N where
+  popCnt = naturalPopCount#
+  (>>#) = naturalShiftR#
+  (>>) = naturalShiftR# -- TODO: check this works
+  (<<#) = naturalShiftL#
+  (<<) = naturalShiftL# -- TODO: check this works
+  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  bit' = coerce naturalTestBit#
+  bit = coerce naturalBit#
+  ctz = \case {NS u → ctz# u; NB u → ctz @Nat (coerce u)}
+  clz = raise# "clz BigNat"
+  pdep = pdep
+  pext = pext
+  byteSwap = byteSwap
+  bitReverse = bitReverse -- TODO: remove these
+
+instance ℕ N where
+  (+) = naturalAdd
+  (-) = naturalSubUnsafe
+  x -? y = naturalSub x y
+  x -?? y = let z' = naturalSub x y in case z' of {(# (##) | #) → (# | x - y #); _ → unsafeCoerce# z'}
+  (×) = naturalMul
+  (/%) = naturalQuotRem#
+  (/) = naturalQuot
+  (%) = naturalRem
+
+instance Logic N where 
+  (∧) = naturalAnd
+  (∨) = naturalOr
+  (¬) = naturalNot
+  (⊕) = naturalXor
+
+naturalNot ∷ N → N; {-# NOINLINE naturalNot #-}
+naturalNot = naturalNot -- TODO: put proper error
+
+{-# RULES "and/notR" forall x y. naturalAnd x (naturalNot y) = naturalAndNot x y #-}
+{-# RULES "and/notL" forall x y. naturalAnd (naturalNot x) y = naturalAndNot y x #-}
+
+
+-- TODO: naturalsubthrow

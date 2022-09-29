@@ -23,4 +23,4 @@ module RTS.CostCentre (CostCentre(CostCentre#)) where
 --
 -- Alternatively, running ghc with @-fprof-auto@ inserts a cost centre
 -- automatically around every binding not marked INLINE.
-newtype CostCentre = CostCentre# P#
+newtype CostCentre = CostCentre# Addr#

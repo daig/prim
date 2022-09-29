@@ -15,7 +15,7 @@ module RTS.CostCentre.Stack
 import RTS.CostCentre
 
 -- | A Cost Centre Stack, represented as a linked list of 'CostCentre'
-newtype Stack = Stack# P#
+newtype Stack = Stack# Addr#
 deriving newtype instance (≡) Stack
 
 -- | Get the 'Stack' associated with a given value

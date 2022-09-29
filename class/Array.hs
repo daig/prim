@@ -4,13 +4,12 @@ import Do.ST as ST
 import Cast
 import Prim
 import Num
-  
--- | Create new uninitialized arrays.
+
 type New# ∷ ∀ {rx}. (T rx → T_) → Constraint
 class New# a where
   -- | Create a new _uninitizlized_ array
   new# ∷ a ∋ x ⇒ I {-^ size in elements -} → ST s (M a s x)
-
+  
 type Array ∷ ∀ {rx}. (T rx → T_) → Constraint
 class New# a ⇒ Array a where
   -- | Make a mutable array immutable, without copying.
@@ -51,8 +50,7 @@ class New# a ⇒ Array a where
           → ST s (M a s x)
 
 instance New# Array# where
-  new# n = let e = raise# "A.Boxed.new#: unintialized index" in ST.do
-                     na <- newArray# n e; return na
+  new# = (`newArray#` raise# "Array#.new#: unintialized index")
 
 -- | "A.Boxed.Big" - @new#@ initializes undefined. @lenM#@ is safe.
 instance Array Array# where
@@ -67,8 +65,7 @@ instance Array Array# where
   cloneM# = cloneMutableArray#
 
 -- | "A.Boxed.Small" - @new#@ initializes undefined. @lenM#@ is safe.
-instance New# SmallArray# where
-  new# n = let ~e = raise# "A.Boxed.Small.new#: unintialized index" in newSmallArray# n e
+instance New# SmallArray# where new# = (`newSmallArray#` raise# "SmallArray#.new#: unintialized index")
 instance Array SmallArray# where
   freeze## = unsafeFreezeSmallArray#
   freeze# = freezeSmallArray#
@@ -111,5 +108,7 @@ instance Array UnboxedArray# where
   clone# ∷ ∀ x. UnboxedArray# ∋ x ⇒ UnboxedArray# x → I → I → UnboxedArray# x
   clone# a (size @x → off) (size @x → n) = runST (ST.do ma <- thaw# a off n; freeze## ma)
 
-instance New# PinnedArray# where new# = coerce newPinnedByteArray#
 deriving via UnboxedArray# instance Array PinnedArray#
+instance New# PinnedArray# where
+  new# ∷ ∀ {r} (x ∷ T r) s. PinnedArray# ∋ x ⇒ I → ST s (M PinnedArray# s x)
+  new# (size @x → n) = coerce newPinnedByteArray# n

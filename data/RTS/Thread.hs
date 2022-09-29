@@ -19,8 +19,8 @@ here ∷ IO Thread
 here = myThreadId#
 -- | Label a thread with the given cstring pointer
 -- Used in debugging output if the RTS was compiled to support it.
-label# ∷ Thread → S# → IO_
-label# = labelThread#
+label# ∷ Thread → S# x → IO_
+label# = coerce labelThread#
 bound' ∷ IO B#
 bound' = coerce isCurrentThreadBound#
 status ∷ Thread → IO (# Status, Cap, B# #)

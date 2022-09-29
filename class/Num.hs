@@ -83,7 +83,7 @@ import GHC.Prim qualified as GHC
 import Prelude hiding ((<#),(>#))
 #include "MachDeps.h"
 
-infixl 6 +, -, -?
+infixl 6 +, -, -??
 infixl 7 ×, /, //
 infixl 7 %, /%, %%, //%%
 
@@ -93,8 +93,10 @@ class (≤) a ⇒ ℕ (a ∷ T r) where
   -- | Subtract without checking overflow
   (-) ∷ a → a → a
   -- | Try to subtract if not overflow.
+  (-?) ∷ a → a → (# (##) | a #)
+  -- | Try to subtract if not overflow.
   -- _Left_ if no overflow. _Right_ if overflow.
-  (-?) ∷ a → a → (# a | a #)
+  (-??) ∷ a → a → (# a | a #)
   -- | Division rounding towards -∞. The behavior is undefined if the first argument is zero.
   (/), (%) ∷ a {- ^ dividend -}  → a {- ^ divisor -} → a
   -- | Satisfies @((x / y) + ((x % y) × y) ≡ x@.
@@ -109,11 +111,13 @@ class ℕ a ⇒ ℤ (a ∷ T r) where
   abs ∷ a → a
   -- | Compare to zero
   sgn ∷ a → Ordering
+-- | Unsigned Integral Types
 class 𝕌 (a ∷ T r) where
   -- | Log base 2
   log2 ∷ a → a
   -- | Log in an arbitrary base
   log# ∷ a → a → a
+  gcd, lcm ∷ a → a → a
 class ℤ a ⇒ ℝ (a ∷ T r) where
   exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a
   -- | @exp x - 1@ but with greater precision for small values of @x@.
@@ -128,7 +132,8 @@ instance ℕ U where
   (+) = plusWord#
   (-) = minusWord#
   (×) = timesWord#
-  a -? b = case subWordC# a b of (# u, oflo #) → cast (# B# oflo, u #)
+  a -? b = case subWordC# a b of (# u, oflo #) → cast (# (¬) (B# oflo), u #)
+  a -?? b = case subWordC# a b of (# u, oflo #) → cast (# B# oflo, u #)
   (/) = quotWord#
   (%) = remWord#
   (/%) = quotRemWord#
@@ -136,7 +141,8 @@ instance ℕ U where
 instance ℕ U8 where
   (+) = plusWord8#
   (-) = subWord8#
-  a -? b = cast (# a ># b, a - b #)
+  a -? b = cast (# a ≤# b, a - b #)
+  a -?? b = cast (# a ># b, a - b #)
   (×) = timesWord8#
   (/) = quotWord8#
   (%) = remWord8#
@@ -145,7 +151,8 @@ instance ℕ U8 where
 instance ℕ U16 where
   (+) = plusWord16#
   (-) = subWord16#
-  a -? b = cast (# a ># b, a - b #)
+  a -? b = cast (# a ≤# b, a - b #)
+  a -?? b = cast (# a ># b, a - b #)
   (×) = timesWord16#
   (/) = quotWord16#
   (%) = remWord16#
@@ -154,7 +161,8 @@ instance ℕ U16 where
 instance ℕ U32 where
   (+) = plusWord32#
   (-) = subWord32#
-  a -? b = cast (# a ># b, a - b #)
+  a -? b = cast (# a ≤# b, a - b #)
+  a -?? b = cast (# a ># b, a - b #)
   (×) = timesWord32#
   (/) = quotWord32#
   (%) = remWord32#
@@ -163,7 +171,8 @@ instance ℕ U32 where
 instance ℕ U64 where
   (+) = plusWord64#
   (-) = subWord64#
-  a -? b = case subWordC# (cast a) (cast b) of (# u, oflo #) → cast (# B# oflo, cast @U64 u #)
+  a -? b = cast (# a ≤# b, a - b #)
+  a -?? b = case subWordC# (cast a) (cast b) of (# u, oflo #) → cast (# B# oflo, cast @U64 u #)
   (×) = timesWord64#
   (/) = quotWord64#
   (%) = remWord64#
@@ -175,7 +184,7 @@ instance ℕ U64 where
 instance ℕ I where
   (+) = (+#)
   (-) = (-#)
-  a -? b = case subIntC# a b of (# i, oflo #) → cast (# B# oflo, i #)
+  a -?? b = case subIntC# a b of (# i, oflo #) → cast (# B# oflo, i #)
   (×) = (*#)
   (%) = modInt#
   (/) = divInt#
@@ -216,7 +225,7 @@ instance ℕ I64 where
   (+) = plusInt64#
   (×) = timesInt64#
   (-) = subInt64#
-  a -? b = case subIntC# (cast a) (cast b) of (# i, oflo #) → cast (# B# oflo, cast @I64 i #)
+  a -?? b = case subIntC# (cast a) (cast b) of (# i, oflo #) → cast (# B# oflo, cast @I64 i #)
   (/) = quotInt64#
   (%) = remInt64#
   x /% y = (# x / y, x % y #)

@@ -435,7 +435,7 @@ unsafeEqualityProof = case unsafeEqualityProof @a @b of UnsafeRefl → UnsafeRef
 --
 -- There are several legitimate ways to use 'unsafeCoerce':
 --
---   1. To coerce e.g. @Int@ to @HValue@, put it in a list of @HValue@,
+--   1. To coerce e.g. @Int@ to 'Any', put it in a list of 'Any',
 --      and then later coerce it back to @Int@ before using it.
 --
 --   2. To produce e.g. @(a+b) :~: (b+a)@ from @unsafeCoerce Refl@.

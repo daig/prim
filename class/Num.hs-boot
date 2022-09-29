@@ -4,7 +4,8 @@ import {-# source #-} Cmp
 
 class (≤) a ⇒ ℕ (a ∷ T r) where
   (+), (×), (-) ∷ a → a → a
-  (-?) ∷ a → a → (# a | a #)
+  (-?) ∷ a → a → (# (##) | a #)
+  (-??) ∷ a → a → (# a | a #)
   (/), (%) ∷ a → a → a
   (/%) ∷ a → a → (# a , a #)
 class ℕ a ⇒ ℤ (a ∷ T r) where
@@ -15,6 +16,7 @@ class ℕ a ⇒ ℤ (a ∷ T r) where
 class 𝕌 (a ∷ T r) where
   log2 ∷ a → a
   log# ∷ a → a → a
+  gcd, lcm ∷ a → a → a
 class ℤ a ⇒ ℝ (a ∷ T r) where
   exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a
   expm1 ∷ a → a

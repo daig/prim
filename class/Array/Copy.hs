@@ -10,40 +10,68 @@ class Copy src dst s where
   -- but this is not checked.
   --
   -- Warning: this can fail with an unchecked exception.
-  copy ∷ ∀ x. dst ∋ x ⇒ src x → dst x → ST_ s
+  (⇉) ∷ ∀ x. dst ∋ x ⇒ src x → dst x → ST_ s
 
-{-
+instance Copy Slice (Ref s) s where
+  Array_Off_Len# (# a, i, n #) ⇉ MutableArray_Off# (# b, j #) = copyArray# a i b j n
+instance Copy (MutableSlice s) (Ref s) s where
+  MutableArray_Off_Len# (# a, i, n #) ⇉ MutableArray_Off# (# b, j #) = copyMutableArray# a i b j n
 
-instance Copy Array# (MutableArray# s) s where copy = copyArray# @_ @s
-instance Copy (MutableArray# s) (MutableArray# s) s where copy = copyMutableArray#
-instance Copy SmallArray# (SmallMutableArray# s) s where copy = copySmallArray#
-instance Copy (SmallMutableArray# s) (SmallMutableArray# s) s where copy = copySmallMutableArray#
+instance Copy SmallSlice (SmallRef s) s where
+  SmallArray_Off_Len# (# a, i, n #) ⇉ SmallMutableArray_Off# (# b, j #) = copySmallArray# a i b j n
+instance Copy (SmallMutableSlice s) (SmallRef s) s where
+  SmallMutableArray_Off_Len# (# a, i, n #) ⇉ SmallMutableArray_Off# (# b, j #) = copySmallMutableArray# a i b j n
 
-instance Copy UnboxedArray# (UnboxedMutableArray# s) s where
-  copy ∷ ∀ x. UnboxedMutableArray# s ∋ x ⇒ UnboxedArray# x → I → UnboxedMutableArray# s x → I → I → ST_ s
-  copy src (size @x → i) dst (size @x → j) (size @x → l) = coerce copyByteArray# src i dst j l
-instance Copy PinnedArray# (PinnedMutableArray# s) s where
-  copy ∷ ∀ x. PinnedMutableArray# s ∋ x ⇒ PinnedArray# x → I → PinnedMutableArray# s x → I → I → ST_ s
-  copy src (size @x → i) dst (size @x → j) (size @x → l) = coerce copyByteArray# src i dst j l
-instance Copy UnboxedArray# (ForeignMutableArray# s) s where
-  copy ∷ ∀ x. ForeignMutableArray# s ∋ x ⇒ UnboxedArray# x → I → ForeignMutableArray# s x → I → I → ST_ s
-  copy src (size @x → i) (coerce @_ @Addr# → dst) (size @x → j) (size @x → l) = coerce copyByteArrayToAddr# src i (dst +. j) l
-instance Copy PinnedArray# (ForeignMutableArray# s) s where
-  copy ∷ ∀ x. ForeignMutableArray# s ∋ x ⇒ PinnedArray# x → I → ForeignMutableArray# s x → I → I → ST_ s
-  copy src (size @x → i) (coerce @_ @Addr# → dst) (size @x → j) (size @x → l) = coerce copyByteArrayToAddr# src i (dst +. j) l
-instance Copy (UnboxedMutableArray# s) (ForeignMutableArray# s) s where
-  copy ∷ ∀ x. ForeignMutableArray# s ∋ x ⇒ UnboxedMutableArray# s x → I → ForeignMutableArray# s x → I → I → ST_ s
-  copy src (size @x → i) (coerce @_ @Addr# → dst) (size @x → j) (size @x → l) = coerce copyMutableByteArrayToAddr# src i (dst +. j) l
-instance Copy ForeignArray# (UnboxedMutableArray# s) s where
-  copy ∷ ∀ x. UnboxedMutableArray# s ∋ x ⇒ ForeignArray# x → I → UnboxedMutableArray# s x → I → I → ST_ s
-  copy (coerce @_ @Addr# → src) (size @x → i) dst (size @x → j) (size @x → l) = coerce copyAddrToByteArray# (src +. i) dst j l
-instance Copy (ForeignMutableArray# s) (UnboxedMutableArray# s) s where
-  copy ∷ ∀ x. UnboxedMutableArray# s ∋ x ⇒ ForeignMutableArray# s x → I → UnboxedMutableArray# s x → I → I → ST_ s
-  copy (coerce @_ @Addr# → src) (size @x → i) dst (size @x → j) (size @x → l) = coerce copyAddrToByteArray# (src +. i) dst j l
-instance Copy ForeignArray# (PinnedMutableArray# s) s where
-  copy ∷ ∀ x. PinnedMutableArray# s ∋ x ⇒ ForeignArray# x → I → PinnedMutableArray# s x → I → I → ST_ s
-  copy (coerce @_ @Addr# → src) (size @x → i) dst (size @x → j) (size @x → l) = coerce copyAddrToByteArray# (src +. i) dst j l
-instance Copy (ForeignMutableArray# s) (PinnedMutableArray# s) s where
-  copy ∷ ∀ x. PinnedMutableArray# s ∋ x ⇒ ForeignMutableArray# s x → I → PinnedMutableArray# s x → I → I → ST_ s
-  copy (coerce @_ @Addr# → src) (size @x → i) dst (size @x → j) (size @x → l) = coerce copyAddrToByteArray# (src +. i) dst j l
-  -}
+instance Copy UnboxedSlice (UnboxedRef s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ UnboxedSlice x → UnboxedRef s x → ST_ s
+  Bytes_Off_Len# (# a, size @x → i, size @x → n #) ⇉ MBytes_Off# (# b, size @x → j #) = copyByteArray# a i b j n
+
+instance Copy PinnedSlice (PinnedRef s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ PinnedSlice x → PinnedRef s x → ST_ s
+  PinnedBytes_Off_Len# (# a, size @x → i, size @x → n #) ⇉ MPinnedBytes_Off# (# b, size @x → j #) = copyByteArray# a i b j n
+
+instance Copy UnboxedSlice (PinnedRef s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ UnboxedSlice x → PinnedRef s x → ST_ s
+  Bytes_Off_Len# (# a, size @x → i, size @x → n #) ⇉ MPinnedBytes_Off# (# b, size @x → j #) = copyByteArray# a i b j n
+
+instance Copy PinnedSlice (UnboxedRef s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ PinnedSlice x → UnboxedRef s x → ST_ s
+  PinnedBytes_Off_Len# (# a, size @x → i, size @x → n #) ⇉ MBytes_Off# (# b, size @x → j #) = copyByteArray# a i b j n
+
+instance Copy (UnboxedMutableSlice s) (UnboxedRef s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ UnboxedMutableSlice s x → UnboxedRef s x → ST_ s
+  MBytes_Off_Len# (# a, size @x → i, size @x → n #) ⇉ MBytes_Off# (# b, size @x → j #) = copyMutableByteArray# a i b j n
+
+instance Copy UnboxedSlice (ForeignMutableArray# s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ UnboxedSlice x → ForeignMutableArray# s x → ST_ s
+  Bytes_Off_Len# (# src, size @x → i, size @x → n #) ⇉ Addr# dst = copyByteArrayToAddr# src i dst n
+
+instance Copy PinnedSlice (ForeignMutableArray# s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ PinnedSlice x → ForeignMutableArray# s x → ST_ s
+  PinnedBytes_Off_Len# (# src, size @x → i, size @x → n #) ⇉ Addr# dst = copyByteArrayToAddr# src i dst n
+
+instance Copy (UnboxedMutableSlice s) (ForeignMutableArray# s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ UnboxedMutableSlice s x → ForeignMutableArray# s x → ST_ s
+  MBytes_Off_Len# (# src, size @x → i, size @x → n #) ⇉ Addr# dst = copyMutableByteArrayToAddr# src i dst n
+
+instance Copy (PinnedMutableSlice s) (ForeignMutableArray# s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ PinnedMutableSlice s x → ForeignMutableArray# s x → ST_ s
+  PinnedMBytes_Off_Len# (# src, size @x → i, size @x → n #) ⇉ Addr# dst = copyMutableByteArrayToAddr# src i dst n
+
+instance Copy ForeignSlice (UnboxedRef s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ ForeignSlice x → UnboxedRef s x → ST_ s
+  Addr_Len# (# src, size @x → n #) ⇉ MBytes_Off# (# dst, i #) = copyAddrToByteArray# src dst i n
+
+instance Copy ForeignSlice (PinnedRef s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ ForeignSlice x → PinnedRef s x → ST_ s
+  Addr_Len# (# src, size @x → n #) ⇉ MPinnedBytes_Off# (# dst, i #) = copyAddrToByteArray# src dst i n
+
+instance Copy (ForeignMutableSlice s) (UnboxedRef s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ ForeignMutableSlice s x → UnboxedRef s x → ST_ s
+  MAddr_Len# (# src, size @x → n #) ⇉ MBytes_Off# (# dst, i #) = copyAddrToByteArray# src dst i n
+
+instance Copy (ForeignMutableSlice s) (PinnedRef s) s where
+  (⇉) ∷ ∀ x. Prim x ⇒ ForeignMutableSlice s x → PinnedRef s x → ST_ s
+  MAddr_Len# (# src, size @x → n #) ⇉ MPinnedBytes_Off# (# dst, i #) = copyAddrToByteArray# src dst i n
+
+-- TODO: add units to sizes eg elts and bytes @Count@

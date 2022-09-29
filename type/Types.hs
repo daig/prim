@@ -12,7 +12,7 @@ import GHC.Num.BigNat
 import GHC.Num.Natural
 
 type N = Natural
-type Nat = BigNat#
+newtype Nat = BigNat# (A X U)
 
 -- | The kind constructor of types abstracted over 'RuntimeRep'
 type T = TYPE

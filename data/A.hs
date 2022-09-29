@@ -6,6 +6,6 @@ module A (type A
          ,module X
          ) where
 import Array as X (Array(..))
-import Array.Index as X (type (∈)(..))
+import Array.Index as X (type (∈#)(..))
 import Array.Copy as X (Copy(..))
 import Array.Shrink as X (Shrink(..))

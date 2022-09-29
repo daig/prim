@@ -9,13 +9,13 @@ import Coerce
 mkApUpd0 ∷ BCO → (# a #)
 mkApUpd0 = mkApUpd0#
 
-new ∷ ∀ a s. A U8 -- ^ instructions
-    → A U8 -- ^ literals
-    → A a -- ^ pointers
+new ∷ ∀ a s. A X U8 -- ^ instructions
+    → A X U8 -- ^ literals
+    → A X a -- ^ pointers
     → I -- ^ arity
-    → A U8 -- ^ static reference table usage bitmap
+    → A X U8 -- ^ static reference table usage bitmap
     → ST s BCO
 new = coerce (newBCO# @a)
 
-getApStackVal ∷ ∀ a b. a → I {- ^ stack depth -} → (?) b {- ^ The AP_STACK, if found -}
+getApStackVal ∷ ∀ a b. a → I {- ^ stack depth -} → (# (##) | b #) {- ^ The AP_STACK, if found -}
 getApStackVal a i = case getApStackVal# a i of (# t, x #) → unsafeCoerce# (# t +# 1#, x #)

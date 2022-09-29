@@ -348,3 +348,9 @@ instance Cast (State# y) (State# x) where cast = unsafeCoerce#
 --
 -- GHC includes a built-in rule for constant folding when the argument is a statically-known literal. That is, a core-to-core pass reduces the expression @cstringLength# "hello"#@ to the constant @5#@.
 instance Cast I (S# Latin1) where cast = coerce cstringLength#
+
+
+-- | Interpret value if valid or fail spectacularly.
+-- The addressing happens when the unboxed tuple is matched,
+-- but the value is not evaluated.
+instance Cast (# a #) Addr# where cast = addrToAny#
