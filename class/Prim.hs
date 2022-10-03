@@ -66,6 +66,8 @@ INST_PRIM(U8,SIZEOF_WORD8,ALIGNMENT_WORD8,indexWord8Array,readWord8Array,writeWo
 INST_PRIM(U16,SIZEOF_WORD16,ALIGNMENT_WORD16,indexWord8ArrayAsWord16,readWord8ArrayAsWord16,writeWord8ArrayAsWord16)
 INST_PRIM(U32,SIZEOF_WORD32,ALIGNMENT_WORD32,indexWord8ArrayAsWord32,readWord8ArrayAsWord32,writeWord8ArrayAsWord32)
 INST_PRIM(U64,SIZEOF_WORD64,ALIGNMENT_WORD64,indexWord8ArrayAsWord64,readWord8ArrayAsWord64,writeWord8ArrayAsWord64)
+INST_PRIM(F32,SIZEOF_FLOAT,ALIGNMENT_FLOAT,indexWord8ArrayAsFloat,readWord8ArrayAsFloat,writeWord8ArrayAsFloat)
+INST_PRIM(F64,SIZEOF_DOUBLE,ALIGNMENT_DOUBLE,indexWord8ArrayAsDouble,readWord8ArrayAsDouble,writeWord8ArrayAsDouble)
 INST_PRIM(Addr#,SIZEOF_HSPTR,ALIGNMENT_HSPTR,indexWord8ArrayAsAddr,readWord8ArrayAsAddr,writeWord8ArrayAsAddr)
 
 -- Override the word representation for chars

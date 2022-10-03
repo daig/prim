@@ -10,7 +10,6 @@ import Cast
 
 
 
-
 -- | Operations for containers of contiguous primitive values.
 type (∈#) ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
 class a ∋ x ⇒ x ∈# a where
@@ -112,6 +111,10 @@ INST_IN(U32,UnboxedArray#,indexWord32Array,readWord32Array,writeWord32Array,setW
 INST_IN(U32,ForeignArray#,indexWord32OffAddr,readWord32OffAddr,writeWord32OffAddr,setWord32OffAddr)
 INST_IN(U64,UnboxedArray#,indexWord64Array,readWord64Array,writeWord64Array,setWord64Array)
 INST_IN(U64,ForeignArray#,indexWord64OffAddr,readWord64OffAddr,writeWord64OffAddr,setWord64OffAddr)
+INST_IN(F32,UnboxedArray#,indexFloatArray,readFloatArray,writeFloatArray,setFloatArray)
+INST_IN(F32,ForeignArray#,indexFloatOffAddr,readFloatOffAddr,writeFloatOffAddr,setFloatOffAddr)
+INST_IN(F64,UnboxedArray#,indexDoubleArray,readDoubleArray,writeDoubleArray,setDoubleArray)
+INST_IN(F64,ForeignArray#,indexDoubleOffAddr,readDoubleOffAddr,writeDoubleOffAddr,setDoubleOffAddr)
 INST_IN_SPEC(Char8#,UnboxedArray#,indexCharArray,readCharArray,writeCharArray,setCharArray)
 INST_IN_SPEC(Char8#,ForeignArray#,indexCharOffAddr,readCharOffAddr,writeCharOffAddr,setCharOffAddr)
 INST_IN_SPEC(Char#,UnboxedArray#,indexWideCharArray,readWideCharArray,writeWideCharArray,setWideCharArray)
@@ -125,3 +128,4 @@ INST_IN(Addr#,ForeignArray#,indexAddrOffAddr,readAddrOffAddr,writeAddrOffAddr,se
 unio ∷ GHC.IO () → ST_ s
 unio (GHC.IO io) s = case unsafeCoerce# io s of (# s' , _ #) → s'
 {-# INLINE unio #-}
+
