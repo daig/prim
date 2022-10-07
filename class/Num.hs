@@ -88,7 +88,7 @@ infixl 7 ×, /, //
 infixl 7 %, /%, %%, //%%
 
 -- |Satisfies @((((x / y) × y) + (x % y) ≡ x@. The
-class (≤) a ⇒ ℕ (a ∷ T r) where
+class (≤) a ⇒ Num# (a ∷ T r) where
   (+), (×) ∷ a → a → a
   -- | Subtract without checking overflow
   (-) ∷ a → a → a
@@ -101,7 +101,7 @@ class (≤) a ⇒ ℕ (a ∷ T r) where
   (/), (%) ∷ a {- ^ dividend -}  → a {- ^ divisor -} → a
   -- | Satisfies @((x / y) + ((x % y) × y) ≡ x@.
   (/%) ∷ a → a → (# a , a #)
-class ℕ a ⇒ ℤ (a ∷ T r) where
+class Num# a ⇒ Integral# (a ∷ T r) where
   -- |Satisfies @((((x // y) × y) + (x %% y) ≡ x@.
   (//),(%%) ∷ a → a → a
   -- | Rounds towards 0. The behavior is undefined if the first argument is zero.
@@ -118,7 +118,7 @@ class 𝕌 (a ∷ T r) where
   -- | Log in an arbitrary base
   log# ∷ a → a → a
   gcd, lcm ∷ a → a → a
-class ℤ a ⇒ ℝ (a ∷ T r) where
+class Integral# a ⇒ Floating# (a ∷ T r) where
   exp,log,sqrt,sin,cos,tan,asin,acos,atan,sinh,cosh,tanh ∷ a → a
   -- | @exp x - 1@ but with greater precision for small values of @x@.
   -- Inverse of 'log1p'
@@ -128,7 +128,7 @@ class ℤ a ⇒ ℝ (a ∷ T r) where
   log1p ∷ a → a
   (**) ∷ a → a → a
 
-instance ℕ U where
+instance Num# U where
   (+) = plusWord#
   (-) = minusWord#
   (×) = timesWord#
@@ -138,7 +138,7 @@ instance ℕ U where
   (%) = remWord#
   (/%) = quotRemWord#
 
-instance ℕ U8 where
+instance Num# U8 where
   (+) = plusWord8#
   (-) = subWord8#
   a -? b = cast (# a ≤# b, a - b #)
@@ -148,7 +148,7 @@ instance ℕ U8 where
   (%) = remWord8#
   (/%) = quotRemWord8#
 
-instance ℕ U16 where
+instance Num# U16 where
   (+) = plusWord16#
   (-) = subWord16#
   a -? b = cast (# a ≤# b, a - b #)
@@ -158,7 +158,7 @@ instance ℕ U16 where
   (%) = remWord16#
   (/%) = quotRemWord16#
 
-instance ℕ U32 where
+instance Num# U32 where
   (+) = plusWord32#
   (-) = subWord32#
   a -? b = cast (# a ≤# b, a - b #)
@@ -168,7 +168,7 @@ instance ℕ U32 where
   (%) = remWord32#
   (/%) = quotRemWord32#
 
-instance ℕ U64 where
+instance Num# U64 where
   (+) = plusWord64#
   (-) = subWord64#
   a -? b = cast (# a ≤# b, a - b #)
@@ -181,7 +181,7 @@ instance ℕ U64 where
 -- | Low word of signed integer multiply
 -- 
 -- Modular functions have built-in rules.
-instance ℕ I where
+instance Num# I where
   (+) = (+#)
   (-) = (-#)
   a -?? b = case subIntC# a b of (# i, oflo #) → cast (# B# oflo, i #)
@@ -189,7 +189,7 @@ instance ℕ I where
   (%) = modInt#
   (/) = divInt#
   (/%) = divModInt#
-instance ℤ I where
+instance Integral# I where
   negate = negateInt#
   abs i = (i ⊕ nsign) -# nsign where
     nsign = i >># minusWord# WORD_SIZE_IN_BITS## 1##
@@ -199,7 +199,7 @@ instance ℤ I where
   sgn a = Ordering# (coerce (a GHC.># 0#) -# (a GHC.<# 0#))
 
 
-instance ℕ I8 where
+instance Num# I8 where
   (+) = plusInt8#
   (-) = subInt8#
   (×) = timesInt8#
@@ -207,21 +207,21 @@ instance ℕ I8 where
   (%) = remInt8#
   x /% y = (# x / y, x % y #)
 
-instance ℕ I16 where
+instance Num# I16 where
   (+) = plusInt16#
   (-) = subInt16#
   (×) = timesInt16#
   (/) = quotInt16#
   (%) = remInt16#
   x /% y = (# x / y, x % y #)
-instance ℕ I32 where
+instance Num# I32 where
   (+) = plusInt32#
   (×) = timesInt32#
   (-) = subInt32#
   (/) = quotInt32#
   (%) = remInt32#
   x /% y = (# x / y, x % y #)
-instance ℕ I64 where
+instance Num# I64 where
   (+) = plusInt64#
   (×) = timesInt64#
   (-) = subInt64#
@@ -230,7 +230,7 @@ instance ℕ I64 where
   (%) = remInt64#
   x /% y = (# x / y, x % y #)
 
-instance ℤ I8 where
+instance Integral# I8 where
   negate = negateInt8#
   (//) = quotInt8#
   (%%) = remInt8#
@@ -238,21 +238,21 @@ instance ℤ I8 where
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 7##
 
-instance ℤ I16 where
+instance Integral# I16 where
   negate = negateInt16#
   (//) = quotInt16#
   (%%) = remInt16#
   (//%%) = quotRemInt16#
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 15##
-instance ℤ I32 where
+instance Integral# I32 where
   negate = negateInt32#
   (//) = quotInt32#
   (%%) = remInt32#
   (//%%) = quotRemInt32#
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 31##
-instance ℤ I64 where
+instance Integral# I64 where
   negate = negateInt64#
   (//) = quotInt64#
   (%%) = remInt64#
@@ -261,21 +261,21 @@ instance ℤ I64 where
   abs i = (i ⊕ nsign) - nsign where nsign = i >># 63##
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
 
-instance ℕ F32 where
+instance Num# F32 where
   (+) = plusFloat#
   (-) = minusFloat#
   (×) = timesFloat#
   (/) = divideFloat#
   _ % _ = 0.0#
   x /% y = (# x / y , 0.0# #)
-instance ℤ F32 where
+instance Integral# F32 where
   negate = negateFloat#
   (//) = divideFloat#
   _ %% _ = 0.0#
   x //%% y = (# x / y , 0.0# #)
   abs = fabsFloat#
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
-instance ℝ F32 where
+instance Floating# F32 where
   exp = expFloat#
   expm1 = expm1Float#
   log = logFloat#
@@ -291,21 +291,21 @@ instance ℝ F32 where
   cosh = coshFloat#
   tanh = tanhFloat#
   (**) = powerFloat#
-instance ℕ F64 where
+instance Num# F64 where
   (+) = (+##)
   (-) = (-##)
   (×) = (*##)
   (/) = (/##)
   _ % _ = 0.0##
   x /% y = (# x / y , 0.0## #)
-instance ℤ F64 where
+instance Integral# F64 where
   negate = negateDouble#
   (//) = (/##)
   _ %% _ = 0.0##
   x //%% y = (# x / y , 0.0## #)
   abs = fabsDouble#
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
-instance ℝ F64 where
+instance Floating# F64 where
   exp = expDouble#
   expm1 = expm1Double#
   log = logDouble#
