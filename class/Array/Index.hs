@@ -13,8 +13,8 @@ import Num
 
 
 -- | Operations for containers of contiguous primitive values.
-type (∈#) ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
-class a ∋ x ⇒ x ∈# a where
+type Index ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
+class a ∋ x ⇒ Index x a where
   -- | Index an element. 
   (!) ∷ a x → I {- ^ Offset in elements -} → x
   -- | Read an element.
@@ -28,9 +28,9 @@ class a ∋ x ⇒ x ∈# a where
 type New ∷ ∀ {rx}. (T rx → T_) → Constraint
 class Array a ⇒ New a where
   -- | Create a new array with all elements initialized to the same value.
-  new ∷ x ∈# a ⇒ I {-^ size in elements -} → x → ST s (M a s x)
+  new ∷ Index x a ⇒ I {-^ size in elements -} → x → ST s (M a s x)
   -- | Create an array with all elements initialized by index
-  gen ∷ x ∈# a ⇒ I → (I → x) → a x
+  gen ∷ Index x a ⇒ I → (I → x) → a x
 
 #define INST_NEW_BOX(L)\
 instance New (Array# ∷ T# L → T_) where { ;\
@@ -51,7 +51,7 @@ INST_NEW_BOX(Lifted)
 
 #define INST_NEW_UB(A)\
 instance New (UnboxedArray# ∷ K A → T_) where { ;\
-  new ∷ ∀ (x ∷ K A) s. x ∈# UnboxedArray# ⇒ I → x → ST s (M UnboxedArray# s x) ;\
+  new ∷ ∀ (x ∷ K A) s. Index x UnboxedArray# ⇒ I → x → ST s (M UnboxedArray# s x) ;\
   new n e = ST.do { ;\
     ma ← new# n ;\
     cast (set# ma 0# n e) ;\
@@ -80,14 +80,14 @@ INST_NEW_UB(Addr#)
 -- @index#@ Forces the indexing but not the value. For more laziness use 'A.Box.indexLazy#'
 --
 -- @new@ uses sharing
-instance x ∈# Array# where
+instance Index x Array# where
   write = writeArray#
   (!!) = readArray#
   (!) a i = case indexArray# a i of (# a #) → a
   set# a off n x = go 0# where
     go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
                            1# → \s→s
-instance (x ∷ T_) ∈# Array# where
+instance Index (x ∷ T_) Array# where
   write = writeArray#
   (!!) = readArray#
   (!) a i = case indexArray# a i of (# a #) → a
@@ -100,14 +100,14 @@ instance (x ∷ T_) ∈# Array# where
 -- @index#@ Forces the indexing but not the value. For more laziness use 'A.Box.Small.indexLazy#'
 --
 -- @new@ uses sharing
-instance x ∈# SmallArray# where
+instance Index x SmallArray# where
   write = writeSmallArray#
   (!!) = readSmallArray# 
   (!) a i = case indexSmallArray# a i of (# a #) → a
   set# a off n x = go 0# where
     go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
                            1# → \s→s
-instance (x ∷ T_) ∈# SmallArray# where
+instance Index (x ∷ T_) SmallArray# where
   write = writeSmallArray# 
   (!!) = readSmallArray# 
   (!) a i = case indexSmallArray# a i of (# a #) → a
@@ -116,13 +116,13 @@ instance (x ∷ T_) ∈# SmallArray# where
                            1# → \s→s
 
 #define INST_IN(TY,TA,IX,RD,WR,SET) \
-instance (x ≑ TY) ⇒ x ∈# (TA) where {\
+instance (x ≑ TY) ⇒ Index x (TA) where {\
   (!) = coerce IX#; \
   (!!) = coerce RD# ; \
   write = coerce WR# ; \
   set# a i n x = unio (SET# (coerce a) i n (coerce x))}
 #define INST_IN_SPEC(TY,TA,IX,RD,WR,SET) \
-instance {-# OVERLAPPING #-} (TY) ∈# (TA) where {\
+instance {-# OVERLAPPING #-} Index (TY) (TA) where {\
   (!) = coerce IX#; \
   (!!) = coerce RD# ; \
   write = coerce WR# ; \
@@ -158,9 +158,6 @@ INST_IN_SPEC(Char#,UnboxedArray#,indexWideCharArray,readWideCharArray,writeWideC
 INST_IN_SPEC(Char#,ForeignArray#,indexWideCharOffAddr,readWideCharOffAddr,writeWideCharOffAddr,setWideCharOffAddr)
 INST_IN(Addr#,UnboxedArray#,indexAddrArray,readAddrArray,writeAddrArray,setAddrArray)
 INST_IN(Addr#,ForeignArray#,indexAddrOffAddr,readAddrOffAddr,writeAddrOffAddr,setAddrOffAddr)
-
--- | Bit indexing (no @read#@ or @write@)
---instance B ∈# U where index# u i = B# (geWord# (and# u (uncheckedShiftL# 1## (word2Int# u))) 1## )
 
 unio ∷ GHC.IO () → ST_ s
 unio (GHC.IO io) s = case unsafeCoerce# io s of (# s' , _ #) → s'

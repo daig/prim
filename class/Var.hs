@@ -28,10 +28,10 @@ instance  Read (TY) UnboxedRef where { read( MBytes_Off# (# a, i #)) = READ_REF#
 instance (x ≑ TY) ⇒ Read (x) ForeignMutableArray# where { read = coerce (`READ#` 0#)}
 
 -- | Set the entire slice
-instance x ∈# ForeignArray# ⇒ Write x ForeignMutableSlice where (MAddr_Len# (# p, n #)) .= x = set# (Addr# p) 0# n x
+instance Index x ForeignArray# ⇒ Write x ForeignMutableSlice where (MAddr_Len# (# p, n #)) .= x = set# (Addr# p) 0# n x
 
 -- | Set the entire slice
-instance x ∈# UnboxedArray# ⇒ Write x UnboxedMutableSlice where (MBytes_Off_Len# (# a, i, n #)) .= x = set# (MutableByteArray# a) i n x
+instance Index x UnboxedArray# ⇒ Write x UnboxedMutableSlice where (MBytes_Off_Len# (# a, i, n #)) .= x = set# (MutableByteArray# a) i n x
 
 #define INST_VAR_SPEC(TY,GET,READ,READ_REF,WRITE,WRITE_REF) \
 instance {-# OVERLAPPING #-} Write (TY) ForeignMutableArray# where { (.=) = coerce (`WRITE#` 0#) } ;\
