@@ -22,10 +22,10 @@ instance Read x IOPort# where read = readIOPort#
 instance Write x IOPort# where r .= x = \s → case writeIOPort# r x s of (# ss , _ #) → ss
 
 #define INST_VAR(TY,GET,READ,READ_REF,WRITE,WRITE_REF) \
-instance (x ≑ TY) ⇒ Write (x) ForeignMutableArray# where { (.=) = coerce (`WRITE#` 0#) } ;\
+instance (Coercible x TY) ⇒ Write (x) ForeignMutableArray# where { (.=) = coerce (`WRITE#` 0#) } ;\
 instance  Write (TY) UnboxedRef where { MBytes_Off# (# a, i #) .= x = WRITE_REF# a i x } ;\
 instance  Read (TY) UnboxedRef where { read( MBytes_Off# (# a, i #)) = READ_REF# a i } ;\
-instance (x ≑ TY) ⇒ Read (x) ForeignMutableArray# where { read = coerce (`READ#` 0#)}
+instance (Coercible x TY) ⇒ Read (x) ForeignMutableArray# where { read = coerce (`READ#` 0#)}
 
 -- | Set the entire slice
 instance Index x ForeignArray# ⇒ Write x ForeignMutableSlice where (MAddr_Len# (# p, n #)) .= x = set# (Addr# p) 0# n x

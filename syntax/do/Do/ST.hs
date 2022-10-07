@@ -1,15 +1,9 @@
 --------------------------------------------------------------------
 -- | Description : Do operations for the primitive ST monad
 --------------------------------------------------------------------
-module Do.ST where
+module Do.ST (runRW#, module Do.ST) where
 import Unsafe.Coerce
 import qualified GHC.Types as GHC
-
--- | Unsafely linearly consume the state token
-escape# ∷ (☸) → (##)
-escape# = unsafeCoerce# \ s → (##)
-(☸) ∷ ∀ {r} (o ∷ T r). ((☸) → o) → o
-(☸) = unsafeCoerce# runRW#
 
 nop ∷ ST s (##)
 nop s = (# s, (##) #)
@@ -47,15 +41,6 @@ class RunST (a ∷ T ra) where runST ∷ (forall s. ST s a) → a
 instance RunST (a ∷ K (A)) where {\
   runST st = case runRW# st of (# _, a #) → a}
 
-
-{-
-class Run (a ∷ T ra) where run ∷ ST s a → a
-#define INST_RUN(A) \
-instance Run (a ∷ K (A)) where {\
-  run io = go (io ☸) where \
-    go ∷ (# (☸) , a #) → a; \
-    go (# s , a #) = (\(##) a → a) (escape# s) a}
--}
 
 class Pure b ⇒ Do (a ∷ T ra) (b ∷ T rb) where
   (>>=) ∷ ST s a → (a → ST s b) → ST s b

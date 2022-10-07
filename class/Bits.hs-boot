@@ -1,8 +1,8 @@
 module Bits where
 
 class Logic (a ∷ T r) where
-  (∧), (∨), (⊕) ∷ a → a → a
-  (¬) ∷ a → a
+  (&&), (||), xor ∷ a → a → a
+  not ∷ a → a
 type Bits ∷ ∀ {r}. T r → Constraint
 class Bits a where
   (<<#) ∷ a → U → a
@@ -19,9 +19,9 @@ class Bits a where
   bitReverse ∷ a → a
   pdep, pext ∷ a → a → a
 
-infixl 3 ∧
-infixl 2 ⊕
-infixl 1 ∨
+infixl 3 &&
+infixl 2 `xor`
+infixl 1 ||
 
 instance Logic B#
 instance Logic I

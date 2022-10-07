@@ -8,8 +8,8 @@ import Cast
 -- | (Bitwise) logical operations on primitive values
 type Logic ∷ ∀ {r}. T r → Constraint
 class Logic a where
-  (∧), (∨), (⊕) ∷ a → a → a
-  (¬) ∷ a → a
+  (&&), (||), xor ∷ a → a → a
+  not ∷ a → a
 -- | Bit shuffling operations
 type Bits ∷ ∀ {r}. T r → Constraint
 class Bits a where
@@ -44,32 +44,32 @@ class Bits a where
   bitReverse ∷ a → a
   pdep, pext ∷ a {-^ source -} → a {-^ mask -} → a
 
-infixl 3 ∧
-infixl 2 ⊕
-infixl 1 ∨
+infixl 3 &&
+infixl 2 `xor`
+infixl 1 ||
 
 infixl 8 <<#, <<, >>, >>#, `shift`
 
 -- | Boolean Operations
 instance Logic B# where
-  (∧) = coerce andI#
-  (∨) = coerce orI#
-  (⊕) = coerce xorI#
-  (¬) = (T# ⊕)
+  (&&) = coerce andI#
+  (||) = coerce orI#
+  xor = coerce xorI#
+  not = (T# `xor`)
 
 instance Logic U where
-  (∧) = and#
-  (∨) = or#
-  (⊕) = xor#
-  (¬) = not#
+  (&&) = and#
+  (||) = or#
+  xor = xor#
+  not = not#
 instance Bits U where
   w <<# i = uncheckedShiftL# w (cast i)
   w >># i = coerce uncheckedShiftRL# w (cast @I i)
-  w << i = if i ≥ WORD_SIZE_IN_BITS## then 0## else w <<# i
-  w >> i = if i ≥ WORD_SIZE_IN_BITS## then 0## else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= WORD_SIZE_IN_BITS## then 0## else w <<# i
+  w >> i = if i >= WORD_SIZE_IN_BITS## then 0## else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (1## <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt = popCnt#
   clz = clz#
   ctz = ctz#
@@ -79,18 +79,18 @@ instance Bits U where
   pext = pext#
 
 instance Logic U8 where
-  (∧) = andWord8#
-  (∨) = orWord8#
-  (⊕) = xorWord8#
-  (¬) = notWord8#
+  (&&) = andWord8#
+  (||) = orWord8#
+  xor = xorWord8#
+  not = notWord8#
 instance Bits U8 where
   w <<# i = uncheckedShiftLWord8# w (cast @I i)
   w >># i = uncheckedShiftRLWord8# w (cast @I i)
-  w << i = if i ≥ 8## then cast 0## else w <<# i
-  w >> i = if i ≥ 8## then cast 0## else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= 8## then cast 0## else w <<# i
+  w >> i = if i >= 8## then cast 0## else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1## <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt w = popCnt8# (cast w)
   clz w = clz8# (cast w)
   ctz w = ctz8# (cast w)
@@ -100,18 +100,18 @@ instance Bits U8 where
   pext s m = cast @U8 (pext8# (cast s) (cast m))
 
 instance Logic U16 where
-  (∧) = andWord16#
-  (∨) = orWord16#
-  (⊕) = xorWord16#
-  (¬) = notWord16#
+  (&&) = andWord16#
+  (||) = orWord16#
+  xor = xorWord16#
+  not = notWord16#
 instance Bits U16 where
   w <<# i = uncheckedShiftLWord16# w (cast @I i)
   w >># i = uncheckedShiftRLWord16# w (cast @I i)
-  w << i = if i ≥ 16## then cast 0## else w <<# i
-  w >> i = if i ≥ 16## then cast 0## else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= 16## then cast 0## else w <<# i
+  w >> i = if i >= 16## then cast 0## else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1## <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt w = popCnt16# (cast w)
   clz w = clz16# (cast w)
   ctz w = ctz16# (cast w)
@@ -121,18 +121,18 @@ instance Bits U16 where
   pext s m = cast @U16 (pext16# (cast s) (cast m))
 
 instance Logic U32 where
-  (∧) = andWord32#
-  (∨) = orWord32#
-  (⊕) = xorWord32#
-  (¬) = notWord32#
+  (&&) = andWord32#
+  (||) = orWord32#
+  xor = xorWord32#
+  not = notWord32#
 instance Bits U32 where
   w <<# i = uncheckedShiftLWord32# w (cast @I i)
   w >># i = uncheckedShiftRLWord32# w (cast @I i)
-  w << i = if i ≥ 32## then cast 0## else w <<# i
-  w >> i = if i ≥ 32## then cast 0## else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= 32## then cast 0## else w <<# i
+  w >> i = if i >= 32## then cast 0## else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1## <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt w = popCnt32# (cast w)
   clz w = clz32# (cast w)
   ctz w = ctz32# (cast w)
@@ -142,18 +142,18 @@ instance Bits U32 where
   pext s m = cast @U32 (pext32# (cast s) (cast m))
 
 instance Logic U64 where
-  (∧) = and64#
-  (∨) = or64#
-  (⊕) = xor64#
-  (¬) = not64#
+  (&&) = and64#
+  (||) = or64#
+  xor = xor64#
+  not = not64#
 instance Bits U64 where
   w <<# i = uncheckedShiftL64# w (cast @I i)
   w >># i = uncheckedShiftRL64# w (cast @I i)
-  w << i = if i ≥ 64## then cast 0## else w <<# i
-  w >> i = if i ≥ 64## then cast 0## else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= 64## then cast 0## else w <<# i
+  w >> i = if i >= 64## then cast 0## else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1## <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt = popCnt64#
   clz = clz64#
   ctz = ctz64#
@@ -163,18 +163,18 @@ instance Bits U64 where
   pext = pext64#
 
 instance Logic I where
-  (∧) = andI#
-  (∨) = orI#
-  (⊕) = xorI#
-  (¬) = notI#
+  (&&) = andI#
+  (||) = orI#
+  xor = xorI#
+  not = notI#
 instance Bits I where
   w <<# i = uncheckedIShiftL# w (cast @I i)
   w >># i = uncheckedIShiftRA# w (cast @I i)
-  w << i = if i ≥ WORD_SIZE_IN_BITS## then cast 0## else w <<# i
-  w >> i = if i ≥ WORD_SIZE_IN_BITS## then cast 0## else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= WORD_SIZE_IN_BITS## then cast 0## else w <<# i
+  w >> i = if i >= WORD_SIZE_IN_BITS## then cast 0## else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (1# <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt i = popCnt# (cast i)
   clz i = clz# (cast i)
   ctz i = ctz# (cast i)
@@ -184,18 +184,18 @@ instance Bits I where
   pext i j = cast (pext# (cast i) (cast j))
 
 instance Logic I8 where
-  a ∧ b = cast (andWord8# (cast a) (cast b))
-  a ∨ b = cast (orWord8# (cast a) (cast b))
-  a ⊕ b = cast (xorWord8# (cast a) (cast b))
-  (¬) a = cast (notWord8# (cast a))
+  a && b = cast (andWord8# (cast a) (cast b))
+  a || b = cast (orWord8# (cast a) (cast b))
+  a `xor` b = cast (xorWord8# (cast a) (cast b))
+  not a = cast (notWord8# (cast a))
 instance Bits I8 where
   w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
-  w << i = if i ≥ 8## then cast 0# else w <<# i
-  w >> i = if i ≥ 8## then cast 0# else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= 8## then cast 0# else w <<# i
+  w >> i = if i >= 8## then cast 0# else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1# <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt i = popCnt8# (cast i)
   clz i = clz8# (cast i)
   ctz i = ctz8# (cast i)
@@ -205,18 +205,18 @@ instance Bits I8 where
   pext i j = cast (cast @U8 (pext8# (cast i) (cast j)))
 
 instance Logic I16 where
-  a ∧ b = cast (andWord16# (cast a) (cast b))
-  a ∨ b = cast (orWord16# (cast a) (cast b))
-  a ⊕ b = cast (xorWord16# (cast a) (cast b))
-  (¬) a = cast (notWord16# (cast a))
+  a && b = cast (andWord16# (cast a) (cast b))
+  a || b = cast (orWord16# (cast a) (cast b))
+  a `xor` b = cast (xorWord16# (cast a) (cast b))
+  not a = cast (notWord16# (cast a))
 instance Bits I16 where
   w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
-  w << i = if i ≥ 16## then cast 0# else w <<# i
-  w >> i = if i ≥ 16## then cast 0# else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= 16## then cast 0# else w <<# i
+  w >> i = if i >= 16## then cast 0# else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1# <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt i = popCnt16# (cast i)
   clz i = clz16# (cast i)
   ctz i = ctz16# (cast i)
@@ -226,18 +226,18 @@ instance Bits I16 where
   pext i j = cast (cast @U16 (pext16# (cast i) (cast j)))
 
 instance Logic I32 where
-  a ∧ b = cast (andWord32# (cast a) (cast b))
-  a ∨ b = cast (orWord32# (cast a) (cast b))
-  a ⊕ b = cast (xorWord32# (cast a) (cast b))
-  (¬) a = cast (notWord32# (cast a))
+  a && b = cast (andWord32# (cast a) (cast b))
+  a || b = cast (orWord32# (cast a) (cast b))
+  a `xor` b = cast (xorWord32# (cast a) (cast b))
+  not a = cast (notWord32# (cast a))
 instance Bits I32 where
   w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
-  w << i = if i ≥ 32## then cast 0# else w <<# i
-  w >> i = if i ≥ 32## then cast 0# else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= 32## then cast 0# else w <<# i
+  w >> i = if i >= 32## then cast 0# else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1# <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt i = popCnt32# (cast i)
   clz i = clz32# (cast i)
   ctz i = ctz32# (cast i)
@@ -247,18 +247,18 @@ instance Bits I32 where
   pext i j = cast (cast @U32 (pext32# (cast i) (cast j)))
 
 instance Logic I64 where
-  a ∧ b = cast (and64# (cast a) (cast b))
-  a ∨ b = cast (or64# (cast a) (cast b))
-  a ⊕ b = cast (xor64# (cast a) (cast b))
-  (¬) a = cast (not64# (cast a))
+  a && b = cast (and64# (cast a) (cast b))
+  a || b = cast (or64# (cast a) (cast b))
+  a `xor` b = cast (xor64# (cast a) (cast b))
+  not a = cast (not64# (cast a))
 instance Bits I64 where
   w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
-  w << i = if i ≥ 64## then cast 0# else w <<# i
-  w >> i = if i ≥ 64## then cast 0# else w >># i
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  w << i = if i >= 64## then cast 0# else w <<# i
+  w >> i = if i >= 64## then cast 0# else w >># i
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit = (cast 1# <<#)
-  bit' x i = cast (bit i ∧ x)
+  bit' x i = cast (bit i && x)
   popCnt i = popCnt64# (cast i)
   clz i = clz64# (cast i)
   ctz i = ctz64# (cast i)

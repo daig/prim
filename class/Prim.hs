@@ -5,31 +5,31 @@ import {-# source #-} Num
 #include "MachDeps.h"
 #include "HsBaseConfig.h"
 
-type (∋) ∷ ∀ {rx} {r}. (T rx → T r) → T rx → Constraint
-type family (∋) a where
-  (∋) Array# = OK
-  (∋) (MutableArray# s) = OK
-  (∋) SmallArray# = OK
-  (∋) (SmallMutableArray# s) = OK
-  (∋) UnboxedArray# = Prim
-  (∋) UnboxedSlice = Prim
-  (∋) PinnedArray# = Prim
-  (∋) PinnedSlice = Prim
-  (∋) UnboxedConstRef = Prim
-  (∋) (UnboxedRef s) = Prim
-  (∋) PinnedConstRef = Prim
-  (∋) (PinnedRef s) = Prim
-  (∋) (UnboxedMutableArray# s) = Prim
-  (∋) (UnboxedMutableSlice s) = Prim
-  (∋) (PinnedMutableArray# s) = Prim
-  (∋) ForeignArray# = Prim
-  (∋) (ForeignMutableArray# s) = Prim
-  (∋) ForeignSlice = Prim
-  (∋) (ForeignMutableSlice s) = Prim
-  (∋) (MutVar# s) = OK
-  (∋) (TVar# s) = OK
-  (∋) (MVar# s) = OK
-  (∋) (IOPort# s) = OK
+type Elt ∷ ∀ {rx} {r}. (T rx → T r) → T rx → Constraint
+type family Elt a where
+  Elt Array# = OK
+  Elt (MutableArray# s) = OK
+  Elt SmallArray# = OK
+  Elt (SmallMutableArray# s) = OK
+  Elt UnboxedArray# = Prim
+  Elt UnboxedSlice = Prim
+  Elt PinnedArray# = Prim
+  Elt PinnedSlice = Prim
+  Elt UnboxedConstRef = Prim
+  Elt (UnboxedRef s) = Prim
+  Elt PinnedConstRef = Prim
+  Elt (PinnedRef s) = Prim
+  Elt (UnboxedMutableArray# s) = Prim
+  Elt (UnboxedMutableSlice s) = Prim
+  Elt (PinnedMutableArray# s) = Prim
+  Elt ForeignArray# = Prim
+  Elt (ForeignMutableArray# s) = Prim
+  Elt ForeignSlice = Prim
+  Elt (ForeignMutableSlice s) = Prim
+  Elt (MutVar# s) = OK
+  Elt (TVar# s) = OK
+  Elt (MVar# s) = OK
+  Elt (IOPort# s) = OK
   
 
 -- | Primitive unboxed, unlifted types that fit natively into raw memory
@@ -42,15 +42,15 @@ class Prim (x ∷ T r) where
   write# ∷ A s U8 → I {- ^ index in # bytes -} → x → ST_ s
 
 #define INST_PRIM(TY,SI,AL,IB,RB,WB) \
-instance (x ≑ TY) ⇒ Prim (x) where {\
-  size = (SI# ×); \
+instance (Coercible x TY) ⇒ Prim (x) where {\
+  size = (SI# *); \
   align i = case i % AL# of {0# → i; off → i + (AL# - off)}; \
   (!#) x = coerce IB# x; \
   (!!#) = coerce RB# ; \
   write# = coerce WB# }
 #define INST_PRIM_SPEC(TY,SI,AL,IB,RB,WB) \
 instance {-# OVERLAPPING #-} Prim (TY) where {\
-  size = (SI# ×); \
+  size = (SI# *); \
   align i = case i % AL# of {0# → i; off → i + (AL# - off)}; \
   (!#) x = coerce IB# x; \
   (!!#) = coerce RB# ; \

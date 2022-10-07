@@ -4,7 +4,7 @@ import Coerce
 
 type Logic_Atomic ∷ ∀ {rx} {r}. ★ → T r → T rx → C
 class Logic_Atomic s v x | v → s x where
-  (⊕=), (∨=), (&=), (⅋=) ∷ v → x → ST s x
+  (|+|=), (|=), (&=), (~&=) ∷ v → x → ST s x
 
 class Num_Atomic (x ∷ T r) where
   (-=), (+=) ∷ ForeignMutableArray# s x → x → ST s x
@@ -13,20 +13,20 @@ type Atomic ∷ ∀ {r}. T r → Constraint
 class Atomic (x ∷ T r) where
   read_atomic ∷ ForeignMutableArray# s x → ST s x
   (.=!) ∷ ForeignMutableArray# s x → x → ST_ s
-  (⇄) ∷ ForeignMutableArray# s x → x → ST s x
+  swap ∷ ForeignMutableArray# s x → x → ST s x
   read_atomicB ∷ UnboxedMutableArray# s x → I →  ST s x
   write_atomicB ∷ UnboxedMutableArray# s x → I → x → ST_ s
 
 instance Logic_Atomic s (ForeignMutableArray# s U) U where
-  (⊕=) = coerce fetchXorWordAddr#
-  (∨=) = coerce fetchOrWordAddr#
+  (|+|=) = coerce fetchXorWordAddr#
+  (|=) = coerce fetchOrWordAddr#
   (&=) = coerce fetchAndWordAddr#
-  (⅋=) = coerce fetchNandWordAddr#
+  (~&=) = coerce fetchNandWordAddr#
 instance Logic_Atomic s (# UnboxedMutableArray# s U, I #) U where
-  (# coerce → m, i #) ⊕= (cast → x) = \s → case fetchXorIntArray# m i x s of (# s', cast → w #) → (# s', w #)
-  (# coerce → m, i #) ∨= (cast → x) = \s → case fetchOrIntArray# m i x s of (# s', cast → w #) → (# s', w #)
+  (# coerce → m, i #) |+|= (cast → x) = \s → case fetchXorIntArray# m i x s of (# s', cast → w #) → (# s', w #)
+  (# coerce → m, i #) |= (cast → x) = \s → case fetchOrIntArray# m i x s of (# s', cast → w #) → (# s', w #)
   (# coerce → m, i #) &= (cast → x) = \s → case fetchAndIntArray# m i x s of (# s', cast → w #) → (# s', w #)
-  (# coerce → m, i #) ⅋= (cast → x) = \s → case fetchNandIntArray# m i x s of (# s', cast → w #) → (# s', w #)
+  (# coerce → m, i #) ~&= (cast → x) = \s → case fetchNandIntArray# m i x s of (# s', cast → w #) → (# s', w #)
 instance Num_Atomic U where
   (-=) = coerce fetchSubWordAddr#
   (+=) = coerce fetchAddWordAddr#
@@ -35,27 +35,27 @@ instance Num_Atomic U where
 instance Atomic U where
   read_atomic = coerce atomicReadWordAddr#
   (.=!) = coerce atomicWriteWordAddr#
-  (⇄) = coerce atomicExchangeWordAddr#
+  swap = coerce atomicExchangeWordAddr#
   (read_atomicB) (coerce → m) i s = case atomicReadIntArray# m i s of (# s', cast → w #) → (# s', w #)
   write_atomicB (coerce → m) i (cast → x) = atomicWriteIntArray# m i x
 
 instance Atomic Addr# where
-  (⇄) = coerce atomicExchangeAddrAddr#
+  swap = coerce atomicExchangeAddrAddr#
   (read_atomicB) (coerce → m) i s = case atomicReadIntArray# m i s of (# s', (cast @Addr# → p) #) → (# s', p #)
   read_atomic (coerce → p) s = case atomicReadWordAddr# p s of (# s', (cast @I → (cast @Addr# → p)) #) → (# s', p #)
   write_atomicB (coerce → m) i (cast @I → x) = atomicWriteIntArray# m i x
   (.=!) (coerce → p) (cast @I → (cast @U → x)) = atomicWriteWordAddr# p x
 
 instance Logic_Atomic s (# UnboxedMutableArray# s I, I #) I where
-  (⊕=) (# m, i #) = coerce fetchXorIntArray# m i
-  (∨=) (# m, i #) = coerce fetchOrIntArray# m i
+  (|+|=) (# m, i #) = coerce fetchXorIntArray# m i
+  (|=) (# m, i #) = coerce fetchOrIntArray# m i
   (&=) (# m, i #) = coerce fetchAndIntArray# m i
-  (⅋=) (# m, i #) = coerce fetchNandIntArray# m i
+  (~&=) (# m, i #) = coerce fetchNandIntArray# m i
 instance Logic_Atomic s (ForeignMutableArray# s I) I where
-  (⊕=) (coerce → p) (cast → x) s = case fetchXorWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
-  (∨=) (coerce → p) (cast → x) s = case fetchOrWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
+  (|+|=) (coerce → p) (cast → x) s = case fetchXorWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
+  (|=) (coerce → p) (cast → x) s = case fetchOrWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
   (&=) (coerce → p) (cast → x) s = case fetchAndWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
-  (⅋=) (coerce → p) (cast → x) s = case fetchNandWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
+  (~&=) (coerce → p) (cast → x) s = case fetchNandWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
 instance Num_Atomic I where
   sub_atomicB m i = coerce fetchSubIntArray# m i
   add_atomicB m i = coerce fetchAddIntArray# m i
@@ -66,7 +66,7 @@ instance Atomic I where
   write_atomicB m i = coerce atomicWriteIntArray# m i
   read_atomic (coerce → p) s = case atomicReadWordAddr# p s of (# s', cast → x #) → (# s', x #)
   (.=!) (coerce → p) (cast → x) = atomicWriteWordAddr# p x
-  (⇄) (coerce → p) i s = case atomicExchangeWordAddr# p (cast i) s of (# s', (cast → i') #) → (# s', i' #)
+  swap (coerce → p) i s = case atomicExchangeWordAddr# p (cast i) s of (# s', (cast → i') #) → (# s', i' #)
 
 
 -- | Bit shuffling operations

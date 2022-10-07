@@ -11,11 +11,11 @@ instance Swap (# (y ∷ K Y), (x ∷ K X) #) (# x, y #) where {swap (# i, j #) =
 
 #define INST_SWAP(X)\
 instance Swap (# (##) | (x ∷ K X) #) (# x | (##) #) where { \
-  swap x = case unsafeCoerce# x of (# tag, (y ∷ x) #) → unsafeCoerce# (# 0b11# ⊕ tag, y #)} ;\
+  swap x = case unsafeCoerce# x of (# tag, (y ∷ x) #) → unsafeCoerce# (# xor 0b11# tag, y #)} ;\
 instance Swap (# (x ∷ K X) | (##) #) (# (##) | x #) where {\
-  swap x = case unsafeCoerce# x of (# tag, (y ∷ x) #) → unsafeCoerce# (# 0b11# ⊕ tag, y #) } ;\
+  swap x = case unsafeCoerce# x of (# tag, (y ∷ x) #) → unsafeCoerce# (# xor 0b11# tag, y #) } ;\
 instance Swap (# (x ∷ K X) | x #) (# x | x #) where {\
-  swap x = case unsafeCoerce# x of (# tag, (y ∷ x) #) → unsafeCoerce# (# 0b11# ⊕ tag, y #) } ;\
+  swap x = case unsafeCoerce# x of (# tag, (y ∷ x) #) → unsafeCoerce# (# xor 0b11# tag, y #) } ;\
 
 INST_SWAP(I)
 INST_SWAP2(I,I8)

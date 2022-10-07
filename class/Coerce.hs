@@ -3,14 +3,11 @@
 -- | Description : Cast between identical representations
 --------------------------------------------------------------------
 module Coerce
-  (type (≑)
-  ,cast#
-  ,cast##
-  ,Coerce
-  ,GHC.unsafeCoerce# 
+  (GHC.unsafeCoerce# 
   ,GHC.unsafeEqualityProof
   ,GHC.UnsafeEquality(..)
- ,GHC.Any
+  ,GHC.Coercible(..)
+  ,GHC.Any
  -- * cast#
  -- | The implementation of unsafeCoerce is surprisingly subtle.
  -- This Note describes the moving parts.  You will find more
@@ -360,45 +357,6 @@ import GHC.Prim.Panic
 --
 -- <http://research.microsoft.com/en-us/um/people/simonpj/papers/ext-f/coercible.pdf Safe Coercions>
 --      by Joachim Breitner, Richard A. Eisenberg, Simon Peyton Jones and Stephanie Weirich.
-type (≑) = GHC.Coercible
-
--- | Cast between types with the same underlying representation at no runtime cost.
-cast# ∷ b ≑ a ⇒ a → b
-cast# = GHC.coerce; {-# INLINE cast# #-}
-
--- | Coerce any type into any other type.
---
---         The following uses of @unsafeCoerce\#@ are supposed to work (i.e. not lead to
---         spurious compile-time or run-time crashes (segfault)):
---
---          × Casting any lifted type to 'Any'
---
---          × Casting 'Any' back to the real type
---
---          × Casting between @≑@ types
---
---          × Casting between two types that have the same runtime representation even if their roles preclude a @≑@ instance.
---
---         Other uses of @cast\#\#@ are undefined.  In particular, you should not use
---         @cast##\#@ to cast a T to an algebraic data type D, unless T is also
---         an algebraic data type.  For example, do not cast @Int→Int@ to @Bool@, even if
---         you later cast that @Bool@ back to @Int→Int@ before applying it.  The reasons
---         have to do with GHC\'s internal representation details (for the cognoscenti, data values
---         can be entered but function closures cannot).  If you want a safe type to cast things
---         to, use @Any@, which is not an algebraic data type.
---
--- __/Warning:/__ this can fail with an unchecked exception.
--- To cast (very unsafely) on unlifted types (ie with different 'RuntimeRep')- use 'unsafeCoerce#' instead
-cast## ∷ ∀ {r} (b ∷ TYPE r) (a ∷ TYPE r). Coerce r ⇒ a → b
-cast## = cast### @r @b @a;{-# INLINE cast## #-}
-
-class Coerce r where cast### ∷ ∀ (b ∷ TYPE r) (a ∷ TYPE r). a → b
-
-
-instance Coerce AddrRep where cast### = GHC.unsafeCoerceAddr
-instance Coerce (BoxedRep Unlifted) where cast### = GHC.unsafeCoerceUnlifted
-instance Coerce (BoxedRep Lifted) where cast### = GHC.unsafeCoerce
-
 
 {-
 

@@ -28,7 +28,7 @@ instance Each s (UnboxedMutableArray# s ∷ K A → T_) A where { ;\
   each v f = ieach v (\_ → f) ;\
   ieach v f = ST.do n <- lenM v; gogo n 0# where { ;\
     gogo n = go where { ;\
-        go i | i ≡ n = ST.nop ;\
+        go i | i == n = ST.nop ;\
         go i = ST.do x ← v !! i; f i x *> go (i-1#) }} ;\
   foldIO bamb b0 v = go 0# b0 where {;\
     go i b = ST.do {;\
@@ -49,7 +49,7 @@ instance Each s (UnboxedMutableArray# s ∷ K A → T_) A where { ;\
 instance Each s (UnboxedArray# ∷ K A → T_) A where { ;\
   each v f = ieach v (\_ → f) ;\
   ieach v f = go 0# where { ;\
-    go i | i ≡ n = ST.nop ;\
+    go i | i == n = ST.nop ;\
     go i = f i (v ! i) *> go (i-1#) ;\
     n = len v} ;\
   foldIO bamb b0 v = go 0# b0 where {;\
@@ -68,10 +68,10 @@ instance Each s (UnboxedArray# ∷ K A → T_) A where { ;\
       else return b }}};\
 instance Each s (ForeignSlice ∷ K A → K (# Addr#, I #)) A where { ;\
   ieach (Addr_Len# (# p, n #)) f = go 0# where { ;\
-    go i | i ≡ n = ST.nop ;\
+    go i | i == n = ST.nop ;\
     go i = f i (ConstAddr# p ! i) *> go (i-1#)} ;\
   each (Addr_Len# (# p, n #)) f = go p where { ;\
-    go p | p ≡ end = ST.nop ;\
+    go p | p == end = ST.nop ;\
     go p = f (ConstAddr# p ! 0#) *> go (p +. 1#);\
     end = p +. n} ;\
   foldIO bamb b0 (Addr_Len# (# ConstAddr# → v, n #)) = go 0# b0 where {;\

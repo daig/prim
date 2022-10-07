@@ -115,12 +115,6 @@ type ST s (a ∷ T ra) = State# s → (# State# s , a #)
 type ST' s (a ∷ T ra) = State# s → (# State# s , B#, a #)
 type ST_ s = State# s → State# s
 
--- | @(☸)@ is the primitive, unlifted type of realworld state.
--- It's only purpose is to sequence IO actions.
--- It is represented by nothing at all. 
-type (☸) = State# RealWorld
-
-
 -- | A computation performing some I\/O before returning a value of type @a@.
 type IO (a ∷ T r)  = ST RealWorld a
 type IO' (a ∷ T ra) = State# RealWorld → (# State# RealWorld , B#, a #)

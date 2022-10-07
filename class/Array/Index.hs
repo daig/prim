@@ -1,5 +1,6 @@
 {-# language UndecidableSuperClasses, InstanceSigs, CPP #-}
 module Array.Index where
+import Prelude hiding ((>=#))
 import Prim
 import Memset
 import qualified GHC.Types as GHC
@@ -14,7 +15,7 @@ import Num
 
 -- | Operations for containers of contiguous primitive values.
 type Index ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
-class a ∋ x ⇒ Index x a where
+class Elt a x ⇒ Index x a where
   -- | Index an element. 
   (!) ∷ a x → I {- ^ Offset in elements -} → x
   -- | Read an element.
@@ -37,13 +38,13 @@ instance New (Array# ∷ T# L → T_) where { ;\
   new = newArray# ;\
   gen n f = runST ST.do { ;\
    xs ← new# n ;\
-   let go i = if i ≡ n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
+   let go i = if i == n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
    freeze## xs }} ;\
 instance New (SmallArray# ∷ T# L → T_) where { ;\
   new = newSmallArray#  ;\
   gen n f = runST ST.do { ;\
    xs ← new# n ;\
-   let go i = if i ≡ n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
+   let go i = if i == n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
    freeze## xs }}
 
 INST_NEW_BOX(Unlifted)
@@ -58,7 +59,7 @@ instance New (UnboxedArray# ∷ K A → T_) where { ;\
     return ma} ;\
   gen n f = runST ST.do { ;\
    xs ← new# n ;\
-   let go i = if i ≡ n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
+   let go i = if i == n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
    freeze## xs}} \
 
 INST_NEW_UB(I)
@@ -85,15 +86,15 @@ instance Index x Array# where
   (!!) = readArray#
   (!) a i = case indexArray# a i of (# a #) → a
   set# a off n x = go 0# where
-    go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
-                           1# → \s→s
+    go i = case i >=# n of F# → \s → go (i +# 1#) (write a i x s)
+                           T# → \s→s
 instance Index (x ∷ T_) Array# where
   write = writeArray#
   (!!) = readArray#
   (!) a i = case indexArray# a i of (# a #) → a
   set# a off n x = go 0# where
-    go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
-                           1# → \s→s
+    go i = case i >=# n of F# → \s → go (i +# 1#) (write a i x s)
+                           T# → \s→s
 
 -- | "A.Boxed.Small".
 --
@@ -105,18 +106,18 @@ instance Index x SmallArray# where
   (!!) = readSmallArray# 
   (!) a i = case indexSmallArray# a i of (# a #) → a
   set# a off n x = go 0# where
-    go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
-                           1# → \s→s
+    go i = case i >=# n of F# → \s → go (i +# 1#) (write a i x s)
+                           T# → \s→s
 instance Index (x ∷ T_) SmallArray# where
   write = writeSmallArray# 
   (!!) = readSmallArray# 
   (!) a i = case indexSmallArray# a i of (# a #) → a
   set# a off n x = go 0# where
-    go i = case i >=# n of 0# → \s → go (i +# 1#) (write a i x s)
-                           1# → \s→s
+    go i = case i >=# n of F# → \s → go (i +# 1#) (write a i x s)
+                           T# → \s→s
 
 #define INST_IN(TY,TA,IX,RD,WR,SET) \
-instance (x ≑ TY) ⇒ Index x (TA) where {\
+instance (Coercible x TY) ⇒ Index x (TA) where {\
   (!) = coerce IX#; \
   (!!) = coerce RD# ; \
   write = coerce WR# ; \
