@@ -2,6 +2,7 @@
 module Var where
 import Cast
 import Array.Index
+import Do.ST
 
 type Write ∷ ∀ {ra} {r}. T ra → (★ → T ra → T r) → C
 class Write x p where (.=) ∷ p s x → x → ST_ s
@@ -13,6 +14,12 @@ instance Read x MutVar# where read = readMutVar#
 
 instance Read x TVar# where read = readTVar#
 instance Write x TVar# where (.=) = writeTVar#
+
+instance Read x MVar# where read = takeMVar#
+instance Write x MVar# where (.=) = putMVar#
+
+instance Read x IOPort# where read = readIOPort#
+instance Write x IOPort# where r .= x = \s → case writeIOPort# r x s of (# ss , _ #) → ss
 
 #define INST_VAR(TY,GET,READ,READ_REF,WRITE,WRITE_REF) \
 instance (x ≑ TY) ⇒ Write (x) ForeignMutableArray# where { (.=) = coerce (`WRITE#` 0#) } ;\

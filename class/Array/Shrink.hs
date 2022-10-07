@@ -4,7 +4,7 @@ import Array
 import Prim
 
 type Shrink ∷ ∀ {r}. (T r → T_) → Constraint
-class Array a ⇒ Shrink a where shrink ∷ a ∋ x ⇒ M a s x → I → ST_ s
+class Shrink a where shrink ∷ a ∋ x ⇒ M a s x → I → ST_ s
 
 instance Shrink SmallArray# where shrink = shrinkSmallMutableArray#
 instance Shrink UnboxedArray# where

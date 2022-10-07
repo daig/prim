@@ -1,4 +1,4 @@
-{-# language InstanceSigs #-}
+{-# language InstanceSigs, CPP #-}
 module Array where
 import Do.ST as ST
 import Cast
@@ -49,11 +49,24 @@ class New# a ⇒ Array a where
           → I -- ^ number of elements to copy
           → ST s (M a s x)
 
-instance New# Array# where
+instance New# (Array# ∷ T_ → T_) where
+  new# = (`newArray#` raise# "Array#.new#: unintialized index")
+instance New# (Array# ∷ ★ → T_) where
   new# = (`newArray#` raise# "Array#.new#: unintialized index")
 
 -- | "A.Boxed.Big" - @new#@ initializes undefined. @lenM#@ is safe.
-instance Array Array# where
+instance Array (Array# ∷ T_ → T_) where
+  freeze## = unsafeFreezeArray#
+  freeze# = freezeArray#
+  thaw## = unsafeThawArray#
+  thaw# = thawArray#
+  len = sizeofArray#
+  lenM#  = sizeofMutableArray#
+  lenM ma = return (lenM# ma)
+  clone# = cloneArray#
+  cloneM# = cloneMutableArray#
+-- | "A.Boxed.Big" - @new#@ initializes undefined. @lenM#@ is safe.
+instance Array (Array# ∷ ★ → T_) where
   freeze## = unsafeFreezeArray#
   freeze# = freezeArray#
   thaw## = unsafeThawArray#
@@ -64,9 +77,23 @@ instance Array Array# where
   clone# = cloneArray#
   cloneM# = cloneMutableArray#
 
+
 -- | "A.Boxed.Small" - @new#@ initializes undefined. @lenM#@ is safe.
-instance New# SmallArray# where new# = (`newSmallArray#` raise# "SmallArray#.new#: unintialized index")
-instance Array SmallArray# where
+instance New# (SmallArray# ∷ ★ → T_) where new# = (`newSmallArray#` raise# "SmallArray#.new#: unintialized index")
+instance Array (SmallArray# ∷ ★ → T_) where
+  freeze## = unsafeFreezeSmallArray#
+  freeze# = freezeSmallArray#
+  thaw## = unsafeThawSmallArray#
+  thaw# = thawSmallArray#
+  len = sizeofSmallArray#
+  lenM#  = sizeofSmallMutableArray#
+  lenM ma = return (lenM# ma)
+  clone# = cloneSmallArray#
+  cloneM# = cloneSmallMutableArray#
+
+-- | "A.Boxed.Small" - @new#@ initializes undefined. @lenM#@ is safe.
+instance New# (SmallArray# ∷ T_ → T_) where new# = (`newSmallArray#` raise# "SmallArray#.new#: unintialized index")
+instance Array (SmallArray# ∷ T_ → T_) where
   freeze## = unsafeFreezeSmallArray#
   freeze# = freezeSmallArray#
   thaw## = unsafeThawSmallArray#
@@ -78,37 +105,52 @@ instance Array SmallArray# where
   cloneM# = cloneSmallMutableArray#
 
 -- | @new#@ unpinned w/ init size in bytes.
-instance New# UnboxedArray# where
-  new# ∷ ∀ x s. UnboxedArray# ∋ x ⇒ I → ST s (M UnboxedArray# s x)
+instance New# (UnboxedArray# ∷ T r  → T_) where
+  new# ∷ ∀ (x ∷ T r) s. UnboxedArray# ∋ x ⇒ I → ST s (M UnboxedArray# s x)
   new# (size @x → n) = coerce newByteArray# n
 
--- | "A.Prim" -
--- 'thaw##' is just a cast.
-instance Array UnboxedArray# where
-  freeze## = coerce unsafeFreezeByteArray#
-  freeze# ∷ ∀ x s. UnboxedArray# ∋ x ⇒ M UnboxedArray# s x → I → I → ST s (UnboxedArray# x)
-  freeze# a (size @x → off) (size @x → n) = ST.do ma <- cloneM# a off n; freeze## ma
-  thaw## a = return (unsafeCoerce# a)
-  thaw# ∷ ∀ x s. UnboxedArray# ∋ x ⇒ UnboxedArray# x → I → I → ST s (M UnboxedArray# s x)
-  thaw# a (size @x → off) (size @x → n) = ST.do
-    ma <- new# n
-    cast (copyByteArray# (coerce a) off (coerce ma) 0# n)
-    return ma
-  len ∷ ∀ x. UnboxedArray# ∋ x ⇒ UnboxedArray# x → I
-  len a = coerce sizeofByteArray# a / size @x 1#
-  lenM# ∷ ∀ x s. UnboxedArray# ∋ x ⇒ M UnboxedArray# s x → I
-  lenM# a = coerce sizeofMutableByteArray# a / size @x 1#
-  lenM ∷ ∀ x s. UnboxedArray# ∋ x ⇒ M UnboxedArray# s x → ST s I
-  lenM a = ST.do i ← coerce getSizeofMutableByteArray# a; return (i / size @x 1#)
-  cloneM# ∷ ∀ x s. UnboxedArray# ∋ x ⇒ M UnboxedArray# s x → I → I → ST s (M UnboxedArray# s x)
-  cloneM# a (size @x → off) (size @x → n) = ST.do
-    ma <- new# n
-    cast (copyMutableByteArray# (coerce a) off (coerce ma) 0# n)
-    return ma
-  clone# ∷ ∀ x. UnboxedArray# ∋ x ⇒ UnboxedArray# x → I → I → UnboxedArray# x
-  clone# a (size @x → off) (size @x → n) = runST (ST.do ma <- thaw# a off n; freeze## ma)
 
-deriving via UnboxedArray# instance Array PinnedArray#
-instance New# PinnedArray# where
-  new# ∷ ∀ {r} (x ∷ T r) s. PinnedArray# ∋ x ⇒ I → ST s (M PinnedArray# s x)
-  new# (size @x → n) = coerce newPinnedByteArray# n
+-- 'thaw##' is just a cast.
+
+#define INST_ARRAY_UB(A)\
+instance Array (UnboxedArray# ∷ K A → T_) where { ;\
+  freeze## = coerce unsafeFreezeByteArray# ;\
+  freeze# ∷ ∀ (x ∷ K A) s. UnboxedArray# ∋ x ⇒ M UnboxedArray# s x → I → I → ST s (UnboxedArray# x) ;\
+  freeze# a (size @x → off) (size @x → n) = ST.do {ma <- cloneM# a off n; freeze## ma} ;\
+  thaw## a = return (unsafeCoerce# a) ;\
+  thaw# ∷ ∀ (x ∷ K A) s. UnboxedArray# ∋ x ⇒ UnboxedArray# x → I → I → ST s (M UnboxedArray# s x) ;\
+  thaw# a (size @x → off) (size @x → n) = ST.do { ;\
+    ma <- new# n ;\
+    cast (copyByteArray# (coerce a) off (coerce ma) 0# n) ;\
+    return ma} ;\
+  len ∷ ∀ (x ∷ K A). UnboxedArray# ∋ x ⇒ UnboxedArray# x → I ;\
+  len a = coerce sizeofByteArray# a / size @x 1# ;\
+  lenM# ∷ ∀ (x ∷ K A) s. UnboxedArray# ∋ x ⇒ M UnboxedArray# s x → I ;\
+  lenM# a = coerce sizeofMutableByteArray# a / size @x 1# ;\
+  lenM ∷ ∀ (x ∷ K A) s. UnboxedArray# ∋ x ⇒ M UnboxedArray# s x → ST s I ;\
+  lenM a = ST.do {i ← coerce getSizeofMutableByteArray# a; return (i / size @x 1#)} ;\
+  cloneM# ∷ ∀ (x ∷ K A) s. UnboxedArray# ∋ x ⇒ M UnboxedArray# s x → I → I → ST s (M UnboxedArray# s x) ;\
+  cloneM# a (size @x → off) (size @x → n) = ST.do { ;\
+    ma <- new# n ;\
+    cast (copyMutableByteArray# (coerce a) off (coerce ma) 0# n) ;\
+    return ma} ;\
+  clone# ∷ ∀ (x ∷ K A). UnboxedArray# ∋ x ⇒ UnboxedArray# x → I → I → UnboxedArray# x ;\
+  clone# a (size @x → off) (size @x → n) = runST (ST.do {ma <- thaw# a off n; freeze## ma})}  ;\
+deriving via (UnboxedArray# ∷ K A → T_) instance Array (PinnedArray# ∷ K A → T_) ;\
+instance New# (PinnedArray# ∷ K A → T_) where { ;\
+  new# ∷ ∀ {r} (x ∷ T r) s. PinnedArray# ∋ x ⇒ I → ST s (M PinnedArray# s x) ;\
+  new# (size @x → n) = coerce newPinnedByteArray# n }
+
+INST_ARRAY_UB(I)
+INST_ARRAY_UB(I8)
+INST_ARRAY_UB(I16)
+INST_ARRAY_UB(I32)
+INST_ARRAY_UB(I64)
+INST_ARRAY_UB(U)
+INST_ARRAY_UB(U8)
+INST_ARRAY_UB(U16)
+INST_ARRAY_UB(U32)
+INST_ARRAY_UB(U64)
+INST_ARRAY_UB(F32)
+INST_ARRAY_UB(F64)
+INST_ARRAY_UB(Addr#)

@@ -135,11 +135,13 @@ type STM (a ∷ T r) = ST Transaction a
 -- | Transactional Memory operations
 type STM_ = ST_ Transaction
 
+{-
 type Small ∷ ∀ {l ∷ Levity} {k}.
               (T# l → k) → T# l → k
 type family Small a = sa | sa → a where
   Small Array# = SmallArray#
   Small MutableArray# = SmallMutableArray#
+  -}
 
 type Slice ∷ ∀ {l}. T# l → K (# ByteArray#, I, I #)
 newtype Slice x = Array_Off_Len# (# Array# x, I, I #)
@@ -185,7 +187,6 @@ type ForeignMutableSlice ∷ ∀ {r}. ★ → T r → K (# Addr#, I #)
 newtype ForeignMutableSlice s x = MAddr_Len# (# Addr#, I #)
 
 
--- Pinned to an address and gaurenteed not to be moved by GC.
 type UnboxedArray# ∷ ∀ {r}. T r → T_
 newtype UnboxedArray# x = ByteArray# ByteArray#
 
@@ -232,30 +233,6 @@ type family A (s ∷ T rs) (x ∷ T r) = a | a → rs r where
   A s (x ∷ K F32) = UnboxedMutableArray# s x
   A s (x ∷ K F64) = UnboxedMutableArray# s x
   A s (x ∷ K Addr#) = UnboxedMutableArray# s x
-
-
-{-
-type P ∷ ∀ {r} {ra}. ★ → T r → T ra
--- | Primitive array type.
--- The concrete representation can be determined by the kind of its contents
-type family P s (x ∷ T r) = a | a → r where
-  P s (x ∷ T# _) = MutVar# s x
-  P s (x ∷ K I) = AddrVar# s x
-  P s (x ∷ K I8) = AddrVar# s x
-  P s (x ∷ K I16) = AddrVar# s x
-  P s (x ∷ K I32) = AddrVar# s x
-  P s (x ∷ K I64) = AddrVar# s x
-  P s (x ∷ K U) = AddrVar# s x
-  P s (x ∷ K U8) = AddrVar# s x
-  P s (x ∷ K U16) = AddrVar# s x
-  P s (x ∷ K U32) = AddrVar# s x
-  P s (x ∷ K U64) = AddrVar# s x
-  P s (x ∷ K F32) = AddrVar# s x
-  P s (x ∷ K F64) = AddrVar# s x
-  P s (x ∷ K Addr#) = AddrVar# s x
--}
-
--- newtype P_Unlifted = 
 
 type M ∷ ∀ {ra} {r}. (T ra → T r) → ★ → T ra → T r
 type family M a = ma | ma → a where

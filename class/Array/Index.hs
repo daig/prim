@@ -7,6 +7,8 @@ import Action
 import Do.ST as ST
 import Array
 import Cast
+import Cmp
+import Num
 
 
 
@@ -23,20 +25,55 @@ class a ∋ x ⇒ x ∈# a where
   set# ∷ M a s x → I {- ^ offset -} → I {- ^ # elements to set -} → x → ST_ s
 
 -- | Create new uninitialized arrays.
-type New ∷ ∀ {rx} {r}. (T rx → T r) → Constraint
-class New a where
+type New ∷ ∀ {rx}. (T rx → T_) → Constraint
+class Array a ⇒ New a where
   -- | Create a new array with all elements initialized to the same value.
   new ∷ x ∈# a ⇒ I {-^ size in elements -} → x → ST s (M a s x)
+  -- | Create an array with all elements initialized by index
+  gen ∷ x ∈# a ⇒ I → (I → x) → a x
 
-instance New Array# where new = newArray#
-instance New SmallArray# where new = newSmallArray#
+#define INST_NEW_BOX(L)\
+instance New (Array# ∷ T# L → T_) where { ;\
+  new = newArray# ;\
+  gen n f = runST ST.do { ;\
+   xs ← new# n ;\
+   let go i = if i ≡ n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
+   freeze## xs }} ;\
+instance New (SmallArray# ∷ T# L → T_) where { ;\
+  new = newSmallArray#  ;\
+  gen n f = runST ST.do { ;\
+   xs ← new# n ;\
+   let go i = if i ≡ n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
+   freeze## xs }}
 
-instance New UnboxedArray# where
-  new ∷ ∀ x s. x ∈# UnboxedArray# ⇒ I → x → ST s (M UnboxedArray# s x)
-  new n e = ST.do
-    ma ← new# n
-    cast (set# ma 0# n e)
-    return ma
+INST_NEW_BOX(Unlifted)
+INST_NEW_BOX(Lifted)
+
+#define INST_NEW_UB(A)\
+instance New (UnboxedArray# ∷ K A → T_) where { ;\
+  new ∷ ∀ (x ∷ K A) s. x ∈# UnboxedArray# ⇒ I → x → ST s (M UnboxedArray# s x) ;\
+  new n e = ST.do { ;\
+    ma ← new# n ;\
+    cast (set# ma 0# n e) ;\
+    return ma} ;\
+  gen n f = runST ST.do { ;\
+   xs ← new# n ;\
+   let go i = if i ≡ n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
+   freeze## xs}} \
+
+INST_NEW_UB(I)
+INST_NEW_UB(I8)
+INST_NEW_UB(I16)
+INST_NEW_UB(I32)
+INST_NEW_UB(I64)
+INST_NEW_UB(U)
+INST_NEW_UB(U8)
+INST_NEW_UB(U16)
+INST_NEW_UB(U32)
+INST_NEW_UB(U64)
+INST_NEW_UB(F32)
+INST_NEW_UB(F64)
+INST_NEW_UB(Addr#)
 
 -- | "A.Box".
 --
