@@ -9,7 +9,7 @@ import Bits
 import Num
 import Var
 
-type Fold ∷ ∀ {ra} {re} {rr}. T ra → T re → T rr → C
+type Fold ∷ ∀ {ra} {re} {rr}. T ra → T re → T rr → TC
 class Fold a e r where fold ∷ a → (e → r) → r
 
 instance Fold (S# Latin1) Char (a → a) where fold = coerce (unpackFoldrCString# @a)
@@ -17,7 +17,7 @@ instance Fold (S# UTF8) Char (a → a) where fold = coerce (unpackFoldrCStringUt
 #define INST_FOLD_LATIN(A)\
 instance Fold (S# Latin1) Char ((a ∷ K A) → a) where {\
     fold (S# s) f r0 = go (ConstAddr# s) r0 \
-      where go p r = let !(Char8# ch) = p!0# in if ch == '\0'# then r else cast ch `f` go (p +. 1#) r}
+      where go p r = let !(C1# ch) = p!0# in if ch == '\0'# then r else cast ch `f` go (p +. 1#) r}
 
 INST_FOLD_LATIN(I)
 INST_FOLD_LATIN(I1)
@@ -34,13 +34,13 @@ INST_FOLD_LATIN(F8)
 INST_FOLD_LATIN((##))
 INST_FOLD_LATIN(ByteArray#)
 
-unpackFoldrCStringUtf9# ∷ S# UTF8 → (Char# → t → t) → t → t
-unpackFoldrCStringUtf9# (S# p0) f r0 = go (ConstAddr# @Char8# p0) r0
+unpackFoldrCStringUtf9# ∷ S# UTF8 → (C# → t → t) → t → t
+unpackFoldrCStringUtf9# (S# p0) f r0 = go (ConstAddr# @C1# p0) r0
   where
-    go p r = let !(Char8# ch) = p!0#
+    go p r = let !(C1# ch) = p!0#
                 in if ch == '\0'# then r else
           let !n = byteCount ch
-          in unpackUtf8Char# n ch p `f` go (p +. n) r
+          in unpackUtf8C# n ch p `f` go (p +. n) r
 
 ------------------------------
 --- UTF8 decoding utilities
@@ -58,14 +58,14 @@ unpackFoldrCStringUtf9# (S# p0) f r0 = go (ConstAddr# @Char8# p0) r0
 
 data ByteCount = One | Two | Three | Four
 {-# INLINE byteCount #-}
-byteCount ∷ Char# → ByteCount
+byteCount ∷ C# → ByteCount
 byteCount ch
     | ch == '\x7F'# = One
     | ch == '\xDF'# = Two
     | ch == '\xEF'# = Three
     | T                   = Four
 
-instance ForeignArray# Char8# +. ByteCount where
+instance ForeignArray# C1# +. ByteCount where
   (+.) p = \case One   → p +. 1#
                  Two   → p +. 2#
                  Three → p +. 3#
@@ -80,9 +80,9 @@ instance ForeignArray# Char8# +. ByteCount where
 -- Reading past the end of the addr might trigger an exception.
 -- For this reason we really have to check the width first and only
 -- decode after.
-{-# INLINE unpackUtf8Char# #-}
-unpackUtf8Char# ∷ ByteCount → Char# → ForeignArray# Char8# → Char#
-unpackUtf8Char# bytes ch (coerce @_ @(ForeignArray# Char8#) → p) =
+{-# INLINE unpackUtf8C# #-}
+unpackUtf8C# ∷ ByteCount → C# → ForeignArray# C1# → C#
+unpackUtf8C# bytes ch (coerce @_ @(ForeignArray# C1#) → p) =
   case bytes of
     One   → ch
     Two   → cast ( ((cast       ch - 0xC0#) <<#  6##)
@@ -96,17 +96,17 @@ unpackUtf8Char# bytes ch (coerce @_ @(ForeignArray# Char8#) → p) =
                  + ( cast (p ! 3#) - 0x80#          ))
 
 {-
-{-# INLINE unpackUtf8Char# #-}
-unpackUtf8Char# ∷ ByteCount → Char# → P# → Char#
-unpackUtf8Char# bytes ch (addr =
+{-# INLINE unpackUtf8C# #-}
+unpackUtf8C# ∷ ByteCount → C# → P# → C#
+unpackUtf8C# bytes ch (addr =
   case bytes of
     One → ch
-    Two →   (cast @Char# (((cast ch                                           - 0xC0#) <<#  6##) +
+    Two →   (cast @C# (((cast ch                                           - 0xC0#) <<#  6##) +
                      (cast (indexCharOffAddr# (addr `plusAddr#` 1#) 0#) - 0x80#)))
-    Three → (cast @Char# (((cast ch                                           - 0xE0#) <<# 12##) +
+    Three → (cast @C# (((cast ch                                           - 0xE0#) <<# 12##) +
                     ((cast (indexCharOffAddr# (addr `plusAddr#` 1#) 0#) - 0x80#) <<#  6##) +
                      (cast (indexCharOffAddr# (addr `plusAddr#` 2#) 0#) - 0x80#)))
-    Four →  (cast @Char# (((cast ch                                           - 0xF0#) <<# 18##) +
+    Four →  (cast @C# (((cast ch                                           - 0xF0#) <<# 18##) +
                     ((cast (indexCharOffAddr# (addr `plusAddr#` 1#) 0#) - 0x80#) <<# 12##) +
                     ((cast (indexCharOffAddr# (addr `plusAddr#` 2#) 0#) - 0x80#) <<#  6##) +
                      (cast (indexCharOffAddr# (addr `plusAddr#` 3#) 0#) - 0x80#)))

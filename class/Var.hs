@@ -4,9 +4,9 @@ import Cast
 import Array.Index
 import Do.ST
 
-type Write ∷ ∀ {ra} {r}. T ra → (★ → T ra → T r) → C
+type Write ∷ ∀ {ra} {r}. T ra → (★ → T ra → T r) → TC
 class Write x p where (.=) ∷ p s x → x → ST_ s
-type Read ∷ ∀ {ra} {r}. T ra → (★ → T ra → T r) → C
+type Read ∷ ∀ {ra} {r}. T ra → (★ → T ra → T r) → TC
 class Read x p where read ∷ p s x → ST s x
 
 instance Write x MutVar# where (.=) = writeMutVar#
@@ -50,5 +50,5 @@ INST_VAR(U2,indexWord16OffAddr,readWord16OffAddr,readWord16Array,writeWord16OffA
 INST_VAR(U4,indexWord32OffAddr,readWord32OffAddr,readWord32Array,writeWord32OffAddr,writeWord32Array)
 INST_VAR(U8,indexWord64OffAddr,readWord64OffAddr,readWord64Array,writeWord64OffAddr,writeWord64Array)
 INST_VAR(Addr#,indexAddrOffAddr,readAddrOffAddr,readAddrArray,writeAddrOffAddr,writeAddrArray)
-INST_VAR_SPEC(Char8#,indexCharOffAddr,readCharOffAddr,readCharArray,writeCharOffAddr,writeCharArray)
-INST_VAR_SPEC(Char#,indexWideCharOffAddr,readWideCharOffAddr,readWideCharArray,writeWideCharOffAddr,writeWideCharArray)
+INST_VAR_SPEC(C1#,indexCharOffAddr,readCharOffAddr,readCharArray,writeCharOffAddr,writeCharArray)
+INST_VAR_SPEC(C#,indexWideCharOffAddr,readWideCharOffAddr,readWideCharArray,writeWideCharOffAddr,writeWideCharArray)

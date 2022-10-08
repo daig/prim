@@ -14,7 +14,7 @@ import Num
 
 
 -- | Operations for containers of contiguous primitive values.
-type Index ∷ ∀ {r} {ra}. T r → (T r → T ra) → Constraint
+type Index ∷ ∀ {r} {ra}. T r → (T r → T ra) → TC
 class Elt a x ⇒ Index x a where
   -- | Index an element. 
   (!) ∷ a x → I {- ^ Offset in elements -} → x
@@ -26,7 +26,7 @@ class Elt a x ⇒ Index x a where
   set# ∷ M a s x → I {- ^ offset -} → I {- ^ # elements to set -} → x → ST_ s
 
 -- | Create new uninitialized arrays.
-type New ∷ ∀ {rx}. (T rx → T_) → Constraint
+type New ∷ ∀ {rx}. (T rx → T_) → TC
 class Array a ⇒ New a where
   -- | Create a new array with all elements initialized to the same value.
   new ∷ Index x a ⇒ I {-^ size in elements -} → x → ST s (M a s x)
@@ -153,10 +153,10 @@ INST_IN(F4,UnboxedArray#,indexFloatArray,readFloatArray,writeFloatArray,setFloat
 INST_IN(F4,ForeignArray#,indexFloatOffAddr,readFloatOffAddr,writeFloatOffAddr,setFloatOffAddr)
 INST_IN(F8,UnboxedArray#,indexDoubleArray,readDoubleArray,writeDoubleArray,setDoubleArray)
 INST_IN(F8,ForeignArray#,indexDoubleOffAddr,readDoubleOffAddr,writeDoubleOffAddr,setDoubleOffAddr)
-INST_IN_SPEC(Char8#,UnboxedArray#,indexCharArray,readCharArray,writeCharArray,setCharArray)
-INST_IN_SPEC(Char8#,ForeignArray#,indexCharOffAddr,readCharOffAddr,writeCharOffAddr,setCharOffAddr)
-INST_IN_SPEC(Char#,UnboxedArray#,indexWideCharArray,readWideCharArray,writeWideCharArray,setWideCharArray)
-INST_IN_SPEC(Char#,ForeignArray#,indexWideCharOffAddr,readWideCharOffAddr,writeWideCharOffAddr,setWideCharOffAddr)
+INST_IN_SPEC(C1#,UnboxedArray#,indexCharArray,readCharArray,writeCharArray,setCharArray)
+INST_IN_SPEC(C1#,ForeignArray#,indexCharOffAddr,readCharOffAddr,writeCharOffAddr,setCharOffAddr)
+INST_IN_SPEC(C#,UnboxedArray#,indexWideCharArray,readWideCharArray,writeWideCharArray,setWideCharArray)
+INST_IN_SPEC(C#,ForeignArray#,indexWideCharOffAddr,readWideCharOffAddr,writeWideCharOffAddr,setWideCharOffAddr)
 INST_IN(Addr#,UnboxedArray#,indexAddrArray,readAddrArray,writeAddrArray,setAddrArray)
 INST_IN(Addr#,ForeignArray#,indexAddrOffAddr,readAddrOffAddr,writeAddrOffAddr,setAddrOffAddr)
 

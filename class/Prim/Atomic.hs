@@ -2,14 +2,14 @@ module Prim.Atomic where
 import Cast
 import Coerce
 
-type Logic_Atomic ∷ ∀ {rx} {r}. ★ → T r → T rx → C
+type Logic_Atomic ∷ ∀ {rx} {r}. ★ → T r → T rx → TC
 class Logic_Atomic s v x | v → s x where
   (|+|=), (|=), (&=), (~&=) ∷ v → x → ST s x
 
 class Num_Atomic (x ∷ T r) where
   (-=), (+=) ∷ ForeignMutableArray# s x → x → ST s x
   sub_atomicB, add_atomicB ∷ UnboxedMutableArray# s x → I → x → ST s x
-type Atomic ∷ ∀ {r}. T r → Constraint
+type Atomic ∷ ∀ {r}. T r → TC
 class Atomic (x ∷ T r) where
   read_atomic ∷ ForeignMutableArray# s x → ST s x
   (.=!) ∷ ForeignMutableArray# s x → x → ST_ s
@@ -70,7 +70,7 @@ instance Atomic I where
 
 
 -- | Bit shuffling operations
-type Eq_Atomic ∷ ∀ {r}. T r → Constraint
+type Eq_Atomic ∷ ∀ {r}. T r → TC
 class Eq_Atomic x where
   -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided expected old value.
   -- Implies a full memory barrier.

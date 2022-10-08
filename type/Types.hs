@@ -19,9 +19,9 @@ type T = TYPE
 type T_ = TYPE (BoxedRep Unlifted)
 type T0 = TYPE (TupleRep '[])
 type T# l = TYPE (BoxedRep l)
+type TC = Constraint
 
 type B = Bool
-type C = Constraint
 
 -- | The kind of a type
 type K (a ∷ k) = k
@@ -47,8 +47,9 @@ pattern GT ← ((\ (Ordering# i) → i >#  0# ) → 1# ) where GT = Ordering#  1
 {-# complete LT, EQ, GT #-}
 
 
+type C# = Char#
 -- | 8-bit Latin-1 code points
-newtype Char8# = Char8# Char#
+newtype C1# = C1# C#
 
 type I = Int#
 type I1 = Int8#
@@ -236,7 +237,7 @@ type family M a = ma | ma → a where
   M Array# = MutableArray#
   M ForeignArray# = ForeignMutableArray#
 
--- | A C-style null-terminated string of Latin-1 @Char8#@ or UTF-8 @Char#@
+-- | A C-style null-terminated string of Latin-1 @Char1#@ or UTF-8 @Char#@
 type S# ∷ Encoding → K Addr#
 newtype S# a = S# Addr#
 

@@ -5,12 +5,12 @@ import Cast
 import Prim
 import Num
 
-type New# ∷ ∀ {rx}. (T rx → T_) → Constraint
+type New# ∷ ∀ {rx}. (T rx → T_) → TC
 class New# a where
   -- | Create a new _uninitizlized_ array
   new# ∷ Elt a x ⇒ I {-^ size in elements -} → ST s (M a s x)
   
-type Array ∷ ∀ {rx}. (T rx → T_) → Constraint
+type Array ∷ ∀ {rx}. (T rx → T_) → TC
 class New# a ⇒ Array a where
   -- | Make a mutable array immutable, without copying.
   freeze## ∷ M a s x → ST s (a x)

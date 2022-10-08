@@ -3,7 +3,7 @@ module Array.Shrink where
 import Array
 import Prim
 
-type Shrink ∷ ∀ {r}. (T r → T_) → Constraint
+type Shrink ∷ ∀ {r}. (T r → T_) → TC
 class Shrink a where shrink ∷ Elt a x ⇒ M a s x → I → ST_ s
 
 instance Shrink SmallArray# where shrink = shrinkSmallMutableArray#

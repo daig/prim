@@ -9,7 +9,7 @@ import Var
 import Action
 import Cast
 
-type Map ∷ ∀ {ra} {rb} {rv}. (∀ {r}. T r → T rv) → T ra → T rb → C
+type Map ∷ ∀ {ra} {rb} {rv}. (∀ {r}. T r → T rv) → T ra → T rb → TC
 class Map v a b where
   imap ∷ (I → a → b) → v a → v b
   map  ∷ (a → b) → v a → v b
@@ -19,7 +19,7 @@ class Map v a b where
   ifold ∷ (I → b → a → b) → b → v a → b
 
 -- | Lazy fold
-type Foldr ∷ ∀ {r} {rv}. (T r → T rv) → T r → C
+type Foldr ∷ ∀ {r} {rv}. (T r → T rv) → T r → TC
 class Foldr v x where foldr ∷ (x → b → b) → b → v x → b
 
 #define INST_EACH(A)\
@@ -173,7 +173,7 @@ INST_MAP_UB(F4)
 INST_MAP_UB(F8)
 INST_MAP_UB(Addr#)
 
-type Each ∷ ∀ {r} {rv}. ★ → (T r → T rv) → T r → C
+type Each ∷ ∀ {r} {rv}. ★ → (T r → T rv) → T r → TC
 class Each s v a where
   ieach ∷ v a → (I → a → ST_ s) → ST_ s
   each ∷ v a → (a → ST_ s) → ST_ s
@@ -181,7 +181,7 @@ class Each s v a where
   ifoldIO ∷ (I → b → a → ST s b) → b → v a → ST s b
 
 
-type Modify ∷ ∀ {r} {rv}. (★ → T r → T rv) → T r → C
+type Modify ∷ ∀ {r} {rv}. (★ → T r → T rv) → T r → TC
 class Modify v a where
   (%=) ∷ ∀ s. v s a → (a → a) → ST_ s
 

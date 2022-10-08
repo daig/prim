@@ -1,6 +1,6 @@
 module Array.Pinned' where
 
-type Pinned' ∷ T_ → Constraint
+type Pinned' ∷ T_ → TC
 class Pinned' a where
   -- | Determine whether the array is gaurenteed not to move during GC.
   -- This happens when it's allocated above a certain size (3kb), for GC performance reasons.

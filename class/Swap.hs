@@ -4,7 +4,7 @@ import Bits
 
 -- TODO change name of atomic swap
 
-type Swap ∷ ∀ {ra} {rb}. T ra → T rb → C
+type Swap ∷ ∀ {ra} {rb}. T ra → T rb → TC
 class Swap b a ⇒ Swap a b where swap ∷ a → b
 
 #define INST_SWAP2(X,Y)\

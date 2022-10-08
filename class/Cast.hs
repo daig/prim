@@ -12,7 +12,7 @@ import {-# source #-} Num
 import Prim
 
 -- | Nontrivial but conceptually-unique conversions between types. Use with care!
-type Cast ∷ forall {r} {r'}. T r → T r' → C
+type Cast ∷ forall {r} {r'}. T r → T r' → TC
 class Cast b a where cast ∷ a → b
 
 -- | Numeric conversion
@@ -52,9 +52,9 @@ instance Cast B# U8 where cast = coerce (gtWord64# (cast 0##))
 -- | Truthiness
 instance Cast B# Addr# where cast = coerce neAddr# nullAddr#
 -- | Truthiness
-instance Cast B# Char# where cast = coerce neChar# '\NUL'#
+instance Cast B# C# where cast = coerce neChar# '\NUL'#
 -- | Truthiness
-deriving via Char# instance Cast B# Char8#
+deriving via C# instance Cast B# C1#
 
 instance Cast I B# where cast (B# i#) = i#
 instance Cast I1 B# where cast (B# i#) = cast i#
@@ -184,9 +184,9 @@ instance Cast Addr# (MutableByteArray# s) where cast = mutableByteArrayContents#
 instance Cast (ForeignArray# x) (PinnedArray# x) where cast = coerce byteArrayContents#
 instance Cast (ForeignMutableArray# s x) (PinnedMutableArray# s x) where cast = coerce mutableByteArrayContents#
 
-instance Cast I Char# where cast = ord#
-instance Cast I Char8# where cast = coerce ord#
-instance Cast Char# I where cast = chr#
+instance Cast I C# where cast = ord#
+instance Cast I C1# where cast = coerce ord#
+instance Cast C# I where cast = chr#
 
 -- | This pattern is strongly deprecated
 instance Cast Addr# I where cast = int2Addr#
@@ -331,8 +331,8 @@ instance Cast Word8 U1 where cast = W8#
 instance Cast Word16 U2 where cast = W16#
 instance Cast Word32 U4 where cast = W32#
 instance Cast Word64 U8 where cast = W64#
-instance Cast Char Char# where cast = C#
-instance Cast Char Char8# where cast = coerce C#
+instance Cast Char C# where cast = C#
+instance Cast Char C1# where cast = coerce C#
 
 -- | Unpack bytes until \null byte
 instance Cast [Char] (S# UTF8) where cast = coerce unpackCStringUtf8#

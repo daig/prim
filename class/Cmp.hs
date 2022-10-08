@@ -8,11 +8,11 @@ import GHC.Prim qualified as GHC
 import Cast
 
 infix 4 >, >#, >=, >=#, <, <#, <=, <=# , ==, ==#, !=, !=#, `cmp`
-type Eq# ∷ ∀ {r}. T r → C
+type Eq# ∷ ∀ {r}. T r → TC
 class Eq# (a ∷ T r) where
   (==), (!=) ∷ a → a → B
   (==#), (!=#) ∷ a → a → B#
-type Cmp# ∷ ∀ {r}. T r → C
+type Cmp# ∷ ∀ {r}. T r → TC
 class Eq# a ⇒ Cmp# a where
   (>),(>=),(<),(<=) ∷ a → a → B
   (>#),(>=#),(<#),(<=#) ∷ a → a → B#
@@ -206,25 +206,25 @@ instance Cmp# U8 where
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# Char# where
+instance Eq# C# where
   (==#) = coerce eqChar#
   (!=#) = coerce neChar#
-  (==) = cast ((==#) @Char#)
-  (!=) = cast ((!=#) @Char#)
-instance Cmp# Char# where
+  (==) = cast ((==#) @C#)
+  (!=) = cast ((!=#) @C#)
+instance Cmp# C# where
   (>#) = coerce gtChar#
   (>=#) = coerce geChar#
   (<#) = coerce ltChar#
   (<=#) = coerce leChar#
-  (>) = cast ((>#) @Char#)
-  (>=) = cast ((>=#) @Char#)
-  (<) = cast ((<#) @Char#)
-  (<=) = cast ((<=#) @Char#)
+  (>) = cast ((>#) @C#)
+  (>=) = cast ((>=#) @C#)
+  (<) = cast ((<#) @C#)
+  (<=) = cast ((<=#) @C#)
   cmp a b = Ordering# do gtChar# a b GHC.-# ltChar# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
-deriving newtype instance Eq# Char8#
-deriving newtype instance Cmp# Char8#
+deriving newtype instance Eq# C1#
+deriving newtype instance Cmp# C1#
 
 instance Eq# F4 where
   (==#) = coerce eqFloat#

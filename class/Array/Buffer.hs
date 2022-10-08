@@ -24,7 +24,7 @@ type family Off a = aa | aa → a where
   Off (UnboxedRef s) = UnboxedMutableSlice s
   Off (ForeignMutableArray# s) = ForeignMutableSlice s
 
-type Buffer ∷ ∀ {rx} {r}. (T rx → T r) → C
+type Buffer ∷ ∀ {rx} {r}. (T rx → T r) → TC
 class Buffer a where ( # ) ∷ a x → I → Off a x
 
 infixl 9 #

@@ -6,12 +6,12 @@ import Cast
 #include "MachDeps.h"
 
 -- | (Bitwise) logical operations on primitive values
-type Logic ∷ ∀ {r}. T r → Constraint
+type Logic ∷ ∀ {r}. T r → TC
 class Logic a where
   (&&), (||), xor ∷ a → a → a
   not ∷ a → a
 -- | Bit shuffling operations
-type Bits ∷ ∀ {r}. T r → Constraint
+type Bits ∷ ∀ {r}. T r → TC
 class Bits a where
   -- | Shift left.  Result undefined if shift amount is not
   --           in the range 0 to word @size - 1@ inclusive.

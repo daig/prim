@@ -7,14 +7,14 @@ import Cast
 import Cmp
 #include "MachDeps.h"
 
-type (+.) ∷ ∀ {rp} {rx}. T rp → T rx → Constraint
+type (+.) ∷ ∀ {rp} {rx}. T rp → T rx → TC
 class p +. x where (+.) ∷ p → x → p
 
-type (+?) ∷ ∀ {rp} {rx}. T rp → T rx → Constraint
+type (+?) ∷ ∀ {rp} {rx}. T rp → T rx → TC
 class p +. x ⇒ p +? x where (+?) ∷ p → x → (# (##) | p #)
 
 
-type (-.) ∷ ∀ {ra} {rx}. T ra → T rx → Constraint
+type (-.) ∷ ∀ {ra} {rx}. T ra → T rx → TC
 class p +. x ⇒ p -. x where (-.) ∷ p → p → x
 
 -- |Advances the given address by the given offset (in bytes).
@@ -83,10 +83,10 @@ INST_OFF(U2)
 INST_OFF(U4)
 INST_OFF(U8)
 INST_OFF(Addr#)
-INST_OFF(Char#)
-INST_OFF(Char8#)
+INST_OFF(C#)
+INST_OFF(C1#)
 
-type (.+) ∷ ∀ {rp} {rx}. T rp → T rx → Constraint
+type (.+) ∷ ∀ {rp} {rx}. T rp → T rx → TC
 class x .+ p | x → p where (.+) ∷ x → p → p
 instance S# Latin1 .+ [Char] where (.+) = coerce unpackAppendCString#
 instance S# UTF8 .+ [Char] where (.+) = coerce unpackAppendCStringUtf8#

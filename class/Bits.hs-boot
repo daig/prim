@@ -3,7 +3,7 @@ module Bits where
 class Logic (a ∷ T r) where
   (&&), (||), xor ∷ a → a → a
   not ∷ a → a
-type Bits ∷ ∀ {r}. T r → Constraint
+type Bits ∷ ∀ {r}. T r → TC
 class Bits a where
   (<<#) ∷ a → U → a
   (<<) ∷ a → U → a

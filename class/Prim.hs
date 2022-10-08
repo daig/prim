@@ -5,7 +5,7 @@ import {-# source #-} Num
 #include "MachDeps.h"
 #include "HsBaseConfig.h"
 
-type Elt ∷ ∀ {rx} {r}. (T rx → T r) → T rx → Constraint
+type Elt ∷ ∀ {rx} {r}. (T rx → T r) → T rx → TC
 type family Elt a where
   Elt Array# = OK
   Elt (MutableArray# s) = OK
@@ -33,7 +33,7 @@ type family Elt a where
   
 
 -- | Primitive unboxed, unlifted types that fit natively into raw memory
-type Prim ∷ forall {r}. T r → Constraint
+type Prim ∷ forall {r}. T r → TC
 class Prim (x ∷ T r) where
   size ∷ I {- ^ # elements -} → I {- ^ size in bytes -}
   align ∷ I → I
@@ -71,5 +71,5 @@ INST_PRIM(F8,SIZEOF_DOUBLE,ALIGNMENT_DOUBLE,indexWord8ArrayAsDouble,readWord8Arr
 INST_PRIM(Addr#,SIZEOF_HSPTR,ALIGNMENT_HSPTR,indexWord8ArrayAsAddr,readWord8ArrayAsAddr,writeWord8ArrayAsAddr)
 
 -- Override the word representation for chars
-INST_PRIM_SPEC(Char#,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsWideChar,readWord8ArrayAsWideChar,writeWord8ArrayAsWideChar)
-INST_PRIM_SPEC(Char8#,1,ALIGNMENT_HSCHAR,indexWord8ArrayAsChar,readWord8ArrayAsChar,writeWord8ArrayAsChar)
+INST_PRIM_SPEC(C#,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsWideChar,readWord8ArrayAsWideChar,writeWord8ArrayAsWideChar)
+INST_PRIM_SPEC(C1#,1,ALIGNMENT_HSCHAR,indexWord8ArrayAsChar,readWord8ArrayAsChar,writeWord8ArrayAsChar)

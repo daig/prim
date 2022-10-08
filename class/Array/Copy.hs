@@ -3,7 +3,7 @@ module Array.Copy where
 import Prim
 import Action
 
-type Copy ∷ ∀ {rx} {rsrc} {rdst}. (T rx → T rsrc) → (T rx → T rdst) → ★ → Constraint
+type Copy ∷ ∀ {rx} {rsrc} {rdst}. (T rx → T rsrc) → (T rx → T rdst) → ★ → TC
 class Copy src dst s where
   -- | Copy the elements from the source to the destination.
   -- Both must fully contain the specified ranges and not overlap in memory,

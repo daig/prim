@@ -2,7 +2,7 @@
 module Array.Boxed where
 import Cast
 
-type BoxedArray ∷ ∀ {l}. (T# l → T_) → C
+type BoxedArray ∷ ∀ {l}. (T# l → T_) → TC
 class BoxedArray a where
 
     -- | Read from the specified index of a the array
