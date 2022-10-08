@@ -26,7 +26,6 @@ deriving newtype instance Eq# B#
 deriving newtype instance Cmp# B#
 deriving newtype instance Eq# Ordering
 
-
 instance Eq# I where
   (==#) = coerce (GHC.==#)
   (!=#) = coerce (/=#)

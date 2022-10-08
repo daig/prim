@@ -38,13 +38,13 @@ instance New (Array# ∷ T# L → T_) where { ;\
   new = newArray# ;\
   gen n f = runST ST.do { ;\
    xs ← new# n ;\
-   let go i = if i == n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
+   let go i = if i == n then \s→s else write xs i (f i) <> go (i + 1#) in go 0# ;\
    freeze## xs }} ;\
 instance New (SmallArray# ∷ T# L → T_) where { ;\
   new = newSmallArray#  ;\
   gen n f = runST ST.do { ;\
    xs ← new# n ;\
-   let go i = if i == n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
+   let go i = if i == n then \s→s else write xs i (f i) <> go (i + 1#) in go 0# ;\
    freeze## xs }}
 
 INST_NEW_BOX(Unlifted)
@@ -55,11 +55,11 @@ instance New (UnboxedArray# ∷ K A → T_) where { ;\
   new ∷ ∀ (x ∷ K A) s. Index x UnboxedArray# ⇒ I → x → ST s (M UnboxedArray# s x) ;\
   new n e = ST.do { ;\
     ma ← new# n ;\
-    cast (set# ma 0# n e) ;\
+    set# ma 0# n e ;\
     return ma} ;\
   gen n f = runST ST.do { ;\
    xs ← new# n ;\
-   let go i = if i == n then nop else ST.do {write xs i (f i) *> go (i + 1#)} in go 0# ;\
+   let go i = if i == n then \s→s else write xs i (f i) <> go (i + 1#) in go 0# ;\
    freeze## xs}} \
 
 INST_NEW_UB(I)

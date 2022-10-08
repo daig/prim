@@ -153,7 +153,7 @@ instance Cast I (P_Stable_Name a) where cast = stableNameToInt#
 instance Prim x ⇒ Cast (UnboxedArray# x) (UnboxedSlice x) where
   cast (Bytes_Off_Len# (# x, size @x → off, size @x → n #)) = runST ST.do
     mv <- newByteArray# n
-    cast (copyByteArray# x off mv 0# n)
+    copyByteArray# x off mv 0# n
     v <- unsafeFreezeByteArray# mv
     return (coerce v)
 
@@ -162,7 +162,7 @@ instance Prim x ⇒ Cast (UnboxedArray# x) (UnboxedConstRef x) where
   cast (Bytes_Off# (# x, size @x → off #)) = runST ST.do
     let n = sizeofByteArray# x -# off
     mv <- newByteArray# n
-    cast (copyByteArray# x off mv 0# n)
+    copyByteArray# x off mv 0# n
     v <- unsafeFreezeByteArray# mv
     return (coerce v)
 
@@ -171,7 +171,7 @@ instance Prim x ⇒ Cast (PinnedArray# x) (PinnedConstRef x) where
   cast (PinnedBytes_Off# (# x, size @x → off #)) = runST ST.do
     let n = sizeofByteArray# x -# off
     mv <- newByteArray# n
-    cast (copyByteArray# x off mv 0# n)
+    copyByteArray# x off mv 0# n
     v <- unsafeFreezeByteArray# mv
     return (coerce v)
 

@@ -19,10 +19,16 @@ flags:
     description: Generate lots of instances for tuples and sums
     manual: true
     default: false
+  lift-insts:
+    description: Generate lots of instances for Lift2
+    manual: true
+    default: false
 
 when:
   - condition: flag(tuple-insts)
     cpp-options: -DTUPLE_INSTS
+  - condition: flag(lift-insts)
+    cpp-options: -DLIFT_INSTS
 
 default-extensions:
   - MagicHash

@@ -22,15 +22,13 @@ class Map v a b where
 type Foldr ∷ ∀ {r} {rv}. (T r → T rv) → T r → C
 class Foldr v x where foldr ∷ (x → b → b) → b → v x → b
 
-
-
 #define INST_EACH(A)\
 instance Each s (UnboxedMutableArray# s ∷ K A → T_) A where { ;\
   each v f = ieach v (\_ → f) ;\
-  ieach v f = ST.do n <- lenM v; gogo n 0# where { ;\
+  ieach v f = lenM v >>* \n → gogo n 0# where { ;\
     gogo n = go where { ;\
-        go i | i == n = ST.nop ;\
-        go i = ST.do x ← v !! i; f i x *> go (i-1#) }} ;\
+        go i | i == n = \s→s ;\
+        go i = v !! i >>* \x → f i x <> go (i-1#) }} ;\
   foldIO bamb b0 v = go 0# b0 where {;\
     go i b = ST.do {;\
       n ← lenM v;\
@@ -50,8 +48,8 @@ instance Each s (UnboxedMutableArray# s ∷ K A → T_) A where { ;\
 instance Each s (UnboxedArray# ∷ K A → T_) A where { ;\
   each v f = ieach v (\_ → f) ;\
   ieach v f = go 0# where { ;\
-    go i | i == n = ST.nop ;\
-    go i = f i (v ! i) *> go (i-1#) ;\
+    go i | i == n = \s→s ;\
+    go i = f i (v!i) <> go (i-1#) ;\
     n = len v} ;\
   foldIO bamb b0 v = go 0# b0 where {;\
     n = len v;\
@@ -69,11 +67,11 @@ instance Each s (UnboxedArray# ∷ K A → T_) A where { ;\
       else return b }}};\
 instance Each s (ForeignSlice ∷ K A → K (# Addr#, I #)) A where { ;\
   ieach (Addr_Len# (# p, n #)) f = go 0# where { ;\
-    go i | i == n = ST.nop ;\
-    go i = f i (ConstAddr# p ! i) *> go (i-1#)} ;\
+    go i | i == n = \s→s ;\
+    go i = f i (ConstAddr# p ! i) <> go (i-1#)} ;\
   each (Addr_Len# (# p, n #)) f = go p where { ;\
-    go p | p == end = ST.nop ;\
-    go p = f (ConstAddr# p ! 0#) *> go (p +. 1#);\
+    go p | p == end = \s→s ;\
+    go p = f (ConstAddr# p ! 0#) <> go (p +. 1#);\
     end = p +. n} ;\
   foldIO bamb b0 (Addr_Len# (# ConstAddr# → v, n #)) = go 0# b0 where {;\
     go i b = ST.do {;\
@@ -91,11 +89,11 @@ instance Modify UnboxedMutableArray# A where { ;\
   xs %= f = ieach xs \ i x → write xs i (f x)} ;\
 
 instance Modify MutVar# a where
-  v %= f = \s → case atomicModifyMutVar_# v f s of (# s', _, _ #) → (# s', (##) #)
+  v %= f = \s → case atomicModifyMutVar_# v f s of (# s', _, _ #) → s'
 
-instance Modify TVar# a where v %= f = ST.do x ← read v; cast (v .= f x)
-instance Modify MVar# a where v %= f = ST.do x ← read v; cast (v .= f x)
-instance Modify IOPort# a where v %= f = ST.do x ← read v; cast (v .= f x)
+instance Modify TVar# a where v %= f = read v >>* \x → v .= f x
+instance Modify MVar# a where v %= f = read v >>* \x → v .= f x
+instance Modify IOPort# a where v %= f = read v >>* \x → v .= f x
 
 #define INST_MAP2_UB(A,B)\
 instance Map UnboxedArray# A B where { ;\
@@ -161,8 +159,6 @@ instance Foldr SmallArray# (a ∷ T_) where
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-
-
 INST_MAP_UB(I)
 INST_MAP_UB(I8)
 INST_MAP_UB(I16)
@@ -179,15 +175,15 @@ INST_MAP_UB(Addr#)
 
 type Each ∷ ∀ {r} {rv}. ★ → (T r → T rv) → T r → C
 class Each s v a where
-  ieach ∷ v a → (I → a → ST_ s) → ST s (##)
-  each ∷ v a → (a → ST_ s) → ST s (##)
+  ieach ∷ v a → (I → a → ST_ s) → ST_ s
+  each ∷ v a → (a → ST_ s) → ST_ s
   foldIO ∷ (b → a → ST s b) → b → v a → ST s b
   ifoldIO ∷ (I → b → a → ST s b) → b → v a → ST s b
 
 
 type Modify ∷ ∀ {r} {rv}. (★ → T r → T rv) → T r → C
 class Modify v a where
-  (%=) ∷ ∀ s. v s a → (a → a) → ST s (##)
+  (%=) ∷ ∀ s. v s a → (a → a) → ST_ s
 
 
 -- TODO <%= atomic modify 2 ioref

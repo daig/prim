@@ -5,72 +5,46 @@ module Do.ST (runRW#, module Do.ST) where
 import Unsafe.Coerce
 import qualified GHC.Types as GHC
 
-nop ∷ ST s (##)
-nop s = (# s, (##) #)
-
-
 -- | Used for @QualifiedDo@
 return ∷ Pure (a ∷ T ra) ⇒ a → ST s a
-return = η
-{-# inline return #-}
+return = pure; {-# inline return #-}
 
-class Pure (a ∷ T ra) where η ∷ a → ST s a
-class (Do a c, Do b c) ⇒ Lift2 (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
-  η2 ∷ (a → b → c) → ST s a → ST s b → ST s c
-
-#define INST_LIFT2(A,B,C) \
-instance Lift2 (a ∷ K A) (b ∷ K B) (c ∷ K C) where {\
-  η2 f sta stb = sta >>= \a → stb >>= \b → η (f a b)}
+class Pure (a ∷ T ra) where pure ∷ a → ST s a
 
 #define INST_PURE(A) \
-instance Pure (a ∷ K (A)) where {\
-  η x = \s → (# s , x #)}
-
-  --η2 f sta stb = sta >>= \a → stb >>= \b → η (f a b)}
-
+instance Pure (a ∷ K (A)) where {pure x = \s → (# s , x #)}
 
 -- | Return the value computed by a state thread.
 -- The @forall@ ensures that the internal state used by the 'ST'
 -- computation is inaccessible to the rest of the program.
-class RunST (a ∷ T ra) where runST ∷ (forall s. ST s a) → a
-#define INST_RUNST(A) \
-instance RunST (a ∷ K (A)) where {\
-  runST st = case runRW# st of (# _, a #) → a}
+class RunST (a ∷ T ra) where runST ∷ (∀ s. ST s a) → a
 
-
-class Pure b ⇒ Do (a ∷ T ra) (b ∷ T rb) where
+class Pure b ⇒ Do2 (a ∷ T ra) (b ∷ T rb) where
   (>>=) ∷ ST s a → (a → ST s b) → ST s b
-  η1 ∷ (a → b) → ST s a → ST s b
-  (>>) ∷ ST s (##) → ST s a → ST s a
-  (*>) ∷ ST_ s → ST s a → ST s a
+  (>%) ∷ ST s a → (a → b) → ST s b
+
+class Do (a ∷ T ra) where
+  (>>*) ∷ ST s a → (a → ST_ s) → ST_ s
+  (>*) ∷ ST s a → ST_ s → ST_ s
+  (>>) ∷ ST_ s → ST s a → ST s a
+
+(<>) ∷ ST_ s → ST_ s → ST_ s
+st <> sta = \s → sta (st s)
+
+infixl 1 >>=, >>, >*, >>*, >%
+
 #define INST_MONAD(A,B) \
-instance Do (a ∷ K (A)) (b ∷ K (B)) where {\
-  η1 f st = st >>= \a → return (f a); \
-  (st >> sta) s = case st s of {(# s', _ #) → sta s'} ;\
-  (st *> sta) s = sta (st s) ;\
-  (st >>= f) s = go (st s) f where \
-    go ∷ (# State# s , a #) → (a → ST s b) → (# State# s , b #); \
-    go (# s' , a #) f = f a s'}
-
-
-INST_PURE((##))
-INST_PURE(())
-INST_PURE(ByteArray#)
-INST_PURE(I) 
-INST_PURE(I8)
-INST_PURE(I16)
-INST_PURE(I32)
-INST_PURE(I64)
-INST_PURE(U)
-INST_PURE(U8)
-INST_PURE(U16)
-INST_PURE(U32)
-INST_PURE(U64)
-INST_PURE(Addr#)
-INST_PURE(F32)
-INST_PURE(F64)
+instance Do2 (a ∷ K (A)) (b ∷ K (B)) where {\
+  st >% f = st >>= \a → return (f a); \
+  st >>= f = \s → case st s of {(# ss, a #) → f a ss}}
 
 #define INSTS2_MONAD(Y) \
+INST_PURE(Y);\
+instance RunST (a ∷ K (Y)) where {runST st = case runRW# st of (# _, a #) → a};\
+instance Do (a ∷ K (Y)) where {\
+  (st >> sta) s = sta (st s) ;\
+  st >* f = \s → case st s of {(# ss, _ #) → f ss};\
+  st >>* f = \s → case st s of {(# ss, a #) → f a ss}};\
 INST_MONAD(Y,(##)); \
 INST_MONAD(Y,()); \
 INST_MONAD(Y,ByteArray#); \
@@ -104,6 +78,14 @@ INSTS2_MONAD(U64)
 INSTS2_MONAD(Addr#)
 INSTS2_MONAD(F32)
 INSTS2_MONAD(F64)
+
+#ifdef LIFT_INSTS
+class (Do a c, Do b c) ⇒ Lift2 (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
+  lift2 ∷ (a → b → c) → ST s a → ST s b → ST s c
+
+#define INST_LIFT2(A,B,C) \
+instance Lift2 (a ∷ K A) (b ∷ K B) (c ∷ K C) where {\
+  lift2 f sta stb = sta >>= \a → stb >>= \b → pure (f a b)}
 
 #define INSTS3_LIFT(Y,Z) \
 INST_LIFT2(Y,Z,(##)); \
@@ -157,20 +139,4 @@ INSTS2_LIFT(U64)
 INSTS2_LIFT(Addr#)
 INSTS2_LIFT(F32)
 INSTS2_LIFT(F64)
-
-INST_RUNST((##))
-INST_RUNST(())
-INST_RUNST(ByteArray#)
-INST_RUNST(I)
-INST_RUNST(I8)
-INST_RUNST(I16)
-INST_RUNST(I32)
-INST_RUNST(I64)
-INST_RUNST(U)
-INST_RUNST(U8)
-INST_RUNST(U16)
-INST_RUNST(U32)
-INST_RUNST(U64)
-INST_RUNST(Addr#)
-INST_RUNST(F32)
-INST_RUNST(F64)
+#endif

@@ -121,7 +121,7 @@ instance Array (UnboxedArray# ∷ K A → T_) where { ;\
   thaw# ∷ ∀ (x ∷ K A) s. Elt UnboxedArray# x ⇒ UnboxedArray# x → I → I → ST s (M UnboxedArray# s x) ;\
   thaw# a (size @x → off) (size @x → n) = ST.do { ;\
     ma <- new# n ;\
-    cast (copyByteArray# (coerce a) off (coerce ma) 0# n) ;\
+    copyByteArray# (coerce a) off (coerce ma) 0# n ;\
     return ma} ;\
   len ∷ ∀ (x ∷ K A). Elt UnboxedArray# x ⇒ UnboxedArray# x → I ;\
   len a = coerce sizeofByteArray# a / size @x 1# ;\
@@ -132,7 +132,7 @@ instance Array (UnboxedArray# ∷ K A → T_) where { ;\
   cloneM# ∷ ∀ (x ∷ K A) s. Elt UnboxedArray# x ⇒ M UnboxedArray# s x → I → I → ST s (M UnboxedArray# s x) ;\
   cloneM# a (size @x → off) (size @x → n) = ST.do { ;\
     ma <- new# n ;\
-    cast (copyMutableByteArray# (coerce a) off (coerce ma) 0# n) ;\
+    copyMutableByteArray# (coerce a) off (coerce ma) 0# n ;\
     return ma} ;\
   clone# ∷ ∀ (x ∷ K A). Elt UnboxedArray# x ⇒ UnboxedArray# x → I → I → UnboxedArray# x ;\
   clone# a (size @x → off) (size @x → n) = runST (ST.do {ma <- thaw# a off n; freeze## ma})}  ;\
