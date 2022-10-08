@@ -14,10 +14,6 @@ return ∷ Pure (a ∷ T ra) ⇒ a → ST s a
 return = η
 {-# inline return #-}
 
-st ∷ ST_ s → ST s (##)
-st f = \s → case f s of s' → (# s', (##) #)
-{-# inline st #-}
-
 class Pure (a ∷ T ra) where η ∷ a → ST s a
 class (Do a c, Do b c) ⇒ Lift2 (a ∷ T ra) (b ∷ T rb) (c ∷ T rc) where
   η2 ∷ (a → b → c) → ST s a → ST s b → ST s c

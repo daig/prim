@@ -7,6 +7,7 @@ import Do.ST as ST
 import Cmp
 import Var
 import Action
+import Cast
 
 type Map ∷ ∀ {ra} {rb} {rv}. (∀ {r}. T r → T rv) → T ra → T rb → C
 class Map v a b where
@@ -92,9 +93,9 @@ instance Modify UnboxedMutableArray# A where { ;\
 instance Modify MutVar# a where
   v %= f = \s → case atomicModifyMutVar_# v f s of (# s', _, _ #) → (# s', (##) #)
 
-instance Modify TVar# a where v %= f = ST.do x ← read v; st (v .= f x)
-instance Modify MVar# a where v %= f = ST.do x ← read v; st (v .= f x)
-instance Modify IOPort# a where v %= f = ST.do x ← read v; st (v .= f x)
+instance Modify TVar# a where v %= f = ST.do x ← read v; cast (v .= f x)
+instance Modify MVar# a where v %= f = ST.do x ← read v; cast (v .= f x)
+instance Modify IOPort# a where v %= f = ST.do x ← read v; cast (v .= f x)
 
 #define INST_MAP2_UB(A,B)\
 instance Map UnboxedArray# A B where { ;\
