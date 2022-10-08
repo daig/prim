@@ -51,65 +51,65 @@ pattern GT ← ((\ (Ordering# i) → i >#  0# ) → 1# ) where GT = Ordering#  1
 newtype Char8# = Char8# Char#
 
 type I = Int#
-type I8 = Int8#
+type I1 = Int8#
 -- | Narrow a machine 'I' to 8 bits
-pattern I8 ∷ I → I8
-pattern I8 u ← (int8ToInt# → u) where I8 = intToInt8#
-{-# complete I8 #-}
+pattern I1 ∷ I → I1
+pattern I1 u ← (int8ToInt# → u) where I1 = intToInt8#
+{-# complete I1 #-}
 
-type I16 = Int16#
+type I2 = Int16#
 -- | Narrow a machine 'I' to 8 bits
-pattern I16 ∷ I → I16
-pattern I16 u ← (int16ToInt# → u) where I16 = intToInt16#
-{-# complete I16 #-}
+pattern I2 ∷ I → I2
+pattern I2 u ← (int16ToInt# → u) where I2 = intToInt16#
+{-# complete I2 #-}
 
-type I32 = Int32#
+type I4 = Int32#
 -- | Narrow a machine 'I' to 32 bits
-pattern I32 ∷ I → I32
-pattern I32 u ← (int32ToInt# → u) where I32 = intToInt32#
-{-# complete I32 #-}
+pattern I4 ∷ I → I4
+pattern I4 u ← (int32ToInt# → u) where I4 = intToInt32#
+{-# complete I4 #-}
 
-type I64 = Int64#
+type I8 = Int64#
 -- | Narrow a machine 'I' to 64 bits
-pattern I64 ∷ I → I64
-pattern I64 u ← (int64ToInt# → u) where I64 = intToInt64#
-{-# complete I64 #-}
+pattern I8 ∷ I → I8
+pattern I8 u ← (int64ToInt# → u) where I8 = intToInt64#
+{-# complete I8 #-}
 
 type U = Word#
 
-type U8 = Word8#
+type U1 = Word8#
 -- | Narrow a machine 'U' to 8 bits
-pattern U8 ∷ U → U8
-pattern U8 u ← (word8ToWord# → u) where U8 = wordToWord8#
-{-# complete U8 #-}
+pattern U1 ∷ U → U1
+pattern U1 u ← (word8ToWord# → u) where U1 = wordToWord8#
+{-# complete U1 #-}
 
-type U16 = Word16#
+type U2 = Word16#
 
 -- | Narrow a machine 'U' to 16 bits
-pattern U16 ∷ U → U16
-pattern U16 u ← (word16ToWord# → u) where U16 = wordToWord16#
-{-# complete U16 #-}
+pattern U2 ∷ U → U2
+pattern U2 u ← (word16ToWord# → u) where U2 = wordToWord16#
+{-# complete U2 #-}
 
-type U32 = Word32#
+type U4 = Word32#
 -- | Narrow a machine 'U' to 32 bits
-pattern U32 ∷ U → U32
-pattern U32 u ← (word32ToWord# → u) where U32 = wordToWord32#
-{-# complete U32 #-}
+pattern U4 ∷ U → U4
+pattern U4 u ← (word32ToWord# → u) where U4 = wordToWord32#
+{-# complete U4 #-}
 
-type U64 = Word64#
+type U8 = Word64#
 -- | Narrow a machine 'U' to 64 bits
-pattern U64 ∷ U → U64
-pattern U64 u ← (word64ToWord# → u) where U64 = wordToWord64#
-{-# complete U64 #-}
+pattern U8 ∷ U → U8
+pattern U8 u ← (word64ToWord# → u) where U8 = wordToWord64#
+{-# complete U8 #-}
 
 -- | Single-precision floating point numbers.
 -- It is desirable that this type be at least equal in range and precision
 -- to the IEEE single-precision type.
-type F32 = Float#
+type F4 = Float#
 -- | Double-precision floating point numbers.
 -- It is desirable that this type be at least equal in range and precision
 -- to the IEEE double-precision type.
-type F64 = Double#
+type F8 = Double#
 
 type ST s (a ∷ T ra) = State# s → (# State# s , a #)
 type ST' s (a ∷ T ra) = State# s → (# State# s , B#, a #)
@@ -201,31 +201,31 @@ type A ∷ ∀ {rs} {r}. T rs → T r → T_
 type family A (s ∷ T rs) (x ∷ T r) = a | a → rs r where
   A X (x ∷ T# _) = Array# x
   A X (x ∷ K I) = UnboxedArray# x
+  A X (x ∷ K I1) = UnboxedArray# x
+  A X (x ∷ K I2) = UnboxedArray# x
+  A X (x ∷ K I4) = UnboxedArray# x
   A X (x ∷ K I8) = UnboxedArray# x
-  A X (x ∷ K I16) = UnboxedArray# x
-  A X (x ∷ K I32) = UnboxedArray# x
-  A X (x ∷ K I64) = UnboxedArray# x
   A X (x ∷ K U) = UnboxedArray# x
+  A X (x ∷ K U1) = UnboxedArray# x
+  A X (x ∷ K U2) = UnboxedArray# x
+  A X (x ∷ K U4) = UnboxedArray# x
   A X (x ∷ K U8) = UnboxedArray# x
-  A X (x ∷ K U16) = UnboxedArray# x
-  A X (x ∷ K U32) = UnboxedArray# x
-  A X (x ∷ K U64) = UnboxedArray# x
-  A X (x ∷ K F32) = UnboxedArray# x
-  A X (x ∷ K F64) = UnboxedArray# x
+  A X (x ∷ K F4) = UnboxedArray# x
+  A X (x ∷ K F8) = UnboxedArray# x
   A X (x ∷ K Addr#) = UnboxedArray# x
   A s (x ∷ T# _) = MutableArray# s x
   A s (x ∷ K I) = UnboxedMutableArray# s x
+  A s (x ∷ K I1) = UnboxedMutableArray# s x
+  A s (x ∷ K I2) = UnboxedMutableArray# s x
+  A s (x ∷ K I4) = UnboxedMutableArray# s x
   A s (x ∷ K I8) = UnboxedMutableArray# s x
-  A s (x ∷ K I16) = UnboxedMutableArray# s x
-  A s (x ∷ K I32) = UnboxedMutableArray# s x
-  A s (x ∷ K I64) = UnboxedMutableArray# s x
   A s (x ∷ K U) = UnboxedMutableArray# s x
+  A s (x ∷ K U1) = UnboxedMutableArray# s x
+  A s (x ∷ K U2) = UnboxedMutableArray# s x
+  A s (x ∷ K U4) = UnboxedMutableArray# s x
   A s (x ∷ K U8) = UnboxedMutableArray# s x
-  A s (x ∷ K U16) = UnboxedMutableArray# s x
-  A s (x ∷ K U32) = UnboxedMutableArray# s x
-  A s (x ∷ K U64) = UnboxedMutableArray# s x
-  A s (x ∷ K F32) = UnboxedMutableArray# s x
-  A s (x ∷ K F64) = UnboxedMutableArray# s x
+  A s (x ∷ K F4) = UnboxedMutableArray# s x
+  A s (x ∷ K F8) = UnboxedMutableArray# s x
   A s (x ∷ K Addr#) = UnboxedMutableArray# s x
 
 type M ∷ ∀ {ra} {r}. (T ra → T r) → ★ → T ra → T r
@@ -304,15 +304,15 @@ newtype X ∷ T (SumRep '[]) where X ∷ X → X
 type Box ∷ ∀ {r}. T r → ★
 type family Box x = b | b → x where
   Box I = GHC.Int
-  Box I8 = GHC.Int8
-  Box I16 = GHC.Int16
-  Box I32 = GHC.Int32
-  Box I64 = GHC.Int64
+  Box I1 = GHC.Int8
+  Box I2 = GHC.Int16
+  Box I4 = GHC.Int32
+  Box I8 = GHC.Int64
   Box U = GHC.Word
-  Box U8 = GHC.Word8
-  Box U16 = GHC.Word16
-  Box U32 = GHC.Word32
-  Box U64 = GHC.Word64
+  Box U1 = GHC.Word8
+  Box U2 = GHC.Word16
+  Box U4 = GHC.Word32
+  Box U8 = GHC.Word64
   Box Ordering = GHC.Ordering
   Box B# = GHC.Bool
   Box Nat = BigNat
@@ -320,59 +320,59 @@ type family Box x = b | b → x where
 
 type VRep ∷ ∀ {r}. T r → Natural → RuntimeRep
 type family VRep v n = r | r → v n where
-  VRep I8  16 = R Int8X16#
-  VRep I16 8  = R Int16X8#
-  VRep I32 4  = R Int32X4#
-  VRep I64 2  = R Int64X2#
+  VRep I1  16 = R Int8X16#
+  VRep I2 8  = R Int16X8#
+  VRep I4 4  = R Int32X4#
+  VRep I8 2  = R Int64X2#
 
-  VRep I8  32 = R Int8X32#
-  VRep I16 16 = R Int16X16#
-  VRep I32 8  = R Int32X8#
-  VRep I64 4  = R Int64X4#
+  VRep I1  32 = R Int8X32#
+  VRep I2 16 = R Int16X16#
+  VRep I4 8  = R Int32X8#
+  VRep I8 4  = R Int64X4#
 
-  VRep I8 64  = R Int8X64#
-  VRep I16 32 = R Int16X32#
-  VRep I32 16 = R Int32X16#
-  VRep I64 8  = R Int64X8#
-
-
-  VRep U8  16 = R Word8X16#
-  VRep U16 8  = R Word16X8#
-  VRep U32 4  = R Word32X4#
-  VRep U64 2  = R Word64X2#
-
-  VRep U8  32 = R Word8X32#
-  VRep U16 16 = R Word16X16#
-  VRep U32 8  = R Word32X8#
-  VRep U64 4  = R Word64X4#
-
-  VRep U8  64 = R Word8X64#
-  VRep U16 32 = R Word16X32#
-  VRep U32 16 = R Word32X16#
-  VRep U64 8  = R Word64X8#
+  VRep I1 64  = R Int8X64#
+  VRep I2 32 = R Int16X32#
+  VRep I4 16 = R Int32X16#
+  VRep I8 8  = R Int64X8#
 
 
-  VRep F32 4  = R FloatX4#
-  VRep F64 2  = R DoubleX2#
+  VRep U1  16 = R Word8X16#
+  VRep U2 8  = R Word16X8#
+  VRep U4 4  = R Word32X4#
+  VRep U8 2  = R Word64X2#
 
-  VRep F32 8  = R FloatX8#
-  VRep F64 4  = R DoubleX4#
+  VRep U1  32 = R Word8X32#
+  VRep U2 16 = R Word16X16#
+  VRep U4 8  = R Word32X8#
+  VRep U8 4  = R Word64X4#
 
-  VRep F32 16 = R FloatX16#
-  VRep F64 8  = R DoubleX8#
+  VRep U1  64 = R Word8X64#
+  VRep U2 32 = R Word16X32#
+  VRep U4 16 = R Word32X16#
+  VRep U8 8  = R Word64X8#
+
+
+  VRep F4 4  = R FloatX4#
+  VRep F8 2  = R DoubleX2#
+
+  VRep F4 8  = R FloatX8#
+  VRep F8 4  = R DoubleX4#
+
+  VRep F4 16 = R FloatX16#
+  VRep F8 8  = R DoubleX8#
 
 type VElem ∷ ∀ {r}. T r → VecElem
 type family VElem a = e | e → a where
-  VElem I8 = Int8ElemRep
-  VElem I16 = Int16ElemRep
-  VElem I32 = Int32ElemRep
-  VElem I64 = Int64ElemRep
-  VElem U8 = Word8ElemRep
-  VElem U16 = Word16ElemRep
-  VElem U32 = Word32ElemRep
-  VElem U64 = Word64ElemRep
-  VElem F32 = FloatElemRep
-  VElem F64 = DoubleElemRep
+  VElem I1 = Int8ElemRep
+  VElem I2 = Int16ElemRep
+  VElem I4 = Int32ElemRep
+  VElem I8 = Int64ElemRep
+  VElem U1 = Word8ElemRep
+  VElem U2 = Word16ElemRep
+  VElem U4 = Word32ElemRep
+  VElem U8 = Word64ElemRep
+  VElem F4 = FloatElemRep
+  VElem F8 = DoubleElemRep
 type VCount ∷ Natural → VecCount
 type family VCount n = c | c → n where
   VCount 2 = Vec2
@@ -385,46 +385,46 @@ type family VCount n = c | c → n where
 --type (×) ∷ ∀ {r} (a ∷ T r) (n ∷ Natural). T r → Natural → T (VRep a n)
 type (×) ∷ ∀ (a ∷ T r) → ∀ (n ∷ Natural) → T (VecRep (VCount n) (VElem a))
 type family a × n = t | t → a n where
-  I8  × 16 = Int8X16#
-  I16 ×  8 = Int16X8#
-  I32 ×  4 = Int32X4#
-  I64 ×  2 = Int64X2#
+  I1  × 16 = Int8X16#
+  I2 ×  8 = Int16X8#
+  I4 ×  4 = Int32X4#
+  I8 ×  2 = Int64X2#
 
-  I8  × 32 = Int8X32#
-  I16 × 16 = Int16X16#
-  I32 ×  8 = Int32X8#
-  I64 ×  4 = Int64X4#
+  I1  × 32 = Int8X32#
+  I2 × 16 = Int16X16#
+  I4 ×  8 = Int32X8#
+  I8 ×  4 = Int64X4#
 
-  I8  × 64 = Int8X64#
-  I16 × 32 = Int16X32#
-  I32 × 16 = Int32X16#
-  I64 ×  8 = Int64X8#
-
-
-  U8  × 16 = Word8X16#
-  U16 ×  8 = Word16X8#
-  U32 ×  4 = Word32X4#
-  U64 ×  2 = Word64X2#
-
-  U8  × 32 = Word8X32#
-  U16 × 16 = Word16X16#
-  U32 ×  8 = Word32X8#
-  U64 ×  4 = Word64X4#
-
-  U8  × 64 = Word8X64#
-  U16 × 32 = Word16X32#
-  U32 × 16 = Word32X16#
-  U64 ×  8 = Word64X8#
+  I1  × 64 = Int8X64#
+  I2 × 32 = Int16X32#
+  I4 × 16 = Int32X16#
+  I8 ×  8 = Int64X8#
 
 
-  F32 ×  4 = FloatX4#
-  F64 ×  2 = DoubleX2#
+  U1  × 16 = Word8X16#
+  U2 ×  8 = Word16X8#
+  U4 ×  4 = Word32X4#
+  U8 ×  2 = Word64X2#
 
-  F32 ×  8 = FloatX8#
-  F64 ×  4 = DoubleX4#
+  U1  × 32 = Word8X32#
+  U2 × 16 = Word16X16#
+  U4 ×  8 = Word32X8#
+  U8 ×  4 = Word64X4#
 
-  F32 × 16 = FloatX16#
-  F64 ×  8 = DoubleX8#
+  U1  × 64 = Word8X64#
+  U2 × 32 = Word16X32#
+  U4 × 16 = Word32X16#
+  U8 ×  8 = Word64X8#
+
+
+  F4 ×  4 = FloatX4#
+  F8 ×  2 = DoubleX2#
+
+  F4 ×  8 = FloatX8#
+  F8 ×  4 = DoubleX4#
+
+  F4 × 16 = FloatX16#
+  F8 ×  8 = DoubleX8#
 
 -- | A trivially satisfied 'Constraint'
 type OK ∷ ∀ {r}. T r → Constraint

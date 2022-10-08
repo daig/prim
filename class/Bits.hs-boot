@@ -25,12 +25,12 @@ infixl 1 ||
 
 instance Logic B#
 instance Logic I
+instance Logic I1
+instance Logic I2
+instance Logic I4
 instance Logic I8
-instance Logic I16
-instance Logic I32
-instance Logic I64
 instance Logic U
+instance Logic U1
+instance Logic U2
+instance Logic U4
 instance Logic U8
-instance Logic U16
-instance Logic U32
-instance Logic U64

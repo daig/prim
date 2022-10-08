@@ -44,74 +44,74 @@ instance Cmp# I where
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# I8 where
+instance Eq# I1 where
   (==#) = coerce eqInt8#
   (!=#) = coerce neInt8#
-  (==) = cast ((==#) @I8)
-  (!=) = cast ((!=#) @I8)
-instance Cmp# I8 where
+  (==) = cast ((==#) @I1)
+  (!=) = cast ((!=#) @I1)
+instance Cmp# I1 where
   (>#) = coerce gtInt8#
   (>=#) = coerce geInt8#
   (<#) = coerce ltInt8#
   (<=#) = coerce leInt8#
-  (>) = cast ((>#) @I8)
-  (>=) = cast ((>=#) @I8)
-  (<) = cast ((<#) @I8)
-  (<=) = cast ((<=#) @I8)
+  (>) = cast ((>#) @I1)
+  (>=) = cast ((>=#) @I1)
+  (<) = cast ((<#) @I1)
+  (<=) = cast ((<=#) @I1)
   cmp a b = Ordering# do gtInt8# a b GHC.-# ltInt8# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# I16 where
+instance Eq# I2 where
   (==#) = coerce eqInt16#
   (!=#) = coerce neInt16#
-  (==) = cast ((==#) @I16)
-  (!=) = cast ((!=#) @I16)
-instance Cmp# I16 where
+  (==) = cast ((==#) @I2)
+  (!=) = cast ((!=#) @I2)
+instance Cmp# I2 where
   (>#) = coerce gtInt16#
   (>=#) = coerce geInt16#
   (<#) = coerce ltInt16#
   (<=#) = coerce leInt16#
-  (>) = cast ((>#) @I16)
-  (>=) = cast ((>=#) @I16)
-  (<) = cast ((<#) @I16)
-  (<=) = cast ((<=#) @I16)
+  (>) = cast ((>#) @I2)
+  (>=) = cast ((>=#) @I2)
+  (<) = cast ((<#) @I2)
+  (<=) = cast ((<=#) @I2)
   cmp a b = Ordering# do gtInt16# a b GHC.-# ltInt16# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# I32 where
+instance Eq# I4 where
   (==#) = coerce eqInt32#
   (!=#) = coerce neInt32#
-  (==) = cast ((==#) @I32)
-  (!=) = cast ((!=#) @I32)
-instance Cmp# I32 where
+  (==) = cast ((==#) @I4)
+  (!=) = cast ((!=#) @I4)
+instance Cmp# I4 where
   (>#) = coerce gtInt32#
   (>=#) = coerce geInt32#
   (<#) = coerce ltInt32#
   (<=#) = coerce leInt32#
-  (>) = cast ((>#) @I32)
-  (>=) = cast ((>=#) @I32)
-  (<) = cast ((<#) @I32)
-  (<=) = cast ((<=#) @I32)
+  (>) = cast ((>#) @I4)
+  (>=) = cast ((>=#) @I4)
+  (<) = cast ((<#) @I4)
+  (<=) = cast ((<=#) @I4)
   cmp a b = Ordering# do gtInt32# a b GHC.-# ltInt32# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# I64 where
+instance Eq# I8 where
   (==#) = coerce eqInt64#
   (!=#) = coerce neInt64#
-  (==) = cast ((==#) @I64)
-  (!=) = cast ((!=#) @I64)
-instance Cmp# I64 where
+  (==) = cast ((==#) @I8)
+  (!=) = cast ((!=#) @I8)
+instance Cmp# I8 where
   (>#) = coerce gtInt64#
   (>=#) = coerce geInt64#
   (<#) = coerce ltInt64#
   (<=#) = coerce leInt64#
-  (>) = cast ((>#) @I64)
-  (>=) = cast ((>=#) @I64)
-  (<) = cast ((<#) @I64)
-  (<=) = cast ((<=#) @I64)
+  (>) = cast ((>#) @I8)
+  (>=) = cast ((>=#) @I8)
+  (<) = cast ((<#) @I8)
+  (<=) = cast ((<=#) @I8)
   cmp a b = Ordering# do gtInt64# a b GHC.-# ltInt64# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
@@ -134,74 +134,74 @@ instance Cmp# U where
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# U8 where
+instance Eq# U1 where
   (==#) = coerce eqWord8#
   (!=#) = coerce neWord8#
-  (==) = cast ((==#) @U8)
-  (!=) = cast ((!=#) @U8)
-instance Cmp# U8 where
+  (==) = cast ((==#) @U1)
+  (!=) = cast ((!=#) @U1)
+instance Cmp# U1 where
   (>#) = coerce gtWord8#
   (>=#) = coerce geWord8#
   (<#) = coerce ltWord8#
   (<=#) = coerce leWord8#
-  (>) = cast ((>#) @U8)
-  (>=) = cast ((>=#) @U8)
-  (<) = cast ((<#) @U8)
-  (<=) = cast ((<=#) @U8)
+  (>) = cast ((>#) @U1)
+  (>=) = cast ((>=#) @U1)
+  (<) = cast ((<#) @U1)
+  (<=) = cast ((<=#) @U1)
   cmp a b = Ordering# do gtWord8# a b GHC.-# ltWord8# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# U16 where
+instance Eq# U2 where
   (==#) = coerce eqWord16#
   (!=#) = coerce neWord16#
-  (==) = cast ((==#) @U16)
-  (!=) = cast ((!=#) @U16)
-instance Cmp# U16 where
+  (==) = cast ((==#) @U2)
+  (!=) = cast ((!=#) @U2)
+instance Cmp# U2 where
   (>#) = coerce gtWord16#
   (>=#) = coerce geWord16#
   (<#) = coerce ltWord16#
   (<=#) = coerce leWord16#
-  (>) = cast ((>#) @U16)
-  (>=) = cast ((>=#) @U16)
-  (<) = cast ((<#) @U16)
-  (<=) = cast ((<=#) @U16)
+  (>) = cast ((>#) @U2)
+  (>=) = cast ((>=#) @U2)
+  (<) = cast ((<#) @U2)
+  (<=) = cast ((<=#) @U2)
   cmp a b = Ordering# do gtWord16# a b GHC.-# ltWord16# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# U32 where
+instance Eq# U4 where
   (==#) = coerce eqWord32#
   (!=#) = coerce neWord32#
-  (==) = cast ((==#) @U32)
-  (!=) = cast ((!=#) @U32)
-instance Cmp# U32 where
+  (==) = cast ((==#) @U4)
+  (!=) = cast ((!=#) @U4)
+instance Cmp# U4 where
   (>#) = coerce gtWord32#
   (>=#) = coerce geWord32#
   (<#) = coerce ltWord32#
   (<=#) = coerce leWord32#
-  (>) = cast ((>#) @U32)
-  (>=) = cast ((>=#) @U32)
-  (<) = cast ((<#) @U32)
-  (<=) = cast ((<=#) @U32)
+  (>) = cast ((>#) @U4)
+  (>=) = cast ((>=#) @U4)
+  (<) = cast ((<#) @U4)
+  (<=) = cast ((<=#) @U4)
   cmp a b = Ordering# do gtWord32# a b GHC.-# ltWord32# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# U64 where
+instance Eq# U8 where
   (==#) = coerce eqWord64#
   (!=#) = coerce neWord64#
-  (==) = cast ((==#) @U64)
-  (!=) = cast ((!=#) @U64)
-instance Cmp# U64 where
+  (==) = cast ((==#) @U8)
+  (!=) = cast ((!=#) @U8)
+instance Cmp# U8 where
   (>#) = coerce gtWord64#
   (>=#) = coerce geWord64#
   (<#) = coerce ltWord64#
   (<=#) = coerce leWord64#
-  (>) = cast ((>#) @U64)
-  (>=) = cast ((>=#) @U64)
-  (<) = cast ((<#) @U64)
-  (<=) = cast ((<=#) @U64)
+  (>) = cast ((>#) @U8)
+  (>=) = cast ((>=#) @U8)
+  (<) = cast ((<#) @U8)
+  (<=) = cast ((<=#) @U8)
   cmp a b = Ordering# do gtWord64# a b GHC.-# ltWord64# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
@@ -226,37 +226,37 @@ instance Cmp# Char# where
 deriving newtype instance Eq# Char8#
 deriving newtype instance Cmp# Char8#
 
-instance Eq# F32 where
+instance Eq# F4 where
   (==#) = coerce eqFloat#
   (!=#) = coerce neFloat#
-  (==) = cast ((==#) @F32)
-  (!=) = cast ((!=#) @F32)
-instance Cmp# F32 where
+  (==) = cast ((==#) @F4)
+  (!=) = cast ((!=#) @F4)
+instance Cmp# F4 where
   (>#) = coerce gtFloat#
   (>=#) = coerce geFloat#
   (<#) = coerce ltFloat#
   (<=#) = coerce leFloat#
-  (>) = cast ((>#) @F32)
-  (>=) = cast ((>=#) @F32)
-  (<) = cast ((<#) @F32)
-  (<=) = cast ((<=#) @F32)
+  (>) = cast ((>#) @F4)
+  (>=) = cast ((>=#) @F4)
+  (<) = cast ((<#) @F4)
+  (<=) = cast ((<=#) @F4)
   cmp a b = Ordering# do gtFloat# a b GHC.-# ltFloat# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
-instance Eq# F64 where
+instance Eq# F8 where
   (==#) = coerce (==##)
   (!=#) = coerce (/=##)
-  (==) = cast ((==#) @F64)
-  (!=) = cast ((!=#) @F64)
-instance Cmp# F64 where
+  (==) = cast ((==#) @F8)
+  (!=) = cast ((!=#) @F8)
+instance Cmp# F8 where
   (>#) = coerce (>##)
   (>=#) = coerce (>=##)
   (<#) = coerce (<##)
   (<=#) = coerce (<=##)
-  (>) = cast ((>#) @F64)
-  (>=) = cast ((>=#) @F64)
-  (<) = cast ((<#) @F64)
-  (<=) = cast ((<=#) @F64)
+  (>) = cast ((>#) @F8)
+  (>=) = cast ((>=#) @F8)
+  (<) = cast ((<#) @F8)
+  (<=) = cast ((<=#) @F8)
   cmp a b = Ordering# do (a >## b) +# (a >=## b) GHC.-# 1#
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
@@ -432,8 +432,6 @@ instance Cmp# (ForeignMutableSlice s x) where
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-
-
 #ifndef TUPLE_INSTS
 instance (Eq# x, Eq# y, Eq# z) ⇒ Eq# (# (x ∷ K ByteArray#), (y ∷ K I) , (z ∷ K I) #) where
   (# x1, x2, x3 #) ==# (# y1, y2, y3 #) = x1 ==# y1 && x2 ==# y2 && x3 ==# y3
@@ -467,17 +465,17 @@ instance (Eq# x,Eq# y) ⇒ Eq# (# (x ∷ K X), (y ∷ K Y) #) where { ;\
   (# x1, x2 #) == (# y1, y2 #) = x1 == y1 && x2 == y2 ;\
   as !=# bs = not (as ==# bs) } ;\
 INST_EQ3(X,Y,I);\
+INST_EQ3(X,Y,I1);\
+INST_EQ3(X,Y,I2);\
+INST_EQ3(X,Y,I4);\
 INST_EQ3(X,Y,I8);\
-INST_EQ3(X,Y,I16);\
-INST_EQ3(X,Y,I32);\
-INST_EQ3(X,Y,I64);\
 INST_EQ3(X,Y,U);\
+INST_EQ3(X,Y,U1);\
+INST_EQ3(X,Y,U2);\
+INST_EQ3(X,Y,U4);\
 INST_EQ3(X,Y,U8);\
-INST_EQ3(X,Y,U16);\
-INST_EQ3(X,Y,U32);\
-INST_EQ3(X,Y,U64);\
-INST_EQ3(X,Y,F32);\
-INST_EQ3(X,Y,F64);\
+INST_EQ3(X,Y,F4);\
+INST_EQ3(X,Y,F8);\
 INST_EQ3(X,Y,(##));\
 INST_EQ3(X,Y,Addr#);\
 INST_EQ3(X,Y,());\
@@ -485,17 +483,17 @@ INST_EQ3(X,Y,ByteArray#)
 
 #define INST_EQ(X)\
 INST_EQ2(X,I);\
+INST_EQ2(X,I1);\
+INST_EQ2(X,I2);\
+INST_EQ2(X,I4);\
 INST_EQ2(X,I8);\
-INST_EQ2(X,I16);\
-INST_EQ2(X,I32);\
-INST_EQ2(X,I64);\
 INST_EQ2(X,U);\
+INST_EQ2(X,U1);\
+INST_EQ2(X,U2);\
+INST_EQ2(X,U4);\
 INST_EQ2(X,U8);\
-INST_EQ2(X,U16);\
-INST_EQ2(X,U32);\
-INST_EQ2(X,U64);\
-INST_EQ2(X,F32);\
-INST_EQ2(X,F64);\
+INST_EQ2(X,F4);\
+INST_EQ2(X,F8);\
 INST_EQ2(X,(##));\
 INST_EQ2(X,Addr#);\
 INST_EQ2(X,());\
@@ -505,17 +503,17 @@ INST_EQ2(X,ByteArray#)
 instance Eq# (x ∷ K (##)) where {_ == _ = T#; _ != _ = F#}
 
 INST_EQ(I)
+INST_EQ(I1)
+INST_EQ(I2)
+INST_EQ(I4)
 INST_EQ(I8)
-INST_EQ(I16)
-INST_EQ(I32)
-INST_EQ(I64)
 INST_EQ(U)
+INST_EQ(U1)
+INST_EQ(U2)
+INST_EQ(U4)
 INST_EQ(U8)
-INST_EQ(U16)
-INST_EQ(U32)
-INST_EQ(U64)
-INST_EQ(F32)
-INST_EQ(F64)
+INST_EQ(F4)
+INST_EQ(F8)
 INST_EQ((##))
 INST_EQ(Addr#)
 INST_EQ(())

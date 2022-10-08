@@ -123,17 +123,17 @@ instance Map UnboxedArray# A B where { ;\
 #define INST_MAP_UB(A);\
 INST_EACH(A);\
 INST_MAP2_UB(A,I) ;\
+INST_MAP2_UB(A,I1) ;\
+INST_MAP2_UB(A,I2) ;\
+INST_MAP2_UB(A,I4) ;\
 INST_MAP2_UB(A,I8) ;\
-INST_MAP2_UB(A,I16) ;\
-INST_MAP2_UB(A,I32) ;\
-INST_MAP2_UB(A,I64) ;\
 INST_MAP2_UB(A,U) ;\
+INST_MAP2_UB(A,U1) ;\
+INST_MAP2_UB(A,U2) ;\
+INST_MAP2_UB(A,U4) ;\
 INST_MAP2_UB(A,U8) ;\
-INST_MAP2_UB(A,U16) ;\
-INST_MAP2_UB(A,U32) ;\
-INST_MAP2_UB(A,U64) ;\
-INST_MAP2_UB(A,F32) ;\
-INST_MAP2_UB(A,F64) ;\
+INST_MAP2_UB(A,F4) ;\
+INST_MAP2_UB(A,F8) ;\
 INST_MAP2_UB(A,Addr#) ;\
 instance Foldr UnboxedArray# A where {;\
   foldr abb b0 v = go 0# where {;\
@@ -160,17 +160,17 @@ instance Foldr SmallArray# (a ∷ T_) where
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
 INST_MAP_UB(I)
+INST_MAP_UB(I1)
+INST_MAP_UB(I2)
+INST_MAP_UB(I4)
 INST_MAP_UB(I8)
-INST_MAP_UB(I16)
-INST_MAP_UB(I32)
-INST_MAP_UB(I64)
 INST_MAP_UB(U)
+INST_MAP_UB(U1)
+INST_MAP_UB(U2)
+INST_MAP_UB(U4)
 INST_MAP_UB(U8)
-INST_MAP_UB(U16)
-INST_MAP_UB(U32)
-INST_MAP_UB(U64)
-INST_MAP_UB(F32)
-INST_MAP_UB(F64)
+INST_MAP_UB(F4)
+INST_MAP_UB(F8)
 INST_MAP_UB(Addr#)
 
 type Each ∷ ∀ {r} {rv}. ★ → (T r → T rv) → T r → C

@@ -78,12 +78,12 @@ instance Bits U where
   pdep = pdep#
   pext = pext#
 
-instance Logic U8 where
+instance Logic U1 where
   (&&) = andWord8#
   (||) = orWord8#
   xor = xorWord8#
   not = notWord8#
-instance Bits U8 where
+instance Bits U1 where
   w <<# i = uncheckedShiftLWord8# w (cast @I i)
   w >># i = uncheckedShiftRLWord8# w (cast @I i)
   w << i = if i >= 8## then cast 0## else w <<# i
@@ -95,16 +95,16 @@ instance Bits U8 where
   clz w = clz8# (cast w)
   ctz w = ctz8# (cast w)
   byteSwap x = x
-  bitReverse w = cast @U8 (bitReverse8# (cast w))
-  pdep s m = cast @U8 (pdep8# (cast s) (cast m))
-  pext s m = cast @U8 (pext8# (cast s) (cast m))
+  bitReverse w = cast @U1 (bitReverse8# (cast w))
+  pdep s m = cast @U1 (pdep8# (cast s) (cast m))
+  pext s m = cast @U1 (pext8# (cast s) (cast m))
 
-instance Logic U16 where
+instance Logic U2 where
   (&&) = andWord16#
   (||) = orWord16#
   xor = xorWord16#
   not = notWord16#
-instance Bits U16 where
+instance Bits U2 where
   w <<# i = uncheckedShiftLWord16# w (cast @I i)
   w >># i = uncheckedShiftRLWord16# w (cast @I i)
   w << i = if i >= 16## then cast 0## else w <<# i
@@ -116,16 +116,16 @@ instance Bits U16 where
   clz w = clz16# (cast w)
   ctz w = ctz16# (cast w)
   byteSwap w = cast (byteSwap16# (cast w))
-  bitReverse w = cast @U16 (bitReverse16# (cast w))
-  pdep s m = cast @U16 (pdep16# (cast s) (cast m))
-  pext s m = cast @U16 (pext16# (cast s) (cast m))
+  bitReverse w = cast @U2 (bitReverse16# (cast w))
+  pdep s m = cast @U2 (pdep16# (cast s) (cast m))
+  pext s m = cast @U2 (pext16# (cast s) (cast m))
 
-instance Logic U32 where
+instance Logic U4 where
   (&&) = andWord32#
   (||) = orWord32#
   xor = xorWord32#
   not = notWord32#
-instance Bits U32 where
+instance Bits U4 where
   w <<# i = uncheckedShiftLWord32# w (cast @I i)
   w >># i = uncheckedShiftRLWord32# w (cast @I i)
   w << i = if i >= 32## then cast 0## else w <<# i
@@ -137,16 +137,16 @@ instance Bits U32 where
   clz w = clz32# (cast w)
   ctz w = ctz32# (cast w)
   byteSwap w = cast (byteSwap32# (cast w))
-  bitReverse w = cast @U32 (bitReverse32# (cast w))
-  pdep s m = cast @U32 (pdep32# (cast s) (cast m))
-  pext s m = cast @U32 (pext32# (cast s) (cast m))
+  bitReverse w = cast @U4 (bitReverse32# (cast w))
+  pdep s m = cast @U4 (pdep32# (cast s) (cast m))
+  pext s m = cast @U4 (pext32# (cast s) (cast m))
 
-instance Logic U64 where
+instance Logic U8 where
   (&&) = and64#
   (||) = or64#
   xor = xor64#
   not = not64#
-instance Bits U64 where
+instance Bits U8 where
   w <<# i = uncheckedShiftL64# w (cast @I i)
   w >># i = uncheckedShiftRL64# w (cast @I i)
   w << i = if i >= 64## then cast 0## else w <<# i
@@ -183,12 +183,12 @@ instance Bits I where
   pdep i j = cast (pdep# (cast i) (cast j))
   pext i j = cast (pext# (cast i) (cast j))
 
-instance Logic I8 where
+instance Logic I1 where
   a && b = cast (andWord8# (cast a) (cast b))
   a || b = cast (orWord8# (cast a) (cast b))
   a `xor` b = cast (xorWord8# (cast a) (cast b))
   not a = cast (notWord8# (cast a))
-instance Bits I8 where
+instance Bits I1 where
   w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
   w << i = if i >= 8## then cast 0# else w <<# i
@@ -200,16 +200,16 @@ instance Bits I8 where
   clz i = clz8# (cast i)
   ctz i = ctz8# (cast i)
   byteSwap i = i
-  bitReverse i = cast (cast @U8 (bitReverse8# (cast i)))
-  pdep i j = cast (cast @U8 (pdep8# (cast i) (cast j)))
-  pext i j = cast (cast @U8 (pext8# (cast i) (cast j)))
+  bitReverse i = cast (cast @U1 (bitReverse8# (cast i)))
+  pdep i j = cast (cast @U1 (pdep8# (cast i) (cast j)))
+  pext i j = cast (cast @U1 (pext8# (cast i) (cast j)))
 
-instance Logic I16 where
+instance Logic I2 where
   a && b = cast (andWord16# (cast a) (cast b))
   a || b = cast (orWord16# (cast a) (cast b))
   a `xor` b = cast (xorWord16# (cast a) (cast b))
   not a = cast (notWord16# (cast a))
-instance Bits I16 where
+instance Bits I2 where
   w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
   w << i = if i >= 16## then cast 0# else w <<# i
@@ -221,16 +221,16 @@ instance Bits I16 where
   clz i = clz16# (cast i)
   ctz i = ctz16# (cast i)
   byteSwap i = i
-  bitReverse i = cast (cast @U16 (bitReverse16# (cast i)))
-  pdep i j = cast (cast @U16 (pdep16# (cast i) (cast j)))
-  pext i j = cast (cast @U16 (pext16# (cast i) (cast j)))
+  bitReverse i = cast (cast @U2 (bitReverse16# (cast i)))
+  pdep i j = cast (cast @U2 (pdep16# (cast i) (cast j)))
+  pext i j = cast (cast @U2 (pext16# (cast i) (cast j)))
 
-instance Logic I32 where
+instance Logic I4 where
   a && b = cast (andWord32# (cast a) (cast b))
   a || b = cast (orWord32# (cast a) (cast b))
   a `xor` b = cast (xorWord32# (cast a) (cast b))
   not a = cast (notWord32# (cast a))
-instance Bits I32 where
+instance Bits I4 where
   w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
   w << i = if i >= 32## then cast 0# else w <<# i
@@ -242,16 +242,16 @@ instance Bits I32 where
   clz i = clz32# (cast i)
   ctz i = ctz32# (cast i)
   byteSwap i = i
-  bitReverse i = cast (cast @U32 (bitReverse32# (cast i)))
-  pdep i j = cast (cast @U32 (pdep32# (cast i) (cast j)))
-  pext i j = cast (cast @U32 (pext32# (cast i) (cast j)))
+  bitReverse i = cast (cast @U4 (bitReverse32# (cast i)))
+  pdep i j = cast (cast @U4 (pdep32# (cast i) (cast j)))
+  pext i j = cast (cast @U4 (pext32# (cast i) (cast j)))
 
-instance Logic I64 where
+instance Logic I8 where
   a && b = cast (and64# (cast a) (cast b))
   a || b = cast (or64# (cast a) (cast b))
   a `xor` b = cast (xor64# (cast a) (cast b))
   not a = cast (not64# (cast a))
-instance Bits I64 where
+instance Bits I8 where
   w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
   w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
   w << i = if i >= 64## then cast 0# else w <<# i

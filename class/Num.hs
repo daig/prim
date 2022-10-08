@@ -138,7 +138,7 @@ instance Num# U where
   (%) = remWord#
   (/%) = quotRemWord#
 
-instance Num# U8 where
+instance Num# U1 where
   (+) = plusWord8#
   (-) = subWord8#
   a -? b = cast (# a <=# b, a - b #)
@@ -148,7 +148,7 @@ instance Num# U8 where
   (%) = remWord8#
   (/%) = quotRemWord8#
 
-instance Num# U16 where
+instance Num# U2 where
   (+) = plusWord16#
   (-) = subWord16#
   a -? b = cast (# a <=# b, a - b #)
@@ -158,7 +158,7 @@ instance Num# U16 where
   (%) = remWord16#
   (/%) = quotRemWord16#
 
-instance Num# U32 where
+instance Num# U4 where
   (+) = plusWord32#
   (-) = subWord32#
   a -? b = cast (# a <=# b, a - b #)
@@ -168,11 +168,11 @@ instance Num# U32 where
   (%) = remWord32#
   (/%) = quotRemWord32#
 
-instance Num# U64 where
+instance Num# U8 where
   (+) = plusWord64#
   (-) = subWord64#
   a -? b = cast (# a <=# b, a - b #)
-  a -?? b = case subWordC# (cast a) (cast b) of (# u, oflo #) → cast (# B# oflo, cast @U64 u #)
+  a -?? b = case subWordC# (cast a) (cast b) of (# u, oflo #) → cast (# B# oflo, cast @U8 u #)
   (*) = timesWord64#
   (/) = quotWord64#
   (%) = remWord64#
@@ -199,7 +199,7 @@ instance Integral# I where
   sgn a = Ordering# (coerce (a GHC.># 0#) -# (a GHC.<# 0#))
 
 
-instance Num# I8 where
+instance Num# I1 where
   (+) = plusInt8#
   (-) = subInt8#
   (*) = timesInt8#
@@ -207,30 +207,30 @@ instance Num# I8 where
   (%) = remInt8#
   x /% y = (# x / y, x % y #)
 
-instance Num# I16 where
+instance Num# I2 where
   (+) = plusInt16#
   (-) = subInt16#
   (*) = timesInt16#
   (/) = quotInt16#
   (%) = remInt16#
   x /% y = (# x / y, x % y #)
-instance Num# I32 where
+instance Num# I4 where
   (+) = plusInt32#
   (*) = timesInt32#
   (-) = subInt32#
   (/) = quotInt32#
   (%) = remInt32#
   x /% y = (# x / y, x % y #)
-instance Num# I64 where
+instance Num# I8 where
   (+) = plusInt64#
   (*) = timesInt64#
   (-) = subInt64#
-  a -?? b = case subIntC# (cast a) (cast b) of (# i, oflo #) → cast (# B# oflo, cast @I64 i #)
+  a -?? b = case subIntC# (cast a) (cast b) of (# i, oflo #) → cast (# B# oflo, cast @I8 i #)
   (/) = quotInt64#
   (%) = remInt64#
   x /% y = (# x / y, x % y #)
 
-instance Integral# I8 where
+instance Integral# I1 where
   negate = negateInt8#
   (//) = quotInt8#
   (%%) = remInt8#
@@ -238,21 +238,21 @@ instance Integral# I8 where
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
   abs i = (i `xor` nsign) - nsign where nsign = i >># 7##
 
-instance Integral# I16 where
+instance Integral# I2 where
   negate = negateInt16#
   (//) = quotInt16#
   (%%) = remInt16#
   (//%%) = quotRemInt16#
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
   abs i = (i `xor` nsign) - nsign where nsign = i >># 15##
-instance Integral# I32 where
+instance Integral# I4 where
   negate = negateInt32#
   (//) = quotInt32#
   (%%) = remInt32#
   (//%%) = quotRemInt32#
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
   abs i = (i `xor` nsign) - nsign where nsign = i >># 31##
-instance Integral# I64 where
+instance Integral# I8 where
   negate = negateInt64#
   (//) = quotInt64#
   (%%) = remInt64#
@@ -261,21 +261,21 @@ instance Integral# I64 where
   abs i = (i `xor` nsign) - nsign where nsign = i >># 63##
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
 
-instance Num# F32 where
+instance Num# F4 where
   (+) = plusFloat#
   (-) = minusFloat#
   (*) = timesFloat#
   (/) = divideFloat#
   _ % _ = 0.0#
   x /% y = (# x / y , 0.0# #)
-instance Integral# F32 where
+instance Integral# F4 where
   negate = negateFloat#
   (//) = divideFloat#
   _ %% _ = 0.0#
   x //%% y = (# x / y , 0.0# #)
   abs = fabsFloat#
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
-instance Floating# F32 where
+instance Floating# F4 where
   exp = expFloat#
   expm1 = expm1Float#
   log = logFloat#
@@ -291,21 +291,21 @@ instance Floating# F32 where
   cosh = coshFloat#
   tanh = tanhFloat#
   (**) = powerFloat#
-instance Num# F64 where
+instance Num# F8 where
   (+) = (+##)
   (-) = (-##)
   (*) = (*##)
   (/) = (/##)
   _ % _ = 0.0##
   x /% y = (# x / y , 0.0## #)
-instance Integral# F64 where
+instance Integral# F8 where
   negate = negateDouble#
   (//) = (/##)
   _ %% _ = 0.0##
   x //%% y = (# x / y , 0.0## #)
   abs = fabsDouble#
   sgn a = Ordering# (coerce (a ># cast 0#) -# coerce (a <# cast 0#))
-instance Floating# F64 where
+instance Floating# F8 where
   exp = expDouble#
   expm1 = expm1Double#
   log = logDouble#
@@ -338,7 +338,7 @@ instance Unsigned# U where
                      (# q, e #) → if q < pw
                            then (# q      , 2## * e       #)
                            else (# q % pw , 2## * e + 1## #)
-instance Unsigned# U8 where
+instance Unsigned# U1 where
   log2 w = cast 7## `subWord8#` cast (clz w)
   logb = \cases
    b _ | b <= cast 1## → case GHC.raiseOverflow of !_ → cast 0##
@@ -353,7 +353,7 @@ instance Unsigned# U8 where
                      (# q, e #) → if q < pw
                            then (# q      , 2## * e       #)
                            else (# q % pw , 2## * e + 1## #)
-instance Unsigned# U16 where
+instance Unsigned# U2 where
   log2 w = cast 15## `subWord16#` cast (clz w)
   logb = \cases
    b _ | b <= cast 1## → case GHC.raiseOverflow of !_ → cast 0##
@@ -368,7 +368,7 @@ instance Unsigned# U16 where
                      (# q, e #) → if q < pw
                                    then (# q      , 2## * e       #)
                                    else (# q % pw , 2## * e + 1## #)
-instance Unsigned# U32 where
+instance Unsigned# U4 where
   log2 w = cast 31## `subWord32#` cast (clz w)
   logb = \cases
    b _ | b <= cast 1## → case GHC.raiseOverflow of !_ → cast 0##
@@ -383,7 +383,7 @@ instance Unsigned# U32 where
                      (# q, e #) → if q < pw
                            then (# q      , 2## * e       #)
                            else (# q % pw , 2## * e + 1## #)
-instance Unsigned# U64 where
+instance Unsigned# U8 where
   log2 w = cast 63## `subWord64#` cast (clz w)
   logb = \cases
    b _ | b <= cast 1## → case GHC.raiseOverflow of !_ → cast 0##
