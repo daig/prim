@@ -1,7 +1,7 @@
 --------------------------------------------------------------------
--- | Description : 32-Bit Unsigned Integers
+-- | Description : 16-Bit Unsigned Integers
 --------------------------------------------------------------------
-module U32 (U32,Word32#
+module U2 (U2,Word16#
           -- * Instance reexports
           , module X
           ) where

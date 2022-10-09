@@ -1,7 +1,7 @@
 --------------------------------------------------------------------
--- | Description : 64-Bit Signed Integers
+-- | Description : 32-Bit Signed Integers
 --------------------------------------------------------------------
-module I64 (I64,Int64#
+module I4 (I4,Int32#
           -- * Instance reexports
           , module X
           ) where
@@ -12,10 +12,10 @@ import Prim as X
 
 -- | Logical right shift. Prefer 'U' for this behavior.
 -- Result undefined if shift amount is not in the range [0, word @size - 1@].
-shiftRL# ∷ I64 → U → I64
-shiftRL# w i = uncheckedIShiftRL64# w (cast @I i); {-# inline shiftRL# #-}
+shiftRL# ∷ I4 → U → I4
+shiftRL# w i = uncheckedShiftRLInt32# w (cast @I i); {-# inline shiftRL# #-}
 -- | Logical right shift. Prefer 'U' for this behavior.
 -- Result 0 if shift amount is not in the range [0, word @size - 1@].
-shiftRL ∷ I64 → U → I64
-shiftRL w i = if i ≥ 64## then cast 0# else shiftRL# w i
+shiftRL ∷ I4 → U → I4
+shiftRL w i = if i >= 4## then cast 0# else shiftRL# w i
 {-# inline shiftRL #-}

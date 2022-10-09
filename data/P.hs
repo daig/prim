@@ -7,9 +7,9 @@ module P (Addr#
          -- * instance reexports
          ,module X
          ) where
-import Cmp as X (type (≡)(..), type (≤)(..))
+import Cmp as X (Eq#(..), Cmp#(..))
 import Array.Copy as X (Copy(..))
-import Array.Index as X (type (∈#)(..))
+import Array.Index as X (Index(..))
 import Prim as X (Prim(..))
 import Prim.Atomic as X (Atomic(..),Eq_Atomic(..),Logic_Atomic(..),Num_Atomic(..))
 

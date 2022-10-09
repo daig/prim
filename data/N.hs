@@ -72,9 +72,9 @@ instance Cast N [Word] where cast = naturalFromWordList
 
 instance Cast (# (##) | U #) N where cast = naturalToWordMaybe#
 -- | (# Mantissa, Exponent #)
-instance Cast F64 (# N, I #) where cast (# m, e #) = naturalEncodeDouble# m e
+instance Cast F8 (# N, I #) where cast (# m, e #) = naturalEncodeDouble# m e
 -- | (# Mantissa, Exponent #)
-instance Cast F32 (# N, I #) where cast (# m, e #) = naturalEncodeFloat# m e
+instance Cast F4 (# N, I #) where cast (# m, e #) = naturalEncodeFloat# m e
 
 -- | Clamp to @maxBound@
 toWord# ∷ N → U
@@ -88,31 +88,31 @@ clamp = naturalToWordClamp
 clamp# ∷ N → U
 clamp# = naturalToWordClamp#
 
-instance (≡) N where
-  (=#) = coerce naturalEq#
-  (≠#) = coerce naturalNe#
-  (≡) = coerce naturalEq
-  (≠) = coerce naturalNe
+instance Eq# N where
+  (==#) = coerce naturalEq#
+  (!=#) = coerce naturalNe#
+  (==) = coerce naturalEq
+  (!=) = coerce naturalNe
 
 instance Cast Ordering GHC.Ordering where
   cast = \case {GHC.LT → LT; GHC.GT → GT; GHC.EQ → EQ}
 
-instance (≤) N where
-  (≤#) = coerce naturalLe#
+instance Cmp# N where
+  (<=#) = coerce naturalLe#
   (<#) = coerce naturalLt#
   (>#) = coerce naturalGt#
-  (≥#) = coerce naturalGe#
-  (≤) = coerce naturalLe
+  (>=#) = coerce naturalGe#
+  (<=) = coerce naturalLe
   (<) = coerce naturalLt
   (>) = coerce naturalGt
-  (≥) = coerce naturalGe
+  (>=) = coerce naturalGe
 --  cmp n m = cast (naturalCompare n m)
   cmp (NS x) (NS y) = cmp x y
   cmp (NB x) (NB y) = cast (bigNatCompare x y)
   cmp (NS _) (NB _) = LT
   cmp (NB _) (NS _) = GT
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if x <= y then x else y
+  max x y = if x >= y then x else y
 
 instance Bits N where
   popCnt = naturalPopCount#
@@ -120,7 +120,7 @@ instance Bits N where
   (>>) = naturalShiftR# -- TODO: check this works
   (<<#) = naturalShiftL#
   (<<) = naturalShiftL# -- TODO: check this works
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit' = coerce naturalTestBit#
   bit = coerce naturalBit#
   ctz = \case {NS u → ctz# u; NB u → ctz @Nat (coerce u)}
@@ -130,21 +130,21 @@ instance Bits N where
   byteSwap = byteSwap
   bitReverse = bitReverse -- TODO: remove these
 
-instance ℕ N where
+instance Num# N where
   (+) = naturalAdd
   (-) = naturalSubUnsafe
   x -? y = naturalSub x y
   x -?? y = let z' = naturalSub x y in case z' of {(# (##) | #) → (# | x - y #); _ → unsafeCoerce# z'}
-  (×) = naturalMul
+  (*) = naturalMul
   (/%) = naturalQuotRem#
   (/) = naturalQuot
   (%) = naturalRem
 
 instance Logic N where 
-  (∧) = naturalAnd
-  (∨) = naturalOr
-  (¬) = naturalNot
-  (⊕) = naturalXor
+  (&&) = naturalAnd
+  (||) = naturalOr
+  not = naturalNot
+  xor = naturalXor
 
 naturalNot ∷ N → N; {-# NOINLINE naturalNot #-}
 naturalNot = naturalNot -- TODO: put proper error

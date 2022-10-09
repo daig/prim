@@ -1,4 +1,4 @@
-module F32 (F32
+module F4 (F4
             -- * Instances
             , module X
             -- * misc utilities
@@ -6,5 +6,5 @@ module F32 (F32
             ) where
 import Num as X
 
-decode ∷ F32 → (# I {- 32 bit -}, I {- 32 bit -} #)
-decode = coerce decodeFloat_Int#
+decode ∷ F4 → (# I4 , I4 #)
+decode x = case decodeFloat_Int# x of (# cast → m, cast → e #) → (# m, e #)

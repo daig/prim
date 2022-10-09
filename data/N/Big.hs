@@ -71,10 +71,10 @@ instance Cast (# (##) | U #) Nat where cast = coerce bigNatToWordMaybe#
 instance Cast Word Nat where cast = coerce bigNatToWord
 instance Cast I Nat where cast = coerce bigNatToInt#
 instance Cast Int Nat where cast = coerce bigNatToInt
-instance Cast Nat U64 where cast = coerce bigNatFromWord64#
-instance Cast U64 Nat where cast = coerce bigNatToWord64#
+instance Cast Nat U8 where cast = coerce bigNatFromWord64#
+instance Cast U8 Nat where cast = coerce bigNatToWord64#
 -- | (# Mantissa, Exponent #)
-instance Cast F64 (# Nat , I #) where cast (# m, e #) = coerce bigNatEncodeDouble# m e
+instance Cast F8 (# Nat , I #) where cast (# m, e #) = coerce bigNatEncodeDouble# m e
 
 gtU,eqU,leU ∷ Nat → U → B#
 gtU = coerce bigNatGtWord#
@@ -88,32 +88,32 @@ leWord = coerce bigNatLeWord
 cmpU ∷ Nat → U → GHC.Ordering
 cmpU = coerce bigNatCompareWord#
 
-instance (≡) Nat where
-  (≡) = coerce bigNatEq
-  (≠) = coerce bigNatNe
-  (=#) = coerce bigNatEq#
-  (≠#) = coerce bigNatNe#
+instance Eq# Nat where
+  (==) = coerce bigNatEq
+  (!=) = coerce bigNatNe
+  (==#) = coerce bigNatEq#
+  (!=#) = coerce bigNatNe#
 
-instance (≤) Nat where
+instance Cmp# Nat where
   (<#) = coerce bigNatLt#
-  (≤#) = coerce bigNatLe#
+  (<=#) = coerce bigNatLe#
   (>#) = coerce bigNatGt#
-  (≥#) = coerce bigNatGe#
+  (>=#) = coerce bigNatGe#
   (>) = cast ((>#) @Nat)
-  (≥) = cast ((≥#) @Nat)
+  (>=) = cast ((>=#) @Nat)
   (<) = cast ((<#) @Nat)
-  (≤) = cast ((≤#) @Nat)
+  (<=) = cast ((<=#) @Nat)
   -- | Compare two BigNat
   cmp a b = Ordering# (dataToTag# @GHC.Ordering (coerce bigNatCompare a b) - 1#)
-  min x y = if x ≤ y then x else y
-  max x y = if x ≥ y then x else y
+  min x y = if x <= y then x else y
+  max x y = if x >= y then x else y
 
 instance Bits Nat where
   (>>#) = coerce bigNatShiftR#
   (<<#) = coerce bigNatShiftL#
   (>>) = (>>#)
   (<<) = (<<#)
-  shift w i = if i ≥ 0# then w << cast i else w >> cast (negateInt# i)
+  shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
   bit' = coerce bigNatTestBit#
   bit = coerce bigNatBit#
   popCnt = coerce bigNatPopCount#

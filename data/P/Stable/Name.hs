@@ -8,7 +8,7 @@ module P.Stable.Name (P_Stable_Name, StableName#
                      ,module X
                      )where
 import Cast as X (Cast(..))
-import Cmp as X (type (≡)(..))
+import Cmp as X (Eq#(..))
 
 new ∷ a → IO (P_Stable_Name a)
 new = makeStableName#

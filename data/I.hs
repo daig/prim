@@ -30,5 +30,5 @@ shiftRL# w i = uncheckedIShiftRL# w (cast @I i); {-# inline shiftRL# #-}
 -- | Logical right shift. Prefer 'U' for this behavior.
 -- Result 0 if shift amount is not in the range [0, word @size - 1@].
 shiftRL ∷ I → U → I
-shiftRL w i = if i ≥ WORD_SIZE_IN_BITS## then 0# else shiftRL# w i
+shiftRL w i = if i >= WORD_SIZE_IN_BITS## then 0# else shiftRL# w i
 {-# inline shiftRL #-}

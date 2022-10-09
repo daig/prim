@@ -1,7 +1,7 @@
 --------------------------------------------------------------------
--- | Description : 8-Bit Unsigned Integers
+-- | Description : 64-Bit Unsigned Integers
 --------------------------------------------------------------------
-module U8 (U8,Word8#
+module U8 (U8,Word64#
           -- * Instance reexports
           , module X
           ) where
@@ -10,3 +10,4 @@ import Num as X
 import Bits as X
 import Cast as X
 import Prim as X
+

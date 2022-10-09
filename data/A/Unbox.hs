@@ -8,7 +8,7 @@ module A.Unbox (UnboxedArray#, UnboxedMutableArray#
                ,module X
                ) where
 import Array as X (Array(..))
-import Array.Index as X (type (∈#)(..))
+import Array.Index as X (Index(..))
 import Array.Copy as X (Copy(..))
 import Array.Shrink as X (Shrink(..))
 import Array.Pinned' as X (Pinned'(..))

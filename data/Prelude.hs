@@ -8,4 +8,4 @@ import Cast as X
 import Cmp as X
 import Num as X
 import Prim as X
-import Types as X hiding ((<#),(>#))
+import Types as X hiding ((<#),(>#),(==#),(<=#),(>=#))
