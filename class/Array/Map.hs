@@ -9,6 +9,7 @@ import Var
 import Action
 import Cast
 import GHC.CString
+import Bits
 
 type Map ∷ ∀ {ra} {rb} {rv}. (∀ {r}. T r → T rv) → T ra → T rb → TC
 class Map v a b where
@@ -24,6 +25,10 @@ type FoldIO ∷ ∀ {ra} {rb} {rv}. ★ → (T ra → T rv) → T ra → T rb �
 class FoldIO s v a b where
   foldIO ∷ v a → b → (b → a → ST s b) → ST s b
   ifoldIO ∷ v a → b → (I → b → a → ST s b) → ST s b
+type Each ∷ ∀ {r} {rv}. ★ → (T r → T rv) → T r → TC
+class Each s v a where
+  each ∷ v a → (a → ST_ s) → ST_ s
+  ieach ∷ v a → (I → a → ST_ s) → ST_ s
 
 -- | Lazy fold
 type Foldr ∷ ∀ {r} {rv}. (T r → T rv) → T r → TC
@@ -138,19 +143,65 @@ instance FoldIO s ForeignSlice A B where { ;\
       else return b }}}
 
 
-#define INST_FOLD_S2(A,B);\
-instance Fold S# A (x ∷ K B) where {;\
-    fold (S# s) r0 f = go (ConstAddr# s) r0 where {go p r = let ch = p!0# in if ch == coerce '\0'# then r else go (p +. 1#) (f r ch)};\
-    ifold (S# (ConstAddr# → p)) r0 f = go 0# r0 where {go i r = let ch = p!i in if ch == coerce '\0'# then r else go (i + 1#) (f i r ch)}}
+instance Each s S# C1# where
+    each (S# s) st = go (ConstAddr# s) where
+      go p = let ch = p!0#
+               in if ch == coerce '\0'# then \s→s
+               else st ch <> go (p +. 1#)
+    ieach (S# (ConstAddr# → p)) st = go 0# where
+      go i = let ch = p!i
+               in if ch == coerce '\0'# then \s→s
+               else st i ch <> go (i + 1#)
+instance Each s S# C# where 
+  each (S# p0) io = go (ConstAddr# @C1# p0)
+    where
+      go p = let C1# ch = p!0#
+             in if ch == '\0'# then \s→s
+             else let n = byteCount ch
+                  in io (unpackUtf8C# n ch p) <> go (p +. n)
+  ieach (S# (ConstAddr# → p)) io = go 0#
+    where
+      go i = let C1# ch = p!i
+               in if ch == '\0'# then \s→s
+               else let n = byteCount ch
+                    in io i (unpackUtf8C# n ch p) <> go (i +. n)
 
 
-#define INST_FOLD_S(A)\
-INST_FOLD_S2(C1#,A);\
-INST_FOLD_S2(C#,A)
 
 #define INST_MAP_UB(A);\
 INST_EACH(A);\
-INST_FOLD_S(A);\
+instance Fold S# C1# (x ∷ K A) where {;\
+    fold (S# s) r0 f = go (ConstAddr# s) r0 where {\
+      go p r = let ch = p!0#;\
+               in if ch == coerce '\0'# then r;\
+               else go (p +. 1#) (f r ch)};\
+    ifold (S# (ConstAddr# → p)) r0 f = go 0# r0 where {\
+      go i r = let ch = p!i;\
+               in if ch == coerce '\0'# then r;\
+               else go (i + 1#) (f i r ch)}};\
+instance Fold S# C# (x ∷ K A) where {;\
+  fold (S# p0) r0 f = go (ConstAddr# @C1# p0) r0 where {go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)};\
+  ifold (S# p0) r0 f = go 0# (ConstAddr# @C1# p0) r0 where {go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))}};\
+instance FoldIO s S# C1# (x ∷ K A) where {;\
+    foldIO (S# s) r0 f = go (ConstAddr# s) r0 where {;\
+      go p r = let ch = p!0#;\
+               in if ch == coerce '\0'# then return r;\
+               else go (p +. 1#) =<< f r ch};\
+    ifoldIO (S# (ConstAddr# → p)) r0 f = go 0# r0 where {\
+      go i r = let ch = p!i;\
+               in if ch == coerce '\0'# then return r;\
+               else go (i + 1#) =<< f i r ch}};\
+instance FoldIO s S# C# (x ∷ K A) where {\
+  foldIO (S# p0) r0 io = go (ConstAddr# @C1# p0) r0 where {\
+      go p r = let C1# ch = p!0#;\
+               in if ch == '\0'# then return r;\
+               else let n = byteCount ch;\
+                    in go (p +. n) =<< io r (unpackUtf8C# n ch p)};\
+  ifoldIO (S# (ConstAddr# → p)) r0 io = go 0# r0 where {\
+      go i r = let C1# ch = p!i;\
+               in if ch == '\0'# then return r;\
+               else let n = byteCount ch;\
+                    in go (i +. n) =<< io i r (unpackUtf8C# n ch p)}};\
 INST_MAP2_UB(A,I) ;\
 INST_MAP2_UB(A,I1) ;\
 INST_MAP2_UB(A,I2) ;\
@@ -202,10 +253,6 @@ INST_MAP_UB(F4)
 INST_MAP_UB(F8)
 INST_MAP_UB(Addr#)
 
-type Each ∷ ∀ {r} {rv}. ★ → (T r → T rv) → T r → TC
-class Each s v a where
-  ieach ∷ v a → (I → a → ST_ s) → ST_ s
-  each ∷ v a → (a → ST_ s) → ST_ s
 
 
 type Modify ∷ ∀ {r} {rv}. (★ → T r → T rv) → T r → TC
@@ -214,3 +261,42 @@ class Modify v a where
 
 
 -- TODO <%= atomic modify 2 ioref
+
+
+data ByteCount = One | Two | Three | Four
+{-# INLINE byteCount #-}
+byteCount ∷ C# → ByteCount
+byteCount ch
+    | ch <= '\x7F'# = One
+    | ch <= '\xDF'# = Two
+    | ch <= '\xEF'# = Three
+    | T             = Four
+
+instance ForeignArray# C1# +. ByteCount where
+  (+.) p = \case {One → p +. 1#; Two → p +. 2#; Three → p +. 3#; Four → p +. 4#}
+instance I +. ByteCount where
+  (+.) i = \case {One → i + 1#; Two → i + 2#; Three → i + 3#; Four → i + 4#}
+
+-- | Take the current address, read unicode char of the given size.
+-- We obviously want the number of bytes, but we have to read one
+-- byte to determine the number of bytes for the current codepoint
+-- so we might as well reuse it and avoid a read.
+--
+-- Side Note: We don't dare to decode all 4 possibilities at once.
+-- Reading past the end of the addr might trigger an exception.
+-- For this reason we really have to check the width first and only
+-- decode after.
+{-# INLINE unpackUtf8C# #-}
+unpackUtf8C# ∷ ByteCount → C# → ForeignArray# C1# → C#
+unpackUtf8C# bytes ch (coerce @_ @(ForeignArray# C1#) → p) =
+  case bytes of
+    One   →                     ch
+    Two   → cast ( ((cast       ch - 0xC0#) <<#  6##)
+                 +  (cast (p ! 1#) - 0x80#          ))
+    Three → cast ( ((cast       ch - 0xE0#) <<# 12##)
+                 + ((cast (p ! 1#) - 0x80#) <<#  6##)
+                 + ( cast (p ! 2#) - 0x80#          ))
+    Four  → cast ( ((cast       ch - 0xF0#) <<# 18##)
+                 + ((cast (p ! 1#) - 0x80#) <<# 12##)
+                 + ((cast (p ! 2#) - 0x80#) <<#  6##)
+                 + ( cast (p ! 3#) - 0x80#          ))
