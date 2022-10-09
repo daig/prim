@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
--- | Description : Reflection
+-- | Description : Typeclass Reflection
 --------------------------------------------------------------------
 module WithDict (
 WithDict(..)

@@ -1,4 +1,7 @@
 {-# language CPP #-}
+--------------------------------------------------------------------
+-- | Description : Operations to advance memory indexes
+--------------------------------------------------------------------
 module Action where
 import GHC.CString
 import Num
@@ -98,8 +101,4 @@ INST_OFF(Addr#)
 INST_OFF(C)
 INST_OFF(C1)
 
-type (.+) ∷ ∀ {rp} {rx}. T rp → T rx → TC
-class x .+ p | x → p where (.+) ∷ x → p → p
-instance S C1 .+ [Char] where (.+) = coerce unpackAppendCString#
-instance S C  .+ [Char] where (.+) = coerce unpackAppendCStringUtf8#
 

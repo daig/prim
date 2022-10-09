@@ -47,7 +47,7 @@ class Prefetch s (a ∷ T r) where
   t0 ∷ a → ST_ s
 
 -- | W/ Byte Offset
-instance Prefetch s (# Addr#, I #) where
+instance Prefetch s (# P#, I #) where
   nta (# x, i #) = prefetchAddr0# x i
   t2 (# x, i #) = prefetchAddr1# x i
   t1 (# x, i #) = prefetchAddr2# x i
@@ -57,10 +57,10 @@ instance Prefetch s Addr# where
   t2 = (`prefetchAddr1#` 0#)
   t1 = (`prefetchAddr2#` 0#)
   t0 = (`prefetchAddr3#` 0#)
-deriving via (# Addr#, I #) instance Prefetch s (# ForeignArray# x, I #)
-deriving via (# Addr#, I #) instance Prefetch s (# ForeignMutableArray# s x, I #)
-deriving newtype instance Prefetch s (ForeignArray# x)
-deriving newtype instance Prefetch s (ForeignMutableArray# s x)
+deriving via (# P#, I #) instance Prefetch s (# P' x, I #)
+deriving via (# P#, I #) instance Prefetch s (# P s x, I #)
+deriving newtype instance Prefetch s (P' x)
+deriving newtype instance Prefetch s (P s x)
 
 instance Prefetch s (# ByteArray#, I #) where
   nta (# x, i #) = prefetchByteArray0# x i
@@ -72,10 +72,10 @@ instance Prefetch s ByteArray# where
   t2 = (`prefetchByteArray1#` 0#)
   t1 = (`prefetchByteArray2#` 0#)
   t0 = (`prefetchByteArray3#` 0#)
-deriving via (# ByteArray#, I #) instance Prefetch s (# PinnedArray# x, I #)
-deriving via (# ByteArray#, I #) instance Prefetch s (# UnboxedArray# x, I #)
-deriving newtype instance Prefetch s (PinnedArray# x)
-deriving newtype instance Prefetch s (UnboxedArray# x)
+deriving via (# ByteArray#, I #) instance Prefetch s (# A'_ x, I #)
+deriving via (# ByteArray#, I #) instance Prefetch s (# A' x, I #)
+deriving newtype instance Prefetch s (A'_ x)
+deriving newtype instance Prefetch s (A' x)
 instance Prefetch s (# MutableByteArray# s, I #) where
   nta (# x, i #) = prefetchMutableByteArray0# x i
   t2 (# x, i #) = prefetchMutableByteArray1# x i
@@ -86,10 +86,10 @@ instance Prefetch s (MutableByteArray# s) where
   t2 = (`prefetchMutableByteArray1#` 0#)
   t1 = (`prefetchMutableByteArray2#` 0#)
   t0 = (`prefetchMutableByteArray3#` 0#)
-deriving via (# MutableByteArray# s, I #) instance Prefetch s (# UnboxedMutableArray# s x, I #)
-deriving newtype instance Prefetch s (PinnedMutableArray# s x)
-deriving newtype instance Prefetch s (UnboxedMutableArray# s x)
-deriving via (# MutableByteArray# s, I #) instance Prefetch s (# PinnedMutableArray# s x, I #)
+deriving via (# MutableByteArray# s, I #) instance Prefetch s (# A s x, I #)
+deriving newtype instance Prefetch s (A_ s x)
+deriving newtype instance Prefetch s (A s x)
+deriving via (# MutableByteArray# s, I #) instance Prefetch s (# A_ s x, I #)
 instance Prefetch s a where
   nta = prefetchValue0#
   t2 = prefetchValue1#

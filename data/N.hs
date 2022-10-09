@@ -49,14 +49,14 @@ baseDigits = naturalSizeInBase#
 
 -- | Write in base-256 representation and return the
 -- number of bytes written.
-write256 ∷ N → M ForeignArray# s U8 → B# {- ^ big endian? -} → ST s U {- ^ number of bytes written -}
+write256 ∷ N → P s U8 → B# {- ^ big endian? -} → ST s U {- ^ number of bytes written -}
 write256 = coerce naturalToAddr#
 
 -- | Read a Natural in base-256 representation from an Addr#.
 --
 -- Null higher limbs are automatically trimed.
-read256 ∷ ForeignMutableSlice s U8 → B# {- ^ big endian? -} → ST s N
-read256 (MAddr_Len# (# p, cast → n #)) = coerce (naturalFromAddr# n p)
+read256 ∷ P## s U8 → B# {- ^ big endian? -} → ST s N
+read256 (P_Len# (# p, cast → n #)) = coerce (naturalFromAddr# n p)
 
 instance Cast N Nat where cast = coerce naturalFromBigNat#
 instance Cast Nat N where cast = coerce naturalToBigNat#

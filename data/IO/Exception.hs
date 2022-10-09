@@ -32,4 +32,4 @@ eval = seq#
 
 
 -- | An unrecoverable error. Display the string and exit.
-foreign import prim "stg_paniczh" panic# ∷ S# x → IO X
+foreign import prim "stg_paniczh" panic# ∷ S x → IO X
