@@ -22,22 +22,22 @@ instance Read x IOPort# where read = readIOPort#
 instance Write x IOPort# where r .= x = \s → case writeIOPort# r x s of (# ss , _ #) → ss
 
 #define INST_VAR(TY,GET,READ,READ_REF,WRITE,WRITE_REF) \
-instance (Coercible x TY) ⇒ Write (x) ForeignMutableArray# where { (.=) = coerce (`WRITE#` 0#) } ;\
-instance  Write (TY) UnboxedRef where { MBytes_Off# (# a, i #) .= x = WRITE_REF# a i x } ;\
-instance  Read (TY) UnboxedRef where { read( MBytes_Off# (# a, i #)) = READ_REF# a i } ;\
-instance (Coercible x TY) ⇒ Read (x) ForeignMutableArray# where { read = coerce (`READ#` 0#)}
+instance (Coercible x TY) ⇒ Write (x) P where { (.=) = coerce (`WRITE#` 0#) } ;\
+instance  Write (TY) A# where { Bytes_Off# (# a, i #) .= x = WRITE_REF# a i x } ;\
+instance  Read (TY) A# where { read( Bytes_Off# (# a, i #)) = READ_REF# a i } ;\
+instance (Coercible x TY) ⇒ Read (x) P where { read = coerce (`READ#` 0#)}
 
 -- | Set the entire slice
-instance Index x ForeignArray# ⇒ Write x ForeignMutableSlice where (MAddr_Len# (# p, n #)) .= x = set# (Addr# p) 0# n x
+instance Index x P' ⇒ Write x P## where (P_Len# (# p, n #)) .= x = set# (P# p) 0# n x
 
 -- | Set the entire slice
-instance Index x UnboxedArray# ⇒ Write x UnboxedMutableSlice where (MBytes_Off_Len# (# a, i, n #)) .= x = set# (MutableByteArray# a) i n x
+instance Index x A' ⇒ Write x A## where (Bytes_Off_Len# (# a, i, n #)) .= x = set# (A# a) i n x
 
 #define INST_VAR_SPEC(TY,GET,READ,READ_REF,WRITE,WRITE_REF) \
-instance {-# OVERLAPPING #-} Write (TY) ForeignMutableArray# where { (.=) = coerce (`WRITE#` 0#) } ;\
-instance  Write (TY) UnboxedRef where { MBytes_Off# (# a, i #) .= x = coerce WRITE_REF# a i x} ;\
-instance  Read (TY) UnboxedRef where { read (MBytes_Off# (# a, i #)) = coerce READ_REF# a i} ;\
-instance {-# OVERLAPPING #-} Read (TY) ForeignMutableArray# where { read = coerce (`READ#` 0#) }
+instance {-# OVERLAPPING #-} Write (TY) P where { (.=) = coerce (`WRITE#` 0#) } ;\
+instance  Write (TY) A# where { Bytes_Off# (# a, i #) .= x = coerce WRITE_REF# a i x} ;\
+instance  Read (TY) A# where { read (Bytes_Off# (# a, i #)) = coerce READ_REF# a i} ;\
+instance {-# OVERLAPPING #-} Read (TY) P where { read = coerce (`READ#` 0#) }
 
 INST_VAR(I,indexIntOffAddr,readIntOffAddr,readIntArray,writeIntOffAddr,writeIntArray)
 INST_VAR(I1,indexInt8OffAddr,readInt8OffAddr,readInt8Array,writeInt8OffAddr,writeInt8Array)
@@ -50,5 +50,5 @@ INST_VAR(U2,indexWord16OffAddr,readWord16OffAddr,readWord16Array,writeWord16OffA
 INST_VAR(U4,indexWord32OffAddr,readWord32OffAddr,readWord32Array,writeWord32OffAddr,writeWord32Array)
 INST_VAR(U8,indexWord64OffAddr,readWord64OffAddr,readWord64Array,writeWord64OffAddr,writeWord64Array)
 INST_VAR(Addr#,indexAddrOffAddr,readAddrOffAddr,readAddrArray,writeAddrOffAddr,writeAddrArray)
-INST_VAR_SPEC(C1#,indexCharOffAddr,readCharOffAddr,readCharArray,writeCharOffAddr,writeCharArray)
-INST_VAR_SPEC(C#,indexWideCharOffAddr,readWideCharOffAddr,readWideCharArray,writeWideCharOffAddr,writeWideCharArray)
+INST_VAR_SPEC(C1,indexCharOffAddr,readCharOffAddr,readCharArray,writeCharOffAddr,writeCharArray)
+INST_VAR_SPEC(C,indexWideCharOffAddr,readWideCharOffAddr,readWideCharArray,writeWideCharOffAddr,writeWideCharArray)

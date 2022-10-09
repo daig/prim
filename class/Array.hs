@@ -105,40 +105,40 @@ instance Array (SmallArray# ∷ T_ → T_) where
   cloneM# = cloneSmallMutableArray#
 
 -- | @new#@ unpinned w/ init size in bytes.
-instance New# (UnboxedArray# ∷ T r  → T_) where
-  new# ∷ ∀ (x ∷ T r) s. Elt UnboxedArray# x ⇒ I → ST s (M UnboxedArray# s x)
+instance New# (A' ∷ T r  → T_) where
+  new# ∷ ∀ (x ∷ T r) s. Elt A' x ⇒ I → ST s (M A' s x)
   new# (size @x → n) = coerce newByteArray# n
 
 
 -- 'thaw##' is just a cast.
 
-#define INST_ARRAY_UB(A)\
-instance Array (UnboxedArray# ∷ K A → T_) where { ;\
+#define INST_ARRAY_UB(X)\
+instance Array (A' ∷ K X → T_) where { ;\
   freeze## = coerce unsafeFreezeByteArray# ;\
-  freeze# ∷ ∀ (x ∷ K A) s. Elt UnboxedArray# x ⇒ M UnboxedArray# s x → I → I → ST s (UnboxedArray# x) ;\
+  freeze# ∷ ∀ (x ∷ K X) s. Elt A' x ⇒ M A' s x → I → I → ST s (A' x) ;\
   freeze# a (size @x → off) (size @x → n) = ST.do {ma <- cloneM# a off n; freeze## ma} ;\
   thaw## a = return (unsafeCoerce# a) ;\
-  thaw# ∷ ∀ (x ∷ K A) s. Elt UnboxedArray# x ⇒ UnboxedArray# x → I → I → ST s (M UnboxedArray# s x) ;\
+  thaw# ∷ ∀ (x ∷ K X) s. Elt A' x ⇒ A' x → I → I → ST s (M A' s x) ;\
   thaw# a (size @x → off) (size @x → n) = ST.do { ;\
     ma <- new# n ;\
     copyByteArray# (coerce a) off (coerce ma) 0# n ;\
     return ma} ;\
-  len ∷ ∀ (x ∷ K A). Elt UnboxedArray# x ⇒ UnboxedArray# x → I ;\
+  len ∷ ∀ (x ∷ K X). Elt A' x ⇒ A' x → I ;\
   len a = coerce sizeofByteArray# a / size @x 1# ;\
-  lenM# ∷ ∀ (x ∷ K A) s. Elt UnboxedArray# x ⇒ M UnboxedArray# s x → I ;\
+  lenM# ∷ ∀ (x ∷ K X) s. Elt A' x ⇒ M A' s x → I ;\
   lenM# a = coerce sizeofMutableByteArray# a / size @x 1# ;\
-  lenM ∷ ∀ (x ∷ K A) s. Elt UnboxedArray# x ⇒ M UnboxedArray# s x → ST s I ;\
+  lenM ∷ ∀ (x ∷ K X) s. Elt A' x ⇒ M A' s x → ST s I ;\
   lenM a = ST.do {i ← coerce getSizeofMutableByteArray# a; return (i / size @x 1#)} ;\
-  cloneM# ∷ ∀ (x ∷ K A) s. Elt UnboxedArray# x ⇒ M UnboxedArray# s x → I → I → ST s (M UnboxedArray# s x) ;\
+  cloneM# ∷ ∀ (x ∷ K X) s. Elt A' x ⇒ M A' s x → I → I → ST s (M A' s x) ;\
   cloneM# a (size @x → off) (size @x → n) = ST.do { ;\
     ma <- new# n ;\
     copyMutableByteArray# (coerce a) off (coerce ma) 0# n ;\
     return ma} ;\
-  clone# ∷ ∀ (x ∷ K A). Elt UnboxedArray# x ⇒ UnboxedArray# x → I → I → UnboxedArray# x ;\
+  clone# ∷ ∀ (x ∷ K X). Elt A' x ⇒ A' x → I → I → A' x ;\
   clone# a (size @x → off) (size @x → n) = runST (ST.do {ma <- thaw# a off n; freeze## ma})}  ;\
-deriving via (UnboxedArray# ∷ K A → T_) instance Array (PinnedArray# ∷ K A → T_) ;\
-instance New# (PinnedArray# ∷ K A → T_) where { ;\
-  new# ∷ ∀ {r} (x ∷ T r) s. Elt PinnedArray# x ⇒ I → ST s (M PinnedArray# s x) ;\
+deriving via (A' ∷ K X → T_) instance Array (A'_ ∷ K X → T_) ;\
+instance New# (A'_ ∷ K X → T_) where { ;\
+  new# ∷ ∀ {r} (x ∷ T r) s. Elt A'_ x ⇒ I → ST s (M A'_ s x) ;\
   new# (size @x → n) = coerce newPinnedByteArray# n }
 
 INST_ARRAY_UB(I)

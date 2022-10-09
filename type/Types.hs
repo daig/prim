@@ -1,5 +1,5 @@
 {-# language CPP,NoImplicitPrelude #-}
-module Types (Bool(F,T), B(F#,T#), module Types, module X) where
+module Types (Bool(F,T), B#(F#,T#), module Types, module X) where
 import GHC.Prim as X
 import GHC.Types as X (TYPE,Levity(..),RuntimeRep(..),VecCount(..),VecElem(..),Constraint,Any,Char(..),Int,Word,Float,Double)
 import GHC.Types (Bool(..))
@@ -13,7 +13,6 @@ import GHC.Num.Natural
 
 type N = Natural
 newtype Nat = BigNat# (A' U)
-
 
 -- | The kind constructor of types abstracted over 'RuntimeRep'
 type T = TYPE
@@ -32,12 +31,13 @@ type K (a ∷ k) = k
 type R (i ∷ T r) = r
 
 -- | Unlifted boolean values 'F#' and 'T#' represented by machine integers
-newtype B = B# I
-pattern F#, T# ∷ B
+newtype B# = B# I
+pattern F#, T# ∷ B#
 pattern F# = B# 0#
 pattern T# = B# 1#
 {-# complete F#, T# #-}
 
+-- type B = Bool
 pattern T,F ∷ Bool
 pattern T = True
 pattern F = False
@@ -134,7 +134,7 @@ type F8 = Double#
 type ST s (a ∷ T ra) = State# s → (# State# s , a #)
 -- | Stateful computations (in state thread @s@) possibly returning values of type @a@.
 -- If the boolean is 'F#', the @a@ value is invalid and should not be used.
-type ST' s (a ∷ T ra) = State# s → (# State# s , B, a #)
+type ST' s (a ∷ T ra) = State# s → (# State# s , B#, a #)
 -- | Stateful computations (in state thread @s@) that do not return a value.
 type ST_ s = State# s → State# s
 
@@ -142,7 +142,7 @@ type ST_ s = State# s → State# s
 type IO (a ∷ T r)  = ST RealWorld a
 -- | A computation performing some I\/O before possibly returning a value of type @a@.
 -- If the boolean is 'F#', the @a@ value is invalid and should not be used.
-type IO' (a ∷ T ra) = State# RealWorld → (# State# RealWorld , B, a #)
+type IO' (a ∷ T ra) = State# RealWorld → (# State# RealWorld , B#, a #)
 -- | A computation performing some I\/O
 type IO_ = ST_ RealWorld
 
@@ -206,13 +206,27 @@ type family M a = ma | ma → a where
   M P' = P
   M P'## = P##
 
+type family Rep# (r ∷ RuntimeRep) = (rr ∷ RuntimeRep) | rr → r where
+  Rep# AddrRep = TupleRep '[AddrRep, IntRep]
+  Rep# (BoxedRep Unlifted) = TupleRep '[BoxedRep Unlifted, IntRep]
+  Rep# (TupleRep '[BoxedRep Unlifted, IntRep]) = TupleRep '[BoxedRep Unlifted, IntRep, IntRep]
+
+-- | The type of a reference with extra context
+type ( # ) ∷ ∀ {rx} {r}. (T rx → T r) → T rx → T (Rep# r)
+type family ( # ) a = aa | aa → a where
+  ( # ) A' = A'#
+  ( # ) A'# = A'##
+  ( # ) P' = P'##
+  ( # ) (A s) = A# s
+  ( # ) (A# s) = A## s
+  ( # ) (P s) = P## s
 
 -- | A slice into an 'Array#'
 type AR'## ∷ ∀ {l}. T# l → K (# ByteArray#, I, I #)
 newtype AR'## x = AR'_Off_Len# (# AR' x, I, I #)
 -- | A slice into a 'MutableArray#'
 type AR## ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I, I #)
-newtype AR## s x = Arr_Off_Len# (# AR s x, I, I #)
+newtype AR## s x = AR_Off_Len# (# AR s x, I, I #)
 -- | A slice into a 'Ar\''
 type Ar'## ∷ ∀ {l}. T# l → K (# ByteArray#, I, I #)
 newtype Ar'## x = Ar'_Off_Len# (# Ar' x, I, I #)
@@ -222,61 +236,63 @@ newtype Ar## s x = Ar_Off_Len# (# Ar s x, I, I #)
 
 -- | Reference into a single value of type @x@ of an 'Array#'
 type AR'# ∷ ∀ {l}. T# l → K (# ByteArray#, I #)
-newtype AR'# x = Array_Off# (# AR' x, I #)
+newtype AR'# x = AR'_Off# (# AR' x, I #)
 -- | Reference into a single value of type @x@ of a 'SmallArray#'
 type Ar'# ∷ ∀ {l}. T# l → K (# ByteArray#, I #)
-newtype Ar'# x = SmallArray_Off# (# Ar' x, I #)
+newtype Ar'# x = Ar'_Off# (# Ar' x, I #)
 -- | Reference into a single value of type @x@ of a 'MutableArray#'
 type AR# ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I #)
-newtype AR# s x = MutableArray_Off# (# AR s x, I #)
+newtype AR# s x = AR_Off# (# AR s x, I #)
 -- | Reference into a single value of type @x@ of a 'Ar'
 type Ar# ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I #)
 newtype Ar# s x = Ar_Off# (# Ar s x, I #)
 
 -- | A slice into a value of type @x@ in a 'A''
 type A'## ∷ ∀ {r}. T r → K (# ByteArray#, I , I #)
-newtype A'## x = Bytes_Off_Len# (# ByteArray# , I , I #)
+newtype A'## x = Bytes'_Off_Len# (# ByteArray# , I , I #)
 -- | A slice (in state thread @s@) into a value of type @x@ in a 'A'
 type A## ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I , I #)
-newtype A## s x = MBytes_Off_Len# (# MutableByteArray# s, I , I #)
+newtype A## s x = Bytes_Off_Len# (# MutableByteArray# s, I , I #)
 -- | A slice into a value of type @x@ in a 'A'_'
 type A'_## ∷ ∀ {r}. T r → K (# ByteArray#, I , I #)
-newtype A'_## x = PinnedBytes_Off_Len# (# ByteArray# , I , I #)
+newtype A'_## x = Pinned'_Off_Len# (# ByteArray# , I , I #)
 -- | A slice (in state thread @s@) into a value of type @x@ in a 'A_'
 type A_## ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I , I #)
-newtype A_## s x = PinnedMBytes_Off_Len# (# MutableByteArray# s, I , I #)
+newtype A_## s x = Pinned_Off_Len# (# MutableByteArray# s, I , I #)
 
 -- | Reference into a single value of type @x@ of an 'A''
 type A'# ∷ ∀ {r}. T r → K (# ByteArray#, I #)
-newtype A'# x = Bytes_Off# (# ByteArray#, I #)
+newtype A'# x = Bytes'_Off# (# ByteArray#, I #)
 -- | Reference (in state thread @s@) into a single value of type @x@ of an 'A'
 type A# ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I #)
-newtype A# s x = MBytes_Off# (# MutableByteArray# s, I #)
+newtype A# s x = Bytes_Off# (# MutableByteArray# s, I #)
 
 -- | Reference into a single value of type @x@ of a 'A'_'
 type A'_# ∷ ∀ {r}. T r → K (# ByteArray#, I #)
-newtype A'_# x = PinnedBytes_Off# (# ByteArray#, I #)
+newtype A'_# x = Pinned'_Off# (# ByteArray#, I #)
 -- | Reference (in state thread @s@) into a single value of type @x@ in a 'A_'
 type A_# ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I #)
-newtype A_# s x = MPinnedBytes_Off# (# MutableByteArray# s, I #)
+newtype A_# s x = Pinned_Off# (# MutableByteArray# s, I #)
 
 -- | An immutable array backed by unmanaged 'P' memory
-type P'## ∷ ∀ {r}. T r → K (# Addr#, I #)
-newtype P'## x = Addr_Len# (# Addr#, I #)
+type P'## ∷ ∀ {r}. T r → K (# P#, I #)
+newtype P'## x = P'_Len# (# P#, I #)
 -- | A mutable array (in state thread @s@) backed by unmanaged 'P\'' memory
-type P## ∷ ∀ {r}. ★ → T r → K (# Addr#, I #)
-newtype P## s x = MAddr_Len# (# Addr#, I #)
+type P## ∷ ∀ {r}. ★ → T r → K (# P#, I #)
+newtype P## s x = P_Len# (# P#, I #)
 
 -- | A C-style null-terminated string of Latin-1 @C1#@ or UTF-8 @C#@
-type S ∷ ∀ {r}. T r → K Addr#
-newtype S a = S# Addr#
+type S ∷ ∀ {r}. T r → K P#
+newtype S a = S# P#
 
 -- | Constant machine address to valid data, assumed to point outside the garbage-collected heap
-type P' ∷ ∀ {r}. T r → K Addr#
-newtype P' x = ConstAddr# Addr#
+type P' ∷ ∀ {r}. T r → K P#
+newtype P' x = P'# P#
 -- | Constant machine address to valid data, assumed to point outside the garbage-collected heap
-type P ∷ ∀ {r}. ★ → T r → K Addr#
-newtype P s x = Addr# Addr#
+type P ∷ ∀ {r}. ★ → T r → K P#
+newtype P s x = P# P#
+
+type P# = Addr#
 
 
 -- | Shared memory locations that support atomic memory transactions.
@@ -317,7 +333,7 @@ type family Box x = b | b → x where
   Box U4 = GHC.Word32
   Box U8 = GHC.Word64
   Box Ordering = GHC.Ordering
-  Box B = GHC.Bool
+  Box B# = GHC.Bool
   Box Nat = BigNat
 
 

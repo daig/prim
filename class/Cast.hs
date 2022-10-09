@@ -53,9 +53,9 @@ instance Cast B# U8 where cast = coerce (gtWord64# (cast 0##))
 -- | Truthiness
 instance Cast B# Addr# where cast = coerce neAddr# nullAddr#
 -- | Truthiness
-instance Cast B# C# where cast = coerce neChar# '\NUL'#
+instance Cast B# C where cast = coerce neChar# '\NUL'#
 -- | Truthiness
-deriving via C# instance Cast B# C1#
+deriving via C instance Cast B# C1
 
 instance Cast I B# where cast (B# i#) = i#
 instance Cast I1 B# where cast (B# i#) = cast i#
@@ -148,19 +148,19 @@ instance Cast U I8 where cast i = int2Word# (int64ToInt# i)
 
 
 -- | Hash
-instance Cast I (P_Stable_Name a) where cast = stableNameToInt#
+instance Cast I (StableName# a) where cast = stableNameToInt#
 
--- | Extract (copy) the live portion of a 'UnboxedSlice'
-instance Prim x ⇒ Cast (UnboxedArray# x) (UnboxedSlice x) where
-  cast (Bytes_Off_Len# (# x, size @x → off, size @x → n #)) = runST ST.do
+-- | Extract (copy) the live portion of a 'A'##'
+instance Prim x ⇒ Cast (A' x) (A'## x) where
+  cast (Bytes'_Off_Len# (# x, size @x → off, size @x → n #)) = runST ST.do
     mv <- newByteArray# n
     copyByteArray# x off mv 0# n
     v <- unsafeFreezeByteArray# mv
     return (coerce v)
 
--- | Extract (copy) the live portion of a 'UnboxedConstRef'
-instance Prim x ⇒ Cast (UnboxedArray# x) (UnboxedConstRef x) where
-  cast (Bytes_Off# (# x, size @x → off #)) = runST ST.do
+-- | Extract (copy) the live portion of a 'A'#'
+instance Prim x ⇒ Cast (A' x) (A'# x) where
+  cast (Bytes'_Off# (# x, size @x → off #)) = runST ST.do
     let n = sizeofByteArray# x -# off
     mv <- newByteArray# n
     copyByteArray# x off mv 0# n
@@ -168,8 +168,8 @@ instance Prim x ⇒ Cast (UnboxedArray# x) (UnboxedConstRef x) where
     return (coerce v)
 
 -- | Extract (copy) the live portion of a 'UnboxedRef'
-instance Prim x ⇒ Cast (PinnedArray# x) (PinnedConstRef x) where
-  cast (PinnedBytes_Off# (# x, size @x → off #)) = runST ST.do
+instance Prim x ⇒ Cast (A'_ x) (A'_# x) where
+  cast (Pinned'_Off# (# x, size @x → off #)) = runST ST.do
     let n = sizeofByteArray# x -# off
     mv <- newByteArray# n
     copyByteArray# x off mv 0# n
@@ -177,20 +177,20 @@ instance Prim x ⇒ Cast (PinnedArray# x) (PinnedConstRef x) where
     return (coerce v)
 
 -- | Wrap (no copy) 'ByteArray#' in a full-size 'Buffer'
-instance Prim x ⇒ Cast (UnboxedSlice x) (UnboxedArray# x) where
-  cast x = Bytes_Off_Len# (# coerce x, 0#, sizeofByteArray# (coerce x) / size @x 1# #)
+instance Prim x ⇒ Cast (A'## x) (A' x) where
+  cast x = Bytes'_Off_Len# (# coerce x, 0#, sizeofByteArray# (coerce x) / size @x 1# #)
 
 instance Cast Addr# ByteArray# where cast = byteArrayContents#
 instance Cast Addr# (MutableByteArray# s) where cast = mutableByteArrayContents#
-instance Cast (ForeignArray# x) (PinnedArray# x) where cast = coerce byteArrayContents#
-instance Cast (ForeignMutableArray# s x) (PinnedMutableArray# s x) where cast = coerce mutableByteArrayContents#
+instance Cast (P' x) (A'_ x) where cast = coerce byteArrayContents#
+instance Cast (P s x) (A_ s x) where cast = coerce mutableByteArrayContents#
 
-instance Cast I C# where cast = ord#
-instance Cast U4 C# where cast c = wordToWord32# (int2Word# (ord# c))
-instance Cast I C1# where cast = coerce ord#
-instance Cast U1 C1# where cast c = wordToWord8# (int2Word# (ord# (coerce c)))
-instance Cast C1# U1 where cast c = C1# (chr# (word2Int# (word8ToWord# c)))
-instance Cast C# I where cast = chr#
+instance Cast I C where cast = ord#
+instance Cast U4 C where cast c = wordToWord32# (int2Word# (ord# c))
+instance Cast I C1 where cast = coerce ord#
+instance Cast U1 C1 where cast c = wordToWord8# (int2Word# (ord# (coerce c)))
+instance Cast C1 U1 where cast c = C1# (chr# (word2Int# (word8ToWord# c)))
+instance Cast C I where cast = chr#
 
 -- | This pattern is strongly deprecated
 instance Cast Addr# I where cast = int2Addr#
@@ -337,8 +337,8 @@ instance Cast Word32 U4 where cast = W32#
 instance Cast Word64 U8 where cast = W64#
 instance Cast Float F4 where cast = GHC.F#
 instance Cast Double F8 where cast = GHC.D#
-instance Cast Char C# where cast = C#
-instance Cast Char8 C1# where cast = coerce C#
+instance Cast Char C where cast = C#
+instance Cast Char8 C1 where cast = coerce C#
 
 instance Cast I Int where cast (I# i) = i
 instance Cast I1 Int8 where cast (I8# i) = i
@@ -352,13 +352,13 @@ instance Cast U4 Word32 where cast (W32# w) = w
 instance Cast U8 Word64 where cast (W64# w) = w
 instance Cast F4 Float where cast (GHC.F# f) = f
 instance Cast F8 Double where cast (GHC.D# d) = d
-instance Cast C# Char where cast (C# c) = c
-instance Cast C1# Char8 where cast (Char8# (C# c)) = C1# c
+instance Cast C Char where cast (C# c) = c
+instance Cast C1 Char8 where cast (Char8# (C# c)) = C1# c
 
 -- | Unpack bytes until \null byte
-instance Cast [Char] (S# C#) where cast = coerce unpackCStringUtf8#
+instance Cast [Char] (S C) where cast = coerce unpackCStringUtf8#
 -- | Unpack bytes until \null byte
-instance Cast [Char] (S# C1#) where cast = coerce unpackCString#
+instance Cast [Char] (S C1) where cast = coerce unpackCString#
 
 
 
@@ -369,7 +369,7 @@ instance Cast (State# y) (State# x) where cast = unsafeCoerce#
 -- This address must refer to immutable memory.
 --
 -- GHC includes a built-in rule for constant folding when the argument is a statically-known literal. That is, a core-to-core pass reduces the expression @cstringLength# "hello"#@ to the constant @5#@.
-instance Cast I (S# C1#) where cast = coerce cstringLength#
+instance Cast I (S C1) where cast = coerce cstringLength#
 
 
 -- | Interpret value if valid or fail spectacularly.

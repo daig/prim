@@ -10,11 +10,11 @@ import Cast
 infix 4 >, >#, >=, >=#, <, <#, <=, <=# , ==, ==#, !=, !=#, `cmp`
 type Eq# ∷ ∀ {r}. T r → TC
 class Eq# (a ∷ T r) where
-  (==), (!=) ∷ a → a → B
+  (==), (!=) ∷ a → a → Bool
   (==#), (!=#) ∷ a → a → B#
 type Cmp# ∷ ∀ {r}. T r → TC
 class Eq# a ⇒ Cmp# a where
-  (>),(>=),(<),(<=) ∷ a → a → B
+  (>),(>=),(<),(<=) ∷ a → a → Bool
   (>#),(>=#),(<#),(<=#) ∷ a → a → B#
   cmp ∷ a → a → Ordering
   -- | Minimum value
@@ -206,25 +206,25 @@ instance Cmp# U8 where
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
-instance Eq# C# where
+instance Eq# C where
   (==#) = coerce eqChar#
   (!=#) = coerce neChar#
-  (==) = cast ((==#) @C#)
-  (!=) = cast ((!=#) @C#)
-instance Cmp# C# where
+  (==) = cast ((==#) @C)
+  (!=) = cast ((!=#) @C)
+instance Cmp# C where
   (>#) = coerce gtChar#
   (>=#) = coerce geChar#
   (<#) = coerce ltChar#
   (<=#) = coerce leChar#
-  (>) = cast ((>#) @C#)
-  (>=) = cast ((>=#) @C#)
-  (<) = cast ((<#) @C#)
-  (<=) = cast ((<=#) @C#)
+  (>) = cast ((>#) @C)
+  (>=) = cast ((>=#) @C)
+  (<) = cast ((<#) @C)
+  (<=) = cast ((<=#) @C)
   cmp a b = Ordering# do gtChar# a b GHC.-# ltChar# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
-deriving newtype instance Eq# C1#
-deriving newtype instance Cmp# C1#
+deriving newtype instance Eq# C1
+deriving newtype instance Cmp# C1
 
 instance Eq# F4 where
   (==#) = coerce eqFloat#
@@ -271,18 +271,18 @@ instance Eq# ByteArray# where
   (==) = cast ((==#) @ByteArray#)
   (!=) = cast ((!=#) @ByteArray#)
 -- | _Value_ equality
-deriving via ByteArray# instance Eq# (UnboxedArray# (x ∷ T r))
+deriving via ByteArray# instance Eq# (A' (x ∷ T r))
 -- | _Reference_ equality
-instance Eq# (PinnedMutableArray# s x) where
+instance Eq# (A_ s x) where
   (==#) = coerce sameMutableByteArray#
   as !=# bs = not (as ==# bs)
-  (==) = cast ((==#) @(PinnedMutableArray# s x))
-  (!=) = cast ((!=#) @(PinnedMutableArray# s x))
-instance Eq# (PinnedArray# x) where
+  (==) = cast ((==#) @(A_ s x))
+  (!=) = cast ((!=#) @(A_ s x))
+instance Eq# (A'_ x) where
   (==#) = coerce sameByteArray#
   as !=# bs = not (as ==# bs)
-  (==) = cast ((==#) @(PinnedArray# x))
-  (!=) = cast ((!=#) @(PinnedArray# x))
+  (==) = cast ((==#) @(A'_ x))
+  (!=) = cast ((!=#) @(A'_ x))
   
 -- | _Reference_ equality
 instance Eq# (SmallArray# x) where
@@ -296,12 +296,12 @@ instance Eq# (SmallMutableArray# s x) where
   as !=# bs = not (as ==# bs)
   (==) = cast ((==#) @(SmallMutableArray# s x))
   (!=) = cast ((!=#) @(SmallMutableArray# s x))
-deriving newtype instance Eq# (ConstRef x)
-deriving newtype instance Eq# (SmallConstRef x)
-deriving newtype instance Eq# (Ref s x)
-deriving newtype instance Eq# (SmallRef s x)
-deriving via (# PinnedArray# x, I #) instance Eq# (PinnedConstRef x)
-deriving via (# PinnedMutableArray# s x, I #) instance Eq# (PinnedRef s x)
+deriving newtype instance Eq# (AR'# x)
+deriving newtype instance Eq# (Ar'# x)
+deriving newtype instance Eq# (AR# s x)
+deriving newtype instance Eq# (Ar# s x)
+deriving via (# A'_ x, I #) instance Eq# (A'_# x)
+deriving via (# A_ s x, I #) instance Eq# (A_# s x)
 
 -- | _Reference_ equality
 instance Eq# (Array# x) where
@@ -322,40 +322,40 @@ instance Eq# (MutVar# s x) where
   (==) = cast ((==#) @(MutVar# s x))
   (!=) = cast ((!=#) @(MutVar# s x))
 -- | _Reference_ equality
-instance Eq# (P_Async x) where
+instance Eq# (Async# x) where
   (==#) = coerce (sameTVar# @_ @x)
   as !=# bs = not (as ==# bs)
-  (==) = cast ((==#) @(P_Async x))
-  (!=) = cast ((!=#) @(P_Async x))
+  (==) = cast ((==#) @(Async# x))
+  (!=) = cast ((!=#) @(Async# x))
 -- | _Reference_ equality
-instance Eq# (P_Sync x) where
+instance Eq# (Sync# x) where
   (==#) = coerce (sameMVar# @_ @x)
   as !=# bs = not (as ==# bs)
-  (==) = cast ((==#) @(P_Sync x))
-  (!=) = cast ((!=#) @(P_Sync x))
+  (==) = cast ((==#) @(Sync# x))
+  (!=) = cast ((!=#) @(Sync# x))
 -- | _Reference_ equality
-instance Eq# (P_Stable x) where
+instance Eq# (Stable# x) where
   (==#) = coerce (eqStablePtr# @x)
   as !=# bs = not (as ==# bs)
-  (==) = cast ((==#) @(P_Stable x))
-  (!=) = cast ((!=#) @(P_Stable x))
+  (==) = cast ((==#) @(Stable# x))
+  (!=) = cast ((!=#) @(Stable# x))
 -- | _Reference_ equality
-instance Eq# (P_Stable_Name a) where
+instance Eq# (StableName# a) where
   (==#) = coerce eqStableName#
   as !=# bs = not (as ==# bs)
-  (==) = cast ((==#) @(P_Stable_Name a))
-  (!=) = cast ((!=#) @(P_Stable_Name a))
+  (==) = cast ((==#) @(StableName# a))
+  (!=) = cast ((!=#) @(StableName# a))
 -- | _Value_ equality
-instance Eq# (UnboxedSlice x) where
+instance Eq# (A'## x) where
   a ==# b = case cmp a b of EQ → T#; _ → F#
   as !=# bs = not (as ==# bs)
-  (==) = cast ((==#) @(UnboxedSlice x))
-  (!=) = cast ((!=#) @(UnboxedSlice x))
+  (==) = cast ((==#) @(A'## x))
+  (!=) = cast ((!=#) @(A'## x))
 -- | _Reference_ equality
-deriving via (# PinnedArray# x, I, I #) instance Eq# (PinnedSlice x)
+deriving via (# A'_ x, I, I #) instance Eq# (A'_## x)
 
-instance Cmp# (PinnedSlice x) where
-  cmp x y = if x == y then EQ else coerce (cmp @(UnboxedSlice x)) x y
+instance Cmp# (A'_## x) where
+  cmp x y = if x == y then EQ else coerce (cmp @(A'## x)) x y
   a <# b = cmp a b ==# LT
   a ># b = cmp a b ==# GT
   a >=# b = cmp a b !=# LT
@@ -367,17 +367,17 @@ instance Cmp# (PinnedSlice x) where
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
   
-instance Cmp# (UnboxedSlice x) where
-  Bytes_Off_Len# (# a, i, n #) `cmp` Bytes_Off_Len# (# b , j, m #)
+instance Cmp# (A'## x) where
+  Bytes'_Off_Len# (# a, i, n #) `cmp` Bytes'_Off_Len# (# b , j, m #)
     = case Ordering# (compareByteArrays# a i b j (n `min` m)) of {EQ → cmp n m; x → x}
   a <# b = cmp a b ==# LT
   a ># b = cmp a b ==# GT
   a >=# b = cmp a b !=# LT
   a <=# b = cmp a b !=# GT
-  (>) = cast ((>#) @(UnboxedSlice x))
-  (>=) = cast ((>=#) @(UnboxedSlice x))
-  (<) = cast ((<#) @(UnboxedSlice x))
-  (<=) = cast ((<=#) @(UnboxedSlice x))
+  (>) = cast ((>#) @(A'## x))
+  (>=) = cast ((>=#) @(A'## x))
+  (<) = cast ((<#) @(A'## x))
+  (<=) = cast ((<=#) @(A'## x))
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
 
@@ -397,14 +397,14 @@ instance Cmp# Addr# where
   cmp a b = Ordering# do gtAddr# a b GHC.-# ltAddr# a b
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
-deriving via Addr# instance Eq# (ForeignArray# x)
-deriving via Addr# instance Cmp# (ForeignArray# x)
-deriving via Addr# instance Eq# (ForeignMutableArray# s x)
-deriving via Addr# instance Cmp# (ForeignMutableArray# s x)
-deriving newtype instance Eq# (ForeignSlice x)
-deriving newtype instance Eq# (ForeignMutableSlice s x)
-instance Cmp# (ForeignSlice x) where
-  Addr_Len# (# p, n #) `cmp` Addr_Len# (# q, m #) = case cmp p q of
+deriving via Addr# instance Eq# (P' x)
+deriving via Addr# instance Cmp# (P' x)
+deriving via Addr# instance Eq# (P s x)
+deriving via Addr# instance Cmp# (P s x)
+deriving newtype instance Eq# (P'## x)
+deriving newtype instance Eq# (P## s x)
+instance Cmp# (P'## x) where
+  P'_Len# (# p, n #) `cmp` P'_Len# (# q, m #) = case cmp p q of
     EQ → cmp n m
     x → x
   a < b = cmp a b == LT
@@ -417,8 +417,8 @@ instance Cmp# (ForeignSlice x) where
   a <=# b = cmp a b !=# GT
   min x y = if x <= y then x else y
   max x y = if x >= y then x else y
-instance Cmp# (ForeignMutableSlice s x) where
-  MAddr_Len# (# p, n #) `cmp` MAddr_Len# (# q, m #) = case cmp p q of
+instance Cmp# (P## s x) where
+  P_Len# (# p, n #) `cmp` P_Len# (# q, m #) = case cmp p q of
     EQ → cmp n m
     x → x
   a < b = cmp a b == LT

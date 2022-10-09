@@ -11,33 +11,33 @@ type family Elt a where
   Elt (MutableArray# s) = OK
   Elt SmallArray# = OK
   Elt (SmallMutableArray# s) = OK
-  Elt UnboxedArray# = Prim
-  Elt UnboxedSlice = Prim
-  Elt PinnedArray# = Prim
-  Elt PinnedSlice = Prim
-  Elt UnboxedConstRef = Prim
-  Elt (UnboxedRef s) = Prim
-  Elt PinnedConstRef = Prim
-  Elt (PinnedRef s) = Prim
-  Elt (UnboxedMutableArray# s) = Prim
-  Elt (UnboxedMutableSlice s) = Prim
-  Elt (PinnedMutableArray# s) = Prim
-  Elt ForeignArray# = Prim
-  Elt (ForeignMutableArray# s) = Prim
-  Elt ForeignSlice = Prim
-  Elt (ForeignMutableSlice s) = Prim
+  Elt A' = Prim
+  Elt A'# = Prim
+  Elt A'## = Prim
+  Elt A'_ = Prim
+  Elt A'_# = Prim
+  Elt A'_## = Prim
+  Elt (A_ s) = Prim
+  Elt (A_# s) = Prim
+  Elt (A_## s) = Prim
+  Elt (A s) = Prim
+  Elt (A# s) = Prim
+  Elt (A## s) = Prim
+  Elt P' = Prim
+  Elt P'## = Prim
+  Elt (P s) = Prim
+  Elt (P## s) = Prim
   Elt (MutVar# s) = OK
   Elt (TVar# s) = OK
   Elt (MVar# s) = OK
   Elt (IOPort# s) = OK
   
-
 -- | Primitive unboxed, unlifted types that fit natively into raw memory
 type Prim ∷ forall {r}. T r → TC
 class Prim (x ∷ T r) where
   size ∷ I {- ^ # elements -} → I {- ^ size in bytes -}
   align ∷ I → I
-  (!#) ∷ A X U1 → I {- ^ index in bytes -} → x
+  (!#) ∷ A' U1 → I {- ^ index in bytes -} → x
   (!!#) ∷ A s U1 → I {- ^ index in # bytes -} → ST s x
   write# ∷ A s U1 → I {- ^ index in # bytes -} → x → ST_ s
 
@@ -71,5 +71,5 @@ INST_PRIM(F8,SIZEOF_DOUBLE,ALIGNMENT_DOUBLE,indexWord8ArrayAsDouble,readWord8Arr
 INST_PRIM(Addr#,SIZEOF_HSPTR,ALIGNMENT_HSPTR,indexWord8ArrayAsAddr,readWord8ArrayAsAddr,writeWord8ArrayAsAddr)
 
 -- Override the word representation for chars
-INST_PRIM_SPEC(C#,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsWideChar,readWord8ArrayAsWideChar,writeWord8ArrayAsWideChar)
-INST_PRIM_SPEC(C1#,1,ALIGNMENT_HSCHAR,indexWord8ArrayAsChar,readWord8ArrayAsChar,writeWord8ArrayAsChar)
+INST_PRIM_SPEC(C,SIZEOF_HSCHAR,ALIGNMENT_HSCHAR,indexWord8ArrayAsWideChar,readWord8ArrayAsWideChar,writeWord8ArrayAsWideChar)
+INST_PRIM_SPEC(C1,1,ALIGNMENT_HSCHAR,indexWord8ArrayAsChar,readWord8ArrayAsChar,writeWord8ArrayAsChar)

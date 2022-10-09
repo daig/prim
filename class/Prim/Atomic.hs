@@ -7,22 +7,22 @@ class Logic_Atomic s v x | v → s x where
   (|+|=), (|=), (&=), (~&=) ∷ v → x → ST s x
 
 class Num_Atomic (x ∷ T r) where
-  (-=), (+=) ∷ ForeignMutableArray# s x → x → ST s x
-  sub_atomicB, add_atomicB ∷ UnboxedMutableArray# s x → I → x → ST s x
+  (-=), (+=) ∷ P s x → x → ST s x
+  sub_atomicB, add_atomicB ∷ A s x → I → x → ST s x
 type Atomic ∷ ∀ {r}. T r → TC
 class Atomic (x ∷ T r) where
-  read_atomic ∷ ForeignMutableArray# s x → ST s x
-  (.=!) ∷ ForeignMutableArray# s x → x → ST_ s
-  swap ∷ ForeignMutableArray# s x → x → ST s x
-  read_atomicB ∷ UnboxedMutableArray# s x → I →  ST s x
-  write_atomicB ∷ UnboxedMutableArray# s x → I → x → ST_ s
+  read_atomic ∷ P s x → ST s x
+  (.=!) ∷ P s x → x → ST_ s
+  swap ∷ P s x → x → ST s x
+  read_atomicB ∷ A s x → I →  ST s x
+  write_atomicB ∷ A s x → I → x → ST_ s
 
-instance Logic_Atomic s (ForeignMutableArray# s U) U where
+instance Logic_Atomic s (P s U) U where
   (|+|=) = coerce fetchXorWordAddr#
   (|=) = coerce fetchOrWordAddr#
   (&=) = coerce fetchAndWordAddr#
   (~&=) = coerce fetchNandWordAddr#
-instance Logic_Atomic s (# UnboxedMutableArray# s U, I #) U where
+instance Logic_Atomic s (# A s U, I #) U where
   (# coerce → m, i #) |+|= (cast → x) = \s → case fetchXorIntArray# m i x s of (# s', cast → w #) → (# s', w #)
   (# coerce → m, i #) |= (cast → x) = \s → case fetchOrIntArray# m i x s of (# s', cast → w #) → (# s', w #)
   (# coerce → m, i #) &= (cast → x) = \s → case fetchAndIntArray# m i x s of (# s', cast → w #) → (# s', w #)
@@ -46,12 +46,12 @@ instance Atomic Addr# where
   write_atomicB (coerce → m) i (cast @I → x) = atomicWriteIntArray# m i x
   (.=!) (coerce → p) (cast @I → (cast @U → x)) = atomicWriteWordAddr# p x
 
-instance Logic_Atomic s (# UnboxedMutableArray# s I, I #) I where
+instance Logic_Atomic s (# A s I, I #) I where
   (|+|=) (# m, i #) = coerce fetchXorIntArray# m i
   (|=) (# m, i #) = coerce fetchOrIntArray# m i
   (&=) (# m, i #) = coerce fetchAndIntArray# m i
   (~&=) (# m, i #) = coerce fetchNandIntArray# m i
-instance Logic_Atomic s (ForeignMutableArray# s I) I where
+instance Logic_Atomic s (P s I) I where
   (|+|=) (coerce → p) (cast → x) s = case fetchXorWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
   (|=) (coerce → p) (cast → x) s = case fetchOrWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
   (&=) (coerce → p) (cast → x) s = case fetchAndWordAddr# p x s of (# s', (cast → w) #) → (# s', w #)
@@ -74,14 +74,14 @@ type Eq_Atomic ∷ ∀ {r}. T r → TC
 class Eq_Atomic x where
   -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided expected old value.
   -- Implies a full memory barrier.
-  casP ∷ ForeignMutableArray# s x {-^ size-aligned pointer -}
+  casP ∷ P s x {-^ size-aligned pointer -}
        → x {- ^ expected old value -}
        → x {- ^ new value -}
        → ST s x {- ^ the original value inside -}
   -- | Atomic compare-and-swap i.e. write the new value if the current value matches the provided expected old value.
   -- Implies a full memory barrier.
   -- _Warning_: this can fail with an unchecked exception.
-  casA ∷ UnboxedMutableArray# s x
+  casA ∷ A s x
        → I {- ^ offset in elements -}
        → x {- ^ expected old value -}
        → x {- ^ new value -}

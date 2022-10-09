@@ -7,9 +7,9 @@ class Pinned' a where
   -- If you want gaurenteed pinning (eg for FFI), use 'A_Box_Pinned'.
   pinned' ∷ a → B#
 instance Pinned' ByteArray# where pinned' = coerce isByteArrayPinned#
-deriving via ByteArray# instance Pinned' (UnboxedArray# x)
+deriving via ByteArray# instance Pinned' (A' x)
 
 instance Pinned' (MutableByteArray# s) where pinned' = coerce isMutableByteArrayPinned#
-deriving via (MutableByteArray# s) instance Pinned' (UnboxedMutableArray# s x)
+deriving via (MutableByteArray# s) instance Pinned' (A s x)
 
-instance Pinned' (PinnedMutableArray# s x) where pinned' _ = T#
+instance Pinned' (A_ s x) where pinned' _ = T#

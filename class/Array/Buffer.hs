@@ -9,29 +9,15 @@ import Array
 import Cast
 
 
-type family OffRep (r ∷ RuntimeRep) = (rr ∷ RuntimeRep) | rr → r where
-  OffRep AddrRep = TupleRep '[AddrRep, IntRep]
-  OffRep (BoxedRep Unlifted) = TupleRep '[BoxedRep Unlifted, IntRep]
-  OffRep (TupleRep '[BoxedRep Unlifted, IntRep]) = TupleRep '[BoxedRep Unlifted, IntRep, IntRep]
   
--- | The type of a reference with extra context
-type Off ∷ ∀ {rx} {r}. (T rx → T r) → T rx → T (OffRep r)
-type family Off a = aa | aa → a where
-  Off UnboxedArray# = UnboxedConstRef
-  Off UnboxedConstRef = UnboxedSlice
-  Off ForeignArray# = ForeignSlice
-  Off (UnboxedMutableArray# s) = UnboxedRef s
-  Off (UnboxedRef s) = UnboxedMutableSlice s
-  Off (ForeignMutableArray# s) = ForeignMutableSlice s
-
 type Buffer ∷ ∀ {rx} {r}. (T rx → T r) → TC
-class Buffer a where ( # ) ∷ a x → I → Off a x
+class Buffer a where ( # ) ∷ a x → I → a # x
 
 infixl 9 #
 
-instance Buffer UnboxedArray# where ( # ) x i = Bytes_Off# (# coerce x, i #)
-instance Buffer UnboxedConstRef where ( # ) (Bytes_Off# (# x, i #)) n = Bytes_Off_Len# (# coerce x, i, n #)
-instance Buffer ForeignArray# where ( # ) x i = Addr_Len# (# coerce x, i #)
-instance Buffer (UnboxedMutableArray# s) where ( # ) x i = MBytes_Off# (# coerce x, i #)
-instance Buffer (UnboxedRef s) where ( # ) (MBytes_Off# (# x, i #)) n = MBytes_Off_Len# (# coerce x, i, n #)
-instance Buffer (ForeignMutableArray# s) where ( # ) x i = MAddr_Len# (# coerce x, i #)
+instance Buffer A' where ( # ) x i = Bytes'_Off# (# coerce x, i #)
+instance Buffer A'# where ( # ) (Bytes'_Off# (# x, i #)) n = Bytes'_Off_Len# (# coerce x, i, n #)
+instance Buffer P' where ( # ) x i = P'_Len# (# coerce x, i #)
+instance Buffer (A s) where ( # ) x i = Bytes_Off# (# coerce x, i #)
+instance Buffer (A# s) where ( # ) (Bytes_Off# (# x, i #)) n = Bytes_Off_Len# (# coerce x, i, n #)
+instance Buffer (P s) where ( # ) x i = P_Len# (# coerce x, i #)
