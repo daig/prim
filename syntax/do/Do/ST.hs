@@ -21,10 +21,13 @@ class RunST (a ∷ T ra) where runST ∷ (∀ s. ST s a) → a
 
 class Pure b ⇒ Do2 (a ∷ T ra) (b ∷ T rb) where
   (>>=) ∷ ST s a → (a → ST s b) → ST s b
+  (=<<) ∷ (a → ST s b) → ST s a → ST s b
   (>%) ∷ ST s a → (a → b) → ST s b
+  (%<) ∷ (a → b) → ST s a → ST s b
 
 class Do (a ∷ T ra) where
   (>>*) ∷ ST s a → (a → ST_ s) → ST_ s
+  (*<<) ∷ (a → ST_ s) → ST s a → ST_ s
   (>*) ∷ ST s a → ST_ s → ST_ s
   (>>) ∷ ST_ s → ST s a → ST s a
 
@@ -32,11 +35,14 @@ class Do (a ∷ T ra) where
 st <> sta = \s → sta (st s)
 
 infixl 1 >>=, >>, >*, >>*, >%
+infixr 1 =<<, *<<, %<
 
 #define INST_MONAD(A,B) \
 instance Do2 (a ∷ K (A)) (b ∷ K (B)) where {\
   st >% f = st >>= \a → return (f a); \
-  st >>= f = \s → case st s of {(# ss, a #) → f a ss}}
+  f %< st = st >>= \a → return (f a); \
+  st >>= f = \s → case st s of {(# ss, a #) → f a ss};\
+  f =<< st = \s → case st s of {(# ss, a #) → f a ss}}
 
 #define INSTS2_MONAD(Y) \
 INST_PURE(Y);\
@@ -44,7 +50,8 @@ instance RunST (a ∷ K (Y)) where {runST st = case runRW# st of (# _, a #) → 
 instance Do (a ∷ K (Y)) where {\
   (st >> sta) s = sta (st s) ;\
   st >* f = \s → case st s of {(# ss, _ #) → f ss};\
-  st >>* f = \s → case st s of {(# ss, a #) → f a ss}};\
+  st >>* f = \s → case st s of {(# ss, a #) → f a ss};\
+  f *<< st = \s → case st s of {(# ss, a #) → f a ss}};\
 INST_MONAD(Y,(##)); \
 INST_MONAD(Y,()); \
 INST_MONAD(Y,ByteArray#); \
