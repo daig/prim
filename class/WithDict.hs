@@ -1,0 +1,170 @@
+--------------------------------------------------------------------
+-- | Description : Reflection
+--------------------------------------------------------------------
+module WithDict (
+WithDict(..)
+--
+-- | The class @WithDict@ is defined as:
+-- 
+-- @
+--     class WithDict cls meth where
+--         withDict :: forall {rr :: RuntimeRep} (r :: TYPE rr). meth -> (cls => r) -> r
+--         @
+-- 
+-- This class is special, like @Typeable@: GHC automatically solves
+-- for instances of @WithDict@, users cannot write their own.
+-- 
+-- It is used to implement a primitive that we cannot define in Haskell
+-- but we can write in Core.
+-- 
+-- @WithDict@ is used to create dictionaries for classes with a single method.
+-- Consider a class like this:
+-- 
+-- @
+--    class C a where
+--      f :: T a
+--      @
+-- 
+-- We can use @withDict@ to cast values of type @T a@ into dictionaries for @C a@.
+-- To do this, we can define a function like this in the library:
+-- 
+--   @
+--   withT :: T a -> (C a => b) -> b
+--   withT t k = withDict @(C a) @(T a) t k
+--   @
+-- 
+-- Here:
+-- 
+-- * The @cls@ in @withDict@ is instantiated to @C a@.
+-- 
+-- * The @meth@ in @withDict@ is instantiated to @T a@.
+--   The definition of @T@ itself is irrelevant, only that @C a@ is a class
+--   with a single method of type @T a@.
+-- 
+-- * The @r@ in @withDict@ is instantiated to @b@.
+-- 
+-- For any single-method class C:
+--
+-- @
+--    class C a1 .. an where op :: meth_ty
+--    @
+-- 
+-- The solver will solve the constraint @WithDict (C t1 .. tn) mty@
+-- as if the following instance declaration existed:
+-- 
+-- @
+-- instance (mty ~# inst_meth_ty) => WithDict (C t1..tn) mty where
+--   withDict = \@{rr} @(r :: TYPE rr) (sv :: mty) (k :: C t1..tn => r) ->
+--     k (sv |> (sub co2 ; sym co))
+--     @
+-- 
+-- That is, it matches on the first (constraint) argument of C; if C is
+-- a single-method class, the instance "fires" and emits an equality
+-- constraint @mty ~ inst_meth_ty@, where @inst_meth_ty@ is @meth_ty[ti/ai]@.
+-- The coercion @co2@ witnesses the equality @mty ~ inst_meth_ty@.
+-- 
+-- The coercion @co@ is a newtype coercion that coerces from @C t1 ... tn@
+-- to @inst_meth_ty@.
+-- This coercion is guaranteed to exist by virtue of the fact that
+-- C is a class with exactly one method and no superclasses, so it
+-- is treated like a newtype when compiled to Core.
+-- 
+-- The condition that @C@ is a single-method class is implemented in the
+-- guards of matchWithDict's definition.
+-- If the conditions are not held, the rewriting will not fire,
+-- and we'll report an unsolved constraint.
+-- 
+-- Some further observations about @withDict@:
+-- 
+-- - (WD1) The @cls@ in the type of withDict must be explicitly instantiated with
+--       visible type application, as invoking @withDict@ would be ambiguous
+--       otherwise.
+-- 
+--       For examples of how @withDict@ is used in the @base@ library, see @withSNat@
+--       in GHC.TypeNats, as well as @withSChar@ and @withSSymbol@ in GHC.TypeLits.
+-- 
+-- - (WD2) The @r@ is representation-polymorphic, to support things like
+--       @withTypeable@ in @Data.Typeable.Internal@.
+-- 
+-- - (WD3) As an alternative to @withDict@, one could define functions like @withT@
+--       above in terms of @unsafeCoerce@. This is more error-prone, however.
+-- 
+-- - (WD4) In order to define things like @reifySymbol@ below:
+-- 
+-- @
+--         reifySymbol :: forall r. String -> (forall (n :: Symbol). KnownSymbol n => r) -> r
+--         @
+-- 
+--       @withDict@ needs to be instantiated with @Any@, like so:
+-- 
+--         @
+--         reifySymbol n k = withDict @(KnownSymbol Any) @String @r n (k @Any)
+--         @
+-- 
+--       The use of @Any@ is explained in Note [NOINLINE someNatVal] in
+--       base:GHC.TypeNats.
+-- 
+-- - (WD5) In earlier implementations, @withDict@ was implemented as an identifier
+--       with special handling during either constant-folding or desugaring.
+--       The current approach is more robust: previously, the type of @withDict@
+--       did not have a type-class constraint and was overly polymorphic.
+--       See #19915.
+-- 
+-- - (WD6) In fact, we desugar @withDict @cls @mty @{rr} @r@ to
+-- 
+--          \@(r :: RuntimeRep) @(a :: TYPE r) (sv :: mty) (k :: cls => a) ->
+--            nospec @(cls => a) k (sv |> (sub co2 ; sym co)))
+-- 
+--       That is, we cast the method using a coercion, and apply k to it.
+--       However, we use the 'nospec' magicId (see Note [nospecId magic] in GHC.Types.Id.Make)
+--       to ensure that the typeclass specialiser doesn't incorrectly common-up distinct
+--       evidence terms. This is super important! Suppose we have calls
+-- 
+--           @
+--           withDict A k
+--           withDict B k
+--           @
+-- 
+--       @where k1, k2 :: C T -> blah@.  If we desugared withDict naively, we'd get
+-- 
+--           @
+--           k (A |> co1)
+--           k (B |> co2)
+--           @
+-- 
+--       and the Specialiser would assume that those arguments (of type @C T@) are
+--       the same. It would then specialise @k@ for that type, and then call the same,
+--       specialised function from both call sites.  #21575 is a concrete case in point.
+-- 
+--       To avoid this, we need to stop the typeclass specialiser from seeing this
+--       structure, by using nospec. This function is inlined only in CorePrep; crucially
+--       this means that it still appears in interface files, so that the desugaring of
+--       withDict remains opaque to the typeclass specialiser across modules.
+--       This means the specialiser will always see instead:
+-- 
+--           @
+--           nospec @(cls => a) k (A |> co1)
+--           nospec @(cls => a) k (B |> co2)
+--           @
+-- 
+--       Why does this work? Recall that nospec is not an overloaded function;
+--       it has the type
+-- 
+--         @
+--         nospec :: forall a. a -> a
+--         @
+-- 
+--       This means that there is nothing for the specialiser to do with function calls
+--       such as
+-- 
+--         @
+--         nospec @(cls => a) k (A |> co)
+--         @
+-- 
+--       as the specialiser only looks at calls of the form @f dict@ for an
+--       overloaded function @f@ (e.g. with a type such as @f :: Eq a => ...@).
+-- 
+--       See test-case T21575b.
+) where
+
+import GHC.Magic.Dict
