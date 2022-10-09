@@ -8,33 +8,10 @@ import Array.Index
 import Bits
 import Num
 import Var
+import Array.Map
 
-type Fold ∷ ∀ {ra} {re} {rr}. T ra → T re → T rr → TC
-class Fold a e r where fold ∷ a → (e → r) → r
 
-instance Fold (S# Latin1) Char (a → a) where fold = coerce (unpackFoldrCString# @a)
-instance Fold (S# UTF8) Char (a → a) where fold = coerce (unpackFoldrCStringUtf8# @a)
-#define INST_FOLD_LATIN(A)\
-instance Fold (S# Latin1) Char ((a ∷ K A) → a) where {\
-    fold (S# s) f r0 = go (ConstAddr# s) r0 \
-      where go p r = let !(C1# ch) = p!0# in if ch == '\0'# then r else cast ch `f` go (p +. 1#) r}
-
-INST_FOLD_LATIN(I)
-INST_FOLD_LATIN(I1)
-INST_FOLD_LATIN(I2)
-INST_FOLD_LATIN(I4)
-INST_FOLD_LATIN(I8)
-INST_FOLD_LATIN(U)
-INST_FOLD_LATIN(U1)
-INST_FOLD_LATIN(U2)
-INST_FOLD_LATIN(U4)
-INST_FOLD_LATIN(U8)
-INST_FOLD_LATIN(F4)
-INST_FOLD_LATIN(F8)
-INST_FOLD_LATIN((##))
-INST_FOLD_LATIN(ByteArray#)
-
-unpackFoldrCStringUtf9# ∷ S# UTF8 → (C# → t → t) → t → t
+unpackFoldrCStringUtf9# ∷ S# C# → (C# → t → t) → t → t
 unpackFoldrCStringUtf9# (S# p0) f r0 = go (ConstAddr# @C1# p0) r0
   where
     go p r = let !(C1# ch) = p!0#
@@ -84,7 +61,7 @@ instance ForeignArray# C1# +. ByteCount where
 unpackUtf8C# ∷ ByteCount → C# → ForeignArray# C1# → C#
 unpackUtf8C# bytes ch (coerce @_ @(ForeignArray# C1#) → p) =
   case bytes of
-    One   → ch
+    One   →                     ch
     Two   → cast ( ((cast       ch - 0xC0#) <<#  6##)
                  +  (cast (p ! 1#) - 0x80#          ))
     Three → cast ( ((cast       ch - 0xE0#) <<# 12##)
@@ -94,21 +71,3 @@ unpackUtf8C# bytes ch (coerce @_ @(ForeignArray# C1#) → p) =
                  + ((cast (p ! 1#) - 0x80#) <<# 12##)
                  + ((cast (p ! 2#) - 0x80#) <<#  6##)
                  + ( cast (p ! 3#) - 0x80#          ))
-
-{-
-{-# INLINE unpackUtf8C# #-}
-unpackUtf8C# ∷ ByteCount → C# → P# → C#
-unpackUtf8C# bytes ch (addr =
-  case bytes of
-    One → ch
-    Two →   (cast @C# (((cast ch                                           - 0xC0#) <<#  6##) +
-                     (cast (indexCharOffAddr# (addr `plusAddr#` 1#) 0#) - 0x80#)))
-    Three → (cast @C# (((cast ch                                           - 0xE0#) <<# 12##) +
-                    ((cast (indexCharOffAddr# (addr `plusAddr#` 1#) 0#) - 0x80#) <<#  6##) +
-                     (cast (indexCharOffAddr# (addr `plusAddr#` 2#) 0#) - 0x80#)))
-    Four →  (cast @C# (((cast ch                                           - 0xF0#) <<# 18##) +
-                    ((cast (indexCharOffAddr# (addr `plusAddr#` 1#) 0#) - 0x80#) <<# 12##) +
-                    ((cast (indexCharOffAddr# (addr `plusAddr#` 2#) 0#) - 0x80#) <<#  6##) +
-                     (cast (indexCharOffAddr# (addr `plusAddr#` 3#) 0#) - 0x80#)))
-
--}

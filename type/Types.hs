@@ -51,6 +51,9 @@ type C# = Char#
 -- | 8-bit Latin-1 code points
 newtype C1# = C1# C#
 
+-- | 8-bit Latin-1 code points
+newtype Char8 = Char8# Char
+
 type I = Int#
 type I1 = Int8#
 -- | Narrow a machine 'I' to 8 bits
@@ -237,11 +240,9 @@ type family M a = ma | ma → a where
   M Array# = MutableArray#
   M ForeignArray# = ForeignMutableArray#
 
--- | A C-style null-terminated string of Latin-1 @Char1#@ or UTF-8 @Char#@
-type S# ∷ Encoding → K Addr#
+-- | A C-style null-terminated string of Latin-1 @C1#@ or UTF-8 @C#@
+type S# ∷ ∀ {r}. T r → K Addr#
 newtype S# a = S# Addr#
-
-data Encoding = Latin1 | UTF8
 
 -- | An machine address to valid data, assumed to point outside the garbage-collected heap
 type ForeignArray# ∷ ∀ {r}. T r → K Addr#

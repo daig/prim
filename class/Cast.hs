@@ -3,6 +3,7 @@ module Cast where
 import Do.ST as ST
 import Unsafe.Coerce
 import GHC.Types (isTrue#,Bool,Char(..))
+import GHC.Types qualified as GHC
 import GHC.Int
 import GHC.Word
 import GHC.Prim qualified as GHC
@@ -185,7 +186,10 @@ instance Cast (ForeignArray# x) (PinnedArray# x) where cast = coerce byteArrayCo
 instance Cast (ForeignMutableArray# s x) (PinnedMutableArray# s x) where cast = coerce mutableByteArrayContents#
 
 instance Cast I C# where cast = ord#
+instance Cast U4 C# where cast c = wordToWord32# (int2Word# (ord# c))
 instance Cast I C1# where cast = coerce ord#
+instance Cast U1 C1# where cast c = wordToWord8# (int2Word# (ord# (coerce c)))
+instance Cast C1# U1 where cast c = C1# (chr# (word2Int# (word8ToWord# c)))
 instance Cast C# I where cast = chr#
 
 -- | This pattern is strongly deprecated
@@ -331,13 +335,31 @@ instance Cast Word8 U1 where cast = W8#
 instance Cast Word16 U2 where cast = W16#
 instance Cast Word32 U4 where cast = W32#
 instance Cast Word64 U8 where cast = W64#
+instance Cast Float F4 where cast = GHC.F#
+instance Cast Double F8 where cast = GHC.D#
 instance Cast Char C# where cast = C#
-instance Cast Char C1# where cast = coerce C#
+instance Cast Char8 C1# where cast = coerce C#
+
+instance Cast I Int where cast (I# i) = i
+instance Cast I1 Int8 where cast (I8# i) = i
+instance Cast I2 Int16 where cast (I16# i) = i
+instance Cast I4 Int32 where cast (I32# i) = i
+instance Cast I8 Int64 where cast (I64# i) = i
+instance Cast U Word where cast (W# w) = w
+instance Cast U1 Word8 where cast (W8# w) = w
+instance Cast U2 Word16 where cast (W16# w) = w
+instance Cast U4 Word32 where cast (W32# w) = w
+instance Cast U8 Word64 where cast (W64# w) = w
+instance Cast F4 Float where cast (GHC.F# f) = f
+instance Cast F8 Double where cast (GHC.D# d) = d
+instance Cast C# Char where cast (C# c) = c
+instance Cast C1# Char8 where cast (Char8# (C# c)) = C1# c
 
 -- | Unpack bytes until \null byte
-instance Cast [Char] (S# UTF8) where cast = coerce unpackCStringUtf8#
+instance Cast [Char] (S# C#) where cast = coerce unpackCStringUtf8#
 -- | Unpack bytes until \null byte
-instance Cast [Char] (S# Latin1) where cast = coerce unpackCString#
+instance Cast [Char] (S# C1#) where cast = coerce unpackCString#
+
 
 
 instance Cast (State# y) (State# x) where cast = unsafeCoerce#
@@ -347,7 +369,7 @@ instance Cast (State# y) (State# x) where cast = unsafeCoerce#
 -- This address must refer to immutable memory.
 --
 -- GHC includes a built-in rule for constant folding when the argument is a statically-known literal. That is, a core-to-core pass reduces the expression @cstringLength# "hello"#@ to the constant @5#@.
-instance Cast I (S# Latin1) where cast = coerce cstringLength#
+instance Cast I (S# C1#) where cast = coerce cstringLength#
 
 
 -- | Interpret value if valid or fail spectacularly.

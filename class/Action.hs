@@ -88,6 +88,6 @@ INST_OFF(C1#)
 
 type (.+) ∷ ∀ {rp} {rx}. T rp → T rx → TC
 class x .+ p | x → p where (.+) ∷ x → p → p
-instance S# Latin1 .+ [Char] where (.+) = coerce unpackAppendCString#
-instance S# UTF8 .+ [Char] where (.+) = coerce unpackAppendCStringUtf8#
+instance S# C1# .+ [Char] where (.+) = coerce unpackAppendCString#
+instance S# C# .+ [Char] where (.+) = coerce unpackAppendCStringUtf8#
 
