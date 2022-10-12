@@ -17,7 +17,10 @@ instance Pure (a ∷ K (A)) where {pure x = \s → (# s , x #)}
 -- | Return the value computed by a state thread.
 -- The @forall@ ensures that the internal state used by the 'ST'
 -- computation is inaccessible to the rest of the program.
-class RunST (a ∷ T ra) where runST ∷ (∀ s. ST s a) → a
+class RunST (a ∷ T ra) where
+  runST ∷ (∀ s. ST s a) → a
+  interleaveIO# :: IO a -> IO a
+
 
 class Pure b ⇒ Do2 (a ∷ T ra) (b ∷ T rb) where
   (>>=) ∷ ST s a → (a → ST s b) → ST s b
@@ -46,7 +49,9 @@ instance Do2 (a ∷ K (A)) (b ∷ K (B)) where {\
 
 #define INSTS2_MONAD(Y) \
 INST_PURE(Y);\
-instance RunST (a ∷ K (Y)) where {runST st = case runRW# st of (# _, a #) → a};\
+instance RunST (a ∷ K (Y)) where {;\
+  interleaveIO# io = \ s -> let r = case io (noDuplicate# s) of {(# _, x #) -> x } in (# s, r #);\
+  runST st = case runRW# st of (# _, a #) → a};\
 instance Do (a ∷ K (Y)) where {\
   (st >> sta) s = sta (st s) ;\
   st >* f = \s → case st s of {(# ss, _ #) → f ss};\
