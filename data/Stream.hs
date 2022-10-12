@@ -34,6 +34,8 @@ class SMap r a b where
   stakeMap' ∷ Stream r a → (a → (# r | b #)) → Stream r b
   -- | Map over a stream or skip elements
   sfilterMap' ∷ Stream r a → (a → (# (##) | b #)) → Stream r b
+  smapM ∷ Stream r a → (a → Stream (##) b) → Stream r b
+  sthen ∷ Stream a r → (a → Stream b r) → Stream b r
 
 -- | Lazy right fold using the termination value as seed.
 type Fold1 ∷ ∀ {ra}. T ra → TC
@@ -62,6 +64,8 @@ class SFold a b where
   stakeWhile ∷ Stream a b → (b → (# (##) | a #)) → Stream a b
   -- | Halt with a default value after taking some number of elements.
   stake ∷ I → a → Stream a b → Stream a b
+  halt ∷ IO a → Stream a b
+  halt' ∷ a → Stream a b
 
 #define INST_SMAP(R,A,B)\
 instance SMap R A B where {\
@@ -90,6 +94,12 @@ instance SMap R A B where {\
   sfilterMap' s0 amb = go s0 where {;\
     go ∷ Stream R A → Stream R B;\
     go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, ss #) #) → case amb a of {(# | b #) → (# tt, (# | (# b, go ss #) #) #); (# (##) | #) → case go ss of Stream sss → sss tt}}};\
+  sthen s0 rs = go s0 where {;\
+    go ∷ Stream A R → Stream B R;\
+    go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → case rs r of Stream ss → ss tt}};\
+  smapM s0 abs = go s0 where {;\
+    go ∷ Stream R A → Stream R B;\
+    go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, ss #) #) → case abs a `sthen` (\(##) → go ss) of Stream sss → (sss tt) }};\
     }
 
 nums ∷ Stream (##) I
