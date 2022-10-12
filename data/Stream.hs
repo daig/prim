@@ -19,13 +19,13 @@ newtype Stream r a = Stream (IO (# r | (# a, Stream r a #) #))
 type SMap ∷ ∀ {rr} {ra} {rb}. T rr → T ra → T rb → TC
 class SMap r a b where
   -- | effectfully map over the values of a stream
-  smap ∷ Stream r a → (a → IO b) → Stream r b
+  smapIO ∷ Stream r a → (a → IO b) → Stream r b
   -- | map over the values of a stream
-  smap' ∷ Stream r a → (a → b) → Stream r b
+  smap ∷ Stream r a → (a → b) → Stream r b
   -- | effectfully map over the values of a stream with access to the index
-  ismap ∷ Stream r a → (I → a → IO b) → Stream r b
+  ismapIO ∷ Stream r a → (I → a → IO b) → Stream r b
   -- | map over the values of a stream with access to the index
-  ismap' ∷ Stream r a → (I → a → b) → Stream r b
+  ismap ∷ Stream r a → (I → a → b) → Stream r b
 -- | Map over the termination value of a stream
   rmap ∷ Stream a r → (a → b) → Stream b r
   -- | Generate a stream by iterating an effectful action on a seed
@@ -36,6 +36,8 @@ class SMap r a b where
   sfilterMap' ∷ Stream r a → (a → (# (##) | b #)) → Stream r b
   smapM ∷ Stream r a → (a → Stream (##) b) → Stream r b
   sthen ∷ Stream a r → (a → Stream b r) → Stream b r
+  sscan ∷ Stream r a → b → (b → a → b) → Stream r b
+  sscanIO ∷ Stream r a → b → (b → a → IO b) → Stream r b
 
 -- | Lazy right fold using the termination value as seed.
 type Fold1 ∷ ∀ {ra}. T ra → TC
@@ -55,10 +57,10 @@ class Fold1 a where
 
 type SFold ∷ ∀ {ra} {rb}. T ra → T rb → TC
 class SFold a b where
-  sfold    ∷ Stream (##) a → b → (    b → a →    b) → IO b
-  isfold   ∷ Stream (##) a → b → (I → b → a →    b) → IO b
-  sfoldIO  ∷ Stream (##) a → b → (    b → a → IO b) → IO b
-  isfoldIO ∷ Stream (##) a → b → (I → b → a → IO b) → IO b
+  sfold      ∷ Stream (##) a → b → (    b → a →    b) → IO b
+  isfold     ∷ Stream (##) a → b → (I → b → a →    b) → IO b
+  sfoldIO    ∷ Stream (##) a → b → (    b → a → IO b) → IO b
+  isfoldIO   ∷ Stream (##) a → b → (I → b → a → IO b) → IO b
   sfilter  ∷ Stream a b → (b → Bool) → Stream a b
   -- | Halt a stream early when the condition is met
   stakeWhile ∷ Stream a b → (b → (# (##) | a #)) → Stream a b
@@ -69,16 +71,16 @@ class SFold a b where
 
 #define INST_SMAP(R,A,B)\
 instance SMap R A B where {\
-  smap' s0 f = go s0 where {\
+  smap s0 f = go s0 where {\
     go ∷ Stream R A → Stream R B;\
     go (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → (# tt, case st of {(# r | #) → (# r | #); (# | (# a, s #) #) → (# | (# f a, go s #) #)} #)}};\
-  smap s0 f = go s0 where {;\
+  smapIO s0 f = go s0 where {;\
     go ∷ Stream R A → Stream R B;\
     go (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, s #) #) → case f a tt of {(# ttt, b #) → (# ttt, (# | (# b, go s #) #) #)}}}};\
-  ismap' s0 f = go 0# s0 where {\
+  ismap s0 f = go 0# s0 where {\
     go ∷ I → Stream R A → Stream R B;\
     go i (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → (# tt, case st of {(# r | #) → (# r | #); (# | (# a, s #) #) → (# | (# f i a, go (i + 1#) s #) #)} #)}};\
-  ismap s0 f = go 0# s0 where {;\
+  ismapIO s0 f = go 0# s0 where {;\
     go ∷ I → Stream R A → Stream R B;\
     go i (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, s #) #) → case f i a tt of {(# ttt, b #) → (# ttt, (# | (# b, go (i + 1#) s #) #) #)}}}};\
   rmap s0 f = go s0 where {\
@@ -100,6 +102,12 @@ instance SMap R A B where {\
   smapM s0 abs = go s0 where {;\
     go ∷ Stream R A → Stream R B;\
     go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, ss #) #) → case abs a `sthen` (\(##) → go ss) of Stream sss → (sss tt) }};\
+  sscan s0 b0 bab = go b0 s0 where {;\
+    go ∷ B → Stream R A → Stream R B;\
+    go b (Stream s) = Stream \ t → case s t of (# tt, st #) → (# tt, case st of {(# r | #) → (# r | #); (# | (# a, ss #) #) → let bb = bab b a in (# | (# bb, go bb ss #) #)} #)};\
+  sscanIO s0 b0 bab = go b0 s0 where {;\
+    go ∷ B → Stream R A → Stream R B;\
+    go b (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, ss #) #) → case bab b a tt of (# ttt, bb #) → (# ttt, (# | (# bb, go bb ss #) #) #)} };\
     }
 
 nums ∷ Stream (##) I
