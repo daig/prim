@@ -36,7 +36,9 @@ class SMap r a b where
   sfilterMap' ∷ Stream r a → (a → (# (##) | b #)) → Stream r b
   smapM ∷ Stream r a → (a → Stream (##) b) → Stream r b
   sthen ∷ Stream a r → (a → Stream b r) → Stream b r
+  -- | Accumulate and emit values of a stream
   sscan ∷ Stream r a → b → (b → a → b) → Stream r b
+  -- | Effectfully accumulate and emit values of a stream
   sscanIO ∷ Stream r a → b → (b → a → IO b) → Stream r b
 
 -- | Lazy right fold using the termination value as seed.
@@ -53,7 +55,12 @@ class Fold1 a where
   -- | perform an IO action with access to the index for each element of the stream
   iseach ∷ Stream (##) a → (I → a → IO_) → IO_
   -- | take from the front of a stream
-  stake' ∷ I → Stream (##) a → Stream (##) a
+  stakeN ∷ I → Stream (##) a → Stream (##) a
+  yield ∷ a → Stream (##) a
+  -- | Generate an infinite stream from repeatedly calling an IO action
+  sgenIO ∷ IO a → Stream (##) a
+  -- | Generate a stream from repeatedly calling an IO action that may halt
+  sgenIO' ∷ IO (# r | a #) → Stream r a
 
 type SFold ∷ ∀ {ra} {rb}. T ra → T rb → TC
 class SFold a b where
@@ -66,8 +73,7 @@ class SFold a b where
   stakeWhile ∷ Stream a b → (b → (# (##) | a #)) → Stream a b
   -- | Halt with a default value after taking some number of elements.
   stake ∷ I → a → Stream a b → Stream a b
-  halt ∷ IO a → Stream a b
-  halt' ∷ a → Stream a b
+  halt ∷ a → Stream a b
 
 #define INST_SMAP(R,A,B)\
 instance SMap R A B where {\
@@ -145,9 +151,14 @@ instance Fold1 A where {;\
   iseach s0 io = go 0# s0 where {;\
     go ∷ I → Stream (##) A → IO_;\
     go i (Stream st) = \t → case st t of {(# tt, s #) → case s of {(# (##) | #) → tt; (# | (# x, ss #) #) → case io i x tt of ttt → go i ss ttt}}};\
-  stake' n s0 = go 0# s0 where {;\
+  stakeN n s0 = go 0# s0 where {;\
     go ∷ I → Stream (##) A → Stream (##) A;\
     go i (Stream s) = Stream \ t → if i == n then (# t, (# (##) | #) #) else case s t of {(# tt, st #) → case st of {(# (##) | #) → (# tt, (# (##) | #) #); (# | (# a, ss #) #) → (# tt, (# | (# a, go (i + 1#) ss #) #) #) }}};\
+  yield a = Stream \ t → (# t, (# | (# a, halt (##) #) #) #);\
+  sgenIO io = go where {;\
+    go = Stream \ t → case io t of (# tt, a #) → (# tt, (# | (# a, go #) #) #)};\
+  sgenIO' io = go where {;\
+    go = Stream \ t → case io t of (# tt, x #) → (# tt, case x of {(# r | #) → (# r | #); (# | a #) → (# | (# a, go #) #)} #)};\
     }
 
 printI i = case print (GHC.I# i) of GHC.IO io → \t → case io t of (# tt, _ #) → tt
@@ -175,6 +186,7 @@ instance SFold A B where {\
   stake n r s0 = go 0# s0 where {;\
     go ∷ I → Stream A B → Stream A B;\
     go i (Stream s) = Stream \ t → if i == n then (# t, (# r | #) #) else case s t of {(# tt, st #) → case st of {(# rr | #) → (# tt, (# rr | #) #); (# | (# a, ss #) #) → (# tt, (# | (# a, go (i + 1#) ss #) #) #) }}};\
+  halt r = Stream \ t → (# t, (# r | #) #);\
     }
 
 --INST_SFOLD(I,U)
