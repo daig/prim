@@ -39,6 +39,7 @@ class SFold a b where
   isfold   ∷ Stream (##) a → b → (I → b → a →    b) → IO b
   sfoldIO  ∷ Stream (##) a → b → (    b → a → IO b) → IO b
   isfoldIO ∷ Stream (##) a → b → (I → b → a → IO b) → IO b
+  sfilter  ∷ Stream a b → (b → Bool) → Stream a b
 
 #define INST_SMAP(R,A,B)\
 instance SMap R A B where {\
@@ -117,7 +118,11 @@ instance SFold A B where {\
     go b (Stream s) = \t → case s t of {(# tt, st #) → case st of {(# r | #) → (# tt, b #); (# | (# a, ss #) #) → case bab b a tt of {(# ttt, bb #) → go bb ss tt}}}};\
   isfoldIO s0 b0 ibab = go 0# b0 s0 where {;\
     go ∷ I → B → Stream (##) A → IO B;\
-    go i b (Stream s) = \t → case s t of {(# tt, st #) → case st of {(# r | #) → (# tt, b #); (# | (# a, ss #) #) → case ibab i b a tt of {(# ttt, bb #) → go i bb ss tt}}}}}
+    go i b (Stream s) = \t → case s t of {(# tt, st #) → case st of {(# r | #) → (# tt, b #); (# | (# a, ss #) #) → case ibab i b a tt of {(# ttt, bb #) → go i bb ss tt}}}};\
+  sfilter s0 p = go s0 where {;\
+    go ∷ Stream A B → Stream A B;\
+    go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# b, ss #) #) → if p b then (# tt, (# | (# b, go ss #) #) #) else case go ss of Stream sss → sss tt} ;\
+    }}
 
 INST_SFOLD(I,U)
 
