@@ -18,20 +18,38 @@ newtype Stream r a = Stream (IO (# r | (# a, Stream r a #) #))
 -- | Map over the elements of a 'Stream'
 type SMap ∷ ∀ {rr} {ra} {rb}. T rr → T ra → T rb → TC
 class SMap r a b where
+  -- | effectfully map over the values of a stream
   smap ∷ Stream r a → (a → IO b) → Stream r b
+  -- | map over the values of a stream
   smap' ∷ Stream r a → (a → b) → Stream r b
+  -- | effectfully map over the values of a stream with access to the index
   ismap ∷ Stream r a → (I → a → IO b) → Stream r b
+  -- | map over the values of a stream with access to the index
   ismap' ∷ Stream r a → (I → a → b) → Stream r b
 -- | Map over the termination value of a stream
   rmap ∷ Stream a r → (a → b) → Stream b r
+  -- | Generate a stream by iterating an effectful action on a seed
   sgen ∷ (a → IO (# r | (# b, a #) #)) → a → Stream r b
+  -- | Map over a stream or halt early
+  stakeMap' ∷ Stream r a → (a → (# r | b #)) → Stream r b
+  -- | Map over a stream or skip elements
+  sfilterMap' ∷ Stream r a → (a → (# (##) | b #)) → Stream r b
+
 -- | Lazy right fold using the termination value as seed.
 type Fold1 ∷ ∀ {ra}. T ra → TC
 class Fold1 a where
+  -- | lazily fold over a stream, using the termination value as the base.
+  -- eg to build a list
   fold1 ∷ Stream r a → (a → r → r) → IO r
+  -- | lazily fold over a stream with access to the index, using the termination value as the base.
+  -- eg to build a list
   ifold1 ∷ Stream r a → (I → a → r → r) → IO r
+  -- | perform an IO action for each element of the stream
   seach ∷ Stream (##) a → (a → IO_) → IO_
+  -- | perform an IO action with access to the index for each element of the stream
   iseach ∷ Stream (##) a → (I → a → IO_) → IO_
+  -- | take from the front of a stream
+  stake' ∷ I → Stream (##) a → Stream (##) a
 
 type SFold ∷ ∀ {ra} {rb}. T ra → T rb → TC
 class SFold a b where
@@ -40,6 +58,10 @@ class SFold a b where
   sfoldIO  ∷ Stream (##) a → b → (    b → a → IO b) → IO b
   isfoldIO ∷ Stream (##) a → b → (I → b → a → IO b) → IO b
   sfilter  ∷ Stream a b → (b → Bool) → Stream a b
+  -- | Halt a stream early when the condition is met
+  stakeWhile ∷ Stream a b → (b → (# (##) | a #)) → Stream a b
+  -- | Halt with a default value after taking some number of elements.
+  stake ∷ I → a → Stream a b → Stream a b
 
 #define INST_SMAP(R,A,B)\
 instance SMap R A B where {\
@@ -61,7 +83,14 @@ instance SMap R A B where {\
   sgen ∷ (A → IO (# R | (# B, A #) #)) → A → Stream R B;\
   sgen step = go where {;\
     go ∷ A → Stream R B;\
-    go i = Stream \ t → case step i t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# x, ss #) #) → (# tt, (# | (# x, go ss #) #) #)}}}}
+    go i = Stream \ t → case step i t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# x, ss #) #) → (# tt, (# | (# x, go ss #) #) #)}}};\
+  stakeMap' s0 arb = go s0 where {;\
+    go ∷ Stream R A → Stream R B;\
+    go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, ss #) #) → (# tt, case arb a of {(# r | #) → (# r | #); (# | b #) → (# | (# b, go ss #) #)} #)}};\
+  sfilterMap' s0 amb = go s0 where {;\
+    go ∷ Stream R A → Stream R B;\
+    go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, ss #) #) → case amb a of {(# | b #) → (# tt, (# | (# b, go ss #) #) #); (# (##) | #) → case go ss of Stream sss → sss tt}}};\
+    }
 
 INST_SMAP((##),I,I)
 
@@ -70,7 +99,6 @@ nums = (`sgen` 0#) \ i → \t → case printI i t of tt → (# tt, if i > 10# th
 
 allnums ∷ Stream (##) I
 allnums = (`sgen` 0#) \ i → \t → (# t, (# | (# i, i + 1# #) #) #)
-
 
 
 {-
@@ -100,7 +128,11 @@ instance Fold1 A where {;\
     go (Stream st) = \t → case st t of {(# tt, s #) → case s of {(# (##) | #) → tt; (# | (# x, ss #) #) → case io x tt of ttt → go ss ttt}}};\
   iseach s0 io = go 0# s0 where {;\
     go ∷ I → Stream (##) A → IO_;\
-    go i (Stream st) = \t → case st t of {(# tt, s #) → case s of {(# (##) | #) → tt; (# | (# x, ss #) #) → case io i x tt of ttt → go i ss ttt}}}}
+    go i (Stream st) = \t → case st t of {(# tt, s #) → case s of {(# (##) | #) → tt; (# | (# x, ss #) #) → case io i x tt of ttt → go i ss ttt}}};\
+  stake' n s0 = go 0# s0 where {;\
+    go ∷ I → Stream (##) A → Stream (##) A;\
+    go i (Stream s) = Stream \ t → if i == n then (# t, (# (##) | #) #) else case s t of {(# tt, st #) → case st of {(# (##) | #) → (# tt, (# (##) | #) #); (# | (# a, ss #) #) → (# tt, (# | (# a, go (i + 1#) ss #) #) #) }}};\
+    }
 
 INST_FOLD1(I)
 printI i = case print (GHC.I# i) of GHC.IO io → \t → case io t of (# tt, _ #) → tt
@@ -121,8 +153,14 @@ instance SFold A B where {\
     go i b (Stream s) = \t → case s t of {(# tt, st #) → case st of {(# r | #) → (# tt, b #); (# | (# a, ss #) #) → case ibab i b a tt of {(# ttt, bb #) → go i bb ss tt}}}};\
   sfilter s0 p = go s0 where {;\
     go ∷ Stream A B → Stream A B;\
-    go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# b, ss #) #) → if p b then (# tt, (# | (# b, go ss #) #) #) else case go ss of Stream sss → sss tt} ;\
-    }}
+    go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# b, ss #) #) → if p b then (# tt, (# | (# b, go ss #) #) #) else case go ss of Stream sss → sss tt}};\
+  stakeWhile s0 p = go s0 where {;\
+    go ∷ Stream A B → Stream A B;\
+    go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# b, ss #) #) → (# tt, case p b of {(# (##) | #) → (# | (# b, go ss #) #); (# | r #) → (# r | #)} #)}};\
+  stake n r s0 = go 0# s0 where {;\
+    go ∷ I → Stream A B → Stream A B;\
+    go i (Stream s) = Stream \ t → if i == n then (# t, (# r | #) #) else case s t of {(# tt, st #) → case st of {(# rr | #) → (# tt, (# rr | #) #); (# | (# a, ss #) #) → (# tt, (# | (# a, go (i + 1#) ss #) #) #) }}};\
+    }
 
 INST_SFOLD(I,U)
 
