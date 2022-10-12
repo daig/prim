@@ -69,13 +69,13 @@ instance SMap R A B where {\
     go ∷ Stream R A → Stream R B;\
     go (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → (# tt, case st of {(# r | #) → (# r | #); (# | (# a, s #) #) → (# | (# f a, go s #) #)} #)}};\
   smap s0 f = go s0 where {;\
-    go ∷ Stream (##) A → Stream (##) B;\
+    go ∷ Stream R A → Stream R B;\
     go (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, s #) #) → case f a tt of {(# ttt, b #) → (# ttt, (# | (# b, go s #) #) #)}}}};\
   ismap' s0 f = go 0# s0 where {\
     go ∷ I → Stream R A → Stream R B;\
     go i (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → (# tt, case st of {(# r | #) → (# r | #); (# | (# a, s #) #) → (# | (# f i a, go (i + 1#) s #) #)} #)}};\
   ismap s0 f = go 0# s0 where {;\
-    go ∷ I → Stream (##) A → Stream (##) B;\
+    go ∷ I → Stream R A → Stream R B;\
     go i (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, s #) #) → case f i a tt of {(# ttt, b #) → (# ttt, (# | (# b, go (i + 1#) s #) #) #)}}}};\
   rmap s0 f = go s0 where {\
     go ∷ Stream A R → Stream B R;\
@@ -91,8 +91,6 @@ instance SMap R A B where {\
     go ∷ Stream R A → Stream R B;\
     go (Stream s) = Stream \ t → case s t of (# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, ss #) #) → case amb a of {(# | b #) → (# tt, (# | (# b, go ss #) #) #); (# (##) | #) → case go ss of Stream sss → sss tt}}};\
     }
-
-INST_SMAP((##),I,I)
 
 nums ∷ Stream (##) I
 nums = (`sgen` 0#) \ i → \t → case printI i t of tt → (# tt, if i > 10# then (# (##) | #) else (# | (# i, i + 1# #) #) #)
@@ -134,7 +132,6 @@ instance Fold1 A where {;\
     go i (Stream s) = Stream \ t → if i == n then (# t, (# (##) | #) #) else case s t of {(# tt, st #) → case st of {(# (##) | #) → (# tt, (# (##) | #) #); (# | (# a, ss #) #) → (# tt, (# | (# a, go (i + 1#) ss #) #) #) }}};\
     }
 
-INST_FOLD1(I)
 printI i = case print (GHC.I# i) of GHC.IO io → \t → case io t of (# tt, _ #) → tt
 
 #define INST_SFOLD(A,B)\
@@ -162,42 +159,26 @@ instance SFold A B where {\
     go i (Stream s) = Stream \ t → if i == n then (# t, (# r | #) #) else case s t of {(# tt, st #) → case st of {(# rr | #) → (# tt, (# rr | #) #); (# | (# a, ss #) #) → (# tt, (# | (# a, go (i + 1#) ss #) #) #) }}};\
     }
 
-INST_SFOLD(I,U)
-
-#define INST_STREAM3(R,A,B)\
-instance Pure b ⇒ Do2 (a ∷ K (# A, Stream R B #)) (b ∷ K (B)) where {;\
-  st >% f = st >>= \a → return (f a);\
-  f %< st = st >>= \a → return (f a);\
-  st >>= f = \s → case st s of {(# ss, a #) → f a ss};\
-  f =<< st = \s → case st s of {(# ss, a #) → f a ss}};\
-instance Pure b ⇒ Do2 (a ∷ K (# A, Stream R A #)) (b ∷ K (# B, Stream R B #)) where {;\
-  st >% f = st >>= \a → return (f a);\
-  f %< st = st >>= \a → return (f a);\
-  st >>= f = \s → case st s of {(# ss, a #) → f a ss};\
-  f =<< st = \s → case st s of {(# ss, a #) → f a ss}};\
-INST_SMAP(R,A,B);\
-
+--INST_SFOLD(I,U)
 
 #define INST_STREAM2(R,A)\
-INST_STREAM3(R,A,U);\
-INST_STREAM3(R,A,U1);\
-INST_STREAM3(R,A,U2);\
-INST_STREAM3(R,A,U4);\
-INST_STREAM3(R,A,U8);\
-INST_STREAM3(R,A,I);\
-INST_STREAM3(R,A,I1);\
-INST_STREAM3(R,A,I2);\
-INST_STREAM3(R,A,I4);\
-INST_STREAM3(R,A,I8);\
-INST_STREAM3(R,A,F4);\
-INST_STREAM3(R,A,F8);\
-INST_STREAM3(R,A,P#);\
-INST_STREAM3(R,A,ByteArray#);\
-INST_STREAM3(R,A,());\
-INST_STREAM3(R,A,(##));\
-INST_PURE((Stream R A));\
-INST_SFOLD(A,R);\
-INST_RMAP(R,A)
+INST_SMAP(R,A,U);\
+INST_SMAP(R,A,U1);\
+INST_SMAP(R,A,U2);\
+INST_SMAP(R,A,U4);\
+INST_SMAP(R,A,U8);\
+INST_SMAP(R,A,I);\
+INST_SMAP(R,A,I1);\
+INST_SMAP(R,A,I2);\
+INST_SMAP(R,A,I4);\
+INST_SMAP(R,A,I8);\
+INST_SMAP(R,A,F4);\
+INST_SMAP(R,A,F8);\
+INST_SMAP(R,A,P#);\
+INST_SMAP(R,A,ByteArray#);\
+INST_SMAP(R,A,());\
+INST_SMAP(R,A,(##));\
+INST_SFOLD(A,R)
 
 #define INST_DO2(A,B)\
 instance Pure b ⇒ Do2 (a ∷ K A) (b ∷ K B) where {;\
@@ -236,18 +217,16 @@ INST_STREAM2(R,P#);\
 INST_STREAM2(R,ByteArray#);\
 INST_STREAM2(R,());\
 INST_STREAM2(R,(##));\
-INST_FOLD1(R);\
-INST_EACH(R)
+INST_FOLD1(R)
 
-{-
 INST_STREAM((##))
-INST_STREAM(())
 INST_STREAM(U)
+INST_STREAM(I)
+INST_STREAM(())
 INST_STREAM(U1)
 INST_STREAM(U2)
 INST_STREAM(U4)
 INST_STREAM(U8)
-INST_STREAM(I)
 INST_STREAM(I1)
 INST_STREAM(I2)
 INST_STREAM(I4)
@@ -256,4 +235,3 @@ INST_STREAM(F4)
 INST_STREAM(F8)
 INST_STREAM(P#)
 INST_STREAM(ByteArray#)
--}
