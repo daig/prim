@@ -23,12 +23,18 @@ flags:
     description: Generate lots of instances for Lift2
     manual: true
     default: false
+  sized-insts:
+    description: Generate lots of instances for sized numeric types
+    manual: true
+    default: false
 
 when:
   - condition: flag(tuple-insts)
     cpp-options: -DTUPLE_INSTS
   - condition: flag(lift-insts)
     cpp-options: -DLIFT_INSTS
+  - condition: flag(sized-insts)
+    cpp-options: -DSIZED_INSTS
 
 default-extensions:
   - MagicHash

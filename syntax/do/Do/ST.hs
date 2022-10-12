@@ -34,7 +34,7 @@ class Do (a ∷ T ra) where
 (<>) ∷ ST_ s → ST_ s → ST_ s
 st <> sta = \s → sta (st s)
 
-infixl 1 >>=, >>, >*, >>*, >%
+infixl 1 >>=, >>, >*, >>*, >%, <>
 infixr 1 =<<, *<<, %<
 
 #define INST_MONAD(A,B) \
@@ -68,6 +68,32 @@ INST_MONAD(Y,U8); \
 INST_MONAD(Y,Addr#); \
 INST_MONAD(Y,F4); \
 INST_MONAD(Y,F8)
+
+#define INST_DO_TUP(A)\
+instance Do (a ∷ K ((# A, () #))) where {\
+  (st >> sta) s = sta (st s) ;\
+  st >* f = \s → case st s of {(# ss, _ #) → f ss};\
+  st >>* f = \s → case st s of {(# ss, a #) → f a ss};\
+  f *<< st = \s → case st s of {(# ss, a #) → f a ss}}
+
+INST_DO_TUP((##))
+INST_DO_TUP(ByteArray#)
+INST_DO_TUP(I)
+INST_DO_TUP(I1)
+INST_DO_TUP(I2)
+INST_DO_TUP(I4)
+INST_DO_TUP(I8)
+INST_DO_TUP(U)
+INST_DO_TUP(U1)
+INST_DO_TUP(U2)
+INST_DO_TUP(U4)
+INST_DO_TUP(U8)
+INST_DO_TUP(Addr#)
+INST_DO_TUP(F4)
+INST_DO_TUP(F8)
+INST_DO_TUP(())
+
+
 
 INSTS2_MONAD((##))
 INSTS2_MONAD(())
