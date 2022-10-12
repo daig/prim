@@ -9,13 +9,11 @@ import GHC.Magic
 import System.IO (print)
 import GHC.Types qualified as GHC
 
-type Stream ∷ ∀ {rr} {ra}. T rr → T ra → T (SumRep '[rr,BoxedRep Lifted])
-newtype Stream r a = Stream ((# r | IO (# a, Stream r a #) #))
+type Stream ∷ ∀ {rr} {ra}. T rr → T ra → ★
+newtype Stream r a = Stream (IO (# r | (# a, Stream r a #) #))
 
 --sgen ∷ ∀ s r a. (Do2 (# r | (# a, s #) #) (Stream r a), Do2 (Stream r a) (# a, Stream r a #))
 --     ⇒ (s → IO (# r | (# a, s #) #)) → s → IO (Stream r a)
-
-
 
 -- | Map over the elements of a 'Stream'
 type SMap ∷ ∀ {rr} {ra} {rb}. T rr → T ra → T rb → TC
@@ -26,12 +24,14 @@ class SMap r a b where
   ismap' ∷ Stream r a → (I → a → b) → Stream r b
 -- | Map over the termination value of a stream
   rmap ∷ Stream a r → (a → b) → Stream b r
-  sgen ∷ (a → IO (# r | (# b, a #) #)) → a → IO (Stream r b)
+  sgen ∷ (a → IO (# r | (# b, a #) #)) → a → Stream r b
 -- | Lazy right fold using the termination value as seed.
 type Fold1 ∷ ∀ {ra}. T ra → TC
 class Fold1 a where
   fold1 ∷ Stream r a → (a → r → r) → IO r
   ifold1 ∷ Stream r a → (I → a → r → r) → IO r
+  seach ∷ Stream (##) a → (a → IO_) → IO_
+  iseach ∷ Stream (##) a → (I → a → IO_) → IO_
 
 type SFold ∷ ∀ {ra} {rb}. T ra → T rb → TC
 class SFold a b where
@@ -42,82 +42,84 @@ class SFold a b where
 
 #define INST_SMAP(R,A,B)\
 instance SMap R A B where {\
-  smap s0 f = go s0 where {\
-    go ∷ Stream R A → Stream R B;\
-    go (Stream (# r | #)) = Stream (# r | #);\
-    go (Stream (# | st #)) = Stream (# | st' #) where {\
-      st' t = case st t of {(# tt, (# a, s #) #) → case f a tt of (# ttt, b #) → (# ttt, (# b, go s #) #)}}};\
-  ismap s0 f = go 0# s0 where {\
-    go ∷ I → Stream R A → Stream R B;\
-    go _ (Stream (# r | #)) = Stream (# r | #);\
-    go i (Stream (# | st #)) = Stream (# | st' #) where {\
-      st' t = case st t of (# tt, (# a, s #) #) → case f i a tt of {(# ttt, b #) → (# ttt, (# b, go (i + 1#) s #) #) } } };\
   smap' s0 f = go s0 where {\
     go ∷ Stream R A → Stream R B;\
-    go (Stream (# r | #)) = Stream (# r | #);\
-    go (Stream (# | st #)) = Stream (# | st' #) where {\
-      st' t = case st t of {(# tt, (# a, s #) #) → (# tt, (# f a, go s #) #)}}};\
+    go (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → (# tt, case st of {(# r | #) → (# r | #); (# | (# a, s #) #) → (# | (# f a, go s #) #)} #)}};\
+  smap s0 f = go s0 where {;\
+    go ∷ Stream (##) A → Stream (##) B;\
+    go (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, s #) #) → case f a tt of {(# ttt, b #) → (# ttt, (# | (# b, go s #) #) #)}}}};\
   ismap' s0 f = go 0# s0 where {\
     go ∷ I → Stream R A → Stream R B;\
-    go _ (Stream (# r | #)) = Stream (# r | #);\
-    go i (Stream (# | st #)) = Stream (# | st' #) where {\
-      st' t = case st t of {(# tt, (# a, s #) #) → (# tt, (# f i a, go (i + 1#) s #) #)}}};\
+    go i (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → (# tt, case st of {(# r | #) → (# r | #); (# | (# a, s #) #) → (# | (# f i a, go (i + 1#) s #) #)} #)}};\
+  ismap s0 f = go 0# s0 where {;\
+    go ∷ I → Stream (##) A → Stream (##) B;\
+    go i (Stream s0) = Stream \ t → case s0 t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# a, s #) #) → case f i a tt of {(# ttt, b #) → (# ttt, (# | (# b, go (i + 1#) s #) #) #)}}}};\
   rmap s0 f = go s0 where {\
     go ∷ Stream A R → Stream B R;\
-    go (Stream (# r | #)) = Stream (# f r | #);\
-    go (Stream (# | st #)) = Stream (# | \t → case st t of (# tt, (# x, s #) #) → (# tt, (# x, go s #) #)  #)};\
-    sgen ∷ (A → IO (# R | (# B, A #) #)) → A → IO (Stream R B);\
-    sgen step = go where {;\
-      go ∷ A → IO (Stream R B);\
-      go s = \t → case step s t of {;\
-        (# tt, (# r | #) #) → (# tt, Stream (# r | #) #);\
-        (# tt, (# | (# a, s #) #) #) → (# tt, Stream (# | \t' → case go s t' of {(# tt', st #) → (# tt', (# a, st #) #)} #)  #)}};\
-    }
+    go (Stream s) = Stream \ t → case s t of (# tt, st #) → (# tt, case st of {(# r | #) → (# f r | #); (# | (# x, ss #) #) → (# | (# x, go ss #) #)} #)};\
+  sgen ∷ (A → IO (# R | (# B, A #) #)) → A → Stream R B;\
+  sgen step = go where {;\
+    go ∷ A → Stream R B;\
+    go i = Stream \ t → case step i t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# x, ss #) #) → (# tt, (# | (# x, go ss #) #) #)}}}}
 
 INST_SMAP((##),I,I)
 
-nums :: _
-nums = (`sgen` 0#) \ i → \t → case printI i t of (# tt, () #) → (# t, if i > 10# then (# (##) | #) else (# | (# i, i + 1# #) #) #)
+nums ∷ Stream (##) I
+nums = (`sgen` 0#) \ i → \t → case printI i t of tt → (# tt, if i > 10# then (# (##) | #) else (# | (# i, i + 1# #) #) #)
 
---foo = each nums \ x → \s → s
+allnums ∷ Stream (##) I
+allnums = (`sgen` 0#) \ i → \t → (# t, (# | (# i, i + 1# #) #) #)
 
 
+
+{-
+                                                       -}
+--    go ∷ I → Stream r U → IO r
+    {-
+    go i (Stream (# r | #)) = return r
+    go i (Stream (# | st #)) = interleaveIO# \t → case st t of {(# tt, (# a, s #) #) → case go (i + 1#) s tt of {(# ttt, r #) → (# ttt, c i a r #)}}}}
+    -}
 
 #define INST_FOLD1(A)\
 instance Fold1 A where {;\
   fold1 ∷ ∀ r. Stream r A → (A → r → r) → IO r;\
   fold1 s0 c = go s0 where {;\
     go ∷ Stream r A → IO r;\
-    go (Stream (# r | #)) = return r;\
-    go (Stream (# | st #)) = interleaveIO# \t → case st t of {(# tt, (# a, s #) #) → case go s tt of {(# ttt, r #) → (# ttt, c a r #)}}};\
+    go (Stream s) = interleaveIO# \t → case s t of (# tt, st #) → case st of {\
+                                                     (# r | #) → (# tt, r #);\
+                                                     (# | (# a, ss #) #) → case go ss tt of (# ttt, r #) → (# ttt, c a r #)}};\
   ifold1 ∷ ∀ r. Stream r A → (I → A → r → r) → IO r;\
   ifold1 s0 c = go 0# s0 where {;\
     go ∷ I → Stream r A → IO r;\
-    go i (Stream (# r | #)) = return r;\
-    go i (Stream (# | st #)) = interleaveIO# \t → case st t of {(# tt, (# a, s #) #) → case go (i + 1#) s tt of {(# ttt, r #) → (# ttt, c i a r #)}}}}
+    go i (Stream s) = interleaveIO# \t → case s t of (# tt, st #) → case st of {;\
+                                                       (# r | #) → (# tt, r #);\
+                                                       (# | (# a, ss #) #) → case go (i + 1#) ss tt of (# ttt, r #) → (# ttt, c i a r #)}};\
+  seach s0 io = go s0 where {;\
+    go ∷ Stream (##) A → IO_;\
+    go (Stream st) = \t → case st t of {(# tt, s #) → case s of {(# (##) | #) → tt; (# | (# x, ss #) #) → case io x tt of ttt → go ss ttt}}};\
+  iseach s0 io = go 0# s0 where {;\
+    go ∷ I → Stream (##) A → IO_;\
+    go i (Stream st) = \t → case st t of {(# tt, s #) → case s of {(# (##) | #) → tt; (# | (# x, ss #) #) → case io i x tt of ttt → go i ss ttt}}}}
 
 INST_FOLD1(I)
-printI i = case print (GHC.I# i) of GHC.IO io → io
+printI i = case print (GHC.I# i) of GHC.IO io → \t → case io t of (# tt, _ #) → tt
 
 #define INST_SFOLD(A,B)\
 instance SFold A B where {\
   sfold s0 b0 bab = go b0 s0 where {;\
     go ∷ B → Stream (##) A → IO B;\
-    go b (Stream (# (##) | #)) = return b;\
-    go b (Stream (# | st #)) = \t → case st t of {(# tt, (# a, s #) #) → go (bab b a) s tt}};\
+    go b (Stream s) = \t → case s t of {(# tt, st #) → case st of {(# r | #) → (# tt, b #); (# | (# a, ss #) #) → go (bab b a) ss tt}}};\
   isfold s0 b0 ibab = go 0# b0 s0 where {;\
     go ∷ I → B → Stream (##) A → IO B;\
-    go i b (Stream (# (##) | #)) = return b;\
-    go i b (Stream (# | st #)) = \t → case st t of {(# tt, (# a, s #) #) → go (i + 1#) (ibab i b a) s tt}};\
+    go i b (Stream s) = \t → case s t of {(# tt, st #) → case st of {(# r | #) → (# tt, b #); (# | (# a, ss #) #) → go (i + 1#) (ibab i b a) ss tt}}};\
   sfoldIO s0 b0 bab = go b0 s0 where {;\
     go ∷ B → Stream (##) A → IO B;\
-    go b (Stream (# (##) | #)) = return b;\
-    go b (Stream (# | st #)) = \t → case st t of {(# tt, (# a, s #) #) → case bab b a tt of {(# ttt, bb #) → go bb s ttt}}};\
+    go b (Stream s) = \t → case s t of {(# tt, st #) → case st of {(# r | #) → (# tt, b #); (# | (# a, ss #) #) → case bab b a tt of {(# ttt, bb #) → go bb ss tt}}}};\
   isfoldIO s0 b0 ibab = go 0# b0 s0 where {;\
     go ∷ I → B → Stream (##) A → IO B;\
-    go i b (Stream (# (##) | #)) = return b;\
-    go i b (Stream (# | st #)) = \t → case st t of {(# tt, (# a, s #) #) → case ibab i b a tt of {(# ttt, bb #) → go (i + 1#) bb s ttt}}}}
+    go i b (Stream s) = \t → case s t of {(# tt, st #) → case st of {(# r | #) → (# tt, b #); (# | (# a, ss #) #) → case ibab i b a tt of {(# ttt, bb #) → go i bb ss tt}}}}}
 
+INST_SFOLD(I,U)
 
 #define INST_STREAM3(R,A,B)\
 instance Pure b ⇒ Do2 (a ∷ K (# A, Stream R B #)) (b ∷ K (B)) where {;\
@@ -132,22 +134,6 @@ instance Pure b ⇒ Do2 (a ∷ K (# A, Stream R A #)) (b ∷ K (# B, Stream R B 
   f =<< st = \s → case st s of {(# ss, a #) → f a ss}};\
 INST_SMAP(R,A,B);\
 
-
-{-
-instance FoldIO RealWorld (Stream R) A B where {;\
-  foldIO s0 b0 io = go b0 s0 where {;\
-    go ∷ B → Stream R A → IO B;\
-    go b0 (Stream st) = ST.do {;\
-      (# x, s #) ← st;\
-      b ← io b0 x;\
-      go b s}};\
-  ifoldIO s0 b0 io = go 0# b0 s0 where {;\
-    go ∷ I → B → Stream R A → IO B;\
-    go i b0 (Stream st) = ST.do {;\
-      (# x, s #) ← st;\
-      b ← io i b0 x;\
-      go (i +1#) b s}}}
--}
 
 #define INST_STREAM2(R,A)\
 INST_STREAM3(R,A,U);\
@@ -209,18 +195,6 @@ INST_STREAM2(R,());\
 INST_STREAM2(R,(##));\
 INST_FOLD1(R);\
 INST_EACH(R)
-
-#define INST_EACH(R)\
-instance Each RealWorld (Stream (##)) R where {;\
-  each s0 io = go s0 where {;\
-    go ∷ Stream (##) R → IO_;\
-    go (Stream st) = case st of {(# (##) | #) → \s→s; (# | st #) → st >>* \(# x, s #) → io x <> go s}};\
-  ieach s0 io = go 0# s0 where {;\
-    go ∷ I → Stream (##) R → IO_;\
-    go i (Stream st) = case st of {(# (##) | #) → \s→s; (# | st #) → st >>* \(# x, s #) → io i x <> go (i + 1#) s}}}
-
-INST_EACH(I)
-
 
 {-
 INST_STREAM((##))
