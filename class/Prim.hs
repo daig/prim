@@ -11,20 +11,20 @@ type family Elt a where
   Elt (MutableArray# s) = OK
   Elt SmallArray# = OK
   Elt (SmallMutableArray# s) = OK
-  Elt A' = Prim
-  Elt A'# = Prim
-  Elt A'## = Prim
-  Elt A'_ = Prim
-  Elt A'_# = Prim
-  Elt A'_## = Prim
-  Elt (A_ s) = Prim
-  Elt (A_# s) = Prim
-  Elt (A_## s) = Prim
+  Elt A_ = Prim
+  Elt A_# = Prim
+  Elt A_## = Prim
+  Elt Pinned_ = Prim
+  Elt Pinned_# = Prim
+  Elt Pinned_## = Prim
+  Elt (Pinned s) = Prim
+  Elt (Pinned# s) = Prim
+  Elt (Pinned## s) = Prim
   Elt (A s) = Prim
   Elt (A# s) = Prim
   Elt (A## s) = Prim
-  Elt P' = Prim
-  Elt P'## = Prim
+  Elt P_ = Prim
+  Elt P_## = Prim
   Elt (P s) = Prim
   Elt (P## s) = Prim
   Elt (MutVar# s) = OK
@@ -37,7 +37,7 @@ type Prim ∷ forall {r}. T r → TC
 class Prim (x ∷ T r) where
   size ∷ I {- ^ # elements -} → I {- ^ size in bytes -}
   align ∷ I → I
-  (!#) ∷ A' U1 → I {- ^ index in bytes -} → x
+  (!#) ∷ A_ U1 → I {- ^ index in bytes -} → x
   (!!#) ∷ A s U1 → I {- ^ index in # bytes -} → ST s x
   write# ∷ A s U1 → I {- ^ index in # bytes -} → x → ST_ s
 

@@ -15,9 +15,9 @@ class Buffer a where ( # ) ∷ a x → I → a # x
 
 infixl 9 #
 
-instance Buffer A' where ( # ) x i = Bytes'_Off# (# coerce x, i #)
-instance Buffer A'# where ( # ) (Bytes'_Off# (# x, i #)) n = Bytes'_Off_Len# (# coerce x, i, n #)
-instance Buffer P' where ( # ) x i = P'_Len# (# coerce x, i #)
+instance Buffer A_ where ( # ) x i = Bytes'_Off# (# coerce x, i #)
+instance Buffer A_# where ( # ) (Bytes'_Off# (# x, i #)) n = Bytes'_Off_Len# (# coerce x, i, n #)
+instance Buffer P_ where ( # ) x i = P__Len# (# coerce x, i #)
 instance Buffer (A s) where ( # ) x i = Bytes_Off# (# coerce x, i #)
 instance Buffer (A# s) where ( # ) (Bytes_Off# (# x, i #)) n = Bytes_Off_Len# (# coerce x, i, n #)
 instance Buffer (P s) where ( # ) x i = P_Len# (# coerce x, i #)

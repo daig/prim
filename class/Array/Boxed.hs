@@ -2,7 +2,7 @@
 module Array.Boxed where
 import Cast
 
-type BoxedArray ∷ ∀ {l}. (T# l → T_) → TC
+type BoxedArray ∷ ∀ {l}. (T# l → T_A) → TC
 class BoxedArray a where
 
     -- | Read from the specified index of a the array
@@ -26,12 +26,12 @@ class BoxedArray a where
          → x {- ^ expected old value -}
          → x {- ^ new value -}
          → ST s (# x | x #) {- ^ @(# newValue | #)@ if successful, or @(# | oldValue #)@ if not -} 
-instance BoxedArray SmallArray# where
+instance BoxedArray Ar_ where
   (!~) = indexSmallArray#
   cas' ∷ ∀ x s. M SmallArray# s x
        → I → x → x → ST s (# x | x #)
   cas' (coerce → m) i x0 x1 = cast (coerce @_ @(ST' s x) (casSmallArray# m i x0 x1))
-instance BoxedArray Array# where
+instance BoxedArray AR_ where
   (!~) = indexArray#
   cas' ∷ ∀ x s. M Array# s x
        → I → x → x → ST s (# x | x #)

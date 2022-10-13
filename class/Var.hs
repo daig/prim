@@ -28,10 +28,10 @@ instance  Read (TY) A# where { read( Bytes_Off# (# a, i #)) = READ_REF# a i } ;\
 instance (Coercible x TY) ⇒ Read (x) P where { read = coerce (`READ#` 0#)}
 
 -- | Set the entire slice
-instance Index x P' ⇒ Write x P## where (P_Len# (# p, n #)) .= x = set# (P# p) 0# n x
+instance Index x P_ ⇒ Write x P## where (P_Len# (# p, n #)) .= x = set# (P# p) 0# n x
 
 -- | Set the entire slice
-instance Index x A' ⇒ Write x A## where (Bytes_Off_Len# (# a, i, n #)) .= x = set# (A# a) i n x
+instance Index x A_ ⇒ Write x A## where (Bytes_Off_Len# (# a, i, n #)) .= x = set# (A# a) i n x
 
 #define INST_VAR_SPEC(TY,GET,READ,READ_REF,WRITE,WRITE_REF) \
 instance {-# OVERLAPPING #-} Write (TY) P where { (.=) = coerce (`WRITE#` 0#) } ;\

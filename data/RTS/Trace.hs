@@ -12,8 +12,8 @@ event = coerce traceEvent#
 --      of the event is the binary object passed as the first argument with
 --      the the given length passed as the second argument. The event will be
 --      emitted to the @.eventlog@ file.
-binaryEvent ∷ P'## x → ST_ s
-binaryEvent (P'_Len# (# p, n #)) = traceBinaryEvent# p n
+binaryEvent ∷ P_## x → ST_ s
+binaryEvent (P__Len# (# p, n #)) = traceBinaryEvent# p n
 
 -- | Emits a marker event via the RTS tracing framework with the argument as contents.
 --      The event will be emitted either to the @.eventlog@ file,

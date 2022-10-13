@@ -1,7 +1,7 @@
 --------------------------------------------------------------------
 -- | Description : Unboxed Arrays of Primitive Types
 --------------------------------------------------------------------
-module A.Unbox (A', A
+module A.Unbox (A_, A
                -- * misc utilities
                ,module A.Unbox
                -- * instance reexports

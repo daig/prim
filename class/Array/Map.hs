@@ -50,22 +50,22 @@ instance Modify IOPort# a where v %= f = read v >>* \x → v .= f x
 
 
 instance Each s S C1 where
-    each (S# s) st = go (P'# s) where
+    each (S# s) st = go (P_# s) where
       go p = let ch = p!0#
                in if ch == coerce '\0'# then \s→s
                else st ch <> go (p +. 1#)
-    ieach (S# (P'# → p)) st = go 0# where
+    ieach (S# (P_# → p)) st = go 0# where
       go i = let ch = p!i
                in if ch == coerce '\0'# then \s→s
                else st i ch <> go (i + 1#)
 instance Each s S C where 
-  each (S# p0) io = go (P'# @C1 p0)
+  each (S# p0) io = go (P_# @C1 p0)
     where
       go p = let C1# ch = p!0#
              in if ch == '\0'# then \s→s
              else let n = byteCount ch
                   in io (unpackUtf8C# n ch p) <> go (p +. n)
-  ieach (S# (P'# → p)) io = go 0#
+  ieach (S# (P_# → p)) io = go 0#
     where
       go i = let C1# ch = p!i
                in if ch == '\0'# then \s→s
@@ -75,56 +75,56 @@ instance Each s S C where
 
 
 #define INST_MAP_UB(X);\
-instance Each s (A s ∷ K X → T_) X where { ;\
+instance Each s (A s ∷ X → T_A) X where { ;\
   each v f = ieach v (\_ → f) ;\
   ieach v f = lenM v >>* \n → gogo n 0# where { ;\
     gogo n = go where { ;\
         go i | i == n = \s→s ;\
         go i = v !! i >>* \x → f i x <> go (i-1#) }}} ;\
-instance Each s A' X where { ;\
+instance Each s A_ X where { ;\
   each v f = ieach v (\_ → f) ;\
   ieach v f = go 0# where { ;\
     go i | i == n = \s→s ;\
     go i = f i (v!i) <> go (i-1#) ;\
     n = len v}} ;\
-instance Each s P'## X where { ;\
-  ieach (P'_Len# (# p, n #)) f = go 0# where { ;\
+instance Each s P_## X where { ;\
+  ieach (P__Len# (# p, n #)) f = go 0# where { ;\
     go i | i == n = \s→s ;\
-    go i = f i (P'# p ! i) <> go (i-1#)} ;\
-  each (P'_Len# (# p, n #)) f = go p where { ;\
+    go i = f i (P_# p ! i) <> go (i-1#)} ;\
+  each (P__Len# (# p, n #)) f = go p where { ;\
     go p | p == end = \s→s ;\
-    go p = f (P'# p ! 0#) <> go (p +. 1#);\
+    go p = f (P_# p ! 0#) <> go (p +. 1#);\
     end = p +. n}} ;\
 instance Modify A X where { ;\
   xs %= f = ieach xs \ i x → write xs i (f x)} ;\
-instance Fold S C1 (x ∷ K X) where {;\
-    fold (S# s) r0 f = go (P'# s) r0 where {\
+instance Fold S C1 (x ∷ X) where {;\
+    fold (S# s) r0 f = go (P_# s) r0 where {\
       go p r = let ch = p!0#;\
                in if ch == coerce '\0'# then r;\
                else go (p +. 1#) (f r ch)};\
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where {\
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where {\
       go i r = let ch = p!i;\
                in if ch == coerce '\0'# then r;\
                else go (i + 1#) (f i r ch)}};\
-instance Fold S C (x ∷ K X) where {;\
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where {go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)};\
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where {go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))}};\
-instance FoldIO s S C1 (x ∷ K X) where {;\
-    foldIO (S# s) r0 f = go (P'# s) r0 where {;\
+instance Fold S C (x ∷ X) where {;\
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where {go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)};\
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where {go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))}};\
+instance FoldIO s S C1 (x ∷ X) where {;\
+    foldIO (S# s) r0 f = go (P_# s) r0 where {;\
       go p r = let ch = p!0#;\
                in if ch == coerce '\0'# then return r;\
                else go (p +. 1#) =<< f r ch};\
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where {\
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where {\
       go i r = let ch = p!i;\
                in if ch == coerce '\0'# then return r;\
                else go (i + 1#) =<< f i r ch}};\
-instance FoldIO s S C (x ∷ K X) where {\
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where {\
+instance FoldIO s S C (x ∷ X) where {\
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where {\
       go p r = let C1# ch = p!0#;\
                in if ch == '\0'# then return r;\
                else let n = byteCount ch;\
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)};\
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where {\
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where {\
       go i r = let C1# ch = p!i;\
                in if ch == '\0'# then return r;\
                else let n = byteCount ch;\
@@ -142,27 +142,27 @@ INST_MAP2_UB(X,U8) ;\
 INST_MAP2_UB(X,F4) ;\
 INST_MAP2_UB(X,F8) ;\
 INST_MAP2_UB(X,Addr#) ;\
-instance Foldr A' X where {;\
+instance Foldr A_ X where {;\
   foldr v b0 abb = go 0# where {;\
     n = len v;\
     go i = if i < n then abb (v!i) (go (i+1#)) else b0}};\
-instance Foldr P'## X where {;\
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where {;\
+instance Foldr P_## X where {;\
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where {;\
     go i = if i < n then abb (v!i) (go (i+1#)) else b0}}
 
-instance Foldr AR' a where
+instance Foldr AR_ a where
   foldr v b0 abb = go 0# where
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr AR' (a ∷ T_) where
+instance Foldr AR_ (a ∷ T_A) where
   foldr v b0 abb = go 0# where
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr Ar' a where
+instance Foldr Ar_ a where
   foldr v b0 abb = go 0# where
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr Ar' (a ∷ T_) where
+instance Foldr Ar_ (a ∷ T_A) where
   foldr v b0 abb = go 0# where
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
@@ -200,7 +200,7 @@ byteCount ch
     | ch <= '\xEF'# = Three
     | T             = Four
 
-instance P' C1 +. ByteCount where
+instance P_ C1 +. ByteCount where
   (+.) p = \case {One → p +. 1#; Two → p +. 2#; Three → p +. 3#; Four → p +. 4#}
 instance I +. ByteCount where
   (+.) i = \case {One → i + 1#; Two → i + 2#; Three → i + 3#; Four → i + 4#}
@@ -215,8 +215,8 @@ instance I +. ByteCount where
 -- For this reason we really have to check the width first and only
 -- decode after.
 {-# INLINE unpackUtf8C# #-}
-unpackUtf8C# ∷ ByteCount → C → P' C1 → C
-unpackUtf8C# bytes ch (coerce @_ @(P' C1) → p) =
+unpackUtf8C# ∷ ByteCount → C → P_ C1 → C
+unpackUtf8C# bytes ch (coerce @_ @(P_ C1) → p) =
   case bytes of
     One   →                     ch
     Two   → cast ( ((cast       ch - 0xC0#) <<#  6##)
@@ -235,63 +235,63 @@ instance Each s (A s) I where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' I where  
+instance Each s A_ I where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## I where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## I where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A I where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K I) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_I) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K I) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K I) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_I) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_I) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K I) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_I) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' I where 
+instance Foldr A_ I where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## I where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## I where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' I U where  
+instance Map A_ I U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -300,7 +300,7 @@ instance Map A' I U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I U where  
+instance MapIO s A_ I U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -309,14 +309,14 @@ instance MapIO s A' I U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I U where 
+instance Fold A_ I U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I U where 
+instance FoldIO s A_ I U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -348,21 +348,21 @@ instance FoldIO s (A s) I U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I U1 where  
+instance Map A_ I U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -371,7 +371,7 @@ instance Map A' I U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I U1 where  
+instance MapIO s A_ I U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -380,14 +380,14 @@ instance MapIO s A' I U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I U1 where 
+instance Fold A_ I U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I U1 where 
+instance FoldIO s A_ I U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -419,21 +419,21 @@ instance FoldIO s (A s) I U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I U2 where  
+instance Map A_ I U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -442,7 +442,7 @@ instance Map A' I U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I U2 where  
+instance MapIO s A_ I U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -451,14 +451,14 @@ instance MapIO s A' I U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I U2 where 
+instance Fold A_ I U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I U2 where 
+instance FoldIO s A_ I U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -490,21 +490,21 @@ instance FoldIO s (A s) I U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I U4 where  
+instance Map A_ I U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -513,7 +513,7 @@ instance Map A' I U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I U4 where  
+instance MapIO s A_ I U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -522,14 +522,14 @@ instance MapIO s A' I U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I U4 where 
+instance Fold A_ I U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I U4 where 
+instance FoldIO s A_ I U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -561,21 +561,21 @@ instance FoldIO s (A s) I U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I U8 where  
+instance Map A_ I U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -584,7 +584,7 @@ instance Map A' I U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I U8 where  
+instance MapIO s A_ I U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -593,14 +593,14 @@ instance MapIO s A' I U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I U8 where 
+instance Fold A_ I U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I U8 where 
+instance FoldIO s A_ I U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -632,21 +632,21 @@ instance FoldIO s (A s) I U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I I where  
+instance Map A_ I I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -655,7 +655,7 @@ instance Map A' I I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I I where  
+instance MapIO s A_ I I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -664,14 +664,14 @@ instance MapIO s A' I I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I I where 
+instance Fold A_ I I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I I where 
+instance FoldIO s A_ I I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -703,14 +703,14 @@ instance FoldIO s (A s) I I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -718,7 +718,7 @@ instance FoldIO s P'## I I where
       else return b 
 
 
-instance Map A' I I1 where  
+instance Map A_ I I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -727,7 +727,7 @@ instance Map A' I I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I I1 where  
+instance MapIO s A_ I I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -736,14 +736,14 @@ instance MapIO s A' I I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I I1 where 
+instance Fold A_ I I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I I1 where 
+instance FoldIO s A_ I I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -775,21 +775,21 @@ instance FoldIO s (A s) I I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I I2 where  
+instance Map A_ I I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -798,7 +798,7 @@ instance Map A' I I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I I2 where  
+instance MapIO s A_ I I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -807,14 +807,14 @@ instance MapIO s A' I I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I I2 where 
+instance Fold A_ I I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I I2 where 
+instance FoldIO s A_ I I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -846,21 +846,21 @@ instance FoldIO s (A s) I I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I I4 where  
+instance Map A_ I I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -869,7 +869,7 @@ instance Map A' I I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I I4 where  
+instance MapIO s A_ I I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -878,14 +878,14 @@ instance MapIO s A' I I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I I4 where 
+instance Fold A_ I I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I I4 where 
+instance FoldIO s A_ I I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -917,21 +917,21 @@ instance FoldIO s (A s) I I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I I8 where  
+instance Map A_ I I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -940,7 +940,7 @@ instance Map A' I I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I I8 where  
+instance MapIO s A_ I I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -949,14 +949,14 @@ instance MapIO s A' I I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I I8 where 
+instance Fold A_ I I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I I8 where 
+instance FoldIO s A_ I I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -988,21 +988,21 @@ instance FoldIO s (A s) I I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I F4 where  
+instance Map A_ I F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1011,7 +1011,7 @@ instance Map A' I F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I F4 where  
+instance MapIO s A_ I F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1020,14 +1020,14 @@ instance MapIO s A' I F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I F4 where 
+instance Fold A_ I F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I F4 where 
+instance FoldIO s A_ I F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1059,21 +1059,21 @@ instance FoldIO s (A s) I F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I F8 where  
+instance Map A_ I F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1082,7 +1082,7 @@ instance Map A' I F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I F8 where  
+instance MapIO s A_ I F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1091,14 +1091,14 @@ instance MapIO s A' I F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I F8 where 
+instance Fold A_ I F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I F8 where 
+instance FoldIO s A_ I F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1130,21 +1130,21 @@ instance FoldIO s (A s) I F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I Addr# where  
+instance Map A_ I Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1153,7 +1153,7 @@ instance Map A' I Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I Addr# where  
+instance MapIO s A_ I Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1162,14 +1162,14 @@ instance MapIO s A' I Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I Addr# where 
+instance Fold A_ I Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I Addr# where 
+instance FoldIO s A_ I Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1201,14 +1201,14 @@ instance FoldIO s (A s) I Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -1222,63 +1222,63 @@ instance Each s (A s) I8 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' I8 where  
+instance Each s A_ I8 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## I8 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## I8 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A I8 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K I8) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_I8) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K I8) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K I8) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_I8) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_I8) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K I8) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_I8) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' I8 where 
+instance Foldr A_ I8 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## I8 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## I8 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' I8 U where  
+instance Map A_ I8 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1287,7 +1287,7 @@ instance Map A' I8 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 U where  
+instance MapIO s A_ I8 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1296,14 +1296,14 @@ instance MapIO s A' I8 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 U where 
+instance Fold A_ I8 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 U where 
+instance FoldIO s A_ I8 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1335,21 +1335,21 @@ instance FoldIO s (A s) I8 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 U1 where  
+instance Map A_ I8 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1358,7 +1358,7 @@ instance Map A' I8 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 U1 where  
+instance MapIO s A_ I8 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1367,14 +1367,14 @@ instance MapIO s A' I8 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 U1 where 
+instance Fold A_ I8 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 U1 where 
+instance FoldIO s A_ I8 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1406,21 +1406,21 @@ instance FoldIO s (A s) I8 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 U2 where  
+instance Map A_ I8 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1429,7 +1429,7 @@ instance Map A' I8 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 U2 where  
+instance MapIO s A_ I8 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1438,14 +1438,14 @@ instance MapIO s A' I8 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 U2 where 
+instance Fold A_ I8 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 U2 where 
+instance FoldIO s A_ I8 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1477,21 +1477,21 @@ instance FoldIO s (A s) I8 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 U4 where  
+instance Map A_ I8 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1500,7 +1500,7 @@ instance Map A' I8 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 U4 where  
+instance MapIO s A_ I8 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1509,14 +1509,14 @@ instance MapIO s A' I8 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 U4 where 
+instance Fold A_ I8 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 U4 where 
+instance FoldIO s A_ I8 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1548,21 +1548,21 @@ instance FoldIO s (A s) I8 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 U8 where  
+instance Map A_ I8 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1571,7 +1571,7 @@ instance Map A' I8 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 U8 where  
+instance MapIO s A_ I8 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1580,14 +1580,14 @@ instance MapIO s A' I8 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 U8 where 
+instance Fold A_ I8 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 U8 where 
+instance FoldIO s A_ I8 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1619,21 +1619,21 @@ instance FoldIO s (A s) I8 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 I where  
+instance Map A_ I8 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1642,7 +1642,7 @@ instance Map A' I8 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 I where  
+instance MapIO s A_ I8 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1651,14 +1651,14 @@ instance MapIO s A' I8 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 I where 
+instance Fold A_ I8 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 I where 
+instance FoldIO s A_ I8 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1690,14 +1690,14 @@ instance FoldIO s (A s) I8 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -1705,7 +1705,7 @@ instance FoldIO s P'## I8 I where
       else return b 
 
 
-instance Map A' I8 I1 where  
+instance Map A_ I8 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1714,7 +1714,7 @@ instance Map A' I8 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 I1 where  
+instance MapIO s A_ I8 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1723,14 +1723,14 @@ instance MapIO s A' I8 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 I1 where 
+instance Fold A_ I8 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 I1 where 
+instance FoldIO s A_ I8 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1762,21 +1762,21 @@ instance FoldIO s (A s) I8 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 I2 where  
+instance Map A_ I8 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1785,7 +1785,7 @@ instance Map A' I8 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 I2 where  
+instance MapIO s A_ I8 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1794,14 +1794,14 @@ instance MapIO s A' I8 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 I2 where 
+instance Fold A_ I8 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 I2 where 
+instance FoldIO s A_ I8 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1833,21 +1833,21 @@ instance FoldIO s (A s) I8 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 I4 where  
+instance Map A_ I8 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1856,7 +1856,7 @@ instance Map A' I8 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 I4 where  
+instance MapIO s A_ I8 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1865,14 +1865,14 @@ instance MapIO s A' I8 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 I4 where 
+instance Fold A_ I8 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 I4 where 
+instance FoldIO s A_ I8 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1904,21 +1904,21 @@ instance FoldIO s (A s) I8 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 I8 where  
+instance Map A_ I8 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1927,7 +1927,7 @@ instance Map A' I8 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 I8 where  
+instance MapIO s A_ I8 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -1936,14 +1936,14 @@ instance MapIO s A' I8 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 I8 where 
+instance Fold A_ I8 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 I8 where 
+instance FoldIO s A_ I8 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -1975,21 +1975,21 @@ instance FoldIO s (A s) I8 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 F4 where  
+instance Map A_ I8 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -1998,7 +1998,7 @@ instance Map A' I8 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 F4 where  
+instance MapIO s A_ I8 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2007,14 +2007,14 @@ instance MapIO s A' I8 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 F4 where 
+instance Fold A_ I8 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 F4 where 
+instance FoldIO s A_ I8 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2046,21 +2046,21 @@ instance FoldIO s (A s) I8 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 F8 where  
+instance Map A_ I8 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2069,7 +2069,7 @@ instance Map A' I8 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 F8 where  
+instance MapIO s A_ I8 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2078,14 +2078,14 @@ instance MapIO s A' I8 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 F8 where 
+instance Fold A_ I8 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 F8 where 
+instance FoldIO s A_ I8 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2117,21 +2117,21 @@ instance FoldIO s (A s) I8 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I8 Addr# where  
+instance Map A_ I8 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2140,7 +2140,7 @@ instance Map A' I8 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I8 Addr# where  
+instance MapIO s A_ I8 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2149,14 +2149,14 @@ instance MapIO s A' I8 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I8 Addr# where 
+instance Fold A_ I8 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I8 Addr# where 
+instance FoldIO s A_ I8 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2188,14 +2188,14 @@ instance FoldIO s (A s) I8 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I8 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I8 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -2209,63 +2209,63 @@ instance Each s (A s) I1 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' I1 where  
+instance Each s A_ I1 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## I1 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## I1 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A I1 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K I1) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_I1) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K I1) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K I1) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_I1) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_I1) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K I1) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_I1) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' I1 where 
+instance Foldr A_ I1 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## I1 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## I1 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' I1 U where  
+instance Map A_ I1 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2274,7 +2274,7 @@ instance Map A' I1 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 U where  
+instance MapIO s A_ I1 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2283,14 +2283,14 @@ instance MapIO s A' I1 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 U where 
+instance Fold A_ I1 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 U where 
+instance FoldIO s A_ I1 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2322,21 +2322,21 @@ instance FoldIO s (A s) I1 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 U1 where  
+instance Map A_ I1 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2345,7 +2345,7 @@ instance Map A' I1 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 U1 where  
+instance MapIO s A_ I1 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2354,14 +2354,14 @@ instance MapIO s A' I1 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 U1 where 
+instance Fold A_ I1 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 U1 where 
+instance FoldIO s A_ I1 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2393,21 +2393,21 @@ instance FoldIO s (A s) I1 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 U2 where  
+instance Map A_ I1 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2416,7 +2416,7 @@ instance Map A' I1 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 U2 where  
+instance MapIO s A_ I1 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2425,14 +2425,14 @@ instance MapIO s A' I1 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 U2 where 
+instance Fold A_ I1 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 U2 where 
+instance FoldIO s A_ I1 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2464,21 +2464,21 @@ instance FoldIO s (A s) I1 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 U4 where  
+instance Map A_ I1 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2487,7 +2487,7 @@ instance Map A' I1 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 U4 where  
+instance MapIO s A_ I1 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2496,14 +2496,14 @@ instance MapIO s A' I1 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 U4 where 
+instance Fold A_ I1 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 U4 where 
+instance FoldIO s A_ I1 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2535,21 +2535,21 @@ instance FoldIO s (A s) I1 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 U8 where  
+instance Map A_ I1 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2558,7 +2558,7 @@ instance Map A' I1 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 U8 where  
+instance MapIO s A_ I1 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2567,14 +2567,14 @@ instance MapIO s A' I1 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 U8 where 
+instance Fold A_ I1 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 U8 where 
+instance FoldIO s A_ I1 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2606,21 +2606,21 @@ instance FoldIO s (A s) I1 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 I where  
+instance Map A_ I1 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2629,7 +2629,7 @@ instance Map A' I1 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 I where  
+instance MapIO s A_ I1 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2638,14 +2638,14 @@ instance MapIO s A' I1 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 I where 
+instance Fold A_ I1 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 I where 
+instance FoldIO s A_ I1 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2677,14 +2677,14 @@ instance FoldIO s (A s) I1 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -2692,7 +2692,7 @@ instance FoldIO s P'## I1 I where
       else return b 
 
 
-instance Map A' I1 I1 where  
+instance Map A_ I1 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2701,7 +2701,7 @@ instance Map A' I1 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 I1 where  
+instance MapIO s A_ I1 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2710,14 +2710,14 @@ instance MapIO s A' I1 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 I1 where 
+instance Fold A_ I1 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 I1 where 
+instance FoldIO s A_ I1 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2749,21 +2749,21 @@ instance FoldIO s (A s) I1 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 I2 where  
+instance Map A_ I1 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2772,7 +2772,7 @@ instance Map A' I1 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 I2 where  
+instance MapIO s A_ I1 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2781,14 +2781,14 @@ instance MapIO s A' I1 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 I2 where 
+instance Fold A_ I1 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 I2 where 
+instance FoldIO s A_ I1 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2820,21 +2820,21 @@ instance FoldIO s (A s) I1 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 I4 where  
+instance Map A_ I1 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2843,7 +2843,7 @@ instance Map A' I1 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 I4 where  
+instance MapIO s A_ I1 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2852,14 +2852,14 @@ instance MapIO s A' I1 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 I4 where 
+instance Fold A_ I1 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 I4 where 
+instance FoldIO s A_ I1 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2891,21 +2891,21 @@ instance FoldIO s (A s) I1 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 I8 where  
+instance Map A_ I1 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2914,7 +2914,7 @@ instance Map A' I1 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 I8 where  
+instance MapIO s A_ I1 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2923,14 +2923,14 @@ instance MapIO s A' I1 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 I8 where 
+instance Fold A_ I1 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 I8 where 
+instance FoldIO s A_ I1 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -2962,21 +2962,21 @@ instance FoldIO s (A s) I1 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 F4 where  
+instance Map A_ I1 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -2985,7 +2985,7 @@ instance Map A' I1 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 F4 where  
+instance MapIO s A_ I1 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -2994,14 +2994,14 @@ instance MapIO s A' I1 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 F4 where 
+instance Fold A_ I1 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 F4 where 
+instance FoldIO s A_ I1 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3033,21 +3033,21 @@ instance FoldIO s (A s) I1 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 F8 where  
+instance Map A_ I1 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3056,7 +3056,7 @@ instance Map A' I1 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 F8 where  
+instance MapIO s A_ I1 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3065,14 +3065,14 @@ instance MapIO s A' I1 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 F8 where 
+instance Fold A_ I1 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 F8 where 
+instance FoldIO s A_ I1 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3104,21 +3104,21 @@ instance FoldIO s (A s) I1 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I1 Addr# where  
+instance Map A_ I1 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3127,7 +3127,7 @@ instance Map A' I1 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I1 Addr# where  
+instance MapIO s A_ I1 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3136,14 +3136,14 @@ instance MapIO s A' I1 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I1 Addr# where 
+instance Fold A_ I1 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I1 Addr# where 
+instance FoldIO s A_ I1 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3175,14 +3175,14 @@ instance FoldIO s (A s) I1 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I1 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I1 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -3196,63 +3196,63 @@ instance Each s (A s) I2 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' I2 where  
+instance Each s A_ I2 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## I2 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## I2 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A I2 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K I2) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_I2) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K I2) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K I2) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_I2) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_I2) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K I2) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_I2) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' I2 where 
+instance Foldr A_ I2 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## I2 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## I2 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' I2 U where  
+instance Map A_ I2 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3261,7 +3261,7 @@ instance Map A' I2 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 U where  
+instance MapIO s A_ I2 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3270,14 +3270,14 @@ instance MapIO s A' I2 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 U where 
+instance Fold A_ I2 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 U where 
+instance FoldIO s A_ I2 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3309,21 +3309,21 @@ instance FoldIO s (A s) I2 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 U1 where  
+instance Map A_ I2 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3332,7 +3332,7 @@ instance Map A' I2 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 U1 where  
+instance MapIO s A_ I2 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3341,14 +3341,14 @@ instance MapIO s A' I2 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 U1 where 
+instance Fold A_ I2 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 U1 where 
+instance FoldIO s A_ I2 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3380,21 +3380,21 @@ instance FoldIO s (A s) I2 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 U2 where  
+instance Map A_ I2 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3403,7 +3403,7 @@ instance Map A' I2 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 U2 where  
+instance MapIO s A_ I2 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3412,14 +3412,14 @@ instance MapIO s A' I2 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 U2 where 
+instance Fold A_ I2 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 U2 where 
+instance FoldIO s A_ I2 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3451,21 +3451,21 @@ instance FoldIO s (A s) I2 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 U4 where  
+instance Map A_ I2 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3474,7 +3474,7 @@ instance Map A' I2 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 U4 where  
+instance MapIO s A_ I2 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3483,14 +3483,14 @@ instance MapIO s A' I2 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 U4 where 
+instance Fold A_ I2 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 U4 where 
+instance FoldIO s A_ I2 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3522,21 +3522,21 @@ instance FoldIO s (A s) I2 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 U8 where  
+instance Map A_ I2 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3545,7 +3545,7 @@ instance Map A' I2 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 U8 where  
+instance MapIO s A_ I2 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3554,14 +3554,14 @@ instance MapIO s A' I2 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 U8 where 
+instance Fold A_ I2 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 U8 where 
+instance FoldIO s A_ I2 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3593,21 +3593,21 @@ instance FoldIO s (A s) I2 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 I where  
+instance Map A_ I2 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3616,7 +3616,7 @@ instance Map A' I2 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 I where  
+instance MapIO s A_ I2 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3625,14 +3625,14 @@ instance MapIO s A' I2 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 I where 
+instance Fold A_ I2 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 I where 
+instance FoldIO s A_ I2 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3664,14 +3664,14 @@ instance FoldIO s (A s) I2 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -3679,7 +3679,7 @@ instance FoldIO s P'## I2 I where
       else return b 
 
 
-instance Map A' I2 I1 where  
+instance Map A_ I2 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3688,7 +3688,7 @@ instance Map A' I2 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 I1 where  
+instance MapIO s A_ I2 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3697,14 +3697,14 @@ instance MapIO s A' I2 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 I1 where 
+instance Fold A_ I2 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 I1 where 
+instance FoldIO s A_ I2 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3736,21 +3736,21 @@ instance FoldIO s (A s) I2 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 I2 where  
+instance Map A_ I2 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3759,7 +3759,7 @@ instance Map A' I2 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 I2 where  
+instance MapIO s A_ I2 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3768,14 +3768,14 @@ instance MapIO s A' I2 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 I2 where 
+instance Fold A_ I2 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 I2 where 
+instance FoldIO s A_ I2 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3807,21 +3807,21 @@ instance FoldIO s (A s) I2 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 I4 where  
+instance Map A_ I2 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3830,7 +3830,7 @@ instance Map A' I2 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 I4 where  
+instance MapIO s A_ I2 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3839,14 +3839,14 @@ instance MapIO s A' I2 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 I4 where 
+instance Fold A_ I2 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 I4 where 
+instance FoldIO s A_ I2 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3878,21 +3878,21 @@ instance FoldIO s (A s) I2 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 I8 where  
+instance Map A_ I2 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3901,7 +3901,7 @@ instance Map A' I2 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 I8 where  
+instance MapIO s A_ I2 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3910,14 +3910,14 @@ instance MapIO s A' I2 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 I8 where 
+instance Fold A_ I2 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 I8 where 
+instance FoldIO s A_ I2 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -3949,21 +3949,21 @@ instance FoldIO s (A s) I2 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 F4 where  
+instance Map A_ I2 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -3972,7 +3972,7 @@ instance Map A' I2 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 F4 where  
+instance MapIO s A_ I2 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -3981,14 +3981,14 @@ instance MapIO s A' I2 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 F4 where 
+instance Fold A_ I2 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 F4 where 
+instance FoldIO s A_ I2 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4020,21 +4020,21 @@ instance FoldIO s (A s) I2 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 F8 where  
+instance Map A_ I2 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4043,7 +4043,7 @@ instance Map A' I2 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 F8 where  
+instance MapIO s A_ I2 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4052,14 +4052,14 @@ instance MapIO s A' I2 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 F8 where 
+instance Fold A_ I2 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 F8 where 
+instance FoldIO s A_ I2 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4091,21 +4091,21 @@ instance FoldIO s (A s) I2 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I2 Addr# where  
+instance Map A_ I2 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4114,7 +4114,7 @@ instance Map A' I2 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I2 Addr# where  
+instance MapIO s A_ I2 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4123,14 +4123,14 @@ instance MapIO s A' I2 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I2 Addr# where 
+instance Fold A_ I2 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I2 Addr# where 
+instance FoldIO s A_ I2 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4162,14 +4162,14 @@ instance FoldIO s (A s) I2 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I2 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I2 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -4183,63 +4183,63 @@ instance Each s (A s) I4 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' I4 where  
+instance Each s A_ I4 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## I4 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## I4 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A I4 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K I4) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_I4) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K I4) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K I4) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_I4) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_I4) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K I4) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_I4) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' I4 where 
+instance Foldr A_ I4 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## I4 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## I4 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' I4 U where  
+instance Map A_ I4 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4248,7 +4248,7 @@ instance Map A' I4 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 U where  
+instance MapIO s A_ I4 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4257,14 +4257,14 @@ instance MapIO s A' I4 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 U where 
+instance Fold A_ I4 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 U where 
+instance FoldIO s A_ I4 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4296,21 +4296,21 @@ instance FoldIO s (A s) I4 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 U1 where  
+instance Map A_ I4 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4319,7 +4319,7 @@ instance Map A' I4 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 U1 where  
+instance MapIO s A_ I4 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4328,14 +4328,14 @@ instance MapIO s A' I4 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 U1 where 
+instance Fold A_ I4 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 U1 where 
+instance FoldIO s A_ I4 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4367,21 +4367,21 @@ instance FoldIO s (A s) I4 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 U2 where  
+instance Map A_ I4 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4390,7 +4390,7 @@ instance Map A' I4 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 U2 where  
+instance MapIO s A_ I4 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4399,14 +4399,14 @@ instance MapIO s A' I4 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 U2 where 
+instance Fold A_ I4 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 U2 where 
+instance FoldIO s A_ I4 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4438,21 +4438,21 @@ instance FoldIO s (A s) I4 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 U4 where  
+instance Map A_ I4 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4461,7 +4461,7 @@ instance Map A' I4 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 U4 where  
+instance MapIO s A_ I4 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4470,14 +4470,14 @@ instance MapIO s A' I4 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 U4 where 
+instance Fold A_ I4 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 U4 where 
+instance FoldIO s A_ I4 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4509,21 +4509,21 @@ instance FoldIO s (A s) I4 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 U8 where  
+instance Map A_ I4 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4532,7 +4532,7 @@ instance Map A' I4 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 U8 where  
+instance MapIO s A_ I4 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4541,14 +4541,14 @@ instance MapIO s A' I4 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 U8 where 
+instance Fold A_ I4 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 U8 where 
+instance FoldIO s A_ I4 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4580,21 +4580,21 @@ instance FoldIO s (A s) I4 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 I where  
+instance Map A_ I4 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4603,7 +4603,7 @@ instance Map A' I4 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 I where  
+instance MapIO s A_ I4 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4612,14 +4612,14 @@ instance MapIO s A' I4 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 I where 
+instance Fold A_ I4 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 I where 
+instance FoldIO s A_ I4 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4651,14 +4651,14 @@ instance FoldIO s (A s) I4 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -4666,7 +4666,7 @@ instance FoldIO s P'## I4 I where
       else return b 
 
 
-instance Map A' I4 I1 where  
+instance Map A_ I4 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4675,7 +4675,7 @@ instance Map A' I4 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 I1 where  
+instance MapIO s A_ I4 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4684,14 +4684,14 @@ instance MapIO s A' I4 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 I1 where 
+instance Fold A_ I4 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 I1 where 
+instance FoldIO s A_ I4 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4723,21 +4723,21 @@ instance FoldIO s (A s) I4 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 I2 where  
+instance Map A_ I4 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4746,7 +4746,7 @@ instance Map A' I4 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 I2 where  
+instance MapIO s A_ I4 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4755,14 +4755,14 @@ instance MapIO s A' I4 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 I2 where 
+instance Fold A_ I4 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 I2 where 
+instance FoldIO s A_ I4 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4794,21 +4794,21 @@ instance FoldIO s (A s) I4 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 I4 where  
+instance Map A_ I4 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4817,7 +4817,7 @@ instance Map A' I4 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 I4 where  
+instance MapIO s A_ I4 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4826,14 +4826,14 @@ instance MapIO s A' I4 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 I4 where 
+instance Fold A_ I4 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 I4 where 
+instance FoldIO s A_ I4 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4865,21 +4865,21 @@ instance FoldIO s (A s) I4 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 I8 where  
+instance Map A_ I4 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4888,7 +4888,7 @@ instance Map A' I4 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 I8 where  
+instance MapIO s A_ I4 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4897,14 +4897,14 @@ instance MapIO s A' I4 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 I8 where 
+instance Fold A_ I4 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 I8 where 
+instance FoldIO s A_ I4 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -4936,21 +4936,21 @@ instance FoldIO s (A s) I4 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 F4 where  
+instance Map A_ I4 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -4959,7 +4959,7 @@ instance Map A' I4 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 F4 where  
+instance MapIO s A_ I4 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -4968,14 +4968,14 @@ instance MapIO s A' I4 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 F4 where 
+instance Fold A_ I4 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 F4 where 
+instance FoldIO s A_ I4 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5007,21 +5007,21 @@ instance FoldIO s (A s) I4 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 F8 where  
+instance Map A_ I4 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5030,7 +5030,7 @@ instance Map A' I4 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 F8 where  
+instance MapIO s A_ I4 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5039,14 +5039,14 @@ instance MapIO s A' I4 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 F8 where 
+instance Fold A_ I4 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 F8 where 
+instance FoldIO s A_ I4 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5078,21 +5078,21 @@ instance FoldIO s (A s) I4 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' I4 Addr# where  
+instance Map A_ I4 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5101,7 +5101,7 @@ instance Map A' I4 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' I4 Addr# where  
+instance MapIO s A_ I4 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5110,14 +5110,14 @@ instance MapIO s A' I4 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' I4 Addr# where 
+instance Fold A_ I4 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' I4 Addr# where 
+instance FoldIO s A_ I4 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5149,14 +5149,14 @@ instance FoldIO s (A s) I4 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## I4 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## I4 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -5169,63 +5169,63 @@ instance Each s (A s) U where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' U where  
+instance Each s A_ U where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## U where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## U where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A U where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K U) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_U) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K U) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K U) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_U) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_U) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K U) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_U) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' U where 
+instance Foldr A_ U where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## U where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## U where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' U U where  
+instance Map A_ U U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5234,7 +5234,7 @@ instance Map A' U U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U U where  
+instance MapIO s A_ U U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5243,14 +5243,14 @@ instance MapIO s A' U U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U U where 
+instance Fold A_ U U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U U where 
+instance FoldIO s A_ U U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5282,21 +5282,21 @@ instance FoldIO s (A s) U U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U U1 where  
+instance Map A_ U U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5305,7 +5305,7 @@ instance Map A' U U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U U1 where  
+instance MapIO s A_ U U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5314,14 +5314,14 @@ instance MapIO s A' U U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U U1 where 
+instance Fold A_ U U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U U1 where 
+instance FoldIO s A_ U U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5353,21 +5353,21 @@ instance FoldIO s (A s) U U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U U2 where  
+instance Map A_ U U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5376,7 +5376,7 @@ instance Map A' U U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U U2 where  
+instance MapIO s A_ U U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5385,14 +5385,14 @@ instance MapIO s A' U U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U U2 where 
+instance Fold A_ U U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U U2 where 
+instance FoldIO s A_ U U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5424,21 +5424,21 @@ instance FoldIO s (A s) U U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U U4 where  
+instance Map A_ U U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5447,7 +5447,7 @@ instance Map A' U U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U U4 where  
+instance MapIO s A_ U U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5456,14 +5456,14 @@ instance MapIO s A' U U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U U4 where 
+instance Fold A_ U U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U U4 where 
+instance FoldIO s A_ U U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5495,21 +5495,21 @@ instance FoldIO s (A s) U U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U U8 where  
+instance Map A_ U U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5518,7 +5518,7 @@ instance Map A' U U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U U8 where  
+instance MapIO s A_ U U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5527,14 +5527,14 @@ instance MapIO s A' U U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U U8 where 
+instance Fold A_ U U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U U8 where 
+instance FoldIO s A_ U U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5566,21 +5566,21 @@ instance FoldIO s (A s) U U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U I where  
+instance Map A_ U I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5589,7 +5589,7 @@ instance Map A' U I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U I where  
+instance MapIO s A_ U I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5598,14 +5598,14 @@ instance MapIO s A' U I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U I where 
+instance Fold A_ U I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U I where 
+instance FoldIO s A_ U I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5637,14 +5637,14 @@ instance FoldIO s (A s) U I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -5652,7 +5652,7 @@ instance FoldIO s P'## U I where
       else return b 
 
 
-instance Map A' U I1 where  
+instance Map A_ U I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5661,7 +5661,7 @@ instance Map A' U I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U I1 where  
+instance MapIO s A_ U I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5670,14 +5670,14 @@ instance MapIO s A' U I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U I1 where 
+instance Fold A_ U I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U I1 where 
+instance FoldIO s A_ U I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5709,21 +5709,21 @@ instance FoldIO s (A s) U I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U I2 where  
+instance Map A_ U I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5732,7 +5732,7 @@ instance Map A' U I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U I2 where  
+instance MapIO s A_ U I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5741,14 +5741,14 @@ instance MapIO s A' U I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U I2 where 
+instance Fold A_ U I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U I2 where 
+instance FoldIO s A_ U I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5780,21 +5780,21 @@ instance FoldIO s (A s) U I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U I4 where  
+instance Map A_ U I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5803,7 +5803,7 @@ instance Map A' U I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U I4 where  
+instance MapIO s A_ U I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5812,14 +5812,14 @@ instance MapIO s A' U I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U I4 where 
+instance Fold A_ U I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U I4 where 
+instance FoldIO s A_ U I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5851,21 +5851,21 @@ instance FoldIO s (A s) U I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U I8 where  
+instance Map A_ U I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5874,7 +5874,7 @@ instance Map A' U I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U I8 where  
+instance MapIO s A_ U I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5883,14 +5883,14 @@ instance MapIO s A' U I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U I8 where 
+instance Fold A_ U I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U I8 where 
+instance FoldIO s A_ U I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5922,21 +5922,21 @@ instance FoldIO s (A s) U I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U F4 where  
+instance Map A_ U F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -5945,7 +5945,7 @@ instance Map A' U F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U F4 where  
+instance MapIO s A_ U F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -5954,14 +5954,14 @@ instance MapIO s A' U F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U F4 where 
+instance Fold A_ U F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U F4 where 
+instance FoldIO s A_ U F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -5993,21 +5993,21 @@ instance FoldIO s (A s) U F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U F8 where  
+instance Map A_ U F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6016,7 +6016,7 @@ instance Map A' U F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U F8 where  
+instance MapIO s A_ U F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6025,14 +6025,14 @@ instance MapIO s A' U F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U F8 where 
+instance Fold A_ U F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U F8 where 
+instance FoldIO s A_ U F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6064,21 +6064,21 @@ instance FoldIO s (A s) U F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U Addr# where  
+instance Map A_ U Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6087,7 +6087,7 @@ instance Map A' U Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U Addr# where  
+instance MapIO s A_ U Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6096,14 +6096,14 @@ instance MapIO s A' U Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U Addr# where 
+instance Fold A_ U Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U Addr# where 
+instance FoldIO s A_ U Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6135,14 +6135,14 @@ instance FoldIO s (A s) U Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -6156,63 +6156,63 @@ instance Each s (A s) U1 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' U1 where  
+instance Each s A_ U1 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## U1 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## U1 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A U1 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K U1) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_U1) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K U1) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K U1) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_U1) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_U1) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K U1) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_U1) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' U1 where 
+instance Foldr A_ U1 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## U1 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## U1 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' U1 U where  
+instance Map A_ U1 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6221,7 +6221,7 @@ instance Map A' U1 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 U where  
+instance MapIO s A_ U1 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6230,14 +6230,14 @@ instance MapIO s A' U1 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 U where 
+instance Fold A_ U1 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 U where 
+instance FoldIO s A_ U1 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6269,21 +6269,21 @@ instance FoldIO s (A s) U1 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 U1 where  
+instance Map A_ U1 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6292,7 +6292,7 @@ instance Map A' U1 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 U1 where  
+instance MapIO s A_ U1 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6301,14 +6301,14 @@ instance MapIO s A' U1 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 U1 where 
+instance Fold A_ U1 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 U1 where 
+instance FoldIO s A_ U1 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6340,21 +6340,21 @@ instance FoldIO s (A s) U1 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 U2 where  
+instance Map A_ U1 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6363,7 +6363,7 @@ instance Map A' U1 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 U2 where  
+instance MapIO s A_ U1 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6372,14 +6372,14 @@ instance MapIO s A' U1 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 U2 where 
+instance Fold A_ U1 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 U2 where 
+instance FoldIO s A_ U1 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6411,21 +6411,21 @@ instance FoldIO s (A s) U1 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 U4 where  
+instance Map A_ U1 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6434,7 +6434,7 @@ instance Map A' U1 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 U4 where  
+instance MapIO s A_ U1 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6443,14 +6443,14 @@ instance MapIO s A' U1 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 U4 where 
+instance Fold A_ U1 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 U4 where 
+instance FoldIO s A_ U1 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6482,21 +6482,21 @@ instance FoldIO s (A s) U1 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 U8 where  
+instance Map A_ U1 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6505,7 +6505,7 @@ instance Map A' U1 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 U8 where  
+instance MapIO s A_ U1 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6514,14 +6514,14 @@ instance MapIO s A' U1 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 U8 where 
+instance Fold A_ U1 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 U8 where 
+instance FoldIO s A_ U1 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6553,21 +6553,21 @@ instance FoldIO s (A s) U1 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 I where  
+instance Map A_ U1 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6576,7 +6576,7 @@ instance Map A' U1 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 I where  
+instance MapIO s A_ U1 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6585,14 +6585,14 @@ instance MapIO s A' U1 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 I where 
+instance Fold A_ U1 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 I where 
+instance FoldIO s A_ U1 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6624,14 +6624,14 @@ instance FoldIO s (A s) U1 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -6639,7 +6639,7 @@ instance FoldIO s P'## U1 I where
       else return b 
 
 
-instance Map A' U1 I1 where  
+instance Map A_ U1 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6648,7 +6648,7 @@ instance Map A' U1 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 I1 where  
+instance MapIO s A_ U1 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6657,14 +6657,14 @@ instance MapIO s A' U1 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 I1 where 
+instance Fold A_ U1 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 I1 where 
+instance FoldIO s A_ U1 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6696,21 +6696,21 @@ instance FoldIO s (A s) U1 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 I2 where  
+instance Map A_ U1 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6719,7 +6719,7 @@ instance Map A' U1 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 I2 where  
+instance MapIO s A_ U1 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6728,14 +6728,14 @@ instance MapIO s A' U1 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 I2 where 
+instance Fold A_ U1 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 I2 where 
+instance FoldIO s A_ U1 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6767,21 +6767,21 @@ instance FoldIO s (A s) U1 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 I4 where  
+instance Map A_ U1 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6790,7 +6790,7 @@ instance Map A' U1 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 I4 where  
+instance MapIO s A_ U1 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6799,14 +6799,14 @@ instance MapIO s A' U1 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 I4 where 
+instance Fold A_ U1 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 I4 where 
+instance FoldIO s A_ U1 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6838,21 +6838,21 @@ instance FoldIO s (A s) U1 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 I8 where  
+instance Map A_ U1 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6861,7 +6861,7 @@ instance Map A' U1 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 I8 where  
+instance MapIO s A_ U1 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6870,14 +6870,14 @@ instance MapIO s A' U1 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 I8 where 
+instance Fold A_ U1 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 I8 where 
+instance FoldIO s A_ U1 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6909,21 +6909,21 @@ instance FoldIO s (A s) U1 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 F4 where  
+instance Map A_ U1 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -6932,7 +6932,7 @@ instance Map A' U1 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 F4 where  
+instance MapIO s A_ U1 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -6941,14 +6941,14 @@ instance MapIO s A' U1 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 F4 where 
+instance Fold A_ U1 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 F4 where 
+instance FoldIO s A_ U1 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -6980,21 +6980,21 @@ instance FoldIO s (A s) U1 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 F8 where  
+instance Map A_ U1 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7003,7 +7003,7 @@ instance Map A' U1 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 F8 where  
+instance MapIO s A_ U1 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7012,14 +7012,14 @@ instance MapIO s A' U1 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 F8 where 
+instance Fold A_ U1 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 F8 where 
+instance FoldIO s A_ U1 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7051,21 +7051,21 @@ instance FoldIO s (A s) U1 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U1 Addr# where  
+instance Map A_ U1 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7074,7 +7074,7 @@ instance Map A' U1 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U1 Addr# where  
+instance MapIO s A_ U1 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7083,14 +7083,14 @@ instance MapIO s A' U1 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U1 Addr# where 
+instance Fold A_ U1 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U1 Addr# where 
+instance FoldIO s A_ U1 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7122,14 +7122,14 @@ instance FoldIO s (A s) U1 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U1 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U1 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -7142,63 +7142,63 @@ instance Each s (A s) U2 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' U2 where  
+instance Each s A_ U2 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## U2 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## U2 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A U2 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K U2) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_U2) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K U2) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K U2) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_U2) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_U2) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K U2) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_U2) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' U2 where 
+instance Foldr A_ U2 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## U2 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## U2 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' U2 U where  
+instance Map A_ U2 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7207,7 +7207,7 @@ instance Map A' U2 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 U where  
+instance MapIO s A_ U2 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7216,14 +7216,14 @@ instance MapIO s A' U2 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 U where 
+instance Fold A_ U2 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 U where 
+instance FoldIO s A_ U2 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7255,21 +7255,21 @@ instance FoldIO s (A s) U2 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 U1 where  
+instance Map A_ U2 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7278,7 +7278,7 @@ instance Map A' U2 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 U1 where  
+instance MapIO s A_ U2 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7287,14 +7287,14 @@ instance MapIO s A' U2 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 U1 where 
+instance Fold A_ U2 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 U1 where 
+instance FoldIO s A_ U2 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7326,21 +7326,21 @@ instance FoldIO s (A s) U2 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 U2 where  
+instance Map A_ U2 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7349,7 +7349,7 @@ instance Map A' U2 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 U2 where  
+instance MapIO s A_ U2 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7358,14 +7358,14 @@ instance MapIO s A' U2 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 U2 where 
+instance Fold A_ U2 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 U2 where 
+instance FoldIO s A_ U2 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7397,21 +7397,21 @@ instance FoldIO s (A s) U2 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 U4 where  
+instance Map A_ U2 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7420,7 +7420,7 @@ instance Map A' U2 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 U4 where  
+instance MapIO s A_ U2 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7429,14 +7429,14 @@ instance MapIO s A' U2 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 U4 where 
+instance Fold A_ U2 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 U4 where 
+instance FoldIO s A_ U2 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7468,21 +7468,21 @@ instance FoldIO s (A s) U2 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 U8 where  
+instance Map A_ U2 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7491,7 +7491,7 @@ instance Map A' U2 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 U8 where  
+instance MapIO s A_ U2 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7500,14 +7500,14 @@ instance MapIO s A' U2 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 U8 where 
+instance Fold A_ U2 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 U8 where 
+instance FoldIO s A_ U2 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7539,21 +7539,21 @@ instance FoldIO s (A s) U2 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 I where  
+instance Map A_ U2 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7562,7 +7562,7 @@ instance Map A' U2 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 I where  
+instance MapIO s A_ U2 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7571,14 +7571,14 @@ instance MapIO s A' U2 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 I where 
+instance Fold A_ U2 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 I where 
+instance FoldIO s A_ U2 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7610,14 +7610,14 @@ instance FoldIO s (A s) U2 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -7625,7 +7625,7 @@ instance FoldIO s P'## U2 I where
       else return b 
 
 
-instance Map A' U2 I1 where  
+instance Map A_ U2 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7634,7 +7634,7 @@ instance Map A' U2 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 I1 where  
+instance MapIO s A_ U2 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7643,14 +7643,14 @@ instance MapIO s A' U2 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 I1 where 
+instance Fold A_ U2 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 I1 where 
+instance FoldIO s A_ U2 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7682,21 +7682,21 @@ instance FoldIO s (A s) U2 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 I2 where  
+instance Map A_ U2 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7705,7 +7705,7 @@ instance Map A' U2 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 I2 where  
+instance MapIO s A_ U2 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7714,14 +7714,14 @@ instance MapIO s A' U2 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 I2 where 
+instance Fold A_ U2 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 I2 where 
+instance FoldIO s A_ U2 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7753,21 +7753,21 @@ instance FoldIO s (A s) U2 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 I4 where  
+instance Map A_ U2 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7776,7 +7776,7 @@ instance Map A' U2 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 I4 where  
+instance MapIO s A_ U2 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7785,14 +7785,14 @@ instance MapIO s A' U2 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 I4 where 
+instance Fold A_ U2 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 I4 where 
+instance FoldIO s A_ U2 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7824,21 +7824,21 @@ instance FoldIO s (A s) U2 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 I8 where  
+instance Map A_ U2 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7847,7 +7847,7 @@ instance Map A' U2 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 I8 where  
+instance MapIO s A_ U2 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7856,14 +7856,14 @@ instance MapIO s A' U2 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 I8 where 
+instance Fold A_ U2 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 I8 where 
+instance FoldIO s A_ U2 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7895,21 +7895,21 @@ instance FoldIO s (A s) U2 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 F4 where  
+instance Map A_ U2 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7918,7 +7918,7 @@ instance Map A' U2 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 F4 where  
+instance MapIO s A_ U2 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7927,14 +7927,14 @@ instance MapIO s A' U2 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 F4 where 
+instance Fold A_ U2 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 F4 where 
+instance FoldIO s A_ U2 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -7966,21 +7966,21 @@ instance FoldIO s (A s) U2 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 F8 where  
+instance Map A_ U2 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -7989,7 +7989,7 @@ instance Map A' U2 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 F8 where  
+instance MapIO s A_ U2 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -7998,14 +7998,14 @@ instance MapIO s A' U2 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 F8 where 
+instance Fold A_ U2 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 F8 where 
+instance FoldIO s A_ U2 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8037,21 +8037,21 @@ instance FoldIO s (A s) U2 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U2 Addr# where  
+instance Map A_ U2 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8060,7 +8060,7 @@ instance Map A' U2 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U2 Addr# where  
+instance MapIO s A_ U2 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8069,14 +8069,14 @@ instance MapIO s A' U2 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U2 Addr# where 
+instance Fold A_ U2 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U2 Addr# where 
+instance FoldIO s A_ U2 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8108,14 +8108,14 @@ instance FoldIO s (A s) U2 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U2 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U2 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -8128,63 +8128,63 @@ instance Each s (A s) U4 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' U4 where  
+instance Each s A_ U4 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## U4 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## U4 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A U4 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K U4) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_U4) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K U4) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K U4) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_U4) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_U4) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K U4) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_U4) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' U4 where 
+instance Foldr A_ U4 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## U4 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## U4 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' U4 U where  
+instance Map A_ U4 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8193,7 +8193,7 @@ instance Map A' U4 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 U where  
+instance MapIO s A_ U4 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8202,14 +8202,14 @@ instance MapIO s A' U4 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 U where 
+instance Fold A_ U4 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 U where 
+instance FoldIO s A_ U4 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8241,21 +8241,21 @@ instance FoldIO s (A s) U4 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 U1 where  
+instance Map A_ U4 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8264,7 +8264,7 @@ instance Map A' U4 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 U1 where  
+instance MapIO s A_ U4 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8273,14 +8273,14 @@ instance MapIO s A' U4 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 U1 where 
+instance Fold A_ U4 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 U1 where 
+instance FoldIO s A_ U4 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8312,21 +8312,21 @@ instance FoldIO s (A s) U4 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 U2 where  
+instance Map A_ U4 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8335,7 +8335,7 @@ instance Map A' U4 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 U2 where  
+instance MapIO s A_ U4 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8344,14 +8344,14 @@ instance MapIO s A' U4 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 U2 where 
+instance Fold A_ U4 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 U2 where 
+instance FoldIO s A_ U4 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8383,21 +8383,21 @@ instance FoldIO s (A s) U4 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 U4 where  
+instance Map A_ U4 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8406,7 +8406,7 @@ instance Map A' U4 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 U4 where  
+instance MapIO s A_ U4 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8415,14 +8415,14 @@ instance MapIO s A' U4 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 U4 where 
+instance Fold A_ U4 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 U4 where 
+instance FoldIO s A_ U4 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8454,21 +8454,21 @@ instance FoldIO s (A s) U4 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 U8 where  
+instance Map A_ U4 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8477,7 +8477,7 @@ instance Map A' U4 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 U8 where  
+instance MapIO s A_ U4 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8486,14 +8486,14 @@ instance MapIO s A' U4 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 U8 where 
+instance Fold A_ U4 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 U8 where 
+instance FoldIO s A_ U4 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8525,21 +8525,21 @@ instance FoldIO s (A s) U4 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 I where  
+instance Map A_ U4 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8548,7 +8548,7 @@ instance Map A' U4 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 I where  
+instance MapIO s A_ U4 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8557,14 +8557,14 @@ instance MapIO s A' U4 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 I where 
+instance Fold A_ U4 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 I where 
+instance FoldIO s A_ U4 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8596,14 +8596,14 @@ instance FoldIO s (A s) U4 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -8611,7 +8611,7 @@ instance FoldIO s P'## U4 I where
       else return b 
 
 
-instance Map A' U4 I1 where  
+instance Map A_ U4 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8620,7 +8620,7 @@ instance Map A' U4 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 I1 where  
+instance MapIO s A_ U4 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8629,14 +8629,14 @@ instance MapIO s A' U4 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 I1 where 
+instance Fold A_ U4 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 I1 where 
+instance FoldIO s A_ U4 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8668,21 +8668,21 @@ instance FoldIO s (A s) U4 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 I2 where  
+instance Map A_ U4 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8691,7 +8691,7 @@ instance Map A' U4 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 I2 where  
+instance MapIO s A_ U4 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8700,14 +8700,14 @@ instance MapIO s A' U4 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 I2 where 
+instance Fold A_ U4 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 I2 where 
+instance FoldIO s A_ U4 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8739,21 +8739,21 @@ instance FoldIO s (A s) U4 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 I4 where  
+instance Map A_ U4 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8762,7 +8762,7 @@ instance Map A' U4 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 I4 where  
+instance MapIO s A_ U4 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8771,14 +8771,14 @@ instance MapIO s A' U4 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 I4 where 
+instance Fold A_ U4 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 I4 where 
+instance FoldIO s A_ U4 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8810,21 +8810,21 @@ instance FoldIO s (A s) U4 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 I8 where  
+instance Map A_ U4 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8833,7 +8833,7 @@ instance Map A' U4 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 I8 where  
+instance MapIO s A_ U4 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8842,14 +8842,14 @@ instance MapIO s A' U4 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 I8 where 
+instance Fold A_ U4 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 I8 where 
+instance FoldIO s A_ U4 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8881,21 +8881,21 @@ instance FoldIO s (A s) U4 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 F4 where  
+instance Map A_ U4 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8904,7 +8904,7 @@ instance Map A' U4 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 F4 where  
+instance MapIO s A_ U4 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8913,14 +8913,14 @@ instance MapIO s A' U4 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 F4 where 
+instance Fold A_ U4 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 F4 where 
+instance FoldIO s A_ U4 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -8952,21 +8952,21 @@ instance FoldIO s (A s) U4 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 F8 where  
+instance Map A_ U4 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -8975,7 +8975,7 @@ instance Map A' U4 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 F8 where  
+instance MapIO s A_ U4 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -8984,14 +8984,14 @@ instance MapIO s A' U4 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 F8 where 
+instance Fold A_ U4 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 F8 where 
+instance FoldIO s A_ U4 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9023,21 +9023,21 @@ instance FoldIO s (A s) U4 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U4 Addr# where  
+instance Map A_ U4 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9046,7 +9046,7 @@ instance Map A' U4 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U4 Addr# where  
+instance MapIO s A_ U4 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9055,14 +9055,14 @@ instance MapIO s A' U4 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U4 Addr# where 
+instance Fold A_ U4 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U4 Addr# where 
+instance FoldIO s A_ U4 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9094,14 +9094,14 @@ instance FoldIO s (A s) U4 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U4 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U4 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -9114,63 +9114,63 @@ instance Each s (A s) U8 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' U8 where  
+instance Each s A_ U8 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## U8 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## U8 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A U8 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K U8) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_U8) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K U8) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K U8) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_U8) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_U8) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K U8) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_U8) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' U8 where 
+instance Foldr A_ U8 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## U8 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## U8 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' U8 U where  
+instance Map A_ U8 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9179,7 +9179,7 @@ instance Map A' U8 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 U where  
+instance MapIO s A_ U8 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9188,14 +9188,14 @@ instance MapIO s A' U8 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 U where 
+instance Fold A_ U8 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 U where 
+instance FoldIO s A_ U8 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9227,21 +9227,21 @@ instance FoldIO s (A s) U8 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 U1 where  
+instance Map A_ U8 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9250,7 +9250,7 @@ instance Map A' U8 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 U1 where  
+instance MapIO s A_ U8 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9259,14 +9259,14 @@ instance MapIO s A' U8 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 U1 where 
+instance Fold A_ U8 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 U1 where 
+instance FoldIO s A_ U8 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9298,21 +9298,21 @@ instance FoldIO s (A s) U8 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 U2 where  
+instance Map A_ U8 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9321,7 +9321,7 @@ instance Map A' U8 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 U2 where  
+instance MapIO s A_ U8 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9330,14 +9330,14 @@ instance MapIO s A' U8 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 U2 where 
+instance Fold A_ U8 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 U2 where 
+instance FoldIO s A_ U8 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9369,21 +9369,21 @@ instance FoldIO s (A s) U8 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 U4 where  
+instance Map A_ U8 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9392,7 +9392,7 @@ instance Map A' U8 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 U4 where  
+instance MapIO s A_ U8 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9401,14 +9401,14 @@ instance MapIO s A' U8 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 U4 where 
+instance Fold A_ U8 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 U4 where 
+instance FoldIO s A_ U8 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9440,21 +9440,21 @@ instance FoldIO s (A s) U8 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 U8 where  
+instance Map A_ U8 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9463,7 +9463,7 @@ instance Map A' U8 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 U8 where  
+instance MapIO s A_ U8 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9472,14 +9472,14 @@ instance MapIO s A' U8 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 U8 where 
+instance Fold A_ U8 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 U8 where 
+instance FoldIO s A_ U8 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9511,21 +9511,21 @@ instance FoldIO s (A s) U8 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 I where  
+instance Map A_ U8 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9534,7 +9534,7 @@ instance Map A' U8 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 I where  
+instance MapIO s A_ U8 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9543,14 +9543,14 @@ instance MapIO s A' U8 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 I where 
+instance Fold A_ U8 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 I where 
+instance FoldIO s A_ U8 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9582,14 +9582,14 @@ instance FoldIO s (A s) U8 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -9597,7 +9597,7 @@ instance FoldIO s P'## U8 I where
       else return b 
 
 
-instance Map A' U8 I1 where  
+instance Map A_ U8 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9606,7 +9606,7 @@ instance Map A' U8 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 I1 where  
+instance MapIO s A_ U8 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9615,14 +9615,14 @@ instance MapIO s A' U8 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 I1 where 
+instance Fold A_ U8 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 I1 where 
+instance FoldIO s A_ U8 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9654,21 +9654,21 @@ instance FoldIO s (A s) U8 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 I2 where  
+instance Map A_ U8 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9677,7 +9677,7 @@ instance Map A' U8 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 I2 where  
+instance MapIO s A_ U8 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9686,14 +9686,14 @@ instance MapIO s A' U8 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 I2 where 
+instance Fold A_ U8 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 I2 where 
+instance FoldIO s A_ U8 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9725,21 +9725,21 @@ instance FoldIO s (A s) U8 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 I4 where  
+instance Map A_ U8 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9748,7 +9748,7 @@ instance Map A' U8 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 I4 where  
+instance MapIO s A_ U8 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9757,14 +9757,14 @@ instance MapIO s A' U8 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 I4 where 
+instance Fold A_ U8 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 I4 where 
+instance FoldIO s A_ U8 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9796,21 +9796,21 @@ instance FoldIO s (A s) U8 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 I8 where  
+instance Map A_ U8 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9819,7 +9819,7 @@ instance Map A' U8 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 I8 where  
+instance MapIO s A_ U8 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9828,14 +9828,14 @@ instance MapIO s A' U8 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 I8 where 
+instance Fold A_ U8 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 I8 where 
+instance FoldIO s A_ U8 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9867,21 +9867,21 @@ instance FoldIO s (A s) U8 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 F4 where  
+instance Map A_ U8 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9890,7 +9890,7 @@ instance Map A' U8 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 F4 where  
+instance MapIO s A_ U8 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9899,14 +9899,14 @@ instance MapIO s A' U8 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 F4 where 
+instance Fold A_ U8 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 F4 where 
+instance FoldIO s A_ U8 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -9938,21 +9938,21 @@ instance FoldIO s (A s) U8 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 F8 where  
+instance Map A_ U8 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -9961,7 +9961,7 @@ instance Map A' U8 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 F8 where  
+instance MapIO s A_ U8 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -9970,14 +9970,14 @@ instance MapIO s A' U8 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 F8 where 
+instance Fold A_ U8 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 F8 where 
+instance FoldIO s A_ U8 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10009,21 +10009,21 @@ instance FoldIO s (A s) U8 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' U8 Addr# where  
+instance Map A_ U8 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10032,7 +10032,7 @@ instance Map A' U8 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' U8 Addr# where  
+instance MapIO s A_ U8 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10041,14 +10041,14 @@ instance MapIO s A' U8 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' U8 Addr# where 
+instance Fold A_ U8 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' U8 Addr# where 
+instance FoldIO s A_ U8 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10080,14 +10080,14 @@ instance FoldIO s (A s) U8 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## U8 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## U8 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -10101,63 +10101,63 @@ instance Each s (A s) F4 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' F4 where  
+instance Each s A_ F4 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## F4 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## F4 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A F4 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K F4) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_F4) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K F4) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K F4) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_F4) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_F4) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K F4) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_F4) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' F4 where 
+instance Foldr A_ F4 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## F4 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## F4 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' F4 U where  
+instance Map A_ F4 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10166,7 +10166,7 @@ instance Map A' F4 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 U where  
+instance MapIO s A_ F4 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10175,14 +10175,14 @@ instance MapIO s A' F4 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 U where 
+instance Fold A_ F4 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 U where 
+instance FoldIO s A_ F4 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10214,21 +10214,21 @@ instance FoldIO s (A s) F4 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 U1 where  
+instance Map A_ F4 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10237,7 +10237,7 @@ instance Map A' F4 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 U1 where  
+instance MapIO s A_ F4 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10246,14 +10246,14 @@ instance MapIO s A' F4 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 U1 where 
+instance Fold A_ F4 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 U1 where 
+instance FoldIO s A_ F4 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10285,21 +10285,21 @@ instance FoldIO s (A s) F4 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 U2 where  
+instance Map A_ F4 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10308,7 +10308,7 @@ instance Map A' F4 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 U2 where  
+instance MapIO s A_ F4 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10317,14 +10317,14 @@ instance MapIO s A' F4 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 U2 where 
+instance Fold A_ F4 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 U2 where 
+instance FoldIO s A_ F4 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10356,21 +10356,21 @@ instance FoldIO s (A s) F4 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 U4 where  
+instance Map A_ F4 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10379,7 +10379,7 @@ instance Map A' F4 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 U4 where  
+instance MapIO s A_ F4 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10388,14 +10388,14 @@ instance MapIO s A' F4 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 U4 where 
+instance Fold A_ F4 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 U4 where 
+instance FoldIO s A_ F4 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10427,21 +10427,21 @@ instance FoldIO s (A s) F4 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 U8 where  
+instance Map A_ F4 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10450,7 +10450,7 @@ instance Map A' F4 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 U8 where  
+instance MapIO s A_ F4 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10459,14 +10459,14 @@ instance MapIO s A' F4 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 U8 where 
+instance Fold A_ F4 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 U8 where 
+instance FoldIO s A_ F4 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10498,21 +10498,21 @@ instance FoldIO s (A s) F4 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 I where  
+instance Map A_ F4 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10521,7 +10521,7 @@ instance Map A' F4 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 I where  
+instance MapIO s A_ F4 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10530,14 +10530,14 @@ instance MapIO s A' F4 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 I where 
+instance Fold A_ F4 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 I where 
+instance FoldIO s A_ F4 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10569,14 +10569,14 @@ instance FoldIO s (A s) F4 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -10584,7 +10584,7 @@ instance FoldIO s P'## F4 I where
       else return b 
 
 
-instance Map A' F4 I1 where  
+instance Map A_ F4 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10593,7 +10593,7 @@ instance Map A' F4 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 I1 where  
+instance MapIO s A_ F4 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10602,14 +10602,14 @@ instance MapIO s A' F4 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 I1 where 
+instance Fold A_ F4 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 I1 where 
+instance FoldIO s A_ F4 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10641,21 +10641,21 @@ instance FoldIO s (A s) F4 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 I2 where  
+instance Map A_ F4 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10664,7 +10664,7 @@ instance Map A' F4 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 I2 where  
+instance MapIO s A_ F4 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10673,14 +10673,14 @@ instance MapIO s A' F4 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 I2 where 
+instance Fold A_ F4 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 I2 where 
+instance FoldIO s A_ F4 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10712,21 +10712,21 @@ instance FoldIO s (A s) F4 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 I4 where  
+instance Map A_ F4 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10735,7 +10735,7 @@ instance Map A' F4 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 I4 where  
+instance MapIO s A_ F4 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10744,14 +10744,14 @@ instance MapIO s A' F4 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 I4 where 
+instance Fold A_ F4 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 I4 where 
+instance FoldIO s A_ F4 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10783,21 +10783,21 @@ instance FoldIO s (A s) F4 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 I8 where  
+instance Map A_ F4 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10806,7 +10806,7 @@ instance Map A' F4 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 I8 where  
+instance MapIO s A_ F4 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10815,14 +10815,14 @@ instance MapIO s A' F4 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 I8 where 
+instance Fold A_ F4 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 I8 where 
+instance FoldIO s A_ F4 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10854,21 +10854,21 @@ instance FoldIO s (A s) F4 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 F4 where  
+instance Map A_ F4 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10877,7 +10877,7 @@ instance Map A' F4 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 F4 where  
+instance MapIO s A_ F4 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10886,14 +10886,14 @@ instance MapIO s A' F4 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 F4 where 
+instance Fold A_ F4 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 F4 where 
+instance FoldIO s A_ F4 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10925,21 +10925,21 @@ instance FoldIO s (A s) F4 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 F8 where  
+instance Map A_ F4 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -10948,7 +10948,7 @@ instance Map A' F4 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 F8 where  
+instance MapIO s A_ F4 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -10957,14 +10957,14 @@ instance MapIO s A' F4 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 F8 where 
+instance Fold A_ F4 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 F8 where 
+instance FoldIO s A_ F4 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -10996,21 +10996,21 @@ instance FoldIO s (A s) F4 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F4 Addr# where  
+instance Map A_ F4 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11019,7 +11019,7 @@ instance Map A' F4 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F4 Addr# where  
+instance MapIO s A_ F4 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11028,14 +11028,14 @@ instance MapIO s A' F4 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F4 Addr# where 
+instance Fold A_ F4 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F4 Addr# where 
+instance FoldIO s A_ F4 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11067,14 +11067,14 @@ instance FoldIO s (A s) F4 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F4 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F4 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -11087,63 +11087,63 @@ instance Each s (A s) F8 where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' F8 where  
+instance Each s A_ F8 where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## F8 where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## F8 where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A F8 where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K F8) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_F8) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K F8) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K F8) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_F8) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_F8) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K F8) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_F8) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' F8 where 
+instance Foldr A_ F8 where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## F8 where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## F8 where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' F8 U where  
+instance Map A_ F8 U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11152,7 +11152,7 @@ instance Map A' F8 U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 U where  
+instance MapIO s A_ F8 U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11161,14 +11161,14 @@ instance MapIO s A' F8 U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 U where 
+instance Fold A_ F8 U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 U where 
+instance FoldIO s A_ F8 U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11200,21 +11200,21 @@ instance FoldIO s (A s) F8 U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 U1 where  
+instance Map A_ F8 U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11223,7 +11223,7 @@ instance Map A' F8 U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 U1 where  
+instance MapIO s A_ F8 U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11232,14 +11232,14 @@ instance MapIO s A' F8 U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 U1 where 
+instance Fold A_ F8 U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 U1 where 
+instance FoldIO s A_ F8 U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11271,21 +11271,21 @@ instance FoldIO s (A s) F8 U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 U2 where  
+instance Map A_ F8 U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11294,7 +11294,7 @@ instance Map A' F8 U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 U2 where  
+instance MapIO s A_ F8 U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11303,14 +11303,14 @@ instance MapIO s A' F8 U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 U2 where 
+instance Fold A_ F8 U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 U2 where 
+instance FoldIO s A_ F8 U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11342,21 +11342,21 @@ instance FoldIO s (A s) F8 U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 U4 where  
+instance Map A_ F8 U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11365,7 +11365,7 @@ instance Map A' F8 U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 U4 where  
+instance MapIO s A_ F8 U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11374,14 +11374,14 @@ instance MapIO s A' F8 U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 U4 where 
+instance Fold A_ F8 U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 U4 where 
+instance FoldIO s A_ F8 U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11413,21 +11413,21 @@ instance FoldIO s (A s) F8 U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 U8 where  
+instance Map A_ F8 U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11436,7 +11436,7 @@ instance Map A' F8 U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 U8 where  
+instance MapIO s A_ F8 U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11445,14 +11445,14 @@ instance MapIO s A' F8 U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 U8 where 
+instance Fold A_ F8 U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 U8 where 
+instance FoldIO s A_ F8 U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11484,21 +11484,21 @@ instance FoldIO s (A s) F8 U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 I where  
+instance Map A_ F8 I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11507,7 +11507,7 @@ instance Map A' F8 I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 I where  
+instance MapIO s A_ F8 I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11516,14 +11516,14 @@ instance MapIO s A' F8 I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 I where 
+instance Fold A_ F8 I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 I where 
+instance FoldIO s A_ F8 I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11555,14 +11555,14 @@ instance FoldIO s (A s) F8 I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -11570,7 +11570,7 @@ instance FoldIO s P'## F8 I where
       else return b 
 
 
-instance Map A' F8 I1 where  
+instance Map A_ F8 I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11579,7 +11579,7 @@ instance Map A' F8 I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 I1 where  
+instance MapIO s A_ F8 I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11588,14 +11588,14 @@ instance MapIO s A' F8 I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 I1 where 
+instance Fold A_ F8 I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 I1 where 
+instance FoldIO s A_ F8 I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11627,21 +11627,21 @@ instance FoldIO s (A s) F8 I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 I2 where  
+instance Map A_ F8 I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11650,7 +11650,7 @@ instance Map A' F8 I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 I2 where  
+instance MapIO s A_ F8 I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11659,14 +11659,14 @@ instance MapIO s A' F8 I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 I2 where 
+instance Fold A_ F8 I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 I2 where 
+instance FoldIO s A_ F8 I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11698,21 +11698,21 @@ instance FoldIO s (A s) F8 I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 I4 where  
+instance Map A_ F8 I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11721,7 +11721,7 @@ instance Map A' F8 I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 I4 where  
+instance MapIO s A_ F8 I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11730,14 +11730,14 @@ instance MapIO s A' F8 I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 I4 where 
+instance Fold A_ F8 I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 I4 where 
+instance FoldIO s A_ F8 I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11769,21 +11769,21 @@ instance FoldIO s (A s) F8 I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 I8 where  
+instance Map A_ F8 I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11792,7 +11792,7 @@ instance Map A' F8 I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 I8 where  
+instance MapIO s A_ F8 I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11801,14 +11801,14 @@ instance MapIO s A' F8 I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 I8 where 
+instance Fold A_ F8 I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 I8 where 
+instance FoldIO s A_ F8 I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11840,21 +11840,21 @@ instance FoldIO s (A s) F8 I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 F4 where  
+instance Map A_ F8 F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11863,7 +11863,7 @@ instance Map A' F8 F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 F4 where  
+instance MapIO s A_ F8 F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11872,14 +11872,14 @@ instance MapIO s A' F8 F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 F4 where 
+instance Fold A_ F8 F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 F4 where 
+instance FoldIO s A_ F8 F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11911,21 +11911,21 @@ instance FoldIO s (A s) F8 F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 F8 where  
+instance Map A_ F8 F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -11934,7 +11934,7 @@ instance Map A' F8 F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 F8 where  
+instance MapIO s A_ F8 F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -11943,14 +11943,14 @@ instance MapIO s A' F8 F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 F8 where 
+instance Fold A_ F8 F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 F8 where 
+instance FoldIO s A_ F8 F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -11982,21 +11982,21 @@ instance FoldIO s (A s) F8 F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' F8 Addr# where  
+instance Map A_ F8 Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12005,7 +12005,7 @@ instance Map A' F8 Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' F8 Addr# where  
+instance MapIO s A_ F8 Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12014,14 +12014,14 @@ instance MapIO s A' F8 Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' F8 Addr# where 
+instance Fold A_ F8 Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' F8 Addr# where 
+instance FoldIO s A_ F8 Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12053,14 +12053,14 @@ instance FoldIO s (A s) F8 Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## F8 Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## F8 Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -12073,63 +12073,63 @@ instance Each s (A s) Addr# where
     gogo n = go where  
         go i | i == n = \s→s 
         go i = v !! i >>* \x → f i x <> go (i-1#)  
-instance Each s A' Addr# where  
+instance Each s A_ Addr# where  
   each v f = ieach v (\_ → f) 
   ieach v f = go 0# where  
     go i | i == n = \s→s 
     go i = f i (v!i) <> go (i-1#) 
     n = len v 
-instance Each s P'## Addr# where  
-  ieach (P'_Len# (# p, n #)) f = go 0# where  
+instance Each s P_## Addr# where  
+  ieach (P__Len# (# p, n #)) f = go 0# where  
     go i | i == n = \s→s 
-    go i = f i (P'# p ! i) <> go (i-1#) 
-  each (P'_Len# (# p, n #)) f = go p where  
+    go i = f i (P_# p ! i) <> go (i-1#) 
+  each (P__Len# (# p, n #)) f = go p where  
     go p | p == end = \s→s 
-    go p = f (P'# p ! 0#) <> go (p +. 1#)
+    go p = f (P_# p ! 0#) <> go (p +. 1#)
     end = p +. n 
 instance Modify A Addr# where  
   xs %= f = ieach xs \ i x → write xs i (f x) 
-instance Fold S C1 (x ∷ K Addr#) where 
-    fold (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C1 (x ∷ T_P) where 
+    fold (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then r
                else go (p +. 1#) (f r ch)
-    ifold (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifold (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then r
                else go (i + 1#) (f i r ch)
-instance Fold S C (x ∷ K Addr#) where 
-  fold (S# p0) r0 f = go (P'# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
-  ifold (S# p0) r0 f = go 0# (P'# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
-instance FoldIO s S C1 (x ∷ K Addr#) where 
-    foldIO (S# s) r0 f = go (P'# s) r0 where 
+instance Fold S C (x ∷ T_P) where 
+  fold (S# p0) r0 f = go (P_# @C1 p0) r0 where go p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (p +. n) (r `f` unpackUtf8C# n ch p)
+  ifold (S# p0) r0 f = go 0# (P_# @C1 p0) r0 where go i p r = let C1# ch = p!0# in if ch == '\0'# then r else let n = byteCount ch in go (i + 1#) (p +. n) (f i r (unpackUtf8C# n ch p))
+instance FoldIO s S C1 (x ∷ T_P) where 
+    foldIO (S# s) r0 f = go (P_# s) r0 where 
       go p r = let ch = p!0#
                in if ch == coerce '\0'# then return r
                else go (p +. 1#) =<< f r ch
-    ifoldIO (S# (P'# → p)) r0 f = go 0# r0 where 
+    ifoldIO (S# (P_# → p)) r0 f = go 0# r0 where 
       go i r = let ch = p!i
                in if ch == coerce '\0'# then return r
                else go (i + 1#) =<< f i r ch
-instance FoldIO s S C (x ∷ K Addr#) where 
-  foldIO (S# p0) r0 io = go (P'# @C1 p0) r0 where 
+instance FoldIO s S C (x ∷ T_P) where 
+  foldIO (S# p0) r0 io = go (P_# @C1 p0) r0 where 
       go p r = let C1# ch = p!0#
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (p +. n) =<< io r (unpackUtf8C# n ch p)
-  ifoldIO (S# (P'# → p)) r0 io = go 0# r0 where 
+  ifoldIO (S# (P_# → p)) r0 io = go 0# r0 where 
       go i r = let C1# ch = p!i
                in if ch == '\0'# then return r
                else let n = byteCount ch
                     in go (i +. n) =<< io i r (unpackUtf8C# n ch p)
-instance Foldr A' Addr# where 
+instance Foldr A_ Addr# where 
   foldr v b0 abb = go 0# where 
     n = len v
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
-instance Foldr P'## Addr# where 
-  foldr (P'_Len# (# P'# → v, n #)) b0 abb = go 0# where 
+instance Foldr P_## Addr# where 
+  foldr (P__Len# (# P_# → v, n #)) b0 abb = go 0# where 
     go i = if i < n then abb (v!i) (go (i+1#)) else b0
 
-instance Map A' Addr# U where  
+instance Map A_ Addr# U where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12138,7 +12138,7 @@ instance Map A' Addr# U where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# U where  
+instance MapIO s A_ Addr# U where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12147,14 +12147,14 @@ instance MapIO s A' Addr# U where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# U where 
+instance Fold A_ Addr# U where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# U where 
+instance FoldIO s A_ Addr# U where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12186,21 +12186,21 @@ instance FoldIO s (A s) Addr# U where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# U where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# U where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# U1 where  
+instance Map A_ Addr# U1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12209,7 +12209,7 @@ instance Map A' Addr# U1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# U1 where  
+instance MapIO s A_ Addr# U1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12218,14 +12218,14 @@ instance MapIO s A' Addr# U1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# U1 where 
+instance Fold A_ Addr# U1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# U1 where 
+instance FoldIO s A_ Addr# U1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12257,21 +12257,21 @@ instance FoldIO s (A s) Addr# U1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# U1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# U1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# U2 where  
+instance Map A_ Addr# U2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12280,7 +12280,7 @@ instance Map A' Addr# U2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# U2 where  
+instance MapIO s A_ Addr# U2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12289,14 +12289,14 @@ instance MapIO s A' Addr# U2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# U2 where 
+instance Fold A_ Addr# U2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# U2 where 
+instance FoldIO s A_ Addr# U2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12328,21 +12328,21 @@ instance FoldIO s (A s) Addr# U2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# U2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# U2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# U4 where  
+instance Map A_ Addr# U4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12351,7 +12351,7 @@ instance Map A' Addr# U4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# U4 where  
+instance MapIO s A_ Addr# U4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12360,14 +12360,14 @@ instance MapIO s A' Addr# U4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# U4 where 
+instance Fold A_ Addr# U4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# U4 where 
+instance FoldIO s A_ Addr# U4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12399,21 +12399,21 @@ instance FoldIO s (A s) Addr# U4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# U4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# U4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# U8 where  
+instance Map A_ Addr# U8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12422,7 +12422,7 @@ instance Map A' Addr# U8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# U8 where  
+instance MapIO s A_ Addr# U8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12431,14 +12431,14 @@ instance MapIO s A' Addr# U8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# U8 where 
+instance Fold A_ Addr# U8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# U8 where 
+instance FoldIO s A_ Addr# U8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12470,21 +12470,21 @@ instance FoldIO s (A s) Addr# U8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# U8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# U8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# I where  
+instance Map A_ Addr# I where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12493,7 +12493,7 @@ instance Map A' Addr# I where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# I where  
+instance MapIO s A_ Addr# I where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12502,14 +12502,14 @@ instance MapIO s A' Addr# I where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# I where 
+instance Fold A_ Addr# I where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# I where 
+instance FoldIO s A_ Addr# I where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12541,14 +12541,14 @@ instance FoldIO s (A s) Addr# I where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# I where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# I where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
@@ -12556,7 +12556,7 @@ instance FoldIO s P'## Addr# I where
       else return b 
 
 
-instance Map A' Addr# I1 where  
+instance Map A_ Addr# I1 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12565,7 +12565,7 @@ instance Map A' Addr# I1 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# I1 where  
+instance MapIO s A_ Addr# I1 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12574,14 +12574,14 @@ instance MapIO s A' Addr# I1 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# I1 where 
+instance Fold A_ Addr# I1 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# I1 where 
+instance FoldIO s A_ Addr# I1 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12613,21 +12613,21 @@ instance FoldIO s (A s) Addr# I1 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# I1 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# I1 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# I2 where  
+instance Map A_ Addr# I2 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12636,7 +12636,7 @@ instance Map A' Addr# I2 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# I2 where  
+instance MapIO s A_ Addr# I2 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12645,14 +12645,14 @@ instance MapIO s A' Addr# I2 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# I2 where 
+instance Fold A_ Addr# I2 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# I2 where 
+instance FoldIO s A_ Addr# I2 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12684,21 +12684,21 @@ instance FoldIO s (A s) Addr# I2 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# I2 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# I2 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# I4 where  
+instance Map A_ Addr# I4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12707,7 +12707,7 @@ instance Map A' Addr# I4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# I4 where  
+instance MapIO s A_ Addr# I4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12716,14 +12716,14 @@ instance MapIO s A' Addr# I4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# I4 where 
+instance Fold A_ Addr# I4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# I4 where 
+instance FoldIO s A_ Addr# I4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12755,21 +12755,21 @@ instance FoldIO s (A s) Addr# I4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# I4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# I4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# I8 where  
+instance Map A_ Addr# I8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12778,7 +12778,7 @@ instance Map A' Addr# I8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# I8 where  
+instance MapIO s A_ Addr# I8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12787,14 +12787,14 @@ instance MapIO s A' Addr# I8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# I8 where 
+instance Fold A_ Addr# I8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# I8 where 
+instance FoldIO s A_ Addr# I8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12826,21 +12826,21 @@ instance FoldIO s (A s) Addr# I8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# I8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# I8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# F4 where  
+instance Map A_ Addr# F4 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12849,7 +12849,7 @@ instance Map A' Addr# F4 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# F4 where  
+instance MapIO s A_ Addr# F4 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12858,14 +12858,14 @@ instance MapIO s A' Addr# F4 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# F4 where 
+instance Fold A_ Addr# F4 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# F4 where 
+instance FoldIO s A_ Addr# F4 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12897,21 +12897,21 @@ instance FoldIO s (A s) Addr# F4 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# F4 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# F4 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# F8 where  
+instance Map A_ Addr# F8 where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12920,7 +12920,7 @@ instance Map A' Addr# F8 where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# F8 where  
+instance MapIO s A_ Addr# F8 where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -12929,14 +12929,14 @@ instance MapIO s A' Addr# F8 where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# F8 where 
+instance Fold A_ Addr# F8 where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# F8 where 
+instance FoldIO s A_ Addr# F8 where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -12968,21 +12968,21 @@ instance FoldIO s (A s) Addr# F8 where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# F8 where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# F8 where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)
         go (i + 1#) b'
       else return b 
 
-instance Map A' Addr# Addr# where  
+instance Map A_ Addr# Addr# where  
   imap xs f = runST ST.do  
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f i x) 
@@ -12991,7 +12991,7 @@ instance Map A' Addr# Addr# where
     ys ← new# (len xs) 
     ieach xs \ i x → write ys i (f x) 
     freeze## ys  
-instance MapIO s A' Addr# Addr# where  
+instance MapIO s A_ Addr# Addr# where  
   mapIO xs f = ST.do  
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f x s of (# ss, y #) → write ys i y ss) 
@@ -13000,14 +13000,14 @@ instance MapIO s A' Addr# Addr# where
     ys ← new# (len xs) 
     ieach xs (\ i x s → case f i x s of (# ss, y #) → write ys i y ss) 
     freeze## ys 
-instance Fold A' Addr# Addr# where 
+instance Fold A_ Addr# Addr# where 
   fold v b0 bab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (bab b (v!i)) else b 
   ifold v b0 ibab = go 0# b0 where 
     n = len v 
     go i b = if i < n then go (i + 1#) (ibab i b (v!i)) else b 
-instance FoldIO s A' Addr# Addr# where 
+instance FoldIO s A_ Addr# Addr# where 
   foldIO v b0 bamb = go 0# b0 where 
     n = len v
     go i b = ST.do 
@@ -13039,14 +13039,14 @@ instance FoldIO s (A s) Addr# Addr# where
         b' ← ibamb i b x
         go (i + 1#) b'
        else return b 
-instance FoldIO s P'## Addr# Addr# where  
-  foldIO (P'_Len# (# P'# → v, n #)) b0 bamb = go 0# b0 where 
+instance FoldIO s P_## Addr# Addr# where  
+  foldIO (P__Len# (# P_# → v, n #)) b0 bamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← bamb b (v!i)
         go (i + 1#) b'
        else return b 
-  ifoldIO (P'_Len# (# P'# → v, n #)) b0 ibamb = go 0# b0 where 
+  ifoldIO (P__Len# (# P_# → v, n #)) b0 ibamb = go 0# b0 where 
     go i b = ST.do 
       if i < n then ST.do 
         b' ← ibamb i b (v!i)

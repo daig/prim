@@ -14,9 +14,9 @@ newNoFinalizer ∷ k → v → IO (Weak# v)
 newNoFinalizer = mkWeakNoFinalizer#
 
 -- | Add a C finalizer
-addCFinalizer ∷ Addr# {- ^ @fptr@: C function pointer to add -}
-              → Addr# {- ^ @ptr@: main argument ptr passed to @fptr(ptr)@ -}
-              → (# (##) | Addr# #) {- ^ @env@: optional environment ptr argument passed to @fptr(env,ptr)@ -}
+addCFinalizer ∷ P# {- ^ @fptr@: C function pointer to add -}
+              → P# {- ^ @ptr@: main argument ptr passed to @fptr(ptr)@ -}
+              → (# (##) | P# #) {- ^ @env@: optional environment ptr argument passed to @fptr(env,ptr)@ -}
               → Weak# v
               → IO B# {- ^ success -}
 addCFinalizer fptr x (cast → (# B# useEnv', env #)) w = coerce do addCFinalizerToWeak# fptr x useEnv' env w

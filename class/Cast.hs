@@ -51,7 +51,7 @@ instance Cast B# U4 where cast = coerce (gtWord32# (cast 0##))
 -- | Truthiness
 instance Cast B# U8 where cast = coerce (gtWord64# (cast 0##))
 -- | Truthiness
-instance Cast B# Addr# where cast = coerce neAddr# nullAddr#
+instance Cast B# P# where cast = coerce neAddr# nullAddr#
 -- | Truthiness
 instance Cast B# C where cast = coerce neChar# '\NUL'#
 -- | Truthiness
@@ -150,16 +150,16 @@ instance Cast U I8 where cast i = int2Word# (int64ToInt# i)
 -- | Hash
 instance Cast I (StableName# a) where cast = stableNameToInt#
 
--- | Extract (copy) the live portion of a 'A'##'
-instance Prim x ⇒ Cast (A' x) (A'## x) where
+-- | Extract (copy) the live portion of a 'A_##'
+instance Prim x ⇒ Cast (A_ x) (A_## x) where
   cast (Bytes'_Off_Len# (# x, size @x → off, size @x → n #)) = runST ST.do
     mv <- newByteArray# n
     copyByteArray# x off mv 0# n
     v <- unsafeFreezeByteArray# mv
     return (coerce v)
 
--- | Extract (copy) the live portion of a 'A'#'
-instance Prim x ⇒ Cast (A' x) (A'# x) where
+-- | Extract (copy) the live portion of a 'A_#'
+instance Prim x ⇒ Cast (A_ x) (A_# x) where
   cast (Bytes'_Off# (# x, size @x → off #)) = runST ST.do
     let n = sizeofByteArray# x -# off
     mv <- newByteArray# n
@@ -168,22 +168,22 @@ instance Prim x ⇒ Cast (A' x) (A'# x) where
     return (coerce v)
 
 -- | Extract (copy) the live portion of a 'UnboxedRef'
-instance Prim x ⇒ Cast (A'_ x) (A'_# x) where
-  cast (Pinned'_Off# (# x, size @x → off #)) = runST ST.do
+instance Prim x ⇒ Cast (Pinned_ x) (Pinned_# x) where
+  cast (Pinned__Off# (# x, size @x → off #)) = runST ST.do
     let n = sizeofByteArray# x -# off
     mv <- newByteArray# n
     copyByteArray# x off mv 0# n
     v <- unsafeFreezeByteArray# mv
     return (coerce v)
 
--- | Wrap (no copy) 'ByteArray#' in a full-size 'Buffer'
-instance Prim x ⇒ Cast (A'## x) (A' x) where
+-- | Wrap (no copy) 'T_A' in a full-size 'Buffer'
+instance Prim x ⇒ Cast (A_## x) (A_ x) where
   cast x = Bytes'_Off_Len# (# coerce x, 0#, sizeofByteArray# (coerce x) / size @x 1# #)
 
-instance Cast Addr# ByteArray# where cast = byteArrayContents#
-instance Cast Addr# (MutableByteArray# s) where cast = mutableByteArrayContents#
-instance Cast (P' x) (A'_ x) where cast = coerce byteArrayContents#
-instance Cast (P s x) (A_ s x) where cast = coerce mutableByteArrayContents#
+instance Cast P# ByteArray# where cast = byteArrayContents#
+instance Cast P# (MutableByteArray# s) where cast = mutableByteArrayContents#
+instance Cast (P_ x) (Pinned_ x) where cast = coerce byteArrayContents#
+instance Cast (P s x) (Pinned s x) where cast = coerce mutableByteArrayContents#
 
 instance Cast I C where cast = ord#
 instance Cast U4 C where cast c = wordToWord32# (int2Word# (ord# c))
@@ -193,9 +193,9 @@ instance Cast C1 U1 where cast c = C1# (chr# (word2Int# (word8ToWord# c)))
 instance Cast C I where cast = chr#
 
 -- | This pattern is strongly deprecated
-instance Cast Addr# I where cast = int2Addr#
+instance Cast P# I where cast = int2Addr#
 -- | This pattern is strongly deprecated
-instance Cast I Addr# where cast = addr2Int#
+instance Cast I P# where cast = addr2Int#
 
 -- | Atomically run a transaction
 instance Cast (IO a) (STM a) where cast = unsafeCoerce# (atomically# @a)
@@ -204,61 +204,61 @@ instance Cast Bool B# where cast = coerce isTrue#
 instance Cast B# Bool where cast p = B# if p then 1# else 0#
 
 #define INST_CAST_CMP(X)\
-instance Cast ((x ∷ K X) → x → Bool) (x → x → B#) where {cast f = \a b → cast (f a b)}
+instance Cast ((x ∷ X) → x → Bool) (x → x → B#) where {cast f = \a b → cast (f a b)}
 
-INST_CAST_CMP(I)
-INST_CAST_CMP(I1)
-INST_CAST_CMP(I2)
-INST_CAST_CMP(I4)
-INST_CAST_CMP(I8)
-INST_CAST_CMP(U)
-INST_CAST_CMP(U1)
-INST_CAST_CMP(U2)
-INST_CAST_CMP(U4)
-INST_CAST_CMP(U8)
-INST_CAST_CMP(F4)
-INST_CAST_CMP(F8)
-INST_CAST_CMP((##))
-INST_CAST_CMP(())
-INST_CAST_CMP(Addr#)
-INST_CAST_CMP(ByteArray#)
-INST_CAST_CMP((# ByteArray#, I #))
-INST_CAST_CMP((# ByteArray#, I, I #))
+INST_CAST_CMP(T_I)
+INST_CAST_CMP(T_I1)
+INST_CAST_CMP(T_I2)
+INST_CAST_CMP(T_I4)
+INST_CAST_CMP(T_I8)
+INST_CAST_CMP(T_U)
+INST_CAST_CMP(T_U1)
+INST_CAST_CMP(T_U2)
+INST_CAST_CMP(T_U4)
+INST_CAST_CMP(T_U8)
+INST_CAST_CMP(T_F4)
+INST_CAST_CMP(T_F8)
+INST_CAST_CMP(T0)
+INST_CAST_CMP(★)
+INST_CAST_CMP(T_P)
+INST_CAST_CMP(T_A)
+INST_CAST_CMP(T_A#)
+INST_CAST_CMP(T_A##)
 
 -- | Convert a tag and a (possibly invalid) value into an unboxed '(?)'
 -- | Convert a tag (_True_ if it's _Err_) and a value into an unboxed 'Result'.
 
 #define INST_CAST_SUM(X)\
-instance Cast (ST s (# (y ∷ K (##)) | (x ∷ K X)  #)) (ST' s x) where { ;\
+instance Cast (ST s (# (y ∷ T0) | (x ∷ X)  #)) (ST' s x) where { ;\
   cast st = \s → case st s of (# s', coerce → t, x #) → (# s', unsafeCoerce# (# t +# 1#, x #) #)} ;\
-instance Cast (ST s (# (x ∷ K X) | (y ∷ K (##))  #)) (ST' s x) where { ;\
+instance Cast (ST s (# (x ∷ X) | (y ∷ T0)  #)) (ST' s x) where { ;\
   cast st = \s → case st s of (# s', coerce → t, x #) → (# s', unsafeCoerce# (# t +# 1#, x #) #)} ;\
-instance Cast (IO (# (x ∷ K X) | (y ∷ K (##))  #)) (IO' x) where { ;\
+instance Cast (IO (# (x ∷ X) | (y ∷ T0)  #)) (IO' x) where { ;\
   cast st = \s → case st s of (# s', coerce → t, x #) → (# s', unsafeCoerce# (# t +# 1#, x #) #)} ;\
-instance Cast (ST s (# (x ∷ K X) | x  #)) (ST' s x) where { ;\
+instance Cast (ST s (# (x ∷ X) | x  #)) (ST' s x) where { ;\
   cast st = \s → case st s of (# s', coerce → t, x #) → (# s', unsafeCoerce# (# t +# 1#, x #) #)} ;\
-instance Cast (# (y ∷ K (##)) | (x ∷ K X) #) (# B#, x #) where { ;\
+instance Cast (# (y ∷ T0) | (x ∷ X) #) (# B#, x #) where { ;\
   cast (# coerce → t, x #) = unsafeCoerce# (# t +# 1#, x #) } ;\
-instance Cast (# (x ∷ K X) | (y ∷ K (##)) #) (# B#, x #) where { ;\
+instance Cast (# (x ∷ X) | (y ∷ T0) #) (# B#, x #) where { ;\
   cast (# coerce → t, x #) = unsafeCoerce# (# t +# 1#, x #) } ;\
-instance Cast (# (x ∷ K X) | x #) (# B#, x #) where { ;\
+instance Cast (# (x ∷ X) | x #) (# B#, x #) where { ;\
   cast (# coerce → t, x #) = unsafeCoerce# (# t +# 1#, x #) } ;\
 
-INST_CAST_SUM(I)
-INST_CAST_SUM(I1)
-INST_CAST_SUM(I2)
-INST_CAST_SUM(I4)
-INST_CAST_SUM(I8)
-INST_CAST_SUM(U)
-INST_CAST_SUM(U1)
-INST_CAST_SUM(U2)
-INST_CAST_SUM(U4)
-INST_CAST_SUM(U8)
-INST_CAST_SUM(F4)
-INST_CAST_SUM(F8)
-INST_CAST_SUM(Addr#)
-INST_CAST_SUM(())
-INST_CAST_SUM((##))
+INST_CAST_SUM(T_I)
+INST_CAST_SUM(T_I1)
+INST_CAST_SUM(T_I2)
+INST_CAST_SUM(T_I4)
+INST_CAST_SUM(T_I8)
+INST_CAST_SUM(T_U)
+INST_CAST_SUM(T_U1)
+INST_CAST_SUM(T_U2)
+INST_CAST_SUM(T_U4)
+INST_CAST_SUM(T_U8)
+INST_CAST_SUM(T_F4)
+INST_CAST_SUM(T_F8)
+INST_CAST_SUM(T_P)
+INST_CAST_SUM(★)
+INST_CAST_SUM(T0)
 
 instance Cast (ST s (##)) (ST_ s) where cast st = \s → (# st s, (##) #)
 instance Cast (ST_ s) (ST s (##)) where cast st = \s → case st s of (# s', _ #) → s'
@@ -284,7 +284,7 @@ INST_CAST_UNMAYBE(U4)
 INST_CAST_UNMAYBE(U8)
 INST_CAST_UNMAYBE(F4)
 INST_CAST_UNMAYBE(F8)
-INST_CAST_UNMAYBE(Addr#)
+INST_CAST_UNMAYBE(P#)
 INST_CAST_UNMAYBE(())
 
 
@@ -302,27 +302,27 @@ INST_CAST_BOOL_EITHER2(A,U4) ;\
 INST_CAST_BOOL_EITHER2(A,U8) ;\
 INST_CAST_BOOL_EITHER2(A,F4) ;\
 INST_CAST_BOOL_EITHER2(A,F8) ;\
-INST_CAST_BOOL_EITHER2(A,Addr#) ;\
+INST_CAST_BOOL_EITHER2(A,T_P) ;\
 INST_CAST_BOOL_EITHER2(A,()) ;\
 INST_CAST_BOOL_EITHER2(A,(##)) ;\
-INST_CAST_BOOL_EITHER2(A,ByteArray#)
+INST_CAST_BOOL_EITHER2(A,T_A)
 
-INST_CAST_BOOL_EITHER1(I)
-INST_CAST_BOOL_EITHER1(I1)
-INST_CAST_BOOL_EITHER1(I2)
-INST_CAST_BOOL_EITHER1(I4)
-INST_CAST_BOOL_EITHER1(I8)
-INST_CAST_BOOL_EITHER1(U)
-INST_CAST_BOOL_EITHER1(U1)
-INST_CAST_BOOL_EITHER1(U2)
-INST_CAST_BOOL_EITHER1(U4)
-INST_CAST_BOOL_EITHER1(U8)
-INST_CAST_BOOL_EITHER1(F4)
-INST_CAST_BOOL_EITHER1(F8)
-INST_CAST_BOOL_EITHER1(Addr#)
+INST_CAST_BOOL_EITHER1(T_I)
+INST_CAST_BOOL_EITHER1(T_I1)
+INST_CAST_BOOL_EITHER1(T_I2)
+INST_CAST_BOOL_EITHER1(T_I4)
+INST_CAST_BOOL_EITHER1(T_I8)
+INST_CAST_BOOL_EITHER1(T_U)
+INST_CAST_BOOL_EITHER1(T_U1)
+INST_CAST_BOOL_EITHER1(T_U2)
+INST_CAST_BOOL_EITHER1(T_U4)
+INST_CAST_BOOL_EITHER1(T_U8)
+INST_CAST_BOOL_EITHER1(T_F4)
+INST_CAST_BOOL_EITHER1(T_F8)
+INST_CAST_BOOL_EITHER1(T_P)
 INST_CAST_BOOL_EITHER1(())
 INST_CAST_BOOL_EITHER1((##))
-INST_CAST_BOOL_EITHER1(ByteArray#)
+INST_CAST_BOOL_EITHER1(T_A)
 
 
 instance Cast Int I where cast = I#
@@ -375,4 +375,4 @@ instance Cast I (S C1) where cast = coerce cstringLength#
 -- | Interpret value if valid or fail spectacularly.
 -- The addressing happens when the unboxed tuple is matched,
 -- but the value is not evaluated.
-instance Cast (# a #) Addr# where cast = addrToAny#
+instance Cast (# a #) (P_ a) where cast = coerce (addrToAny# @a)

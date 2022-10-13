@@ -1,7 +1,7 @@
 --------------------------------------------------------------------
 -- | Description : Unboxed Arrays of Primitive Types stored at a fixed address
 --------------------------------------------------------------------
-module A.Unbox.Pinned (A'_,A'
+module A.Unbox.Pinned (Pinned_,Pinned
                -- * misc utilities
                ,module A.Unbox.Pinned
                -- * instance reexports
@@ -14,5 +14,5 @@ import Array.Shrink as X (Shrink(..))
 import Array.Pinned' as X (Pinned'(..))
 import Prim.Atomic as X (Atomic(..),Eq_Atomic(..),Num_Atomic(..),Logic_Atomic(..))
 
-aligned ∷ I {- ^ size in bytes -} → I {- ^ alignment in bytes (must be power of 2) -} → ST s (A_ s x)
+aligned ∷ I {- ^ size in bytes -} → I {- ^ alignment in bytes (must be power of 2) -} → ST s (Pinned s x)
 aligned = coerce newAlignedPinnedByteArray#

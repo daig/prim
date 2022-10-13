@@ -26,7 +26,7 @@ class Elt a x ⇒ Index x a where
   set# ∷ M a s x → I {- ^ offset -} → I {- ^ # elements to set -} → x → ST_ s
 
 -- | Create new uninitialized arrays.
-type New ∷ ∀ {rx}. (T rx → T_) → TC
+type New ∷ ∀ {rx}. (T rx → T_A) → TC
 class Array a ⇒ New a where
   -- | Create a new array with all elements initialized to the same value.
   new ∷ Index x a ⇒ I {-^ size in elements -} → x → ST s (M a s x)
@@ -34,13 +34,13 @@ class Array a ⇒ New a where
   gen ∷ Index x a ⇒ I → (I → x) → a x
 
 #define INST_NEW_BOX(L)\
-instance New (Array# ∷ T# L → T_) where { ;\
+instance New (Array# ∷ T# L → T_A) where { ;\
   new = newArray# ;\
   gen n f = runST ST.do { ;\
    xs ← new# n ;\
    let go i = if i == n then \s→s else write xs i (f i) <> go (i + 1#) in go 0# ;\
    freeze## xs }} ;\
-instance New (SmallArray# ∷ T# L → T_) where { ;\
+instance New (SmallArray# ∷ T# L → T_A) where { ;\
   new = newSmallArray#  ;\
   gen n f = runST ST.do { ;\
    xs ← new# n ;\
@@ -51,8 +51,8 @@ INST_NEW_BOX(Unlifted)
 INST_NEW_BOX(Lifted)
 
 #define INST_NEW_UB(X)\
-instance New (A' ∷ K X → T_) where { ;\
-  new ∷ ∀ (x ∷ K X) s. Index x A' ⇒ I → x → ST s (M A' s x) ;\
+instance New (A_ ∷ X → T_A) where { ;\
+  new ∷ ∀ (x ∷ X) s. Index x A_ ⇒ I → x → ST s (M A_ s x) ;\
   new n e = ST.do { ;\
     ma ← new# n ;\
     set# ma 0# n e ;\
@@ -62,19 +62,19 @@ instance New (A' ∷ K X → T_) where { ;\
    let go i = if i == n then \s→s else write xs i (f i) <> go (i + 1#) in go 0# ;\
    freeze## xs}} \
 
-INST_NEW_UB(I)
-INST_NEW_UB(I1)
-INST_NEW_UB(I2)
-INST_NEW_UB(I4)
-INST_NEW_UB(I8)
-INST_NEW_UB(U)
-INST_NEW_UB(U1)
-INST_NEW_UB(U2)
-INST_NEW_UB(U4)
-INST_NEW_UB(U8)
-INST_NEW_UB(F4)
-INST_NEW_UB(F8)
-INST_NEW_UB(Addr#)
+INST_NEW_UB(T_I)
+INST_NEW_UB(T_I1)
+INST_NEW_UB(T_I2)
+INST_NEW_UB(T_I4)
+INST_NEW_UB(T_I8)
+INST_NEW_UB(T_U)
+INST_NEW_UB(T_U1)
+INST_NEW_UB(T_U2)
+INST_NEW_UB(T_U4)
+INST_NEW_UB(T_U8)
+INST_NEW_UB(T_F4)
+INST_NEW_UB(T_F8)
+INST_NEW_UB(T_P)
 
 -- | "A.Box".
 --
@@ -88,7 +88,7 @@ instance Index x Array# where
   set# a off n x = go 0# where
     go i = case i >=# n of F# → \s → go (i +# 1#) (write a i x s)
                            T# → \s→s
-instance Index (x ∷ T_) Array# where
+instance Index (x ∷ T_A) Array# where
   write = writeArray#
   (!!) = readArray#
   (!) a i = case indexArray# a i of (# a #) → a
@@ -108,7 +108,7 @@ instance Index x SmallArray# where
   set# a off n x = go 0# where
     go i = case i >=# n of F# → \s → go (i +# 1#) (write a i x s)
                            T# → \s→s
-instance Index (x ∷ T_) SmallArray# where
+instance Index (x ∷ T_A) SmallArray# where
   write = writeSmallArray# 
   (!!) = readSmallArray# 
   (!) a i = case indexSmallArray# a i of (# a #) → a
@@ -117,23 +117,23 @@ instance Index (x ∷ T_) SmallArray# where
                            T# → \s→s
 
 #define INST_IN(TY,IX,RD,WR,SET,IXP,RDP,WRP,SETP) \
-instance (Coercible x TY) ⇒ Index x A' where {\
+instance (Coercible x TY) ⇒ Index x A_ where {\
   (!) = coerce IX#; \
   (!!) = coerce RD# ; \
   write = coerce WR# ; \
   set# a i n x = unio (SET# (coerce a) i n (coerce x))};\
-instance (Coercible x TY) ⇒ Index x P' where {\
+instance (Coercible x TY) ⇒ Index x P_ where {\
   (!) = coerce IXP#; \
   (!!) = coerce RDP# ; \
   write = coerce WRP# ; \
   set# a i n x = unio (SETP# (coerce a) i n (coerce x))}
 #define INST_IN_SPEC(TY,IX,RD,WR,SET,IXP,RDP,WRP,SETP) \
-instance {-# OVERLAPPING #-} Index (TY) A' where {\
+instance {-# OVERLAPPING #-} Index (TY) A_ where {\
   (!) = coerce IX#; \
   (!!) = coerce RD# ; \
   write = coerce WR# ; \
   set# a i n x = unio (SET# (coerce a) i n (coerce x))};\
-instance {-# OVERLAPPING #-} Index (TY) P' where {\
+instance {-# OVERLAPPING #-} Index (TY) P_ where {\
   (!) = coerce IXP#; \
   (!!) = coerce RDP# ; \
   write = coerce WRP# ; \

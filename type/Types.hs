@@ -12,21 +12,101 @@ import GHC.Num.BigNat
 import GHC.Num.Natural
 
 type N = Natural
-newtype Nat = BigNat# (A' U)
+newtype Nat = BigNat# (A_ U)
 
 -- | The kind constructor of types abstracted over 'RuntimeRep'
 type T = TYPE
--- | The kind of an unlifted type
-type T_ = TYPE (BoxedRep Unlifted)
 -- | The kind of types with no runtime representation
 type T0 = TYPE (TupleRep '[])
+-- | The kind of unconstructable (void) types 
+type T_ = TYPE (SumRep '[])
 -- | The kind constructor of boxed types
 type T# l = TYPE (BoxedRep l)
 -- | The kind of constraints
 type TC = Constraint
 
+-- | The kind of signed machine-sized numbers
+type T_I = TYPE IntRep
+-- | The kind of signed 8-bit numbers
+type T_I1 = TYPE Int8Rep
+-- | The kind of signed 16-bit numbers
+type T_I2 = TYPE Int16Rep
+-- | The kind of signed 32-bit numbers
+type T_I4 = TYPE Int32Rep
+-- | The kind of signed 64-bit numbers
+type T_I8 = TYPE Int64Rep
+-- | The kind of unsigned machine-sized numbers
+type T_U = TYPE WordRep
+-- | The kind of unsigned 8-bit numbers
+type T_U1 = TYPE Word8Rep
+-- | The kind of unsigned 16-bit numbers
+type T_U2 = TYPE Word16Rep
+-- | The kind of unsigned 32-bit numbers
+type T_U4 = TYPE Word32Rep
+-- | The kind of unsigned 64-bit numbers
+type T_U8 = TYPE Word64Rep
+-- | The kind of 32-bit floating point numbers
+type T_F4 = TYPE FloatRep
+-- | The kind of 64-bit floating point numbers
+type T_F8 = TYPE DoubleRep
+-- | The kind of foreign addresses
+type T_P = TYPE AddrRep
+-- | The kind of an unlifted type
+type T_A = TYPE (BoxedRep Unlifted)
+
+-- | The kind of optional signed machine-sized numbers
+type T_I' = TYPE (SumRep '[TupleRep '[],IntRep])
+-- | The kind of optional signed 8-bit numbers
+type T_I1' = TYPE (SumRep '[TupleRep '[],Int8Rep])
+-- | The kind of optional signed 16-bit numbers
+type T_I2' = TYPE (SumRep '[TupleRep '[],Int16Rep])
+-- | The kind of optional signed 32-bit numbers
+type T_I4' = TYPE (SumRep '[TupleRep '[],Int32Rep])
+-- | The kind of optional signed 64-bit numbers
+type T_I8' = TYPE (SumRep '[TupleRep '[],Int64Rep])
+-- | The kind of optional unsigned machine-sized numbers
+type T_U' = TYPE (SumRep '[TupleRep '[],WordRep])
+-- | The kind of optional unsigned 8-bit numbers
+type T_U1' = TYPE (SumRep '[TupleRep '[],Word8Rep])
+-- | The kind of optional unsigned 16-bit numbers
+type T_U2' = TYPE (SumRep '[TupleRep '[],Word16Rep])
+-- | The kind of optional unsigned 32-bit numbers
+type T_U4' = TYPE (SumRep '[TupleRep '[],Word32Rep])
+-- | The kind of optional unsigned 64-bit numbers
+type T_U8' = TYPE (SumRep '[TupleRep '[],Word64Rep])
+-- | The kind of optional 32-bit floating point numbers
+type T_F4' = TYPE (SumRep '[TupleRep '[],FloatRep])
+-- | The kind of optional 64-bit floating point numbers
+type T_F8' = TYPE (SumRep '[TupleRep '[],DoubleRep])
+-- | The kind of optional foreign addresses
+type T_P_ = TYPE (SumRep '[TupleRep '[],AddrRep])
+-- | The kind of optional unlifted types
+type T_A_ = TYPE (SumRep '[TupleRep '[],BoxedRep Unlifted])
+
+type I' = (# (##) | I #)
+type I1' = (# (##) | I1 #)
+type I2' = (# (##) | I2 #)
+type I4' = (# (##) | I4 #)
+type I8' = (# (##) | I8 #)
+type U' = (# (##) | U #)
+type U1' = (# (##) | U1 #)
+type U2' = (# (##) | U2 #)
+type U4' = (# (##) | U4 #)
+type U8' = (# (##) | U8 #)
+type F4' = (# (##) | F4 #)
+type F8' = (# (##) | F8 #)
+type P'# = (# (##) | P# #)
+
+-- | The kind of unlifted refs
+type T_A# = TYPE (TupleRep '[BoxedRep Unlifted, IntRep])
+-- | The kind of unlifted slices
+type T_A## = TYPE (TupleRep '[BoxedRep Unlifted, IntRep,IntRep])
+
+-- | The kind of Foreign slices
+type T_P## = TYPE (TupleRep '[AddrRep, IntRep])
+
 -- | The kind of a type
-type K (a ∷ k) = k
+-- type K (a ∷ k) = k
 -- | The 'RuntimeRep' of a type
 type R (i ∷ T r) = r
 
@@ -43,7 +123,7 @@ pattern T = True
 pattern F = False
 
 -- | A number less-than, equal-to, or greater-than @0#@
-newtype Ordering ∷ K I where Ordering# ∷ I → Ordering
+newtype Ordering where Ordering# ∷ I → Ordering
 pattern LT ∷ Ordering
 pattern LT ← ((\ (Ordering# i) → i <#  0# ) → 1# ) where LT = Ordering# -1#
 pattern EQ ← ((\ (Ordering# i) → i ==# 0# ) → 1# ) where EQ = Ordering#  0#
@@ -155,56 +235,59 @@ type STM (a ∷ T r) = ST Transaction a
 type STM_ = ST_ Transaction
 
 -- | A mutable array of boxed (lifted or unlifted) values.
-type Ar ∷ ∀ {l}. ★ → T# l → T_
+type Ar ∷ ∀ {l}. ★ → T# l → T_A
 type Ar = SmallMutableArray#
 -- | A constant array of boxed (lifted or unlifted) values.
-type Ar' ∷ ∀ {l}. T# l → T_
-type Ar' = SmallArray#
+type Ar_ ∷ ∀ {l}. T# l → T_A
+type Ar_ = SmallArray#
 -- | A big mutable array of boxed (lifted or unlifted) values.
 -- This marks segments the array of size 128 during garbage collection for
 -- better GC performance on small mutations to large arrays,
 -- at the cost of a small amount of memory (for the card table) and write speed (to update the card table)
-type AR ∷ ∀ {l}. ★ → T# l → T_
+type AR ∷ ∀ {l}. ★ → T# l → T_A
 type AR = MutableArray#
 -- | A big constant array of boxed (lifted or unlifted) values.
-type AR' ∷ ∀ {l}. T# l → T_
-type AR' = Array#
+-- This marks segments the array of size 128 during garbage collection for
+-- better GC performance on small mutations to large arrays,
+-- at the cost of a small amount of memory (for the card table) and write speed (to update the card table)
+type AR_ ∷ ∀ {l}. T# l → T_A
+type AR_ = Array#
 
 -- | An immutable array of packed bytes representing values of type @x@
-type A' ∷ ∀ {r}. T r → T_
-newtype A' x = A'# ByteArray#
+type A_ ∷ ∀ {r}. T r → T_A
+newtype A_ x = A_# ByteArray#
 
 -- | A mutable array (in state thread @s@) of packed bytes representing values of type @x@
-type A ∷ ∀ {r}. ★ → T r → T_
+type A ∷ ∀ {r}. ★ → T r → T_A
 newtype A s x = A# (MutableByteArray# s)
 
 -- | An immutable array of packed bytes representing values of type @x@
 -- Pinned to an address and gaurenteed not to be moved by GC.
-type A'_ ∷ ∀ {r}. T r → T_
-newtype A'_ x = A'_# ByteArray#
+type Pinned_ ∷ ∀ {r}. T r → T_A
+newtype Pinned_ x = Pinned_# ByteArray#
 
 -- | A mutable array (in state thread @s@) of packed bytes representing values of type @x@
 -- Pinned to an address and gaurenteed not to be moved by GC.
-type A_ ∷ ∀ {r}. ★ → T r → T_
-newtype A_ s x = A_# (MutableByteArray# s)
+type Pinned ∷ ∀ {r}. ★ → T r → T_A
+newtype Pinned s x = Pinned# (MutableByteArray# s)
 
 -- | Mutible version 
 type M ∷ ∀ {ra} {r}. (T ra → T r) → ★ → T ra → T r
 type family M a = ma | ma → a where
-  M A' = A
-  M A'# = A#
-  M A'## = A##
-  M A'_ = A_
-  M A'_# = A_#
-  M A'_## = A_##
-  M Ar' = Ar
-  M Ar'# = Ar#
-  M Ar'## = Ar##
-  M AR' = AR
-  M AR'# = AR#
-  M AR'## = AR##
-  M P' = P
-  M P'## = P##
+  M A_ = A
+  M A_# = A#
+  M A_## = A##
+  M Pinned_ = Pinned
+  M Pinned_# = Pinned#
+  M Pinned_## = Pinned##
+  M Ar_ = Ar
+  M Ar_# = Ar#
+  M Ar_## = Ar##
+  M AR_ = AR
+  M AR_# = AR#
+  M AR_## = AR##
+  M P_ = P
+  M P_## = P##
 
 type family Rep# (r ∷ RuntimeRep) = (rr ∷ RuntimeRep) | rr → r where
   Rep# AddrRep = TupleRep '[AddrRep, IntRep]
@@ -214,82 +297,82 @@ type family Rep# (r ∷ RuntimeRep) = (rr ∷ RuntimeRep) | rr → r where
 -- | The type of a reference with extra context
 type ( # ) ∷ ∀ {rx} {r}. (T rx → T r) → T rx → T (Rep# r)
 type family ( # ) a = aa | aa → a where
-  ( # ) A' = A'#
-  ( # ) A'# = A'##
-  ( # ) P' = P'##
+  ( # ) A_ = A_#
+  ( # ) A_# = A_##
+  ( # ) P_ = P_##
   ( # ) (A s) = A# s
   ( # ) (A# s) = A## s
   ( # ) (P s) = P## s
 
 -- | A slice into an 'Array#'
-type AR'## ∷ ∀ {l}. T# l → K (# ByteArray#, I, I #)
-newtype AR'## x = AR'_Off_Len# (# AR' x, I, I #)
+type AR_## ∷ ∀ {l}. T# l → T_A##
+newtype AR_## x = AR__Off_Len# (# AR_ x, I, I #)
 -- | A slice into a 'MutableArray#'
-type AR## ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I, I #)
+type AR## ∷ ∀ {l}. ★ → T# l → T_A##
 newtype AR## s x = AR_Off_Len# (# AR s x, I, I #)
 -- | A slice into a 'Ar\''
-type Ar'## ∷ ∀ {l}. T# l → K (# ByteArray#, I, I #)
-newtype Ar'## x = Ar'_Off_Len# (# Ar' x, I, I #)
+type Ar_## ∷ ∀ {l}. T# l → T_A##
+newtype Ar_## x = Ar__Off_Len# (# Ar_ x, I, I #)
 -- | A slice into a 'Ar'
-type Ar## ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I, I #)
+type Ar## ∷ ∀ {l}. ★ → T# l → T_A##
 newtype Ar## s x = Ar_Off_Len# (# Ar s x, I, I #)
 
 -- | Reference into a single value of type @x@ of an 'Array#'
-type AR'# ∷ ∀ {l}. T# l → K (# ByteArray#, I #)
-newtype AR'# x = AR'_Off# (# AR' x, I #)
+type AR_# ∷ ∀ {l}. T# l → T_A#
+newtype AR_# x = AR__Off# (# AR_ x, I #)
 -- | Reference into a single value of type @x@ of a 'SmallArray#'
-type Ar'# ∷ ∀ {l}. T# l → K (# ByteArray#, I #)
-newtype Ar'# x = Ar'_Off# (# Ar' x, I #)
+type Ar_# ∷ ∀ {l}. T# l → T_A#
+newtype Ar_# x = Ar__Off# (# Ar_ x, I #)
 -- | Reference into a single value of type @x@ of a 'MutableArray#'
-type AR# ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I #)
+type AR# ∷ ∀ {l}. ★ → T# l → T_A#
 newtype AR# s x = AR_Off# (# AR s x, I #)
 -- | Reference into a single value of type @x@ of a 'Ar'
-type Ar# ∷ ∀ {l}. ★ → T# l → K (# ByteArray#, I #)
+type Ar# ∷ ∀ {l}. ★ → T# l → T_A#
 newtype Ar# s x = Ar_Off# (# Ar s x, I #)
 
--- | A slice into a value of type @x@ in a 'A''
-type A'## ∷ ∀ {r}. T r → K (# ByteArray#, I , I #)
-newtype A'## x = Bytes'_Off_Len# (# ByteArray# , I , I #)
--- | A slice (in state thread @s@) into a value of type @x@ in a 'A'
-type A## ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I , I #)
+-- | A slice into a value of type @x@ in a 'A_'
+type A_## ∷ ∀ {r}. T r → T_A##
+newtype A_## x = Bytes'_Off_Len# (# ByteArray# , I , I #)
+-- | A slice (in state thread @s@) into a value of type @x@ in a 'A_
+type A## ∷ ∀ {r}. ★ → T r → T_A##
 newtype A## s x = Bytes_Off_Len# (# MutableByteArray# s, I , I #)
--- | A slice into a value of type @x@ in a 'A'_'
-type A'_## ∷ ∀ {r}. T r → K (# ByteArray#, I , I #)
-newtype A'_## x = Pinned'_Off_Len# (# ByteArray# , I , I #)
--- | A slice (in state thread @s@) into a value of type @x@ in a 'A_'
-type A_## ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I , I #)
-newtype A_## s x = Pinned_Off_Len# (# MutableByteArray# s, I , I #)
+-- | A slice into a value of type @x@ in a 'Pinned_'
+type Pinned_## ∷ ∀ {r}. T r → T_A##
+newtype Pinned_## x = Pinned__Off_Len# (# ByteArray# , I , I #)
+-- | A slice (in state thread @s@) into a value of type @x@ in a 'Pinned_
+type Pinned## ∷ ∀ {r}. ★ → T r → T_A##
+newtype Pinned## s x = Pinned_Off_Len# (# MutableByteArray# s, I , I #)
 
--- | Reference into a single value of type @x@ of an 'A''
-type A'# ∷ ∀ {r}. T r → K (# ByteArray#, I #)
-newtype A'# x = Bytes'_Off# (# ByteArray#, I #)
--- | Reference (in state thread @s@) into a single value of type @x@ of an 'A'
-type A# ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I #)
+-- | Reference into a single value of type @x@ of an 'A_'
+type A_# ∷ ∀ {r}. T r → T_A#
+newtype A_# x = Bytes'_Off# (# ByteArray#, I #)
+-- | Reference (in state thread @s@) into a single value of type @x@ of an 'A_
+type A# ∷ ∀ {r}. ★ → T r → T_A#
 newtype A# s x = Bytes_Off# (# MutableByteArray# s, I #)
 
--- | Reference into a single value of type @x@ of a 'A'_'
-type A'_# ∷ ∀ {r}. T r → K (# ByteArray#, I #)
-newtype A'_# x = Pinned'_Off# (# ByteArray#, I #)
--- | Reference (in state thread @s@) into a single value of type @x@ in a 'A_'
-type A_# ∷ ∀ {r}. ★ → T r → K (# ByteArray#, I #)
-newtype A_# s x = Pinned_Off# (# MutableByteArray# s, I #)
+-- | Reference into a single value of type @x@ of a 'Pinned_'
+type Pinned_# ∷ ∀ {r}. T r → T_A#
+newtype Pinned_# x = Pinned__Off# (# ByteArray#, I #)
+-- | Reference (in state thread @s@) into a single value of type @x@ in a 'Pinned_
+type Pinned# ∷ ∀ {r}. ★ → T r → T_A#
+newtype Pinned# s x = Pinned_Off# (# MutableByteArray# s, I #)
 
--- | An immutable array backed by unmanaged 'P' memory
-type P'## ∷ ∀ {r}. T r → K (# P#, I #)
-newtype P'## x = P'_Len# (# P#, I #)
+-- | An immutable array backed by unmanaged 'P_ memory
+type P_## ∷ ∀ {r}. T r → T_P##
+newtype P_## x = P__Len# (# P#, I #)
 -- | A mutable array (in state thread @s@) backed by unmanaged 'P\'' memory
-type P## ∷ ∀ {r}. ★ → T r → K (# P#, I #)
+type P## ∷ ∀ {r}. ★ → T r → T_P##
 newtype P## s x = P_Len# (# P#, I #)
 
 -- | A C-style null-terminated string of Latin-1 @C1#@ or UTF-8 @C#@
-type S ∷ ∀ {r}. T r → K P#
+type S ∷ ∀ {r}. T r → T_P
 newtype S a = S# P#
 
 -- | Constant machine address to valid data, assumed to point outside the garbage-collected heap
-type P' ∷ ∀ {r}. T r → K P#
-newtype P' x = P'# P#
+type P_ ∷ ∀ {r}. T r → T_P
+newtype P_ x = P_# P#
 -- | Constant machine address to valid data, assumed to point outside the garbage-collected heap
-type P ∷ ∀ {r}. ★ → T r → K P#
+type P ∷ ∀ {r}. ★ → T r → T_P
 newtype P s x = P# P#
 
 type P# = Addr#
@@ -400,6 +483,38 @@ type family VCount n = c | c → n where
   VCount 16 = Vec16
   VCount 32 = Vec32
   VCount 64 = Vec64
+
+type T_I1x16 = T (VecRep Vec16 Int8ElemRep)
+type T_I1x32 = T (VecRep Vec32 Int8ElemRep)
+type T_I1x64 = T (VecRep Vec64 Int8ElemRep)
+type T_I2x8 = T (VecRep Vec8 Int16ElemRep)
+type T_I2x16 = T (VecRep Vec16 Int16ElemRep)
+type T_I2x32 = T (VecRep Vec32 Int16ElemRep)
+type T_I4x4 = T (VecRep Vec4 Int32ElemRep)
+type T_I4x8 = T (VecRep Vec8 Int32ElemRep)
+type T_I4x16 = T (VecRep Vec16 Int32ElemRep)
+type T_I8x2 = T (VecRep Vec2 Int64ElemRep)
+type T_I8x4 = T (VecRep Vec4 Int64ElemRep)
+type T_I8x8 = T (VecRep Vec8 Int64ElemRep)
+type T_U1x16 = T (VecRep Vec16 Word8ElemRep)
+type T_U1x32 = T (VecRep Vec32 Word8ElemRep)
+type T_U1x64 = T (VecRep Vec64 Word8ElemRep)
+type T_U2x8 = T (VecRep Vec8 Word16ElemRep)
+type T_U2x16 = T (VecRep Vec16 Word16ElemRep)
+type T_U2x32 = T (VecRep Vec32 Word16ElemRep)
+type T_U4x4 = T (VecRep Vec4 Word32ElemRep)
+type T_U4x8 = T (VecRep Vec8 Word32ElemRep)
+type T_U4x16 = T (VecRep Vec16 Word32ElemRep)
+type T_U8x2 = T (VecRep Vec2 Word64ElemRep)
+type T_U8x4 = T (VecRep Vec4 Word64ElemRep)
+type T_U8x8 = T (VecRep Vec8 Word64ElemRep)
+type T_F4x4 = T (VecRep Vec4 FloatElemRep)
+type T_F4x8 = T (VecRep Vec8 FloatElemRep)
+type T_F4x16 = T (VecRep Vec16 FloatElemRep)
+type T_F8x2 = T (VecRep Vec2 DoubleElemRep)
+type T_F8x4 = T (VecRep Vec4 DoubleElemRep)
+type T_F8x8 = T (VecRep Vec8 DoubleElemRep)
+
 
 --type (×) ∷ ∀ {r} (a ∷ T r) (n ∷ Natural). T r → Natural → T (VRep a n)
 type (×) ∷ ∀ (a ∷ T r) → ∀ (n ∷ Natural) → T (VecRep (VCount n) (VElem a))

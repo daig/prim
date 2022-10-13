@@ -9,11 +9,11 @@ import Coerce
 mkApUpd0 ∷ BCO → (# a #)
 mkApUpd0 = mkApUpd0#
 
-new ∷ ∀ a s. A' U8 -- ^ instructions
-    → A' U8 -- ^ literals
-    → AR' a -- ^ pointers
+new ∷ ∀ a s. A_ U8 -- ^ instructions
+    → A_ U8 -- ^ literals
+    → AR_ a -- ^ pointers
     → I -- ^ arity
-    → A' U8 -- ^ static reference table usage bitmap
+    → A_ U8 -- ^ static reference table usage bitmap
     → ST s BCO
 new = coerce (newBCO# @a)
 

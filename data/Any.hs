@@ -42,7 +42,7 @@ fromP# = addrToAny#
 --      bytes of the closure, and a pointer array for the pointers in the payload. 
 --
 -- see <https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/storage/heap-objects The Layout of Heap Objects>
-unpack ∷ ∀ a b. a → (# P# , A' U8 , AR' b #)
+unpack ∷ ∀ a b. a → (# P# , A_ U8 , AR_ b #)
 unpack = coerce (unpackClosure# @a @b)
 
 size# ∷ a → I {- ^ # machine words -}

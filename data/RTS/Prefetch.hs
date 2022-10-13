@@ -57,9 +57,9 @@ instance Prefetch s Addr# where
   t2 = (`prefetchAddr1#` 0#)
   t1 = (`prefetchAddr2#` 0#)
   t0 = (`prefetchAddr3#` 0#)
-deriving via (# P#, I #) instance Prefetch s (# P' x, I #)
+deriving via (# P#, I #) instance Prefetch s (# P_ x, I #)
 deriving via (# P#, I #) instance Prefetch s (# P s x, I #)
-deriving newtype instance Prefetch s (P' x)
+deriving newtype instance Prefetch s (P_ x)
 deriving newtype instance Prefetch s (P s x)
 
 instance Prefetch s (# ByteArray#, I #) where
@@ -72,10 +72,10 @@ instance Prefetch s ByteArray# where
   t2 = (`prefetchByteArray1#` 0#)
   t1 = (`prefetchByteArray2#` 0#)
   t0 = (`prefetchByteArray3#` 0#)
-deriving via (# ByteArray#, I #) instance Prefetch s (# A'_ x, I #)
-deriving via (# ByteArray#, I #) instance Prefetch s (# A' x, I #)
-deriving newtype instance Prefetch s (A'_ x)
-deriving newtype instance Prefetch s (A' x)
+deriving via (# ByteArray#, I #) instance Prefetch s (# Pinned_ x, I #)
+deriving via (# ByteArray#, I #) instance Prefetch s (# A_ x, I #)
+deriving newtype instance Prefetch s (Pinned_ x)
+deriving newtype instance Prefetch s (A_ x)
 instance Prefetch s (# MutableByteArray# s, I #) where
   nta (# x, i #) = prefetchMutableByteArray0# x i
   t2 (# x, i #) = prefetchMutableByteArray1# x i
@@ -87,9 +87,9 @@ instance Prefetch s (MutableByteArray# s) where
   t1 = (`prefetchMutableByteArray2#` 0#)
   t0 = (`prefetchMutableByteArray3#` 0#)
 deriving via (# MutableByteArray# s, I #) instance Prefetch s (# A s x, I #)
-deriving newtype instance Prefetch s (A_ s x)
+deriving newtype instance Prefetch s (Pinned s x)
 deriving newtype instance Prefetch s (A s x)
-deriving via (# MutableByteArray# s, I #) instance Prefetch s (# A_ s x, I #)
+deriving via (# MutableByteArray# s, I #) instance Prefetch s (# Pinned s x, I #)
 instance Prefetch s a where
   nta = prefetchValue0#
   t2 = prefetchValue1#
