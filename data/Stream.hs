@@ -41,6 +41,32 @@ class SMap r a b where
   -- | Effectfully accumulate and emit values of a stream
   sscanIO ∷ Stream r a → b → (b → a → IO b) → Stream r b
 
+type SZip ∷ ∀ {rr} {ra} {rb} {rc}. T rr → T ra → T rb → T rc → TC
+class SZip r a b c where
+  -- | left biased
+  szipIO ∷ Stream r a → Stream r b → (a → b → IO c) → Stream r c
+  szip ∷ Stream r a → Stream r b → (a → b → c) → Stream r c
+
+#define INST_STREAM3(R,A,B)\
+INST_SMAP(R,A,B);\
+INST_SZIP(R,A,B,U);\
+INST_SZIP(R,A,B,I);\
+INST_SZIP(R,A,B,F4);\
+INST_SZIP(R,A,B,F8);\
+INST_SZIP(R,A,B,P#);\
+INST_SZIP(R,A,B,ByteArray#);\
+INST_SZIP(R,A,B,());\
+INST_SZIP(R,A,B,(##))
+
+#define INST_SZIP(R,A,B,C)\
+instance SZip R A B C where {;\
+  szipIO sa0 sb0 abc = go sa0 sb0 where {;\
+    go ∷ Stream R A → Stream R B → Stream R C;\
+    go (Stream sa) (Stream sb) = Stream \ t → case sa t of (# tt, sta #) → case sta of {(# r | #) → (# tt, (# r | #) #); (# | (# a, ssa #) #) → case sb tt of (# ttt, stb #) → case stb of {(# r | #) → (# ttt, (# r | #) #); (# | (# b, ssb #) #) → case abc a b ttt of (# tttt, c #) → (# tttt, (# | (# c, go ssa ssb #) #) #) }}};\
+  szip sa0 sb0 abc = go sa0 sb0 where {;\
+    go ∷ Stream R A → Stream R B → Stream R C;\
+    go (Stream sa) (Stream sb) = Stream \ t → case sa t of (# tt, sta #) → case sta of {(# r | #) → (# tt, (# r | #) #); (# | (# a, ssa #) #) → case sb tt of (# ttt, stb #) → case stb of {(# r | #) → (# ttt, (# r | #) #); (# | (# b, ssb #) #) → (# ttt, (# | (# abc a b, go ssa ssb #) #) #) }}}}
+
 -- | Lazy right fold using the termination value as seed.
 type Fold1 ∷ ∀ {ra}. T ra → TC
 class Fold1 a where
@@ -192,14 +218,14 @@ instance SFold A B where {\
 --INST_SFOLD(I,U)
 
 #define INST_STREAM2(R,A)\
-INST_SMAP(R,A,U);\
-INST_SMAP(R,A,I);\
-INST_SMAP(R,A,F4);\
-INST_SMAP(R,A,F8);\
-INST_SMAP(R,A,P#);\
-INST_SMAP(R,A,ByteArray#);\
-INST_SMAP(R,A,());\
-INST_SMAP(R,A,(##));\
+INST_STREAM3(R,A,U);\
+INST_STREAM3(R,A,I);\
+INST_STREAM3(R,A,F4);\
+INST_STREAM3(R,A,F8);\
+INST_STREAM3(R,A,P#);\
+INST_STREAM3(R,A,ByteArray#);\
+INST_STREAM3(R,A,());\
+INST_STREAM3(R,A,(##));\
 INST_SFOLD(A,R)
 
 #define INST_DO2(A,B)\
