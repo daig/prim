@@ -1,9 +1,7 @@
 --------------------------------------------------------------------
--- | Description : 8-Bit Signed Integers
+-- | Description : 32-Bit Signed Integers
 --------------------------------------------------------------------
-module I1 (I1,Int8#
-          -- * misc utilities
-          ,module I1
+module I.I4 (I4,Int32#
           -- * Instance reexports
           , module X
           ) where
@@ -14,10 +12,10 @@ import Prim as X
 
 -- | Logical right shift. Prefer 'U' for this behavior.
 -- Result undefined if shift amount is not in the range [0, word @size - 1@].
-shiftRL# ∷ I1 → U → I1
-shiftRL# w i = uncheckedShiftRLInt8# w (cast @I i); {-# inline shiftRL# #-}
+shiftRL# ∷ I4 → U → I4
+shiftRL# w i = uncheckedShiftRLInt32# w (cast @I i); {-# inline shiftRL# #-}
 -- | Logical right shift. Prefer 'U' for this behavior.
 -- Result 0 if shift amount is not in the range [0, word @size - 1@].
-shiftRL ∷ I1 → U → I1
-shiftRL w i = if i >= 1## then cast 0# else shiftRL# w i
+shiftRL ∷ I4 → U → I4
+shiftRL w i = if i >= 4## then cast 0# else shiftRL# w i
 {-# inline shiftRL #-}
