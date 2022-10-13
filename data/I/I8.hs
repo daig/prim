@@ -1,7 +1,7 @@
 --------------------------------------------------------------------
 -- | Description : 64-Bit Signed Integers
 --------------------------------------------------------------------
-module I8 (I8,Int64#
+module I.I8 (I8,Int64#
           -- * Instance reexports
           , module X
           ) where

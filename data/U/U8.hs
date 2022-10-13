@@ -1,7 +1,7 @@
 --------------------------------------------------------------------
 -- | Description : 64-Bit Unsigned Integers
 --------------------------------------------------------------------
-module U8 (U8,Word64#
+module U.U8 (U8,Word64#
           -- * Instance reexports
           , module X
           ) where

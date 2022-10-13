@@ -64,7 +64,7 @@ instance Logic U where
   not = not#
 instance Bits U where
   w <<# i = uncheckedShiftL# w (cast i)
-  w >># i = coerce uncheckedShiftRL# w (cast @I i)
+  w >># i = uncheckedShiftRL# w (cast i)
   w << i = if i >= WORD_SIZE_IN_BITS## then 0## else w <<# i
   w >> i = if i >= WORD_SIZE_IN_BITS## then 0## else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
@@ -84,8 +84,8 @@ instance Logic U1 where
   xor = xorWord8#
   not = notWord8#
 instance Bits U1 where
-  w <<# i = uncheckedShiftLWord8# w (cast @I i)
-  w >># i = uncheckedShiftRLWord8# w (cast @I i)
+  w <<# i = uncheckedShiftLWord8# w (cast i)
+  w >># i = uncheckedShiftRLWord8# w (cast i)
   w << i = if i >= 8## then cast 0## else w <<# i
   w >> i = if i >= 8## then cast 0## else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
@@ -105,8 +105,8 @@ instance Logic U2 where
   xor = xorWord16#
   not = notWord16#
 instance Bits U2 where
-  w <<# i = uncheckedShiftLWord16# w (cast @I i)
-  w >># i = uncheckedShiftRLWord16# w (cast @I i)
+  w <<# i = uncheckedShiftLWord16# w (cast i)
+  w >># i = uncheckedShiftRLWord16# w (cast i)
   w << i = if i >= 16## then cast 0## else w <<# i
   w >> i = if i >= 16## then cast 0## else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
@@ -126,8 +126,8 @@ instance Logic U4 where
   xor = xorWord32#
   not = notWord32#
 instance Bits U4 where
-  w <<# i = uncheckedShiftLWord32# w (cast @I i)
-  w >># i = uncheckedShiftRLWord32# w (cast @I i)
+  w <<# i = uncheckedShiftLWord32# w (cast i)
+  w >># i = uncheckedShiftRLWord32# w (cast i)
   w << i = if i >= 32## then cast 0## else w <<# i
   w >> i = if i >= 32## then cast 0## else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
@@ -147,8 +147,8 @@ instance Logic U8 where
   xor = xor64#
   not = not64#
 instance Bits U8 where
-  w <<# i = uncheckedShiftL64# w (cast @I i)
-  w >># i = uncheckedShiftRL64# w (cast @I i)
+  w <<# i = uncheckedShiftL64# w (cast i)
+  w >># i = uncheckedShiftRL64# w (cast i)
   w << i = if i >= 64## then cast 0## else w <<# i
   w >> i = if i >= 64## then cast 0## else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
@@ -168,8 +168,8 @@ instance Logic I where
   xor = xorI#
   not = notI#
 instance Bits I where
-  w <<# i = uncheckedIShiftL# w (cast @I i)
-  w >># i = uncheckedIShiftRA# w (cast @I i)
+  w <<# i = uncheckedIShiftL# w (cast i)
+  w >># i = uncheckedIShiftRA# w (cast i)
   w << i = if i >= WORD_SIZE_IN_BITS## then cast 0## else w <<# i
   w >> i = if i >= WORD_SIZE_IN_BITS## then cast 0## else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
@@ -189,8 +189,8 @@ instance Logic I1 where
   a `xor` b = cast (xorWord8# (cast a) (cast b))
   not a = cast (notWord8# (cast a))
 instance Bits I1 where
-  w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
-  w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
+  w <<# i = uncheckedShiftLInt8# w (cast i)
+  w >># i = uncheckedShiftRAInt8# w (cast i)
   w << i = if i >= 8## then cast 0# else w <<# i
   w >> i = if i >= 8## then cast 0# else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
@@ -210,8 +210,8 @@ instance Logic I2 where
   a `xor` b = cast (xorWord16# (cast a) (cast b))
   not a = cast (notWord16# (cast a))
 instance Bits I2 where
-  w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
-  w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
+  w <<# i = uncheckedShiftLInt16# w (cast i)
+  w >># i = uncheckedShiftRAInt16# w (cast i)
   w << i = if i >= 16## then cast 0# else w <<# i
   w >> i = if i >= 16## then cast 0# else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
@@ -231,8 +231,8 @@ instance Logic I4 where
   a `xor` b = cast (xorWord32# (cast a) (cast b))
   not a = cast (notWord32# (cast a))
 instance Bits I4 where
-  w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
-  w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
+  w <<# i = uncheckedShiftLInt32# w (cast i)
+  w >># i = uncheckedShiftRAInt32# w (cast i)
   w << i = if i >= 32## then cast 0# else w <<# i
   w >> i = if i >= 32## then cast 0# else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
@@ -252,8 +252,8 @@ instance Logic I8 where
   a `xor` b = cast (xor64# (cast a) (cast b))
   not a = cast (not64# (cast a))
 instance Bits I8 where
-  w <<# i = cast (uncheckedIShiftL# (cast @I w) (cast @I i))
-  w >># i = cast (uncheckedIShiftRA# (cast w) (cast @I i))
+  w <<# i = uncheckedIShiftL64# w (cast i)
+  w >># i = uncheckedIShiftRA64# w (cast i)
   w << i = if i >= 64## then cast 0# else w <<# i
   w >> i = if i >= 64## then cast 0# else w >># i
   shift w i = if i >= 0# then w << cast i else w >> cast (negateInt# i)
