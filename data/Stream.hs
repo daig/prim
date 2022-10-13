@@ -29,7 +29,7 @@ class SMap r a b where
 -- | Map over the termination value of a stream
   rmap ∷ Stream a r → (a → b) → Stream b r
   -- | Generate a stream by iterating an effectful action on a seed
-  sgen ∷ (a → IO (# r | (# b, a #) #)) → a → Stream r b
+  sgen ∷ a → (a → IO (# r | (# b, a #) #)) → Stream r b
   -- | Map over a stream or halt early
   stakeMap' ∷ Stream r a → (a → (# r | b #)) → Stream r b
   -- | Map over a stream or skip elements
@@ -118,8 +118,8 @@ instance SMap R A B where {\
   rmap s0 f = go s0 where {\
     go ∷ Stream A R → Stream B R;\
     go (Stream s) = Stream \ t → case s t of (# tt, st #) → (# tt, case st of {(# r | #) → (# f r | #); (# | (# x, ss #) #) → (# | (# x, go ss #) #)} #)};\
-  sgen ∷ (A → IO (# R | (# B, A #) #)) → A → Stream R B;\
-  sgen step = go where {;\
+  sgen ∷ A → (A → IO (# R | (# B, A #) #)) → Stream R B;\
+  sgen i0 step = go i0 where {;\
     go ∷ A → Stream R B;\
     go i = Stream \ t → case step i t of {(# tt, st #) → case st of {(# r | #) → (# tt, (# r | #) #); (# | (# x, ss #) #) → (# tt, (# | (# x, go ss #) #) #)}}};\
   stakeMap' s0 arb = go s0 where {;\
@@ -143,19 +143,10 @@ instance SMap R A B where {\
     }
 
 nums ∷ Stream (##) I
-nums = (`sgen` 0#) \ i → \t → case printI i t of tt → (# tt, if i > 10# then (# (##) | #) else (# | (# i, i + 1# #) #) #)
+nums = sgen 0# \ i → \t → case printI i t of tt → (# tt, if i > 10# then (# (##) | #) else (# | (# i, i + 1# #) #) #)
 
 allnums ∷ Stream (##) I
-allnums = (`sgen` 0#) \ i → \t → (# t, (# | (# i, i + 1# #) #) #)
-
-
-{-
-                                                       -}
---    go ∷ I → Stream r U → IO r
-    {-
-    go i (Stream (# r | #)) = return r
-    go i (Stream (# | st #)) = interleaveIO# \t → case st t of {(# tt, (# a, s #) #) → case go (i + 1#) s tt of {(# ttt, r #) → (# ttt, c i a r #)}}}}
-    -}
+allnums = sgen 0# \ i → \t → (# t, (# | (# i, i + 1# #) #) #)
 
 #define INST_FOLD1(A)\
 instance Fold1 A where {;\
