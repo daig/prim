@@ -2,6 +2,8 @@
 -- | Description : 16-Bit Signed Integers
 --------------------------------------------------------------------
 module I.I2 (I2,Int16#
+          -- * misc utilities
+          ,module I.I2
           -- * Instance reexports
           , module X
           ) where

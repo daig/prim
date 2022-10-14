@@ -2,6 +2,8 @@
 -- | Description : 32-Bit Signed Integers
 --------------------------------------------------------------------
 module I.I4 (I4,Int32#
+          -- * misc utilities
+          ,module I.I4
           -- * Instance reexports
           , module X
           ) where

@@ -138,8 +138,8 @@ instance Bits U4 where
   ctz w = ctz32# (cast w)
   byteSwap w = cast (byteSwap32# (cast w))
   bitReverse w = cast @U4 (bitReverse32# (cast w))
-  pdep s m = cast @U4 (pdep32# (cast s) (cast m))
-  pext s m = cast @U4 (pext32# (cast s) (cast m))
+  pdep s m = cast (pdep32# (cast s) (cast m))
+  pext s m = cast (pext32# (cast s) (cast m))
 
 instance Logic U8 where
   (&&) = and64#

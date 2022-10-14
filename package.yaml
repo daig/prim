@@ -153,3 +153,16 @@ internal-libraries:
       - ghc-prim
       - base
       - ghc-bignum
+  base:
+    other-modules: Prelude
+    source-dirs: data
+    visibility: public
+    dependencies:
+      - prim:type
+      - prim:class
+      - prim:ffi
+      - prim:stock
+      - prim:do
+      - ghc-prim
+      - base
+      - ghc-bignum
